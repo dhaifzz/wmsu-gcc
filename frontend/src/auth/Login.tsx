@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { User, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import authBg from '../assets/img/Auth-Background.jpg';
@@ -7,9 +7,6 @@ import gccLogo from '../assets/logos/GCC.png';
 import wmsuLogo from '../assets/logos/WMSU.png';
 
 export default function Login() {
-  const location = useLocation();
-  const shouldFlip = new URLSearchParams(location.search).get('flip') === 'true';
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -28,8 +25,8 @@ export default function Login() {
 
       {/* Main Card Container */}
       <motion.div 
-        initial={shouldFlip ? { rotateY: 90, opacity: 0 } : { y: 20, opacity: 0 }}
-        animate={{ rotateY: 0, y: 0, opacity: 1 }}
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
         className="relative z-30 flex w-full max-w-4xl max-h-full flex-col overflow-hidden rounded-[2rem] bg-white shadow-2xl md:flex-row"
       >
@@ -151,7 +148,7 @@ export default function Login() {
                 </form>
 
                 <div className="mt-8 text-center text-sm text-gray-700">
-                  Don't have an account? <Link to="/register?flip=true" className="ml-1 text-emerald-900 hover:underline font-bold">Sign Up</Link>
+                  Don't have an account? <Link to="/register" className="ml-1 text-emerald-900 hover:underline font-bold">Sign Up</Link>
                 </div>
               </div>
             </div>

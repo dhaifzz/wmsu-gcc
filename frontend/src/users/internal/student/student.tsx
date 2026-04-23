@@ -11,14 +11,17 @@ import {
   MapPin
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import UserSidebar from '../../components/UserSidebar';
-import UserNavbar from '../../components/UserNavbar';
-import Profile from '../Profile';
-import Settings from '../Settings';
-import MarqueeText from '../../components/MarqueeText';
+import UserSidebar from '../../../components/UserSidebar';
+import UserNavbar from '../../../components/UserNavbar';
+import Profile from '../../Profile';
+import Settings from '../../Settings';
+import MarqueeText from '../../../components/MarqueeText';
+import Counseling from '../Counseling';
+import Assessment from '../Assessment';
 
 const StudentDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
+  const [activeService, setActiveService] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const [user, setUser] = useState({
@@ -97,9 +100,9 @@ const StudentDashboard = () => {
           onMenuClick={() => setIsSidebarOpen(true)}
         />
 
-        <div className="p-6 lg:p-10 max-w-6xl">
+        <div className="p-6 lg:p-10 max-w-6xl mx-auto">
           <AnimatePresence mode="wait">
-            {activeTab === 'overview' && (
+            {activeTab === 'overview' && !activeService && (
               <motion.div
                 key="overview"
                 initial={{ opacity: 0, y: 20 }}
@@ -137,9 +140,9 @@ const StudentDashboard = () => {
                       <GraduationCap size={24} />
                     </div>
                     <p className="text-slate-500 text-xs font-black uppercase tracking-widest mb-1">Status</p>
-                    <MarqueeText 
-                      text={user.educationLevel} 
-                      className="text-xl font-black" 
+                    <MarqueeText
+                      text={user.educationLevel}
+                      className="text-xl font-black"
                     />
                   </div>
                 </div>
@@ -160,9 +163,10 @@ const StudentDashboard = () => {
                         <motion.div
                           key={service.id}
                           layout
+                          onClick={() => isAllowed && setActiveService(service.id)}
                           className={`p-8 rounded-[2.5rem] border transition-all flex flex-col ${isAllowed
-                              ? 'bg-white border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 group cursor-pointer'
-                              : 'bg-slate-50 border-dashed border-slate-200 opacity-60 grayscale'
+                            ? 'bg-white border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 group cursor-pointer'
+                            : 'bg-slate-50 border-dashed border-slate-200 opacity-60 grayscale'
                             }`}
                         >
                           <div className={`w-14 h-14 ${isAllowed ? service.color : 'bg-slate-200'} text-white rounded-3xl flex items-center justify-center mb-6 shadow-lg transition-transform ${isAllowed ? 'group-hover:scale-110' : ''}`}>
@@ -213,6 +217,14 @@ const StudentDashboard = () => {
                   </div>
                 </div>
               </motion.div>
+            )}
+
+            {activeTab === 'overview' && activeService === 'counseling' && (
+              <Counseling key="counseling" onBack={() => setActiveService(null)} />
+            )}
+
+            {activeTab === 'overview' && activeService === 'assessment' && (
+              <Assessment key="assessment" onBack={() => setActiveService(null)} />
             )}
 
             {activeTab === 'profile' && <Profile key="profile" user={user} />}

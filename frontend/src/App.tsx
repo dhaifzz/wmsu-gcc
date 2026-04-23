@@ -7,8 +7,8 @@ import AssessmentDetails from './public/services/AssessmentDetails';
 import ShiftingDetails from './public/services/ShiftingDetails';
 import AboutUs from './public/AboutUs';
 import OurTeam from './public/OurTeam';
-import StudentDashboard from './users/internal/student';
-import FacultyDashboard from './users/internal/faculty';
+import StudentDashboard from './users/internal/student/student';
+import FacultyDashboard from './users/internal/faculty/faculty';
 import './index.css';
 
 function App() {
@@ -22,12 +22,12 @@ function App() {
         <Route path="/team" element={<OurTeam />} />
         <Route path="/student" element={<StudentDashboard />} />
         <Route path="/faculty" element={<FacultyDashboard />} />
-        
+
         {/* Service Details Routes */}
         <Route path="/services/counseling" element={<CounselingDetails />} />
         <Route path="/services/assessment" element={<AssessmentDetails />} />
         <Route path="/services/shifting" element={<ShiftingDetails />} />
-        
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

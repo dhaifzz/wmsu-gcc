@@ -8,11 +8,11 @@ import {
   Building
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import UserSidebar from '../../components/UserSidebar';
-import UserNavbar from '../../components/UserNavbar';
-import Profile from '../Profile';
-import Settings from '../Settings';
-import MarqueeText from '../../components/MarqueeText';
+import UserSidebar from '../../../components/UserSidebar';
+import UserNavbar from '../../../components/UserNavbar';
+import Profile from '../../Profile';
+import Settings from '../../Settings';
+import MarqueeText from '../../../components/MarqueeText';
 
 const FacultyDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -90,9 +90,9 @@ const FacultyDashboard = () => {
                       <Building size={24} />
                     </div>
                     <p className="text-slate-500 text-xs font-black uppercase tracking-widest mb-1">Department</p>
-                    <MarqueeText 
-                      text={user.department} 
-                      className="text-xl font-black" 
+                    <MarqueeText
+                      text={user.department}
+                      className="text-xl font-black"
                     />
                   </div>
                   <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm transition-all hover:shadow-md">
