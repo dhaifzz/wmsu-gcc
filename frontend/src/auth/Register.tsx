@@ -33,6 +33,9 @@ export default function Register() {
   const [educationLevel, setEducationLevel] = useState('');
   const [course, setCourse] = useState('');
   const [gradeLevel, setGradeLevel] = useState('');
+  const [track, setTrack] = useState('');
+  const [isFaculty, setIsFaculty] = useState<boolean>(false);
+  const [department, setDepartment] = useState('');
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -66,7 +69,7 @@ export default function Register() {
     setError('');
     // Handle registration logic here
     console.log('Registration submitted:', {
-      email, password, firstName, middleInitial, lastName, sex, birthdate, occupation, school, course, gradeLevel
+      email, password, firstName, middleInitial, lastName, sex, birthdate, occupation, school, course, gradeLevel, track, department: isFaculty ? department : ""
     });
   };
 
@@ -422,8 +425,68 @@ export default function Register() {
                         />
                       </div>
 
-                      {/* Occupation */}
+                      {/* Faculty Check */}
                       {!isStudent && (
+                        <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                          <div className="mb-2">
+                            <p className="mb-2 text-sm font-bold text-gray-700">Are you a Faculty member?</p>
+                            <div className="flex w-full rounded-xl bg-gray-100 p-1">
+                              <button
+                                type="button"
+                                onClick={() => setIsFaculty(true)}
+                                className={`flex-1 rounded-lg py-2 text-sm font-bold transition-all ${isFaculty === true ? 'bg-emerald-700 text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                              >
+                                Yes
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setIsFaculty(false);
+                                  setDepartment('');
+                                }}
+                                className={`flex-1 rounded-lg py-2 text-sm font-bold transition-all ${isFaculty === false ? 'bg-white text-emerald-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                              >
+                                No
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Department Selection for Faculty */}
+                          {isFaculty && (
+                            <div className="relative flex items-center animate-in fade-in slide-in-from-top-2 duration-300">
+                              <div className="absolute left-4 text-gray-700 opacity-60">
+                                <Building className="h-5 w-5" />
+                              </div>
+                              <select
+                                value={department}
+                                onChange={(e) => setDepartment(e.target.value)}
+                                required
+                                className={`w-full appearance-none rounded-xl bg-gray-100 py-4 pl-12 pr-10 text-sm font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all ${department ? 'text-slate-800' : 'text-gray-400'}`}
+                              >
+                                <option value="" disabled className="text-gray-400">Select Department/College</option>
+                                <option value="CSM" className="text-gray-700">College of Science and Mathematics</option>
+                                <option value="CLA" className="text-gray-700">College of Liberal Arts</option>
+                                <option value="CTE" className="text-gray-700">College of Teacher Education</option>
+                                <option value="COE" className="text-gray-700">College of Engineering</option>
+                                <option value="CA" className="text-gray-700">College of Agriculture</option>
+                                <option value="CN" className="text-gray-700">College of Nursing</option>
+                                <option value="CCJE" className="text-gray-700">College of Criminal Justice Education</option>
+                                <option value="CSWCD" className="text-gray-700">College of Social Work and Community Development</option>
+                                <option value="CHomeE" className="text-gray-700">College of Home Economics</option>
+                                <option value="CFCES" className="text-gray-700">College of Forestry and Environmental Studies</option>
+                                <option value="CPADS" className="text-gray-700">College of Public Administration and Development Studies</option>
+                                <option value="ILS" className="text-gray-700">Integrated Laboratory School</option>
+                              </select>
+                              <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-gray-500">
+                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Occupation */}
+                      {!isStudent && !isFaculty && (
                         <div className="relative flex items-center animate-in fade-in slide-in-from-top-2 duration-300">
                           <div className="absolute left-4 text-gray-700 opacity-60">
                             <Briefcase className="h-5 w-5" />
@@ -511,18 +574,56 @@ export default function Register() {
                       )}
 
                       {educationLevel === 'High School' && (
-                        <div className="relative flex items-center animate-in fade-in slide-in-from-top-2 duration-300">
-                          <div className="absolute left-4 text-gray-700 opacity-60">
-                            <BookOpen className="h-5 w-5" />
+                        <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                          {/* Grade Level Select */}
+                          <div className="relative flex items-center">
+                            <div className="absolute left-4 text-gray-700 opacity-60">
+                              <BookOpen className="h-5 w-5" />
+                            </div>
+                            <select
+                              value={gradeLevel}
+                              onChange={(e) => {
+                                setGradeLevel(e.target.value);
+                                if (!['11', '12'].includes(e.target.value)) setTrack('');
+                              }}
+                              required
+                              className={`w-full appearance-none rounded-xl bg-gray-100 py-4 pl-12 pr-10 text-sm font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all ${gradeLevel ? 'text-slate-800' : 'text-gray-400'}`}
+                            >
+                              <option value="" disabled className="text-gray-400">Select Grade Level</option>
+                              <option value="7" className="text-gray-700">Grade 7</option>
+                              <option value="8" className="text-gray-700">Grade 8</option>
+                              <option value="9" className="text-gray-700">Grade 9</option>
+                              <option value="10" className="text-gray-700">Grade 10</option>
+                              <option value="11" className="text-gray-700">Grade 11</option>
+                              <option value="12" className="text-gray-700">Grade 12</option>
+                            </select>
+                            <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-gray-500">
+                              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
                           </div>
-                          <input
-                            type="text"
-                            placeholder="Grade Level"
-                            value={gradeLevel}
-                            onChange={(e) => setGradeLevel(e.target.value)}
-                            required
-                            className="w-full rounded-xl bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
-                          />
+
+                          {/* Conditional Track Selection for Grade 11-12 */}
+                          {['11', '12'].includes(gradeLevel) && (
+                            <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                              <p className="mb-2 text-sm font-bold text-gray-700">Choose Track</p>
+                              <div className="flex w-full rounded-xl bg-gray-100 p-1">
+                                <button
+                                  type="button"
+                                  onClick={() => setTrack('Academic')}
+                                  className={`flex-1 rounded-lg py-2 text-sm font-bold transition-all ${track === 'Academic' ? 'bg-emerald-700 text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                >
+                                  Academic
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setTrack('TechPro')}
+                                  className={`flex-1 rounded-lg py-2 text-sm font-bold transition-all ${track === 'TechPro' ? 'bg-emerald-700 text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                >
+                                  TechPro
+                                </button>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>

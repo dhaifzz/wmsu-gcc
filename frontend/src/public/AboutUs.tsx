@@ -153,30 +153,30 @@ const AboutUs = () => {
           </div>
 
         </div>
-        {/* Noticeable Contact Section */}
-        <div className="mt-12 grid md:grid-cols-2 gap-8">
-          <div className="bg-emerald-600 p-10 rounded-[3rem] shadow-2xl shadow-emerald-900/20 text-white relative overflow-hidden group">
-            <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-white/10 rounded-full blur-3xl group-hover:bg-white/20 transition-colors"></div>
-            <div className="flex items-center gap-6">
-              <div className="w-20 h-20 rounded-[2rem] bg-white/20 backdrop-blur-md flex items-center justify-center shadow-inner border border-white/30">
-                <Phone size={40} />
+        {/* Pill Contact Section */}
+        <div className="mt-12 bg-gradient-to-r from-emerald-600 to-emerald-900 rounded-full p-1 shadow-2xl shadow-emerald-900/20 overflow-hidden relative group max-w-5xl mx-auto">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+          
+          <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-white/10 relative z-10">
+            {/* Phone Part */}
+            <div className="py-4 px-10 flex items-center gap-6">
+              <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center shadow-inner border border-white/20 shrink-0">
+                <Phone size={20} className="text-white" />
               </div>
               <div>
-                <h3 className="text-lg font-black uppercase tracking-widest text-emerald-100 mb-2">Call Our Office</h3>
-                <p className="text-3xl font-black tracking-tight">(062) 991-6446</p>
+                <h3 className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-100 mb-0.5 opacity-70">Call Our Office</h3>
+                <p className="text-lg lg:text-xl font-black tracking-tight text-white leading-none">(062) 991-6446</p>
               </div>
             </div>
-          </div>
 
-          <div className="bg-emerald-900 p-10 rounded-[3rem] shadow-2xl shadow-emerald-950/40 text-white relative overflow-hidden group">
-            <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl group-hover:bg-emerald-500/20 transition-colors"></div>
-            <div className="flex items-center gap-6">
-              <div className="w-20 h-20 rounded-[2rem] bg-white/5 backdrop-blur-md flex items-center justify-center shadow-inner border border-white/10">
-                <Mail size={40} />
+            {/* Email Part */}
+            <div className="py-4 px-10 flex items-center gap-6">
+              <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center shadow-inner border border-white/10 shrink-0">
+                <Mail size={20} className="text-white" />
               </div>
               <div>
-                <h3 className="text-lg font-black uppercase tracking-widest text-slate-400 mb-2">Official Email</h3>
-                <p className="text-3xl font-black tracking-tight break-all">gcc@wmsu.edu.ph</p>
+                <h3 className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-100 mb-0.5 opacity-70">Official Email</h3>
+                <p className="text-lg lg:text-xl font-black tracking-tight text-white break-all leading-none">gcc@wmsu.edu.ph</p>
               </div>
             </div>
           </div>
