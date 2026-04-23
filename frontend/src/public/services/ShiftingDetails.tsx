@@ -1,6 +1,4 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowLeft, BookOpen, Scaling, FileEdit, AlertCircle, CheckCircle2, ListChecks } from 'lucide-react';
+import { ArrowLeft, BookOpen, Scaling, AlertCircle, ListChecks } from 'lucide-react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import shiftingImg from '../../assets/img/shifting-img.png';
