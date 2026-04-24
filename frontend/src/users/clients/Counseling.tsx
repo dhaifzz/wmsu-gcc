@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar as CalendarIcon, Clock, ChevronLeft, ChevronRight, Info } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, ChevronLeft, ChevronRight, Info, MessageCircle } from 'lucide-react';
 
 const Counseling = ({ onBack }: { onBack: () => void }) => {
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const days = Array.from({ length: 31 }, (_, i) => i + 1);
   const timeSlots = [
@@ -17,7 +20,7 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="w-full"
+      className="w-full relative"
     >
       {/* Header */}
       <div className="flex items-center gap-4 mb-10">
@@ -144,8 +147,11 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
           </div>
 
           {/* Booking Summary Card */}
-          <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl shadow-slate-900/20">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl"></div>
+          <div className="bg-emerald-950 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl shadow-emerald-950/20">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-400/10 rounded-full blur-3xl"></div>
+            <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mb-6 border border-white/10 relative z-10">
+              <MessageCircle size={24} className="text-emerald-400" />
+            </div>
             <h3 className="font-black text-xl mb-8 relative z-10">Summary</h3>
             
             <div className="space-y-6 relative z-10">
@@ -175,7 +181,7 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
               className={`
                 w-full mt-10 py-5 rounded-[1.5rem] font-black text-sm transition-all
                 ${selectedDate && selectedTime 
-                  ? 'bg-emerald-500 text-white hover:bg-emerald-400 shadow-xl shadow-emerald-950/40 scale-[1.02] active:scale-[0.98]' 
+                  ? 'bg-white text-emerald-900 hover:bg-emerald-50 shadow-xl scale-[1.02] active:scale-[0.98]' 
                   : 'bg-white/5 text-white/20 cursor-not-allowed border border-white/5'}
               `}
             >

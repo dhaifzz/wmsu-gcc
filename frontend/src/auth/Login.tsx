@@ -33,7 +33,7 @@ export default function Login() {
         {/* Back to Home Button */}
         <Link
           to="/"
-          className="absolute top-6 left-8 z-50 flex items-center gap-2 text-sm font-bold text-emerald-700 transition-all duration-200 hover:bg-emerald-50 hover:text-emerald-800 bg-white rounded-2xl px-4 py-2.5 shadow-md group"
+          className="absolute top-4 left-4 md:top-6 md:left-8 z-50 flex items-center gap-2 text-sm font-bold text-emerald-700 transition-all duration-200 hover:bg-emerald-50 hover:text-emerald-800 bg-white rounded-2xl px-4 py-2.5 shadow-md group"
         >
           <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
           Back to Home
@@ -69,7 +69,7 @@ export default function Login() {
           <div className="relative z-10 h-full w-full overflow-y-auto overflow-x-hidden">
             <div className="flex min-h-full flex-col justify-center p-8 lg:p-16">
               <div className="mx-auto w-full max-w-sm">
-                <div className="md:hidden mb-6 flex gap-4 justify-center">
+                <div className="md:hidden mb-6 mt-14 flex gap-4 justify-center">
                   <img src={wmsuLogo} alt="WMSU Logo" className="h-14 w-14 object-contain" />
                   <img src={gccLogo} alt="GCC Logo" className="h-14 w-14 object-contain" />
                 </div>
@@ -132,9 +132,9 @@ export default function Login() {
                       </div>
                       <span className="text-xs font-bold text-gray-500">Remember me</span>
                     </label>
-                    <a href="#" className="text-xs font-bold text-emerald-600 hover:text-emerald-700 hover:underline">
+                    <Link to="/forgot-password" className="text-xs font-bold text-emerald-600 hover:text-emerald-700 hover:underline">
                       Forgot Password?
-                    </a>
+                    </Link>
                   </div>
 
                   {/* Sign in button */}

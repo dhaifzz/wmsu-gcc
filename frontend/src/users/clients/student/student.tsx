@@ -18,6 +18,7 @@ import Settings from '../../Settings';
 import MarqueeText from '../../../components/MarqueeText';
 import Counseling from '../Counseling';
 import Assessment from '../Assessment';
+import Shifting from '../Shifting';
 
 const StudentDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -225,6 +226,10 @@ const StudentDashboard = () => {
 
             {activeTab === 'overview' && activeService === 'assessment' && (
               <Assessment key="assessment" onBack={() => setActiveService(null)} />
+            )}
+
+            {activeTab === 'overview' && activeService === 'shifting' && (
+              <Shifting key="shifting" onBack={() => setActiveService(null)} user={user} />
             )}
 
             {activeTab === 'profile' && <Profile key="profile" user={user} />}

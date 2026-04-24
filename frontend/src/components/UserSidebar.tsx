@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { 
-  LayoutDashboard, 
-  User, 
-  Settings, 
+import {
+  LayoutDashboard,
+  User,
+  Settings,
   LogOut,
   Clock as ClockIcon
 } from 'lucide-react';
@@ -11,6 +11,12 @@ import WMSULogo from '../assets/logos/WMSU.png';
 import GCCLogo from '../assets/logos/GCC.png';
 import MarqueeText from './MarqueeText';
 
+interface NavLink {
+  id: string;
+  label: string;
+  icon: any;
+}
+
 interface UserSidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
@@ -18,9 +24,10 @@ interface UserSidebarProps {
   userType: string;
   isOpen: boolean;
   onClose: () => void;
+  links?: NavLink[];
 }
 
-const UserSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen, onClose }: UserSidebarProps) => {
+const UserSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen, onClose, links }: UserSidebarProps) => {
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
@@ -29,26 +36,34 @@ const UserSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen, onCl
   }, []);
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: '2-digit', 
-      year: 'numeric' 
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: '2-digit',
+      year: 'numeric'
     });
   };
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
+    return date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
-      hour12: true 
+      hour12: true
     });
   };
+
+  const defaultLinks: NavLink[] = [
+    { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'profile', label: 'My Profile', icon: User },
+    { id: 'settings', label: 'Settings', icon: Settings },
+  ];
+
+  const displayLinks = links || defaultLinks;
 
   return (
     <>
       {/* Mobile Overlay */}
-      <div 
+      <div
         className={`fixed inset-0 bg-emerald-950/40 backdrop-blur-sm z-40 transition-opacity lg:hidden ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={onClose}
       ></div>
@@ -82,35 +97,20 @@ const UserSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen, onCl
         </div>
 
         {/* Nav Links */}
-        <nav className="space-y-2 flex-1">
+        <nav className="space-y-2 flex-1 overflow-y-auto pr-2 scrollbar-hide">
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400/40 mb-4 px-4">Navigation</p>
-          
-          <button 
-            className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-bold transition-all relative group ${activeTab === 'overview' ? 'bg-white text-emerald-900 shadow-xl shadow-emerald-950/20' : 'text-emerald-100 hover:bg-white/5'}`} 
-            onClick={() => { setActiveTab('overview'); onClose(); }}
-          >
-            <LayoutDashboard size={20} className={activeTab === 'overview' ? 'text-emerald-700' : 'text-emerald-300'} /> 
-            Dashboard
-            {activeTab === 'overview' && <div className="absolute right-4 w-1.5 h-1.5 rounded-full bg-emerald-600"></div>}
-          </button>
 
-          <button 
-            className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-bold transition-all relative group ${activeTab === 'profile' ? 'bg-white text-emerald-900 shadow-xl shadow-emerald-950/20' : 'text-emerald-100 hover:bg-white/5'}`} 
-            onClick={() => { setActiveTab('profile'); onClose(); }}
-          >
-            <User size={20} className={activeTab === 'profile' ? 'text-emerald-700' : 'text-emerald-300'} /> 
-            My Profile
-            {activeTab === 'profile' && <div className="absolute right-4 w-1.5 h-1.5 rounded-full bg-emerald-600"></div>}
-          </button>
-
-          <button 
-            className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-bold transition-all relative group ${activeTab === 'settings' ? 'bg-white text-emerald-900 shadow-xl shadow-emerald-950/20' : 'text-emerald-100 hover:bg-white/5'}`} 
-            onClick={() => { setActiveTab('settings'); onClose(); }}
-          >
-            <Settings size={20} className={activeTab === 'settings' ? 'text-emerald-700' : 'text-emerald-300'} /> 
-            Settings
-            {activeTab === 'settings' && <div className="absolute right-4 w-1.5 h-1.5 rounded-full bg-emerald-600"></div>}
-          </button>
+          {displayLinks.map((link) => (
+            <button
+              key={link.id}
+              className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-bold transition-all relative group ${activeTab === link.id ? 'bg-white text-emerald-900 shadow-xl shadow-emerald-950/20' : 'text-emerald-100 hover:bg-white/5'}`}
+              onClick={() => { setActiveTab(link.id); onClose(); }}
+            >
+              <link.icon size={20} className={activeTab === link.id ? 'text-emerald-700' : 'text-emerald-300'} />
+              {link.label}
+              {activeTab === link.id && <div className="absolute right-4 w-1.5 h-1.5 rounded-full bg-emerald-600"></div>}
+            </button>
+          ))}
         </nav>
 
         {/* User Card */}
@@ -120,12 +120,12 @@ const UserSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen, onCl
               <User size={24} />
             </div>
             <div className="flex-1 overflow-hidden">
-              <MarqueeText 
-                text={userName} 
-                className="font-black text-sm text-white" 
+              <MarqueeText
+                text={userName}
+                className="font-black text-sm text-white"
               />
-              <MarqueeText 
-                text={userType} 
+              <MarqueeText
+                text={userType}
                 className="text-[10px] text-emerald-400/80 font-black uppercase tracking-widest"
                 containerClassName="mt-0.5"
               />

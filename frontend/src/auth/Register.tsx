@@ -1,13 +1,43 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { User, Lock, Eye, EyeOff, UserCircle, Calendar, Briefcase, Users, Building, GraduationCap, BookOpen, Phone, MapPin, Map, ArrowLeft } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { 
+  User, 
+  Lock, 
+  Eye, 
+  EyeOff, 
+  UserCircle, 
+  Calendar, 
+  Briefcase, 
+  Users, 
+  Building, 
+  GraduationCap, 
+  BookOpen, 
+  Phone, 
+  MapPin, 
+  Map, 
+  ArrowLeft,
+  ChevronDown
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import authBg from '../assets/img/Auth-Background.jpg';
 import gccLogo from '../assets/logos/GCC.png';
 import wmsuLogo from '../assets/logos/WMSU.png';
 
 export default function Register() {
   const [step, setStep] = useState(1);
+  const [isDropdownOpen, setIsDropdownOpen] = useState<{ [key: string]: boolean }>({
+    sex: false,
+    gradeLevel: false,
+    department: false
+  });
+
+  const toggleDropdown = (key: string) => {
+    setIsDropdownOpen(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const closeDropdowns = () => {
+    setIsDropdownOpen({ sex: false, gradeLevel: false, department: false });
+  };
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -44,6 +74,7 @@ export default function Register() {
     if (scrollContainer) {
       scrollContainer.scrollTop = 0;
     }
+    closeDropdowns();
   }, [step]);
 
   const handleNextStep1 = () => {
@@ -91,7 +122,7 @@ export default function Register() {
         {/* Back to Home Button */}
         <Link
           to="/"
-          className="absolute top-6 left-8 z-50 flex items-center gap-2 text-sm font-bold text-emerald-700 transition-all duration-200 hover:bg-emerald-50 hover:text-emerald-800 bg-white rounded-2xl px-4 py-2.5 shadow-md group"
+          className="absolute top-4 left-4 md:top-6 md:left-8 z-50 flex items-center gap-2 text-sm font-bold text-emerald-700 transition-all duration-200 hover:bg-emerald-50 hover:text-emerald-800 bg-white rounded-2xl px-4 py-2.5 shadow-md group"
         >
           <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
           Back to Home
@@ -127,7 +158,7 @@ export default function Register() {
           <div id="register-scroll-container" className="relative z-10 h-full w-full overflow-y-auto overflow-x-hidden">
             <div className="flex min-h-full flex-col justify-center p-8 lg:p-16">
               <div className="mx-auto w-full max-w-sm">
-                <div className="md:hidden mb-6 flex gap-4 justify-center">
+                <div className="md:hidden mb-6 mt-14 flex gap-4 justify-center">
                   <img src={wmsuLogo} alt="WMSU Logo" className="h-14 w-14 object-contain" />
                   <img src={gccLogo} alt="GCC Logo" className="h-14 w-14 object-contain" />
                 </div>
@@ -387,23 +418,47 @@ export default function Register() {
                   {step === 3 && (
                     <div className="flex flex-col gap-4">
                       {/* Sex */}
-                      <div className="relative flex items-center">
-                        <div className="absolute left-4 text-gray-700">
-                          <Users className="h-5 w-5" />
-                        </div>
-                        <select
-                          value={sex}
-                          onChange={(e) => setSex(e.target.value)}
-                          required
-                          className={`w-full appearance-none rounded-xl bg-gray-100 py-4 pl-12 pr-10 text-sm font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all ${sex ? 'text-slate-800' : 'text-gray-400'}`}
-                        >
-                          <option value="" disabled className="text-gray-400">Select Sex</option>
-                          <option value="Male" className="text-gray-700">Male</option>
-                          <option value="Female" className="text-gray-700">Female</option>
-                          <option value="Prefer not to say" className="text-gray-700">Prefer not to say</option>
-                        </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-gray-500">
-                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                      <div className="relative">
+                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4 mb-2 block">Sex</label>
+                        <div className="relative flex items-center">
+                          <div className="absolute left-4 z-10 text-gray-700 pointer-events-none">
+                            <Users className="h-5 w-5" />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => toggleDropdown('sex')}
+                            className={`w-full flex items-center justify-between rounded-xl bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold transition-all border-2 ${isDropdownOpen.sex ? 'border-emerald-500 bg-white ring-4 ring-emerald-500/10' : 'border-transparent'}`}
+                          >
+                            <span className={sex ? 'text-slate-800' : 'text-gray-400'}>
+                              {sex || 'Select Sex'}
+                            </span>
+                            <ChevronDown size={18} className={`text-emerald-600 transition-transform ${isDropdownOpen.sex ? 'rotate-180' : ''}`} />
+                          </button>
+
+                          <AnimatePresence>
+                            {isDropdownOpen.sex && (
+                              <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 10 }}
+                                className="absolute z-50 top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-2xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto"
+                              >
+                                {['Male', 'Female', 'Prefer not to say'].map((option) => (
+                                  <button
+                                    key={option}
+                                    type="button"
+                                    onClick={() => {
+                                      setSex(option);
+                                      toggleDropdown('sex');
+                                    }}
+                                    className={`w-full px-6 py-4 text-left text-sm font-bold transition-colors border-b border-slate-50 last:border-0 ${sex === option ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-emerald-50/50'}`}
+                                  >
+                                    {option}
+                                  </button>
+                                ))}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
                         </div>
                       </div>
 
@@ -450,32 +505,60 @@ export default function Register() {
 
                           {/* Department Selection for Faculty */}
                           {isFaculty && (
-                            <div className="relative flex items-center animate-in fade-in slide-in-from-top-2 duration-300">
-                              <div className="absolute left-4 text-gray-700 opacity-60">
-                                <Building className="h-5 w-5" />
-                              </div>
-                              <select
-                                value={department}
-                                onChange={(e) => setDepartment(e.target.value)}
-                                required
-                                className={`w-full appearance-none rounded-xl bg-gray-100 py-4 pl-12 pr-10 text-sm font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all ${department ? 'text-slate-800' : 'text-gray-400'}`}
-                              >
-                                <option value="" disabled className="text-gray-400">Select Department/College</option>
-                                <option value="CSM" className="text-gray-700">College of Science and Mathematics</option>
-                                <option value="CLA" className="text-gray-700">College of Liberal Arts</option>
-                                <option value="CTE" className="text-gray-700">College of Teacher Education</option>
-                                <option value="COE" className="text-gray-700">College of Engineering</option>
-                                <option value="CA" className="text-gray-700">College of Agriculture</option>
-                                <option value="CN" className="text-gray-700">College of Nursing</option>
-                                <option value="CCJE" className="text-gray-700">College of Criminal Justice Education</option>
-                                <option value="CSWCD" className="text-gray-700">College of Social Work and Community Development</option>
-                                <option value="CHomeE" className="text-gray-700">College of Home Economics</option>
-                                <option value="CFCES" className="text-gray-700">College of Forestry and Environmental Studies</option>
-                                <option value="CPADS" className="text-gray-700">College of Public Administration and Development Studies</option>
-                                <option value="ILS" className="text-gray-700">Integrated Laboratory School</option>
-                              </select>
-                              <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-gray-500">
-                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                            <div className="relative animate-in fade-in slide-in-from-top-2 duration-300">
+                              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4 mb-2 block">Department / College</label>
+                              <div className="relative flex items-center">
+                                <div className="absolute left-4 z-10 text-gray-700 pointer-events-none">
+                                  <Building className="h-5 w-5" />
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => toggleDropdown('department')}
+                                  className={`w-full flex items-center justify-between rounded-xl bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold transition-all border-2 ${isDropdownOpen.department ? 'border-emerald-500 bg-white ring-4 ring-emerald-500/10' : 'border-transparent'}`}
+                                >
+                                  <span className={department ? 'text-slate-800' : 'text-gray-400'}>
+                                    {department || 'Select Department/College'}
+                                  </span>
+                                  <ChevronDown size={18} className={`text-emerald-600 transition-transform ${isDropdownOpen.department ? 'rotate-180' : ''}`} />
+                                </button>
+
+                                <AnimatePresence>
+                                  {isDropdownOpen.department && (
+                                    <motion.div
+                                      initial={{ opacity: 0, y: 10 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                      exit={{ opacity: 0, y: 10 }}
+                                      className="absolute z-50 bottom-full left-0 right-0 mb-2 bg-white border border-slate-100 rounded-2xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto"
+                                    >
+                                      {[
+                                        { val: "CSM", label: "College of Science and Mathematics" },
+                                        { val: "CLA", label: "College of Liberal Arts" },
+                                        { val: "CTE", label: "College of Teacher Education" },
+                                        { val: "COE", label: "College of Engineering" },
+                                        { val: "CA", label: "College of Agriculture" },
+                                        { val: "CN", label: "College of Nursing" },
+                                        { val: "CCJE", label: "College of Criminal Justice Education" },
+                                        { val: "CSWCD", label: "College of Social Work and Community Development" },
+                                        { val: "CHomeE", label: "College of Home Economics" },
+                                        { val: "CFCES", label: "College of Forestry and Environmental Studies" },
+                                        { val: "CPADS", label: "College of Public Administration and Development Studies" },
+                                        { val: "ILS", label: "Integrated Laboratory School" }
+                                      ].map((opt) => (
+                                        <button
+                                          key={opt.val}
+                                          type="button"
+                                          onClick={() => {
+                                            setDepartment(opt.val);
+                                            toggleDropdown('department');
+                                          }}
+                                          className={`w-full px-6 py-4 text-left text-sm font-bold transition-colors border-b border-slate-50 last:border-0 ${department === opt.val ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-emerald-50/50'}`}
+                                        >
+                                          {opt.label}
+                                        </button>
+                                      ))}
+                                    </motion.div>
+                                  )}
+                                </AnimatePresence>
                               </div>
                             </div>
                           )}
@@ -484,23 +567,47 @@ export default function Register() {
 
                       {/* Occupation */}
                       {!isStudent && !isFaculty && (
-                        <div className="relative flex items-center animate-in fade-in slide-in-from-top-2 duration-300">
-                          <div className="absolute left-4 text-gray-700 opacity-60">
-                            <Briefcase className="h-5 w-5" />
-                          </div>
-                          <select
-                            value={occupation}
-                            onChange={(e) => setOccupation(e.target.value)}
-                            className={`w-full appearance-none rounded-xl bg-gray-100 py-4 pl-12 pr-10 text-sm font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all ${occupation ? 'text-slate-800' : 'text-gray-400'}`}
-                          >
-                            <option value="" className="text-gray-400">Occupation (Optional)</option>
-                            <option value="Employee" className="text-gray-700">Employee</option>
-                            <option value="Self Employed" className="text-gray-700">Self Employed</option>
-                            <option value="Unemployed" className="text-gray-700">Unemployed</option>
-                            <option value="Prefer not to say" className="text-gray-700">Prefer not to say</option>
-                          </select>
-                          <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-gray-500">
-                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                        <div className="relative animate-in fade-in slide-in-from-top-2 duration-300">
+                          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4 mb-2 block">Occupation</label>
+                          <div className="relative flex items-center">
+                            <div className="absolute left-4 z-10 text-gray-700 pointer-events-none">
+                              <Briefcase className="h-5 w-5" />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => toggleDropdown('occupation')}
+                              className={`w-full flex items-center justify-between rounded-xl bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold transition-all border-2 ${isDropdownOpen.occupation ? 'border-emerald-500 bg-white ring-4 ring-emerald-500/10' : 'border-transparent'}`}
+                            >
+                              <span className={occupation ? 'text-slate-800' : 'text-gray-400'}>
+                                {occupation || 'Select Occupation'}
+                              </span>
+                              <ChevronDown size={18} className={`text-emerald-600 transition-transform ${isDropdownOpen.occupation ? 'rotate-180' : ''}`} />
+                            </button>
+
+                            <AnimatePresence>
+                              {isDropdownOpen.occupation && (
+                                <motion.div
+                                  initial={{ opacity: 0, y: 10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  exit={{ opacity: 0, y: 10 }}
+                                  className="absolute z-50 bottom-full left-0 right-0 mb-2 bg-white border border-slate-100 rounded-2xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto"
+                                >
+                                  {['Employee', 'Self Employed', 'Unemployed', 'Prefer not to say'].map((option) => (
+                                    <button
+                                      key={option}
+                                      type="button"
+                                      onClick={() => {
+                                        setOccupation(option);
+                                        toggleDropdown('occupation');
+                                      }}
+                                      className={`w-full px-6 py-4 text-left text-sm font-bold transition-colors border-b border-slate-50 last:border-0 ${occupation === option ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-emerald-50/50'}`}
+                                    >
+                                      {option}
+                                    </button>
+                                  ))}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
                           </div>
                         </div>
                       )}
@@ -573,29 +680,48 @@ export default function Register() {
                       {educationLevel === 'High School' && (
                         <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
                           {/* Grade Level Select */}
-                          <div className="relative flex items-center">
-                            <div className="absolute left-4 text-gray-700 opacity-60">
-                              <BookOpen className="h-5 w-5" />
-                            </div>
-                            <select
-                              value={gradeLevel}
-                              onChange={(e) => {
-                                setGradeLevel(e.target.value);
-                                if (!['11', '12'].includes(e.target.value)) setTrack('');
-                              }}
-                              required
-                              className={`w-full appearance-none rounded-xl bg-gray-100 py-4 pl-12 pr-10 text-sm font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all ${gradeLevel ? 'text-slate-800' : 'text-gray-400'}`}
-                            >
-                              <option value="" disabled className="text-gray-400">Select Grade Level</option>
-                              <option value="7" className="text-gray-700">Grade 7</option>
-                              <option value="8" className="text-gray-700">Grade 8</option>
-                              <option value="9" className="text-gray-700">Grade 9</option>
-                              <option value="10" className="text-gray-700">Grade 10</option>
-                              <option value="11" className="text-gray-700">Grade 11</option>
-                              <option value="12" className="text-gray-700">Grade 12</option>
-                            </select>
-                            <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-gray-500">
-                              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                          <div className="relative">
+                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4 mb-2 block">Grade Level</label>
+                            <div className="relative flex items-center">
+                              <div className="absolute left-4 z-10 text-gray-700 pointer-events-none">
+                                <BookOpen className="h-5 w-5" />
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => toggleDropdown('gradeLevel')}
+                                className={`w-full flex items-center justify-between rounded-xl bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold transition-all border-2 ${isDropdownOpen.gradeLevel ? 'border-emerald-500 bg-white ring-4 ring-emerald-500/10' : 'border-transparent'}`}
+                              >
+                                <span className={gradeLevel ? 'text-slate-800' : 'text-gray-400'}>
+                                  {gradeLevel ? `Grade ${gradeLevel}` : 'Select Grade Level'}
+                                </span>
+                                <ChevronDown size={18} className={`text-emerald-600 transition-transform ${isDropdownOpen.gradeLevel ? 'rotate-180' : ''}`} />
+                              </button>
+
+                              <AnimatePresence>
+                                {isDropdownOpen.gradeLevel && (
+                                  <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 10 }}
+                                    className="absolute z-50 top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-2xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto"
+                                  >
+                                    {['7', '8', '9', '10', '11', '12'].map((level) => (
+                                      <button
+                                        key={level}
+                                        type="button"
+                                        onClick={() => {
+                                          setGradeLevel(level);
+                                          if (!['11', '12'].includes(level)) setTrack('');
+                                          toggleDropdown('gradeLevel');
+                                        }}
+                                        className={`w-full px-6 py-4 text-left text-sm font-bold transition-colors border-b border-slate-50 last:border-0 ${gradeLevel === level ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-emerald-50/50'}`}
+                                      >
+                                        Grade {level}
+                                      </button>
+                                    ))}
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
                             </div>
                           </div>
 

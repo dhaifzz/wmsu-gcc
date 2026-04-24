@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar as CalendarIcon, Clock, ChevronLeft, ChevronRight, Info, ClipboardCheck } from 'lucide-react';
 
 const Assessment = ({ onBack }: { onBack: () => void }) => {
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const days = Array.from({ length: 31 }, (_, i) => i + 1);
   const timeSlots = [
@@ -17,7 +20,7 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="w-full"
+      className="w-full relative"
     >
       {/* Header */}
       <div className="flex items-center gap-4 mb-10">
@@ -149,7 +152,7 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
             <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mb-6 border border-white/10 relative z-10">
               <ClipboardCheck size={24} className="text-emerald-400" />
             </div>
-            <h3 className="font-black text-xl mb-8 relative z-10">Details</h3>
+            <h3 className="font-black text-xl mb-8 relative z-10">Summary</h3>
             
             <div className="space-y-6 relative z-10">
               <div className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/5">
