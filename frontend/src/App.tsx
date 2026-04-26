@@ -12,7 +12,8 @@ import OurTeam from './public/OurTeam';
 import StudentDashboard from './users/clients/student/student';
 import FacultyDashboard from './users/clients/faculty/faculty';
 import OutsideClientDashboard from './users/clients/outsideClient/outsideClient';
-import ManagementDashboard from './users/management/ManagementDashboard';
+import DirectorDashboard from './users/management/director/director';
+import StaffDashboard from './users/management/staff/staff';
 
 function App() {
   return (
@@ -27,7 +28,8 @@ function App() {
         <Route path="/student" element={<StudentDashboard />} />
         <Route path="/faculty" element={<FacultyDashboard />} />
         <Route path="/outsideClient" element={<OutsideClientDashboard />} />
-        <Route path="/staff" element={<ManagementDashboard />} />
+        <Route path="/staff" element={<StaffDashboard />} />
+        <Route path="/director" element={<DirectorDashboard />} />
 
         {/* Service Details Routes */}
         <Route path="/services/counseling" element={<CounselingDetails />} />

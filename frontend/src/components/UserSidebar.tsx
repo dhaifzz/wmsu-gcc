@@ -97,7 +97,7 @@ const UserSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen, onCl
         </div>
 
         {/* Nav Links */}
-        <nav className="space-y-2 flex-1 overflow-y-auto pr-2 scrollbar-hide">
+        <nav className="space-y-2 flex-1 overflow-y-auto pr-1 custom-scrollbar">
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400/40 mb-4 px-4">Navigation</p>
 
           {displayLinks.map((link) => (

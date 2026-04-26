@@ -1,15 +1,29 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar as CalendarIcon, Clock, ChevronLeft, ChevronRight, Info, MessageCircle } from 'lucide-react';
 
 const Counseling = ({ onBack }: { onBack: () => void }) => {
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
 
-  const days = Array.from({ length: 31 }, (_, i) => i + 1);
+  const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+  const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
+  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+
+  const isPastDay = (day: number) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dateToCheck = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+    return dateToCheck < today;
+  };
+
+  const changeMonth = (offset: number) => {
+    const nextDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + offset, 1);
+    const today = new Date();
+    if (nextDate.getMonth() < today.getMonth() && nextDate.getFullYear() <= today.getFullYear()) return;
+    setCurrentDate(nextDate);
+  };
   const timeSlots = [
     "08:00 AM - 09:00 AM", "09:00 AM - 10:00 AM", "10:00 AM - 11:00 AM", "11:00 AM - 12:00 PM",
     "01:00 PM - 02:00 PM", "02:00 PM - 03:00 PM", "03:00 PM - 04:00 PM", "04:00 PM - 05:00 PM"
@@ -42,13 +56,22 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
           <div className="flex items-center justify-between mb-10">
             <div>
               <h3 className="text-2xl font-black text-slate-900">Select Date</h3>
-              <p className="text-slate-400 text-sm font-medium">May 2024</p>
+              <p className="text-slate-400 text-sm font-medium">
+                {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
+              </p>
             </div>
             <div className="flex gap-2">
-              <button className="p-3 hover:bg-slate-50 rounded-2xl border border-slate-100 text-slate-400 hover:text-emerald-600 transition-all">
+              <button 
+                onClick={() => changeMonth(-1)}
+                disabled={currentDate.getMonth() === new Date().getMonth() && currentDate.getFullYear() === new Date().getFullYear()}
+                className="p-3 hover:bg-slate-50 rounded-2xl border border-slate-100 text-slate-400 hover:text-emerald-600 transition-all disabled:opacity-20 disabled:cursor-not-allowed"
+              >
                 <ChevronLeft size={20} />
               </button>
-              <button className="p-3 hover:bg-slate-50 rounded-2xl border border-slate-100 text-slate-400 hover:text-emerald-600 transition-all">
+              <button 
+                onClick={() => changeMonth(1)}
+                className="p-3 hover:bg-slate-50 rounded-2xl border border-slate-100 text-slate-400 hover:text-emerald-600 transition-all"
+              >
                 <ChevronRight size={20} />
               </button>
             </div>
@@ -61,15 +84,21 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
                   {day.slice(0, 3)}
                 </div>
               ))}
+              {Array.from({ length: firstDayOfMonth }).map((_, i) => (
+                <div key={`empty-${i}`} className="aspect-square"></div>
+              ))}
               {days.map(day => (
                 <button
                   key={day}
-                  onClick={() => setSelectedDate(day)}
+                  onClick={() => !isPastDay(day) && setSelectedDate(day)}
+                  disabled={isPastDay(day)}
                   className={`
                     aspect-square rounded-[1.75rem] flex items-center justify-center font-bold text-lg transition-all
                     ${selectedDate === day 
                       ? 'bg-emerald-600 text-white shadow-xl shadow-emerald-100 scale-110 z-10' 
-                      : 'hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 hover:scale-105'}
+                      : isPastDay(day)
+                        ? 'text-slate-200 cursor-not-allowed opacity-50'
+                        : 'hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 hover:scale-105'}
                   `}
                 >
                   {day}
@@ -161,7 +190,11 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
                 </div>
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400/60 mb-0.5">Selected Date</p>
-                  <p className="font-bold text-sm">{selectedDate ? `May ${selectedDate}, 2024` : '---'}</p>
+                  <p className="font-bold text-sm">
+                    {selectedDate 
+                      ? `${currentDate.toLocaleString('default', { month: 'long' })} ${selectedDate}, ${currentDate.getFullYear()}` 
+                      : '---'}
+                  </p>
                 </div>
               </div>
 

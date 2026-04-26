@@ -5,7 +5,7 @@ import Footer from '../components/Footer';
 import assessmentImg from '../assets/img/assessment-img.png';
 import counselingImg from '../assets/img/counseling-img.png';
 import shiftingImg from '../assets/img/shifting-img.png';
-import ourServicesImg from '../assets/img/our-services.png';
+import ourServicesImg from '../assets/img/Presentation-GCC.jpg';
 import ourServicesImg2 from '../assets/img/our-services2.png';
 import ourServicesImg3 from '../assets/img/our-services3.png';
 

@@ -91,7 +91,7 @@ const History = () => {
                     </div>
                   </td>
                   <td className="px-8 py-6 text-right">
-                    <button className="text-emerald-600 text-[10px] font-black uppercase tracking-widest hover:underline">View File</button>
+                    <button className="text-emerald-600 text-[10px] font-black uppercase tracking-widest hover:underline">View Receipt</button>
                   </td>
                 </tr>
               ))}

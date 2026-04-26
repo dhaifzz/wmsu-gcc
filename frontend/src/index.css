@@ -38,4 +38,25 @@
     overflow: hidden;
     white-space: nowrap;
   }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 5px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(217, 37, 37, 0.6); /* Rich Crimson Red */
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.05); /* Very subtle rim */
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(104, 7, 31, 0.9); /* Vibrant Crimson (Rose-700) */
+  }
+
+  /* Firefox */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(228, 59, 84, 0.6) transparent;
+  }
 }

@@ -1,0 +1,108 @@
+import { useState } from 'react';
+import { 
+  Clock, 
+  MessageCircle,
+  ClipboardCheck,
+  RefreshCw,
+  User,
+  Settings as SettingsIcon,
+  BarChart3
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import UserSidebar from '../../../components/UserSidebar';
+import UserNavbar from '../../../components/UserNavbar';
+import Profile from '../../Profile';
+import Settings from '../../Settings';
+import Analytics from '../Analytics';
+import CounselingAppointments from '../Appointment/CounselingAppointments';
+import AssessmentAppointments from '../Appointment/AssessmentAppointments';
+import ShiftingAppointments from '../Appointment/ShiftingAppointments';
+import History from '../History';
+
+const DirectorDashboard = () => {
+  const [activeTab, setActiveTab] = useState('analytics');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const director = {
+    name: "Dr. Alicia Torres",
+    role: "Center Director",
+    email: "alicia.torres@wmsu.edu.ph",
+  };
+
+  const navLinks = [
+    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+    { id: 'counseling', label: 'Counseling', icon: MessageCircle },
+    { id: 'assessment', label: 'Assessment', icon: ClipboardCheck },
+    { id: 'shifting', label: 'Shifting', icon: RefreshCw },
+    { id: 'history', label: 'History', icon: Clock },
+    { id: 'profile', label: 'My Profile', icon: User },
+    { id: 'settings', label: 'Settings', icon: SettingsIcon },
+  ];
+
+  return (
+    <div className="min-h-screen bg-[#f1f5f9] flex font-sans text-slate-900">
+      <UserSidebar 
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        userName={director.name}
+        userType={director.role}
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+        links={navLinks}
+      />
+
+      <main className="flex-1 relative h-screen overflow-y-auto">
+        <UserNavbar 
+          userName={director.name}
+          onMenuClick={() => setIsSidebarOpen(true)}
+        />
+
+        <div className="p-6 lg:p-10 max-w-7xl mx-auto">
+          <AnimatePresence mode="wait">
+            {activeTab === 'analytics' && (
+              <Analytics key="analytics" />
+            )}
+
+            {activeTab === 'counseling' && (
+              <CounselingAppointments key="counseling-list" role="director" />
+            )}
+
+            {activeTab === 'assessment' && (
+              <AssessmentAppointments key="assessment-list" role="director" />
+            )}
+
+            {activeTab === 'shifting' && (
+              <ShiftingAppointments key="shifting-list" role="director" />
+            )}
+
+            {activeTab === 'history' && (
+              <History key="history-list" />
+            )}
+
+            {activeTab === 'profile' && (
+              <Profile key="profile" user={{ ...director, type: 'director' } as any} />
+            )}
+
+            {activeTab === 'settings' && (
+              <Settings key="settings" />
+            )}
+
+            {/* Fallback for other tabs */}
+            {!['analytics', 'counseling', 'assessment', 'shifting', 'history', 'profile', 'settings'].includes(activeTab) && (
+              <motion.div
+                key="coming-soon"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex items-center justify-center min-h-[400px] text-slate-400 font-medium italic"
+              >
+                Module "{activeTab}" is currently under development.
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default DirectorDashboard;

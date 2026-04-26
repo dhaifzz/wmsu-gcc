@@ -54,7 +54,7 @@ export default function Register() {
   const [birthdate, setBirthdate] = useState('');
   const [occupation, setOccupation] = useState('');
 
-  const [isStudent, setIsStudent] = useState<boolean>(true);
+  const [isWMSU, setIsWMSU] = useState<boolean>(true);
 
   const [school, setSchool] = useState('');
   const [educationLevel, setEducationLevel] = useState('');
@@ -166,22 +166,25 @@ export default function Register() {
                 <h2 className="mb-2 text-4xl font-bold text-gray-800">Sign up</h2>
                 <p className="mb-6 text-xs text-gray-500 font-medium">Create your account to get started with GCC.</p>
 
-                {/* Student Check (Only in Step 1) */}
+                {/* WMSU Check (Only in Step 1) */}
                 {step === 1 && (
                   <div className="mb-6 animate-in fade-in slide-in-from-top-2 duration-300">
-                    <p className="mb-2 text-sm font-bold text-gray-700">Are you a student?</p>
+                    <p className="mb-2 text-sm font-bold text-gray-700">Are you from WMSU?</p>
                     <div className="flex w-full rounded-xl bg-gray-100 p-1">
                       <button
                         type="button"
-                        onClick={() => setIsStudent(true)}
-                        className={`flex-1 rounded-lg py-2 text-sm font-bold transition-all ${isStudent === true ? 'bg-emerald-700 text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                        onClick={() => setIsWMSU(true)}
+                        className={`flex-1 rounded-lg py-2 text-sm font-bold transition-all ${isWMSU === true ? 'bg-rose-600 text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                       >
                         Yes, I am
                       </button>
                       <button
                         type="button"
-                        onClick={() => setIsStudent(false)}
-                        className={`flex-1 rounded-lg py-2 text-sm font-bold transition-all ${isStudent === false ? 'bg-white text-emerald-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                        onClick={() => {
+                          setIsWMSU(false);
+                          setIsFaculty(false);
+                        }}
+                        className={`flex-1 rounded-lg py-2 text-sm font-bold transition-all ${isWMSU === false ? 'bg-emerald-600 text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                       >
                         No, I'm not
                       </button>
@@ -205,7 +208,7 @@ export default function Register() {
                     <div className={`flex h-8 w-8 items-center justify-center rounded-full font-bold transition-colors duration-300 ${step >= 3 ? 'bg-emerald-600 text-white shadow-md' : 'bg-gray-200 text-gray-500'}`}>3</div>
                     <span className={`mt-1 text-[10px] font-bold uppercase tracking-wider ${step >= 3 ? 'text-emerald-700' : 'text-gray-400'}`}>Details</span>
                   </div>
-                  {isStudent && (
+                  {((isWMSU && !isFaculty) || (!isWMSU && occupation === 'Student')) && (
                     <>
                       <div className={`h-1 flex-1 mx-1 rounded transition-colors duration-300 mb-4 ${step >= 4 ? 'bg-emerald-600' : 'bg-gray-200'}`}></div>
                       <div className="flex flex-col items-center">
@@ -477,34 +480,8 @@ export default function Register() {
                         />
                       </div>
 
-                      {/* Faculty Check */}
-                      {!isStudent && (
-                        <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                          <div className="mb-2">
-                            <p className="mb-2 text-sm font-bold text-gray-700">Are you a Faculty member?</p>
-                            <div className="flex w-full rounded-xl bg-gray-100 p-1">
-                              <button
-                                type="button"
-                                onClick={() => setIsFaculty(true)}
-                                className={`flex-1 rounded-lg py-2 text-sm font-bold transition-all ${isFaculty === true ? 'bg-emerald-700 text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                              >
-                                Yes
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setIsFaculty(false);
-                                  setDepartment('');
-                                }}
-                                className={`flex-1 rounded-lg py-2 text-sm font-bold transition-all ${isFaculty === false ? 'bg-white text-emerald-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                              >
-                                No
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* Department Selection for Faculty */}
-                          {isFaculty && (
+                      {/* Department Selection for Faculty */}
+                      {isWMSU && isFaculty && (
                             <div className="relative animate-in fade-in slide-in-from-top-2 duration-300">
                               <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4 mb-2 block">Department / College</label>
                               <div className="relative flex items-center">
@@ -562,11 +539,9 @@ export default function Register() {
                               </div>
                             </div>
                           )}
-                        </div>
-                      )}
 
                       {/* Occupation */}
-                      {!isStudent && !isFaculty && (
+                      {!isWMSU && (
                         <div className="relative animate-in fade-in slide-in-from-top-2 duration-300">
                           <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4 mb-2 block">Occupation</label>
                           <div className="relative flex items-center">
@@ -592,7 +567,7 @@ export default function Register() {
                                   exit={{ opacity: 0, y: 10 }}
                                   className="absolute z-50 bottom-full left-0 right-0 mb-2 bg-white border border-slate-100 rounded-2xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto"
                                 >
-                                  {['Employee', 'Self Employed', 'Unemployed', 'Prefer not to say'].map((option) => (
+                                  {['Student', 'Employee', 'Self Employed', 'Unemployed', 'Prefer not to say'].map((option) => (
                                     <button
                                       key={option}
                                       type="button"
@@ -615,7 +590,7 @@ export default function Register() {
                   )}
 
                   {/* STEP 4: Education Details */}
-                  {step === 4 && isStudent && (
+                  {step === 4 && ((isWMSU && !isFaculty) || (!isWMSU && occupation === 'Student')) && (
                     <div className="flex flex-col gap-4">
 
                       {/* School */}
@@ -774,10 +749,10 @@ export default function Register() {
                     {step === 2 && (
                       <button type="button" onClick={() => { handleNextStep2(); window.scrollTo(0, 0); }} className={step > 1 ? "w-2/3 rounded-xl bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0" : "w-full rounded-xl bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0"}>Next</button>
                     )}
-                    {step === 3 && isStudent && (
+                    {step === 3 && ((isWMSU && !isFaculty) || (!isWMSU && occupation === 'Student')) && (
                       <button type="button" onClick={() => { handleNextStep3(); window.scrollTo(0, 0); }} className="w-2/3 rounded-xl bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0">Next</button>
                     )}
-                    {step === 3 && !isStudent && (
+                    {step === 3 && !((isWMSU && !isFaculty) || (!isWMSU && occupation === 'Student')) && (
                       <button type="submit" className="w-2/3 rounded-xl bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0">Complete Sign up</button>
                     )}
                     {step === 4 && (
