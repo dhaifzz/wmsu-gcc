@@ -11,13 +11,14 @@ import AssessmentDetails from './public/services/AssessmentDetails';
 import ShiftingDetails from './public/services/ShiftingDetails';
 import AboutUs from './public/AboutUs';
 import OurTeam from './public/OurTeam';
+import { ToastProvider } from './components/modal-notification/toast';
 import HighSchoolDashboard from './users/clients/student/high-school/dashboard';
 import CollegeDashboard from './users/clients/student/college/dashboard';
 import FacultyDashboard from './users/clients/faculty/faculty';
 import OutsideClientDashboard from './users/clients/outsideClient/outsideClient';
 import DirectorDashboard from './users/management/director/director';
 import StaffDashboard from './users/management/staff/staff';
-import { ToastProvider } from './components/modal-notification/toast';
+import SuperAdminDashboard from './users/management/superadmin/superadmin';
 
 function App() {
   return (
@@ -58,17 +59,20 @@ function App() {
               <OutsideClientDashboard />
             </ProtectedRoute>
           } />
-
-          {/* Protected Management Routes */}
           <Route path="/staff" element={
-            <ProtectedRoute allowedRoles={['Staff']}>
+            // <ProtectedRoute allowedRoles={['Staff', 'SuperAdmin']}>
               <StaffDashboard />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           } />
           <Route path="/director" element={
-            <ProtectedRoute allowedRoles={['Director']}>
+            // <ProtectedRoute allowedRoles={['Director', 'SuperAdmin']}>
               <DirectorDashboard />
-            </ProtectedRoute>
+            // </ProtectedRoute>
+          } />
+          <Route path="/superadmin" element={
+            // <ProtectedRoute allowedRoles={['SuperAdmin']}>
+              <SuperAdminDashboard />
+            // </ProtectedRoute>
           } />
 
           {/* Legacy /student route redirects to login */}

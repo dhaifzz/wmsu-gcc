@@ -18,14 +18,28 @@
     /* Firefox */
     scrollbar-width: none;
   }
+
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
-  
+
   @keyframes scroll-left-right {
-    0%, 10% { transform: translateX(0); }
-    45%, 55% { transform: translateX(calc(-100% + 100px)); } /* Adjust 100px based on container width */
-    90%, 100% { transform: translateX(0); }
+
+    0%,
+    10% {
+      transform: translateX(0);
+    }
+
+    45%,
+    55% {
+      transform: translateX(calc(-100% + 100px));
+    }
+
+    /* Adjust 100px based on container width */
+    90%,
+    100% {
+      transform: translateX(0);
+    }
   }
 
   .animate-scroll-text {
@@ -42,16 +56,22 @@
   .custom-scrollbar::-webkit-scrollbar {
     width: 5px;
   }
+
   .custom-scrollbar::-webkit-scrollbar-track {
     background: transparent;
   }
+
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(217, 37, 37, 0.6); /* Rich Crimson Red */
+    background: rgba(217, 37, 37, 0.6);
+    /* Rich Crimson Red */
     border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.05); /* Very subtle rim */
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    /* Very subtle rim */
   }
+
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(104, 7, 31, 0.9); /* Vibrant Crimson (Rose-700) */
+    background: rgba(104, 7, 31, 0.9);
+    /* Vibrant Crimson (Rose-700) */
   }
 
   /* Firefox */

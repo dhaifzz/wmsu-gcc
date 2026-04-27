@@ -1,7 +1,9 @@
 import { motion } from 'framer-motion';
 import { Clock, Search, Filter, Calendar as CalendarIcon, CheckCircle2, XCircle } from 'lucide-react';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const History = () => {
+  const theme = useTheme();
   const historyItems = [
     { id: 1, student: "Luna, Juan", level: "College", type: "Counseling", date: "May 20, 2024", status: "Completed" },
     { id: 2, student: "Clara, Maria", level: "High School", type: "Assessment", date: "May 18, 2024", status: "Cancelled" },
@@ -43,7 +45,7 @@ const History = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-emerald-900">
+              <tr className={theme.bg900}>
                 <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-white">Student Name</th>
                 <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-white">Level</th>
                 <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-white">Service Type</th>
@@ -66,7 +68,7 @@ const History = () => {
                   <td className="px-8 py-6">
                     <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${
                       item.type === 'Counseling' ? 'bg-blue-50 text-blue-600 border-blue-100' : 
-                      item.type === 'Assessment' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                      item.type === 'Assessment' ? `${theme.bg50} ${theme.text600} ${theme.border200}` :
                       'bg-purple-50 text-purple-600 border-purple-100'
                     }`}>
                       {item.type}
@@ -81,17 +83,17 @@ const History = () => {
                   <td className="px-8 py-6">
                     <div className="flex items-center gap-2">
                       {item.status === 'Completed' ? (
-                        <CheckCircle2 size={16} className="text-emerald-500" />
+                        <CheckCircle2 size={16} className={theme.text600} />
                       ) : (
                         <XCircle size={16} className="text-rose-500" />
                       )}
-                      <span className={`font-bold text-xs ${item.status === 'Completed' ? 'text-emerald-600' : 'text-rose-600'}`}>
+                      <span className={`font-bold text-xs ${item.status === 'Completed' ? theme.text600 : 'text-rose-600'}`}>
                         {item.status}
                       </span>
                     </div>
                   </td>
                   <td className="px-8 py-6 text-right">
-                    <button className="text-emerald-600 text-[10px] font-black uppercase tracking-widest hover:underline">View Receipt</button>
+                    <button className={`${theme.text600} text-[10px] font-black uppercase tracking-widest hover:underline`}>View Receipt</button>
                   </td>
                 </tr>
               ))}

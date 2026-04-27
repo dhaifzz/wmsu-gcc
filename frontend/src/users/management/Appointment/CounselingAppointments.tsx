@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { MessageCircle, Search, Filter, Calendar as CalendarIcon, MoreHorizontal, ClipboardCheck, CheckCircle2, X } from 'lucide-react';
 import CounselingEvaluationModal from '../../../components/management-modals/CounselingEvaluationModal';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 const CounselingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }) => {
+  const theme = useTheme();
   const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -39,7 +41,7 @@ const CounselingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director
         <div className="flex flex-col sm:flex-row items-center gap-3">
           {role === 'director' && (
             <div className="flex items-center gap-2 mr-2">
-              <button className="px-4 py-2.5 bg-emerald-50 hover:bg-emerald-600 text-emerald-600 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border border-emerald-200 hover:border-emerald-600 flex items-center gap-2 shadow-sm">
+              <button className={`px-4 py-2.5 ${theme.bg50} ${theme.hoverBg600} ${theme.text600} hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${theme.border200} ${theme.hoverBorder600} flex items-center gap-2 shadow-sm`}>
                 <CheckCircle2 size={14} />
                 Accept All
               </button>
@@ -67,7 +69,7 @@ const CounselingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-emerald-900">
+              <tr className={theme.bg900}>
                 <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-white">Requestor Info</th>
                 {role === 'director' ? (
                   <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-white">Evaluated By</th>
@@ -89,7 +91,7 @@ const CounselingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director
                   {role === 'director' ? (
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-2">
-                         <div className="w-7 h-7 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600 border border-emerald-100">
+                         <div className={`w-7 h-7 ${theme.bg50} rounded-lg flex items-center justify-center ${theme.text600} border ${theme.border200}`}>
                            <ClipboardCheck size={12} />
                          </div>
                          <p className="text-xs font-bold text-slate-700">{app.evaluatedBy || 'Pending'}</p>
@@ -100,7 +102,7 @@ const CounselingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director
                       <div className="flex flex-col gap-1">
                         <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border w-fit ${app.level === 'College' ? 'bg-indigo-50 text-indigo-600 border-indigo-100' :
                             app.level === 'High School' ? 'bg-orange-50 text-orange-600 border-orange-100' :
-                              app.level === 'Faculty' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                              app.level === 'Faculty' ? `${theme.bg50} ${theme.text600} ${theme.border200}` :
                                 'bg-slate-50 text-slate-600 border-slate-200'
                           }`}>
                           {app.level}
@@ -123,7 +125,7 @@ const CounselingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director
                   </td>
                   <td className="px-8 py-6">
                     <div className="flex items-center gap-2">
-                      <div className={`w-1.5 h-1.5 rounded-full ${app.status === 'Approved' ? 'bg-emerald-500' : 'bg-amber-500'}`}></div>
+                      <div className={`w-1.5 h-1.5 rounded-full ${app.status === 'Approved' ? theme.bg600.replace('bg-','bg-') : 'bg-amber-500'}`}></div>
                       <span className="font-bold text-xs text-slate-700">{app.status}</span>
                     </div>
                   </td>
@@ -131,7 +133,7 @@ const CounselingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director
                     <div className="flex items-center justify-end gap-3">
                       <button
                         onClick={() => handleEvaluate(app)}
-                        className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-700 transition-all flex items-center gap-2"
+                        className={`px-4 py-2 ${theme.bg600} text-white rounded-xl text-[10px] font-black uppercase tracking-widest ${theme.hoverBg700} transition-all flex items-center gap-2`}
                       >
                         <ClipboardCheck size={14} />
                         {role === 'director' ? 'Final Review' : 'Review'}

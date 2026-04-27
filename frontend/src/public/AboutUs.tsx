@@ -6,7 +6,7 @@ const AboutUs = () => {
   return (
     <div className="min-h-screen bg-slate-50">
       <Navbar />
-      
+
       {/* Hero Section */}
       <div className="relative pt-32 pb-20 overflow-hidden bg-emerald-900">
         <div className="container mx-auto px-6 relative z-10 text-center">
@@ -20,7 +20,7 @@ const AboutUs = () => {
       {/* Main Content */}
       <div className="container mx-auto px-6 -mt-10 relative z-20 pb-24">
         <div className="grid lg:grid-cols-3 gap-8">
-          
+
           {/* Core Values / Vision-Mission */}
           <div className="lg:col-span-2 space-y-8">
             <div className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100 transition-all hover:shadow-2xl">
@@ -108,15 +108,16 @@ const AboutUs = () => {
 
             {/* Google Map & Waze Navigation */}
             <div className="bg-white p-4 rounded-lg shadow-xl border border-slate-100 overflow-hidden">
-               <iframe 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3960.916858546554!2d122.062033!3d6.9123!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x32504193639e78df%3A0x64700877997a66f7!2sWestern+Mindanao+State+University!5e0!3m2!1sen!2sph!4v1713862000000" 
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3960.916858546554!2d122.062033!3d6.9123!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x32504193639e78df%3A0x64700877997a66f7!2sWestern+Mindanao+State+University!5e0!3m2!1sen!2sph!4v1713862000000"
                 className="w-full h-[250px] rounded-lg mb-4"
-                style={{ border: 0 }} 
-                allowFullScreen={true} 
-                loading="lazy" 
+                style={{ border: 0 }}
+                allowFullScreen={true}
+                loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
+                title="WMSU Location"
               ></iframe>
-              <a 
+              <a
                 href="https://www.waze.com/en-GB/live-map/directions/western-mindanao-state-university-normal-road-zamboanga-city?to=place.w.80019525.799933107.8020098"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -156,7 +157,7 @@ const AboutUs = () => {
         {/* Pill Contact Section */}
         <div className="mt-12 bg-gradient-to-r from-emerald-600 to-emerald-900 rounded-lg p-1 shadow-2xl shadow-emerald-900/20 overflow-hidden relative group max-w-5xl mx-auto">
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-          
+
           <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-white/10 relative z-10">
             {/* Phone Part */}
             <div className="py-4 px-10 flex items-center gap-6">

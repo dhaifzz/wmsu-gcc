@@ -112,10 +112,10 @@ const Footer = () => {
           <p className="text-xs font-bold text-white/70">
             © {new Date().getFullYear()} WMSU Guidance and Counseling Center. All rights reserved.
           </p>
-            <div className="flex gap-8 text-xs font-bold text-white/70">
-              <a href="#" className="hover:text-emerald-400">Privacy Policy</a>
-              <a href="#" className="hover:text-emerald-400">Terms of Service</a>
-            </div>
+          <div className="flex gap-8 text-xs font-bold text-white/70">
+            <a href="#" className="hover:text-emerald-400">Privacy Policy</a>
+            <a href="#" className="hover:text-emerald-400">Terms of Service</a>
+          </div>
         </div>
       </div>
     </footer>

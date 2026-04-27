@@ -74,7 +74,7 @@ export default function Login() {
       <div className="absolute inset-0 z-10 bg-[#047857]/75"></div>
 
       {/* Main Card Container */}
-      <motion.div 
+      <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}

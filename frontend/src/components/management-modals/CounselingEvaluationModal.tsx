@@ -34,10 +34,10 @@ const CounselingEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff
             className="relative w-full max-w-2xl bg-white rounded-[2rem] sm:rounded-[3rem] shadow-2xl shadow-slate-950/20 overflow-hidden h-auto max-h-[90dvh] flex flex-col"
           >
             {/* Header - Sticky */}
-            <div className="relative h-32 bg-emerald-900 overflow-hidden shrink-0">
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-800/40 to-emerald-900"></div>
-              <div className="absolute -right-20 -top-20 w-64 h-64 bg-emerald-400/10 rounded-full blur-3xl"></div>
-              <div className="absolute -left-10 -bottom-10 w-40 h-40 bg-emerald-500/10 rounded-full blur-2xl"></div>
+            <div className="relative h-32 bg-teal-900 overflow-hidden shrink-0">
+              <div className="absolute inset-0 bg-gradient-to-br from-teal-800/40 to-teal-900"></div>
+              <div className="absolute -right-20 -top-20 w-64 h-64 bg-teal-400/10 rounded-full blur-3xl"></div>
+              <div className="absolute -left-10 -bottom-10 w-40 h-40 bg-teal-500/10 rounded-full blur-2xl"></div>
 
               <div className="relative z-10 px-6 sm:px-8 h-full flex items-center justify-between">
                 <div className="flex items-center gap-3 sm:gap-4">
@@ -46,7 +46,7 @@ const CounselingEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff
                   </div>
                   <div>
                     <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">Counseling Request</h2>
-                    <p className="text-emerald-400/80 text-[9px] sm:text-[10px] font-black uppercase tracking-widest mt-1">ID: {appointment.studentId}</p>
+                    <p className="text-teal-400/80 text-[9px] sm:text-[10px] font-black uppercase tracking-widest mt-1">ID: {appointment.studentId}</p>
                   </div>
                 </div>
                 <button
@@ -85,11 +85,11 @@ const CounselingEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff
                     </div>
                     {appointment.evaluatedBy && (
                       <div className="flex items-center gap-3 pt-2 border-t border-slate-100">
-                        <div className="w-8 h-8 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 shadow-sm border border-emerald-100">
+                        <div className="w-8 h-8 bg-teal-50 rounded-xl flex items-center justify-center text-teal-600 shadow-sm border border-teal-100">
                           <ClipboardCheck size={14} />
                         </div>
                         <div>
-                          <p className="text-[9px] font-black uppercase text-emerald-400 tracking-widest">Processing Staff</p>
+                          <p className="text-[9px] font-black uppercase text-teal-400 tracking-widest">Processing Staff</p>
                           <p className="text-sm font-bold text-slate-900 leading-tight">{appointment.evaluatedBy}</p>
                         </div>
                       </div>
@@ -124,11 +124,11 @@ const CounselingEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff
 
               {/* Action Buttons */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-2">
-                <button className="group flex sm:flex-col items-center gap-3 p-4 sm:p-6 bg-emerald-50 hover:bg-emerald-600 rounded-[1.5rem] sm:rounded-[2rem] border border-emerald-100 hover:border-emerald-600 transition-all shadow-sm hover:shadow-emerald-200">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white group-hover:bg-emerald-500 rounded-2xl flex items-center justify-center text-emerald-600 group-hover:text-white transition-all shadow-sm shrink-0">
+                <button className="group flex sm:flex-col items-center gap-3 p-4 sm:p-6 bg-teal-50 hover:bg-teal-600 rounded-[1.5rem] sm:rounded-[2rem] border border-teal-100 hover:border-teal-600 transition-all shadow-sm hover:shadow-teal-200">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white group-hover:bg-teal-500 rounded-2xl flex items-center justify-center text-teal-600 group-hover:text-white transition-all shadow-sm shrink-0">
                     <CheckCircle2 size={24} />
                   </div>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-emerald-700 group-hover:text-white">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-teal-700 group-hover:text-white">
                     {role === 'director' ? 'Accept' : 'Evaluate'}
                   </span>
                 </button>
@@ -167,3 +167,4 @@ const CounselingEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff
 };
 
 export default CounselingEvaluationModal;
+

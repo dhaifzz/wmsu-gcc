@@ -1,20 +1,20 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { 
-  User, 
-  Lock, 
-  Eye, 
-  EyeOff, 
-  UserCircle, 
-  Calendar, 
-  Briefcase, 
-  Users, 
-  Building, 
-  GraduationCap, 
-  BookOpen, 
-  Phone, 
-  MapPin, 
-  Map, 
+import {
+  User,
+  Lock,
+  Eye,
+  EyeOff,
+  UserCircle,
+  Calendar,
+  Briefcase,
+  Users,
+  Building,
+  GraduationCap,
+  BookOpen,
+  Phone,
+  MapPin,
+  Map,
   ArrowLeft,
   ChevronDown,
   Loader2
@@ -183,7 +183,7 @@ export default function Register() {
       <div className="absolute inset-0 z-10 bg-[#047857]/75"></div>
 
       {/* Main Card Container */}
-      <motion.div 
+      <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
@@ -533,63 +533,63 @@ export default function Register() {
 
                       {/* Department Selection for Faculty */}
                       {isWMSU && isFaculty && (
-                            <div className="relative animate-in fade-in slide-in-from-top-2 duration-300">
-                              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4 mb-2 block">Department / College</label>
-                              <div className="relative flex items-center">
-                                <div className="absolute left-4 z-10 text-gray-700 pointer-events-none">
-                                  <Building className="h-5 w-5" />
-                                </div>
-                                <button
-                                  type="button"
-                                  onClick={() => toggleDropdown('department')}
-                                  className={`w-full flex items-center justify-between bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold transition-all border-2 ${isDropdownOpen.department ? 'border-emerald-500 bg-white ring-4 ring-emerald-500/10' : 'border-transparent'}`}
-                                >
-                                  <span className={department ? 'text-slate-800' : 'text-gray-400'}>
-                                    {department || 'Select Department/College'}
-                                  </span>
-                                  <ChevronDown size={18} className={`text-emerald-600 transition-transform ${isDropdownOpen.department ? 'rotate-180' : ''}`} />
-                                </button>
-
-                                <AnimatePresence>
-                                  {isDropdownOpen.department && (
-                                    <motion.div
-                                      initial={{ opacity: 0, y: 10 }}
-                                      animate={{ opacity: 1, y: 0 }}
-                                      exit={{ opacity: 0, y: 10 }}
-                                      className="absolute z-50 bottom-full left-0 right-0 mb-2 bg-white border border-slate-100 rounded-lg shadow-2xl overflow-hidden max-h-60 overflow-y-auto"
-                                    >
-                                      {[
-                                        { val: "CSM", label: "College of Science and Mathematics" },
-                                        { val: "CLA", label: "College of Liberal Arts" },
-                                        { val: "CTE", label: "College of Teacher Education" },
-                                        { val: "COE", label: "College of Engineering" },
-                                        { val: "CA", label: "College of Agriculture" },
-                                        { val: "CN", label: "College of Nursing" },
-                                        { val: "CCJE", label: "College of Criminal Justice Education" },
-                                        { val: "CSWCD", label: "College of Social Work and Community Development" },
-                                        { val: "CHomeE", label: "College of Home Economics" },
-                                        { val: "CFCES", label: "College of Forestry and Environmental Studies" },
-                                        { val: "CPADS", label: "College of Public Administration and Development Studies" },
-                                        { val: "ILS", label: "Integrated Laboratory School" }
-                                      ].map((opt) => (
-                                        <button
-                                          key={opt.val}
-                                          type="button"
-                                          onClick={() => {
-                                            setDepartment(opt.val);
-                                            toggleDropdown('department');
-                                          }}
-                                          className={`w-full px-6 py-4 text-left text-sm font-bold transition-colors border-b border-slate-50 last:border-0 ${department === opt.val ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-emerald-50/50'}`}
-                                        >
-                                          {opt.label}
-                                        </button>
-                                      ))}
-                                    </motion.div>
-                                  )}
-                                </AnimatePresence>
-                              </div>
+                        <div className="relative animate-in fade-in slide-in-from-top-2 duration-300">
+                          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4 mb-2 block">Department / College</label>
+                          <div className="relative flex items-center">
+                            <div className="absolute left-4 z-10 text-gray-700 pointer-events-none">
+                              <Building className="h-5 w-5" />
                             </div>
-                          )}
+                            <button
+                              type="button"
+                              onClick={() => toggleDropdown('department')}
+                              className={`w-full flex items-center justify-between bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold transition-all border-2 ${isDropdownOpen.department ? 'border-emerald-500 bg-white ring-4 ring-emerald-500/10' : 'border-transparent'}`}
+                            >
+                              <span className={department ? 'text-slate-800' : 'text-gray-400'}>
+                                {department || 'Select Department/College'}
+                              </span>
+                              <ChevronDown size={18} className={`text-emerald-600 transition-transform ${isDropdownOpen.department ? 'rotate-180' : ''}`} />
+                            </button>
+
+                            <AnimatePresence>
+                              {isDropdownOpen.department && (
+                                <motion.div
+                                  initial={{ opacity: 0, y: 10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  exit={{ opacity: 0, y: 10 }}
+                                  className="absolute z-50 bottom-full left-0 right-0 mb-2 bg-white border border-slate-100 rounded-lg shadow-2xl overflow-hidden max-h-60 overflow-y-auto"
+                                >
+                                  {[
+                                    { val: "CSM", label: "College of Science and Mathematics" },
+                                    { val: "CLA", label: "College of Liberal Arts" },
+                                    { val: "CTE", label: "College of Teacher Education" },
+                                    { val: "COE", label: "College of Engineering" },
+                                    { val: "CA", label: "College of Agriculture" },
+                                    { val: "CN", label: "College of Nursing" },
+                                    { val: "CCJE", label: "College of Criminal Justice Education" },
+                                    { val: "CSWCD", label: "College of Social Work and Community Development" },
+                                    { val: "CHomeE", label: "College of Home Economics" },
+                                    { val: "CFCES", label: "College of Forestry and Environmental Studies" },
+                                    { val: "CPADS", label: "College of Public Administration and Development Studies" },
+                                    { val: "ILS", label: "Integrated Laboratory School" }
+                                  ].map((opt) => (
+                                    <button
+                                      key={opt.val}
+                                      type="button"
+                                      onClick={() => {
+                                        setDepartment(opt.val);
+                                        toggleDropdown('department');
+                                      }}
+                                      className={`w-full px-6 py-4 text-left text-sm font-bold transition-colors border-b border-slate-50 last:border-0 ${department === opt.val ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-emerald-50/50'}`}
+                                    >
+                                      {opt.label}
+                                    </button>
+                                  ))}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        </div>
+                      )}
 
                       {/* Occupation */}
                       {!isWMSU && (
