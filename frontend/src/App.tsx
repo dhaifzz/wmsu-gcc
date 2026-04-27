@@ -60,19 +60,19 @@ function App() {
             </ProtectedRoute>
           } />
           <Route path="/staff" element={
-            // <ProtectedRoute allowedRoles={['Staff', 'SuperAdmin']}>
+            <ProtectedRoute allowedRoles={['Staff', 'SuperAdmin']}>
               <StaffDashboard />
-            // </ProtectedRoute>
+            </ProtectedRoute>
           } />
           <Route path="/director" element={
-            // <ProtectedRoute allowedRoles={['Director', 'SuperAdmin']}>
+            <ProtectedRoute allowedRoles={['Director', 'SuperAdmin']}>
               <DirectorDashboard />
-            // </ProtectedRoute>
+            </ProtectedRoute>
           } />
           <Route path="/superadmin" element={
-            // <ProtectedRoute allowedRoles={['SuperAdmin']}>
+            <ProtectedRoute allowedRoles={['SuperAdmin']}>
               <SuperAdminDashboard />
-            // </ProtectedRoute>
+            </ProtectedRoute>
           } />
 
           {/* Legacy /student route redirects to login */}
