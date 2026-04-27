@@ -1,20 +1,22 @@
 import { useState } from 'react';
 import {
   MessageCircle,
+  ClipboardCheck,
   ChevronRight,
   Calendar,
-  Briefcase,
-  MapPin,
-  Building
+  Clock,
+  GraduationCap,
+  MapPin
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import ClientNavbar from '../../../components/ClientNavbar';
-import Profile from '../../Profile';
-import MarqueeText from '../../../components/MarqueeText';
-import Counseling from '../Counseling';
-import { useAuth } from '../../../auth/AuthProvider';
+import ClientNavbar from '../../../../components/ClientNavbar';
+import Profile from '../../../Profile';
+import MarqueeText from '../../../../components/MarqueeText';
+import Counseling from '../../Counseling';
+import Assessment from '../../Assessment';
+import { useAuth } from '../../../../auth/AuthProvider';
 
-const FacultyDashboard = () => {
+const HighSchoolDashboard = () => {
   const { user: authUser } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
   const [activeService, setActiveService] = useState<string | null>(null);
@@ -22,27 +24,32 @@ const FacultyDashboard = () => {
   // Map authUser to the structure expected by the dashboard and Profile component
   const user = {
     name: authUser ? `${authUser.firstName} ${authUser.lastName}` : "User",
-    type: "faculty",
-    educationLevel: "Faculty Member",
+    type: "highschool",
+    educationLevel: authUser?.educationLevel || "High School Student",
     email: authUser?.email || "",
     studentId: authUser?.id?.substring(0, 8).toUpperCase() || "N/A",
-    department: authUser?.department || "WMSU Faculty",
-    status: "Permanent",
+    gradeLevel: authUser?.gradeLevel?.toString() || "N/A",
+    track: "Academic", // This would ideally come from the DB as well
+    school: authUser?.school || "WMSU High School",
     joinedDate: "N/A"
   };
 
   const services = [
     {
       id: 'counseling',
-      name: 'Faculty Consultation',
+      name: 'Counseling',
       icon: MessageCircle,
       color: 'bg-blue-500',
-      allowed: ['faculty'],
-      desc: 'Professional counseling and support services for faculty members.'
+      desc: 'Professional one-on-one psychological support and guidance.'
+    },
+    {
+      id: 'assessment',
+      name: 'Assessment',
+      icon: ClipboardCheck,
+      color: 'bg-emerald-500',
+      desc: 'Standardized testing for mental health and personality.'
     }
   ];
-
-  const filteredServices = services;
 
   return (
     <div className="min-h-screen bg-[#f8fafc] flex flex-col font-sans text-slate-900">
@@ -52,7 +59,6 @@ const FacultyDashboard = () => {
       />
 
       <main className="flex-1 relative">
-
         <div className="p-6 lg:p-10 max-w-6xl mx-auto">
           <AnimatePresence mode="wait">
             {activeTab === 'overview' && !activeService && (
@@ -66,9 +72,9 @@ const FacultyDashboard = () => {
                 <div className="mb-10">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600">Faculty Portal</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600">Student Portal</span>
                   </div>
-                  <h3 className="text-4xl font-black tracking-tight">Good day, {user.name.split('. ')[1].split(' ')[0]}!</h3>
+                  <h3 className="text-4xl font-black tracking-tight">Good day, {user.name.split(' ')[0]}!</h3>
                   <p className="text-slate-500 text-sm font-medium mt-1">Here's what's happening with your portal today.</p>
                 </div>
 
@@ -83,20 +89,20 @@ const FacultyDashboard = () => {
                   </div>
                   <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm transition-all hover:shadow-md">
                     <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-4">
-                      <Building size={24} />
+                      <Clock size={24} />
                     </div>
-                    <p className="text-slate-500 text-xs font-black uppercase tracking-widest mb-1">Department</p>
-                    <MarqueeText
-                      text={user.department}
-                      className="text-xl font-black"
-                    />
+                    <p className="text-slate-500 text-xs font-black uppercase tracking-widest mb-1">Wait Time</p>
+                    <p className="text-xl font-black">Fast Track</p>
                   </div>
                   <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm transition-all hover:shadow-md">
                     <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center mb-4">
-                      <Briefcase size={24} />
+                      <GraduationCap size={24} />
                     </div>
-                    <p className="text-slate-500 text-xs font-black uppercase tracking-widest mb-1">Employment</p>
-                    <p className="text-xl font-black">{user.status}</p>
+                    <p className="text-slate-500 text-xs font-black uppercase tracking-widest mb-1">Status</p>
+                    <MarqueeText
+                      text={user.educationLevel}
+                      className="text-xl font-black"
+                    />
                   </div>
                 </div>
 
@@ -104,13 +110,13 @@ const FacultyDashboard = () => {
                 <div className="mb-10">
                   <div className="flex items-center justify-between mb-8">
                     <div>
-                      <h3 className="text-2xl font-black tracking-tight mb-1">Faculty Services</h3>
-                      <p className="text-slate-500 text-sm font-medium">Access specialized support and referral tools.</p>
+                      <h3 className="text-2xl font-black tracking-tight mb-1">Available Services</h3>
+                      <p className="text-slate-500 text-sm font-medium">Click on a service to start your application.</p>
                     </div>
                   </div>
 
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredServices.map((service) => (
+                    {services.map((service) => (
                       <motion.div
                         key={service.id}
                         layout
@@ -132,26 +138,26 @@ const FacultyDashboard = () => {
                   </div>
                 </div>
 
-                {/* Info Banner */}
+                {/* Banner */}
                 <div className="bg-emerald-900 rounded-[3rem] p-10 text-white relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2"></div>
                   <div className="relative z-10 grid md:grid-cols-2 gap-10 items-center">
                     <div>
-                      <h3 className="text-3xl font-black mb-4 leading-tight">Faculty Wellness</h3>
+                      <h3 className="text-3xl font-black mb-4 leading-tight">Need Support?</h3>
                       <p className="text-emerald-100 font-medium mb-8 leading-relaxed">
-                        Your well-being matters. The GCC provides confidential consultations and professional support tailored for WMSU faculty members.
+                        The Guidance and Counseling Center is open Monday to Friday, 8:00 AM to 5:00 PM to serve you.
                       </p>
                       <div className="flex gap-6">
                         <div className="flex items-center gap-2">
                           <MapPin className="text-emerald-400" size={18} />
-                          <span className="text-sm font-bold">Main Executive Bldg</span>
+                          <span className="text-sm font-bold">WMSU Executive Building</span>
                         </div>
                       </div>
                     </div>
                     <div className="bg-white/10 backdrop-blur-md rounded-[2.5rem] p-8 border border-white/10">
-                      <p className="text-emerald-300 text-xs font-black uppercase mb-4 tracking-widest">Support Hours</p>
+                      <p className="text-emerald-300 text-xs font-black uppercase mb-4 tracking-widest">Office Hours</p>
                       <p className="font-bold text-lg leading-relaxed">
-                        Dedicated hours for faculty consultations are available. Please book in advance.
+                        Visit us at the 2nd Floor for personal consultations and assessments.
                       </p>
                     </div>
                   </div>
@@ -163,6 +169,10 @@ const FacultyDashboard = () => {
               <Counseling key="counseling" onBack={() => setActiveService(null)} />
             )}
 
+            {activeTab === 'overview' && activeService === 'assessment' && (
+              <Assessment key="assessment" onBack={() => setActiveService(null)} />
+            )}
+
             {activeTab === 'profile' && <Profile key="profile" user={user} />}
           </AnimatePresence>
         </div>
@@ -171,4 +181,4 @@ const FacultyDashboard = () => {
   );
 };
 
-export default FacultyDashboard;
+export default HighSchoolDashboard;

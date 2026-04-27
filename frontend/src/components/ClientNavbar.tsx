@@ -1,6 +1,8 @@
-import { Bell, LayoutDashboard, User } from 'lucide-react';
+import { Bell, LayoutDashboard, User, LogOut } from 'lucide-react';
 import gccLogo from '../assets/logos/GCC.png';
 import wmsuLogo from '../assets/logos/WMSU.png';
+import { useAuth } from '../auth/AuthProvider';
+import { showAlert } from './modal-notification/sweetalert';
 
 interface ClientNavbarProps {
   activeTab: string;
@@ -9,6 +11,8 @@ interface ClientNavbarProps {
 }
 
 const ClientNavbar = ({ activeTab, setActiveTab }: ClientNavbarProps) => {
+  const { signOut } = useAuth();
+
   return (
     <header className="bg-emerald-900 text-white sticky top-0 z-30 px-6 lg:px-10 py-4 flex items-center justify-between shadow-xl">
       <div className="flex items-center gap-3">
@@ -42,10 +46,25 @@ const ClientNavbar = ({ activeTab, setActiveTab }: ClientNavbarProps) => {
           </button>
         </nav>
 
-        <button className="w-10 h-10 bg-emerald-800 border border-emerald-700 rounded-xl flex items-center justify-center hover:bg-emerald-700 transition-colors relative">
-          <Bell size={18} />
-          <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-emerald-800"></span>
-        </button>
+        <div className="flex items-center gap-3">
+          <button className="w-10 h-10 bg-emerald-800 border border-emerald-700 rounded-xl flex items-center justify-center hover:bg-emerald-700 transition-colors relative">
+            <Bell size={18} />
+            <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-emerald-800"></span>
+          </button>
+
+          <button 
+            onClick={async () => {
+              const result = await showAlert.confirm('Logout', 'Are you sure you want to sign out?', 'Logout', 'Stay');
+              if (result.isConfirmed) {
+                await signOut();
+              }
+            }}
+            className="w-10 h-10 bg-emerald-800 border border-emerald-700 rounded-xl flex items-center justify-center hover:bg-rose-600 hover:border-rose-500 transition-colors"
+            title="Logout"
+          >
+            <LogOut size={18} />
+          </button>
+        </div>
       </div>
     </header>
   );

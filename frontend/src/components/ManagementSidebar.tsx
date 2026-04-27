@@ -9,6 +9,8 @@ import {
 import WMSULogo from '../assets/logos/WMSU.png';
 import GCCLogo from '../assets/logos/GCC.png';
 import MarqueeText from './MarqueeText';
+import { useAuth } from '../auth/AuthProvider';
+import { showAlert } from './modal-notification/sweetalert';
 
 interface NavLink {
   id: string;
@@ -27,6 +29,7 @@ interface ManagementSidebarProps {
 }
 
 const ManagementSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen, onClose, links }: ManagementSidebarProps) => {
+  const { signOut } = useAuth();
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
@@ -128,7 +131,16 @@ const ManagementSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen
                 containerClassName="mt-0.5"
               />
             </div>
-            <button className="p-2 text-emerald-400 hover:text-rose-400 transition-colors">
+            <button 
+              onClick={async () => {
+                const result = await showAlert.confirm('Logout', 'Are you sure you want to sign out?', 'Logout', 'Stay');
+                if (result.isConfirmed) {
+                  await signOut();
+                }
+              }}
+              className="p-2 text-emerald-400 hover:text-rose-400 transition-colors"
+              title="Logout"
+            >
               <LogOut size={18} />
             </button>
           </div>

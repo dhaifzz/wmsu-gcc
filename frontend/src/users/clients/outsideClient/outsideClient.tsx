@@ -11,21 +11,24 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ClientNavbar from '../../../components/ClientNavbar';
 import Profile from '../../Profile';
 import Counseling from '../Counseling';
+import { useAuth } from '../../../auth/AuthProvider';
 
 const OutsideClientDashboard = () => {
+  const { user: authUser } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
   const [activeService, setActiveService] = useState<string | null>(null);
 
-  const [user] = useState({
-    name: "Dela Cruz, Maria",
+  // Map authUser to the structure expected by the dashboard and Profile component
+  const user = {
+    name: authUser ? `${authUser.firstName} ${authUser.lastName}` : "User",
     type: "outside",
     educationLevel: "Outside Client",
-    email: "maria.dc@gmail.com",
+    email: authUser?.email || "",
     studentId: "N/A - Guest",
     department: "None (External)",
     status: "Active",
-    joinedDate: "April 2024"
-  });
+    joinedDate: "N/A"
+  };
 
   const services = [
     {

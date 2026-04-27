@@ -16,15 +16,17 @@ import CounselingAppointments from '../Appointment/CounselingAppointments';
 import AssessmentAppointments from '../Appointment/AssessmentAppointments';
 import ShiftingAppointments from '../Appointment/ShiftingAppointments';
 import History from '../History';
+import { useAuth } from '../../../auth/AuthProvider';
 
 const DirectorDashboard = () => {
+  const { user: authUser } = useAuth();
   const [activeTab, setActiveTab] = useState('analytics');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const director = {
-    name: "Dr. Alicia Torres",
+    name: authUser ? `${authUser.firstName} ${authUser.lastName}` : "Director",
     role: "Center Director",
-    email: "alicia.torres@wmsu.edu.ph",
+    email: authUser?.email || "",
   };
 
   const navLinks = [

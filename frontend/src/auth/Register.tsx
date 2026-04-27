@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   User, 
   Lock, 
@@ -16,15 +16,21 @@ import {
   MapPin, 
   Map, 
   ArrowLeft,
-  ChevronDown
+  ChevronDown,
+  Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import authBg from '../assets/img/Auth-Background.jpg';
 import gccLogo from '../assets/logos/GCC.png';
 import wmsuLogo from '../assets/logos/WMSU.png';
+import { authApi } from '../lib/api';
+import { showToast } from '../components/modal-notification/toast';
+import { showAlert } from '../components/modal-notification/sweetalert';
 
 export default function Register() {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState<{ [key: string]: boolean }>({
     sex: false,
     gradeLevel: false,
@@ -66,7 +72,6 @@ export default function Register() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState('');
 
   // Reset scroll position when step changes
   useEffect(() => {
@@ -78,27 +83,92 @@ export default function Register() {
   }, [step]);
 
   const handleNextStep1 = () => {
-    setError('');
+    if (!email.trim()) { showToast.error('Email is required.'); return; }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) { showToast.error('Please enter a valid email address.'); return; }
+    if (password.length < 8) { showToast.error('Password must be at least 8 characters.'); return; }
+    if (!/[A-Z]/.test(password)) { showToast.error('Password must contain at least one uppercase letter.'); return; }
+    if (!/[0-9]/.test(password)) { showToast.error('Password must contain at least one number.'); return; }
+    if (password !== confirmPassword) { showToast.error('Passwords do not match.'); return; }
     setStep(2);
   };
 
   const handleNextStep2 = () => {
-    setError('');
+    if (!firstName.trim()) { showToast.error('First name is required.'); return; }
+    if (!lastName.trim()) { showToast.error('Last name is required.'); return; }
+    if (!contactNumber.trim()) { showToast.error('Contact number is required.'); return; }
+    const phoneRegex = /^(09\d{9}|\+639\d{9})$/;
+    if (!phoneRegex.test(contactNumber.replace(/\s/g, ''))) { showToast.error('Enter a valid PH number (09xxxxxxxxx or +639xxxxxxxxx).'); return; }
+    if (!city.trim()) { showToast.error('City is required.'); return; }
+    if (!barangay.trim()) { showToast.error('Barangay is required.'); return; }
+    if (!street.trim()) { showToast.error('Street / House No. is required.'); return; }
     setStep(3);
   };
 
   const handleNextStep3 = () => {
-    setError('');
+    if (!sex) { showToast.error('Please select your sex.'); return; }
+    if (!birthdate) { showToast.error('Birthdate is required.'); return; }
+    if (isWMSU && isFaculty && !department) { showToast.error('Please select your department.'); return; }
+    if (!isWMSU && !occupation) { showToast.error('Please select your occupation.'); return; }
     setStep(4);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validateStep4 = (): boolean => {
+    if (!educationLevel) { showToast.error('Please select an education level.'); return false; }
+    if (educationLevel === 'College' && !course.trim()) { showToast.error('Course is required.'); return false; }
+    if (educationLevel === 'High School' && !gradeLevel) { showToast.error('Grade level is required.'); return false; }
+    if (educationLevel === 'High School' && ['11', '12'].includes(gradeLevel) && !track) { showToast.error('Please select a track.'); return false; }
+    if (!isWMSU && !school.trim()) { showToast.error('School name is required.'); return false; }
+    return true;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    // Handle registration logic here
-    console.log('Registration submitted:', {
-      email, password, firstName, middleInitial, lastName, sex, birthdate, occupation, school, course, gradeLevel, track, department: isFaculty ? department : ""
-    });
+
+    // If on step 4, validate education fields first
+    if (step === 4 && !validateStep4()) return;
+
+    setLoading(true);
+    try {
+      const result = await authApi.register({
+        email,
+        password,
+        firstName,
+        middleName: middleInitial,
+        lastName,
+        contactNumber,
+        city,
+        barangay,
+        street,
+        sex,
+        birthdate,
+        isWMSU,
+        isFaculty,
+        department: isFaculty ? department : '',
+        occupation: !isWMSU ? occupation : '',
+        educationLevel,
+        school: !isWMSU ? school : '',
+        course,
+        gradeLevel,
+        track
+      });
+
+      if (!result.ok) {
+        const errData = result.data as unknown as { error: string };
+        showToast.error(errData.error || 'Registration failed. Please try again.');
+        return;
+      }
+
+      // Show SweetAlert email confirmation modal
+      const alertResult = await showAlert.emailConfirmation(email);
+      if (alertResult.isConfirmed) {
+        navigate('/login');
+      }
+    } catch {
+      showToast.error('Unable to connect to the server. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Calculate max date for 12+ years old
@@ -219,12 +289,6 @@ export default function Register() {
                   )}
                 </div>
 
-                {error && (
-                  <div className="mb-4 rounded-lg bg-red-50 p-3 text-xs font-semibold text-red-600 border border-red-200">
-                    {error}
-                  </div>
-                )}
-
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
                   {/* STEP 1: Account Details */}
@@ -239,10 +303,7 @@ export default function Register() {
                           type="email"
                           placeholder="Email"
                           value={email}
-                          onChange={(e) => {
-                            setEmail(e.target.value);
-                            if (error) setError('');
-                          }}
+                          onChange={(e) => setEmail(e.target.value)}
                           required
                           className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
                         />
@@ -257,10 +318,7 @@ export default function Register() {
                           type={showPassword ? 'text' : 'password'}
                           placeholder="Password"
                           value={password}
-                          onChange={(e) => {
-                            setPassword(e.target.value);
-                            if (error) setError('');
-                          }}
+                          onChange={(e) => setPassword(e.target.value)}
                           required
                           className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-20 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
                         />
@@ -283,10 +341,7 @@ export default function Register() {
                           type={showConfirmPassword ? 'text' : 'password'}
                           placeholder="Re-enter Password"
                           value={confirmPassword}
-                          onChange={(e) => {
-                            setConfirmPassword(e.target.value);
-                            if (error) setError('');
-                          }}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
                           required
                           className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-20 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
                         />
@@ -315,10 +370,7 @@ export default function Register() {
                             type="text"
                             placeholder="First Name"
                             value={firstName}
-                            onChange={(e) => {
-                              setFirstName(e.target.value);
-                              if (error) setError('');
-                            }}
+                            onChange={(e) => setFirstName(e.target.value)}
                             required
                             className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
                           />
@@ -345,10 +397,7 @@ export default function Register() {
                           type="text"
                           placeholder="Last Name"
                           value={lastName}
-                          onChange={(e) => {
-                            setLastName(e.target.value);
-                            if (error) setError('');
-                          }}
+                          onChange={(e) => setLastName(e.target.value)}
                           required
                           className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
                         />
@@ -739,31 +788,35 @@ export default function Register() {
                     {step > 1 && (
                       <button
                         type="button"
+                        disabled={loading}
                         onClick={() => {
                           setStep(step - 1);
-                          setError('');
                           window.scrollTo(0, 0);
                         }}
-                        className="w-1/3 rounded-lg bg-gray-200 py-4 text-sm font-bold text-gray-700 transition-all hover:bg-gray-300"
+                        className="w-1/3 rounded-lg bg-gray-200 py-4 text-sm font-bold text-gray-700 transition-all hover:bg-gray-300 disabled:opacity-50"
                       >
                         Back
                       </button>
                     )}
 
                     {step === 1 && (
-                      <button type="button" onClick={() => { handleNextStep1(); window.scrollTo(0, 0); }} className="w-full rounded-lg bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0">Next</button>
+                      <button type="button" disabled={loading} onClick={() => { handleNextStep1(); window.scrollTo(0, 0); }} className="w-full rounded-lg bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0 disabled:opacity-50">Next</button>
                     )}
                     {step === 2 && (
-                      <button type="button" onClick={() => { handleNextStep2(); window.scrollTo(0, 0); }} className={step > 1 ? "w-2/3 rounded-lg bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0" : "w-full rounded-lg bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0"}>Next</button>
+                      <button type="button" disabled={loading} onClick={() => { handleNextStep2(); window.scrollTo(0, 0); }} className={step > 1 ? "w-2/3 rounded-lg bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0 disabled:opacity-50" : "w-full rounded-lg bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0 disabled:opacity-50"}>Next</button>
                     )}
                     {step === 3 && ((isWMSU && !isFaculty) || (!isWMSU && occupation === 'Student')) && (
-                      <button type="button" onClick={() => { handleNextStep3(); window.scrollTo(0, 0); }} className="w-2/3 rounded-lg bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0">Next</button>
+                      <button type="button" disabled={loading} onClick={() => { handleNextStep3(); window.scrollTo(0, 0); }} className="w-2/3 rounded-lg bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0 disabled:opacity-50">Next</button>
                     )}
                     {step === 3 && !((isWMSU && !isFaculty) || (!isWMSU && occupation === 'Student')) && (
-                      <button type="submit" className="w-2/3 rounded-lg bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0">Complete Sign up</button>
+                      <button type="submit" disabled={loading} className="w-2/3 rounded-lg bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0 disabled:opacity-70 flex items-center justify-center gap-2">
+                        {loading ? (<><Loader2 className="h-4 w-4 animate-spin" />Creating account...</>) : 'Complete Sign up'}
+                      </button>
                     )}
                     {step === 4 && (
-                      <button type="submit" className="w-2/3 rounded-lg bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0">Complete Sign up</button>
+                      <button type="submit" disabled={loading} className="w-2/3 rounded-lg bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0 disabled:opacity-70 flex items-center justify-center gap-2">
+                        {loading ? (<><Loader2 className="h-4 w-4 animate-spin" />Creating account...</>) : 'Complete Sign up'}
+                      </button>
                     )}
                   </div>
                 </form>

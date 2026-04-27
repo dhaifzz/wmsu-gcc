@@ -1,19 +1,69 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { User, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { User, Lock, Eye, EyeOff, ArrowLeft, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import authBg from '../assets/img/Auth-Background.jpg';
 import gccLogo from '../assets/logos/GCC.png';
 import wmsuLogo from '../assets/logos/WMSU.png';
+import { authApi } from '../lib/api';
+import { useAuth } from './AuthProvider';
+import { supabase } from '../lib/supabaseClient';
+import { showToast } from '../components/modal-notification/toast';
 
 export default function Login() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { setAuthData } = useAuth();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Check for email confirmation redirect
+  useEffect(() => {
+    if (searchParams.get('confirmed') === 'true') {
+      showToast.success('Email confirmed successfully! You can now sign in.');
+    }
+  }, [searchParams]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+
+    try {
+      // Call backend login endpoint
+      const result = await authApi.login({ email, password });
+
+      if (!result.ok) {
+        const errorData = result.data as unknown as { error: string };
+        showToast.error(errorData.error || 'Login failed. Please try again.');
+        setLoading(false);
+        return;
+      }
+
+      const { session, user, redirectPath } = result.data;
+
+      // Set the Supabase session locally so AuthProvider can track it
+      if (session?.access_token && session?.refresh_token) {
+        await supabase.auth.setSession({
+          access_token: session.access_token,
+          refresh_token: session.refresh_token,
+        });
+      }
+
+      // Update auth context
+      setAuthData(user, session.access_token, redirectPath);
+
+      // Navigate to the role-based dashboard
+      showToast.success('Welcome back!');
+      navigate(redirectPath, { replace: true });
+    } catch {
+      showToast.error('Unable to connect to the server. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -89,7 +139,8 @@ export default function Login() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
+                      disabled={loading}
+                      className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all disabled:opacity-50"
                     />
                   </div>
 
@@ -104,7 +155,8 @@ export default function Login() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-20 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
+                      disabled={loading}
+                      className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-20 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all disabled:opacity-50"
                     />
                     <button
                       type="button"
@@ -140,9 +192,17 @@ export default function Login() {
                   {/* Sign in button */}
                   <button
                     type="submit"
-                    className="mt-4 w-full rounded-lg bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0"
+                    disabled={loading}
+                    className="mt-4 w-full rounded-lg bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0 disabled:opacity-70 disabled:hover:translate-y-0 flex items-center justify-center gap-2"
                   >
-                    Sign in
+                    {loading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Signing in...
+                      </>
+                    ) : (
+                      'Sign in'
+                    )}
                   </button>
 
                 </form>
