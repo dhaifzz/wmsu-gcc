@@ -3,9 +3,9 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { User, Lock, Eye, EyeOff, ArrowLeft, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import authBg from '../assets/img/Auth-Background.jpg';
-import gccLogo from '../assets/logos/GCC.png';
-import wmsuLogo from '../assets/logos/WMSU.png';
-import { authApi } from '../lib/api';
+import gccLogoAsset from '../assets/logos/GCC.png';
+import wmsuLogoAsset from '../assets/logos/WMSU.png';
+import { authApi, cmsApi } from '../lib/api';
 import { useAuth } from './AuthProvider';
 import { supabase } from '../lib/supabaseClient';
 import { showToast } from '../components/modal-notification/toast';
@@ -14,6 +14,27 @@ export default function Login() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { setAuthData } = useAuth();
+  const [logos, setLogos] = useState({
+    wmsuLogo: wmsuLogoAsset,
+    gccLogo: gccLogoAsset
+  });
+
+  useEffect(() => {
+    const fetchLogos = async () => {
+      try {
+        const res = await cmsApi.getContent('logos');
+        if (res.ok && res.data) {
+          setLogos({
+            wmsuLogo: res.data.wmsuLogo || wmsuLogoAsset,
+            gccLogo: res.data.gccLogo || gccLogoAsset
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch logos:', error);
+      }
+    };
+    fetchLogos();
+  }, []);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -98,8 +119,8 @@ export default function Login() {
 
           <div className="relative z-10 mt-auto mb-auto">
             <div className="mb-8 flex gap-4">
-              <img src={wmsuLogo} alt="WMSU Logo" className="h-24 w-24 object-contain drop-shadow-md" />
-              <img src={gccLogo} alt="GCC Logo" className="h-24 w-24 object-contain drop-shadow-md" />
+              <img src={logos.wmsuLogo} alt="WMSU Logo" className="h-24 w-24 object-contain drop-shadow-md" />
+              <img src={logos.gccLogo} alt="GCC Logo" className="h-24 w-24 object-contain drop-shadow-md" />
             </div>
             <h1 className="mb-2 text-5xl font-bold tracking-wider text-white drop-shadow-sm">Welcome!</h1>
             <h2 className="mb-8 text-md font-bold tracking-wider text-emerald-100">WMSU GCC Portal</h2>
@@ -120,8 +141,8 @@ export default function Login() {
             <div className="flex min-h-full flex-col justify-center p-8 lg:p-16">
               <div className="mx-auto w-full max-w-sm">
                 <div className="md:hidden mb-6 mt-14 flex gap-4 justify-center">
-                  <img src={wmsuLogo} alt="WMSU Logo" className="h-14 w-14 object-contain" />
-                  <img src={gccLogo} alt="GCC Logo" className="h-14 w-14 object-contain" />
+                  <img src={logos.wmsuLogo} alt="WMSU Logo" className="h-14 w-14 object-contain" />
+                  <img src={logos.gccLogo} alt="GCC Logo" className="h-14 w-14 object-contain" />
                 </div>
 
                 <h2 className="mb-2 text-4xl font-bold text-gray-800">Sign in</h2>

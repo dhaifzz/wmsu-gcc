@@ -1,6 +1,8 @@
+import { useState, useEffect } from 'react';
 import { Phone, Mail, MapPin } from 'lucide-react';
-import gccLogo from '../assets/logos/GCC.png';
-import wmsuLogo from '../assets/logos/WMSU.png';
+import gccLogoAsset from '../assets/logos/GCC.png';
+import wmsuLogoAsset from '../assets/logos/WMSU.png';
+import { cmsApi } from '../lib/api';
 
 const FacebookIcon = ({ size = 18 }: { size?: number }) => (
   <svg
@@ -18,6 +20,45 @@ const FacebookIcon = ({ size = 18 }: { size?: number }) => (
 );
 
 const Footer = () => {
+  const [logos, setLogos] = useState({
+    wmsuLogo: wmsuLogoAsset,
+    gccLogo: gccLogoAsset
+  });
+  const [footerInfo, setFooterInfo] = useState({
+    description: "Empowering WMSU students through professional guidance, psychological support, and career development services.",
+    phone: "(062) 991-6446",
+    email: "gcc@wmsu.edu.ph",
+    address: "2nd Floor, Executive Building, WMSU Main Campus, Normal Road, Zamboanga City, 7000"
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const logoRes = await cmsApi.getContent('logos');
+        if (logoRes.ok && logoRes.data) {
+          setLogos({
+            wmsuLogo: logoRes.data.wmsuLogo || wmsuLogoAsset,
+            gccLogo: logoRes.data.gccLogo || gccLogoAsset
+          });
+        }
+
+        const footerRes = await cmsApi.getContent('footer');
+        const contactRes = await cmsApi.getContent('contact');
+        
+        if (footerRes.ok && contactRes.ok) {
+          setFooterInfo({
+            description: footerRes.data.description || footerInfo.description,
+            phone: contactRes.data.phone || footerInfo.phone,
+            email: contactRes.data.email || footerInfo.email,
+            address: contactRes.data.address || footerInfo.address
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch footer data:', error);
+      }
+    };
+    fetchData();
+  }, []);
   return (
     <footer className="bg-[#BD2D2D] text-rose-100 pt-24 pb-12 overflow-hidden relative">
       {/* Decorative Spheres (Ball Design) */}
@@ -35,13 +76,13 @@ const Footer = () => {
           <div className="lg:col-span-1">
             <div className="flex items-center gap-3 mb-6">
               <div className="flex -space-x-2">
-                <img src={wmsuLogo} alt="WMSU" className="h-10 w-10 object-contain" />
-                <img src={gccLogo} alt="GCC" className="h-10 w-10 object-contain" />
+                <img src={logos.wmsuLogo} alt="WMSU" className="h-10 w-10 object-contain" />
+                <img src={logos.gccLogo} alt="GCC" className="h-10 w-10 object-contain" />
               </div>
               <span className="text-xl font-black text-white tracking-tighter">WMSU GCC</span>
             </div>
             <p className="text-sm leading-relaxed mb-8 font-medium">
-              Empowering WMSU students through professional guidance, psychological support, and career development services.
+              {footerInfo.description}
             </p>
             <div className="flex gap-4">
               <a href="https://www.facebook.com/wmsugcc" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-rose-900/50 rounded-lg flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-all border border-rose-800">
@@ -75,7 +116,7 @@ const Footer = () => {
                 </div>
                 <div>
                   <p className="text-xs text-rose-300/50 uppercase font-black mb-1">Call Us</p>
-                  <p className="text-sm font-bold text-rose-50">(062) 991-6446</p>
+                  <p className="text-sm font-bold text-rose-50">{footerInfo.phone}</p>
                 </div>
               </li>
               <li className="flex items-start gap-4">
@@ -84,7 +125,7 @@ const Footer = () => {
                 </div>
                 <div>
                   <p className="text-xs text-rose-300/50 uppercase font-black mb-1">Email Us</p>
-                  <p className="text-sm font-bold text-rose-50">gcc@wmsu.edu.ph</p>
+                  <p className="text-sm font-bold text-rose-50">{footerInfo.email}</p>
                 </div>
               </li>
             </ul>
@@ -98,9 +139,7 @@ const Footer = () => {
                 <MapPin size={18} />
               </div>
               <p className="text-sm font-bold leading-relaxed text-rose-50">
-                2nd Floor, Executive Building,<br />
-                WMSU Main Campus, Normal Road,<br />
-                Zamboanga City, 7000
+                {footerInfo.address}
               </p>
             </div>
           </div>

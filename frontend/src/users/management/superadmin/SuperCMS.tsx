@@ -13,12 +13,14 @@ import {
   Database,
   AlignLeft,
   Building2,
-  GraduationCap,
   Plus,
   Trash2,
   Briefcase,
+  GraduationCap,
   GripVertical,
-  Palette
+  Palette,
+  Clock,
+  AlertCircle
 } from 'lucide-react';
 import { showAlert } from '../../../components/modal-notification/sweetalert';
 import { showToast } from '../../../components/modal-notification/toast';
@@ -128,95 +130,18 @@ const CMS = () => {
     ]
   });
 
-  const [contactContent, setContactContent] = useState({
-    phone: "(062) 991-6446",
-    email: "gcc@wmsu.edu.ph",
-    address: "2nd Floor, Executive Building, WMSU Main Campus, Normal Road, Zamboanga City",
-    facebook: "WMSU Guidance and Counseling Center",
-    messenger: "m.me/wmsugcc"
+  const [contactContent, setContactContent] = useState<any>(null);
+  const [footerContent, setFooterContent] = useState<any>(null);
+  const [systemData, setSystemData] = useState<any>(null);
+  const [logoSettings, setLogoSettings] = useState({
+    wmsuLogo: null,
+    gccLogo: null
   });
-
-  const [themeSettings, setThemeSettings] = useState({
-    primaryColor: 'emerald',
-    mode: 'light',
-    accentStyle: 'rounded'
-  });
-
-  const [footerContent, setFooterContent] = useState({
-    description: "Empowering WMSU students through professional guidance, psychological support, and career development services."
-  });
-
-
-
-  const [systemData, setSystemData] = useState({
-    courses: [
-      "BS in Computer Science",
-      "BS in Information Technology",
-      "BS in Psychology",
-      "BS in Civil Engineering",
-      "BS in Nursing",
-      "BS in Education",
-      "BS in Criminology",
-      "BS in Accountancy"
-    ],
-    shsTracks: [
-      "STEM (Science, Technology, Engineering, and Mathematics)",
-      "ABM (Accountancy, Business, and Management)",
-      "HUMSS (Humanities and Social Sciences)",
-      "GAS (General Academic Strand)",
-      "TVL (Technical-Vocational-Livelihood)"
-    ],
-    occupations: [
-      "Student",
-      "Faculty",
-      "Staff",
-      "Alumni",
-      "Outside Client",
-      "Professional",
-      "Unemployed"
-    ]
-  });
-
-
-
-  const colorThemes: Record<string, Record<string, string>> = {
-    emerald: {
-      50: "236 253 245", 100: "209 250 229", 200: "167 243 208", 300: "110 231 183",
-      400: "52 211 153", 500: "16 185 129", 600: "5 150 105", 700: "4 120 87",
-      800: "6 95 70", 900: "6 78 59"
-    },
-    teal: {
-      50: "240 253 250", 100: "204 251 241", 200: "153 246 233", 300: "94 234 212",
-      400: "45 212 191", 500: "20 184 166", 600: "13 148 136", 700: "15 118 110",
-      800: "17 94 89", 900: "19 78 74"
-    },
-    indigo: {
-      50: "238 242 255", 100: "224 231 255", 200: "199 210 254", 300: "165 180 252",
-      400: "129 140 248", 500: "99 102 241", 600: "79 70 229", 700: "67 56 202",
-      800: "55 48 163", 900: "49 46 129"
-    },
-    rose: {
-      50: "255 241 242", 100: "255 228 230", 200: "254 205 211", 300: "253 164 175",
-      400: "251 113 133", 500: "244 63 94", 600: "225 29 72", 700: "190 18 60",
-      800: "159 18 57", 900: "136 19 55"
-    }
-  };
-
-  const applyTheme = (color: string) => {
-    const theme = colorThemes[color];
-    if (!theme) return;
-
-    Object.entries(theme).forEach(([shade, value]) => {
-      document.documentElement.style.setProperty(`--primary-${shade}`, value);
-    });
-  };
 
   const [savedStates, setSavedStates] = useState<Record<string, any>>({});
 
-
-
   const fetchAllContent = async () => {
-    const sectionsToFetch = ['home', 'about', 'team', 'contact', 'footer', 'theme', 'system'];
+    const sectionsToFetch = ['home', 'about', 'team', 'contact', 'footer', 'system', 'logos'];
     const newSavedStates: Record<string, any> = {};
 
     for (const s of sectionsToFetch) {
@@ -228,20 +153,13 @@ const CMS = () => {
           case 'about': setAboutContent(result.data); break;
           case 'team': 
             const teamData = result.data;
-            if (teamData.mainCampus && !teamData.mainCampus.director) {
-              teamData.mainCampus.director = [];
-            }
+            if (teamData.mainCampus && !teamData.mainCampus.director) teamData.mainCampus.director = [];
             setTeamContent(teamData); 
             break;
           case 'contact': setContactContent(result.data); break;
           case 'footer': setFooterContent(result.data); break;
-          case 'theme':
-            if (result.data.primaryColor) {
-              setThemeSettings(result.data);
-              applyTheme(result.data.primaryColor);
-            }
-            break;
           case 'system': setSystemData(result.data); break;
+          case 'logos': setLogoSettings(result.data); break;
         }
       }
     }
@@ -275,49 +193,25 @@ const CMS = () => {
         .getPublicUrl(filePath);
 
       const { section, path, index } = uploadContext;
+      
+      const updateContentState = (setter: React.Dispatch<React.SetStateAction<any>>) => {
+        setter((prev: any) => {
+          const newContent = JSON.parse(JSON.stringify(prev));
+          let current = newContent;
+          for (let i = 0; i < path.length - 1; i++) {
+            current = current[path[i]];
+          }
+          const lastKey = path[path.length - 1];
+          if (typeof index === 'number') current[lastKey][index] = publicUrl;
+          else current[lastKey] = publicUrl;
+          return newContent;
+        });
+      };
 
-      if (section === 'home') {
-        setHomeContent(prev => {
-          const newContent = JSON.parse(JSON.stringify(prev));
-          let current = newContent;
-          for (let i = 0; i < path.length - 1; i++) {
-            current = current[path[i]];
-          }
-          const lastKey = path[path.length - 1];
-          if (typeof index === 'number') {
-            current[lastKey][index] = publicUrl;
-          } else {
-            current[lastKey] = publicUrl;
-          }
-          return newContent;
-        });
-      } else if (section === 'team') {
-        setTeamContent(prev => {
-          const newContent = JSON.parse(JSON.stringify(prev));
-          let current = newContent;
-          for (let i = 0; i < path.length - 1; i++) {
-            current = current[path[i]];
-          }
-          const lastKey = path[path.length - 1];
-          if (typeof index === 'number') {
-            current[lastKey][index] = publicUrl;
-          } else {
-            current[lastKey] = publicUrl;
-          }
-          return newContent;
-        });
-      } else if (section === 'about') {
-        setAboutContent(prev => {
-          const newContent = JSON.parse(JSON.stringify(prev));
-          let current = newContent;
-          for (let i = 0; i < path.length - 1; i++) {
-            current = current[path[i]];
-          }
-          const lastKey = path[path.length - 1];
-          current[lastKey] = publicUrl;
-          return newContent;
-        });
-      }
+      if (section === 'home') updateContentState(setHomeContent);
+      else if (section === 'team') updateContentState(setTeamContent);
+      else if (section === 'about') updateContentState(setAboutContent);
+      else if (section === 'logos') updateContentState(setLogoSettings);
 
       showToast.success('Image uploaded successfully!');
     } catch (error: any) {
@@ -348,15 +242,11 @@ const CMS = () => {
         switch (sectionId) {
           case 'home': setHomeContent(res.data); break;
           case 'about': setAboutContent(res.data); break;
-          case 'team': 
-            const data = res.data;
-            if (data.mainCampus && !data.mainCampus.director) data.mainCampus.director = [];
-            setTeamContent(data); 
-            break;
+          case 'team': setTeamContent(res.data); break;
           case 'contact': setContactContent(res.data); break;
           case 'footer': setFooterContent(res.data); break;
-          case 'theme': setThemeSettings(res.data); applyTheme(res.data.primaryColor); break;
           case 'system': setSystemData(res.data); break;
+          case 'logos': setLogoSettings(res.data); break;
         }
         showToast.info('Changes discarded.');
       }
@@ -364,15 +254,16 @@ const CMS = () => {
   };
 
   const hasChanges = (sectionId: string) => {
-    const current = sectionId === 'home' ? homeContent :
-      sectionId === 'about' ? aboutContent :
-        sectionId === 'team' ? teamContent :
-          sectionId === 'contact' ? contactContent :
-            sectionId === 'footer' ? footerContent :
-              sectionId === 'theme' ? themeSettings :
-                sectionId === 'system' ? systemData : null;
-
-    return JSON.stringify(current) !== JSON.stringify(savedStates[sectionId]);
+    const contentMap: any = { 
+      home: homeContent, 
+      about: aboutContent, 
+      team: teamContent, 
+      contact: contactContent, 
+      footer: footerContent, 
+      system: systemData,
+      logos: logoSettings
+    };
+    return JSON.stringify(contentMap[sectionId]) !== JSON.stringify(savedStates[sectionId]);
   };
 
   const handleSave = async (section: string) => {
@@ -384,30 +275,21 @@ const CMS = () => {
     );
 
     if (result.isConfirmed) {
-      let contentToSave: any;
-      let sectionKey;
+      const mapping: any = { 
+        'Home Page': { key: 'home', data: homeContent }, 
+        'About Us': { key: 'about', data: aboutContent }, 
+        'Our Team': { key: 'team', data: teamContent }, 
+        'Contact Info': { key: 'contact', data: contactContent }, 
+        'System Data': { key: 'system', data: systemData }, 
+        'Footer': { key: 'footer', data: footerContent },
+        'System Logos': { key: 'logos', data: logoSettings }
+      };
+      const { key, data } = mapping[section];
 
-      switch (section) {
-        case 'Home Page': contentToSave = homeContent; sectionKey = 'home'; break;
-        case 'About Us': contentToSave = aboutContent; sectionKey = 'about'; break;
-        case 'Our Team': contentToSave = teamContent; sectionKey = 'team'; break;
-        case 'Contact Info': contentToSave = contactContent; sectionKey = 'contact'; break;
-        case 'System Data': contentToSave = systemData; sectionKey = 'system'; break;
-        case 'Footer': contentToSave = footerContent; sectionKey = 'footer'; break;
-        case 'Theme Settings': contentToSave = themeSettings; sectionKey = 'theme'; break;
-      }
-
-      if (sectionKey) {
-        const updateResult = await cmsApi.updateContent(sectionKey, contentToSave);
+      if (key) {
+        const updateResult = await cmsApi.updateContent(key, data);
         if (updateResult.ok) {
-          setSavedStates(prev => ({
-            ...prev,
-            [sectionKey]: JSON.parse(JSON.stringify(contentToSave))
-          }));
-
-          if (section === 'Theme Settings') {
-            applyTheme(themeSettings.primaryColor);
-          }
+          setSavedStates(prev => ({ ...prev, [key]: JSON.parse(JSON.stringify(data)) }));
           showToast.success(`${section} updated successfully!`);
         } else {
           showToast.error(`Failed to update ${section}.`);
@@ -422,8 +304,8 @@ const CMS = () => {
     { id: 'team', title: 'Our Team', icon: Users, description: 'Manage team members and counselors.' },
     { id: 'contact', title: 'Contact Info', icon: Phone, description: 'Update phone numbers, emails, and address.' },
     { id: 'system', title: 'System Data', icon: Database, description: 'Manage courses, SHS tracks, and occupations.' },
-    { id: 'footer', title: 'Footer', icon: LayoutGrid, description: 'Manage footer brand text.' },
-    { id: 'theme', title: 'Theme Settings', icon: Palette, description: 'Customize system colors and branding.' },
+    { id: 'footer', title: 'Footer', icon: Palette, description: 'Update footer links, copyright, and social media.' },
+    { id: 'logos', title: 'System Logos', icon: ImageIcon, description: 'Manage university and center logos.' },
   ];
 
 return (
@@ -1820,8 +1702,7 @@ return (
           </div>
         </motion.div>
       )}
-
-      {activeSection === 'theme' && (
+      {activeSection === 'logos' && logoSettings && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -1830,101 +1711,61 @@ return (
         >
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
-              <div className="w-2 h-8 bg-indigo-500 rounded-full"></div>
-              <h3 className="text-2xl font-black text-slate-800">Theme Settings</h3>
+              <div className="w-2 h-8 bg-teal-500 rounded-full"></div>
+              <h3 className="text-2xl font-black text-slate-800">System Logos</h3>
             </div>
             <button
-              onClick={() => handleSave('Theme Settings')}
-              className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-xl font-black text-sm hover:bg-slate-800 transition-all shadow-lg"
+              onClick={() => handleSave('System Logos')}
+              className="flex items-center gap-2 px-6 py-3 bg-teal-900 text-white rounded-xl font-black text-sm hover:bg-teal-800 transition-all shadow-lg shadow-teal-900/20"
             >
               <Save size={16} />
-              Apply Theme
+              Save Logos
             </button>
           </div>
 
-          <div className="space-y-12">
-            {/* Primary Color Selection */}
-            <div className="space-y-6">
-              <h4 className="text-sm font-black text-slate-500 uppercase tracking-[0.2em]">Primary System Color</h4>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {[
-                  { id: 'emerald', name: 'Emerald Green', bg: 'bg-emerald-500', shadow: 'shadow-emerald-200' },
-                  { id: 'teal', name: 'Teal Blue', bg: 'bg-teal-500', shadow: 'shadow-teal-200' },
-                  { id: 'indigo', name: 'Royal Indigo', bg: 'bg-indigo-500', shadow: 'shadow-indigo-200' },
-                  { id: 'rose', name: 'Rose Crimson', bg: 'bg-rose-500', shadow: 'shadow-rose-200' },
-                ].map((color) => (
-                  <button
-                    key={color.id}
-                    onClick={() => setThemeSettings({ ...themeSettings, primaryColor: color.id })}
-                    className={`p-6 rounded-[2rem] border-2 transition-all flex flex-col items-center gap-3 group ${themeSettings.primaryColor === color.id
-                      ? `border-${color.id}-500 bg-${color.id}-50`
-                      : 'border-slate-100 bg-white hover:border-slate-200'
-                      }`}
-                  >
-                    <div className={`w-12 h-12 rounded-2xl ${color.bg} shadow-lg ${color.shadow} group-hover:scale-110 transition-transform`}></div>
-                    <span className={`text-xs font-black ${themeSettings.primaryColor === color.id ? `text-${color.id}-700` : 'text-slate-500'}`}>
-                      {color.name}
-                    </span>
-                  </button>
-                ))}
+          <div className="grid md:grid-cols-2 gap-10">
+            {/* WMSU Logo */}
+            <div className="space-y-4">
+              <label className="block text-xs font-black text-slate-500 uppercase tracking-widest">WMSU University Logo</label>
+              <div
+                onClick={() => triggerUpload('logos', ['wmsuLogo'])}
+                className="aspect-square bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 hover:border-teal-400 transition-all group relative overflow-hidden"
+              >
+                {logoSettings.wmsuLogo ? (
+                  <img src={logoSettings.wmsuLogo} className="w-full h-full object-contain p-8" alt="WMSU Logo" />
+                ) : (
+                  <div className="text-center">
+                    <ImageIcon size={40} className="text-slate-300 mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                    <span className="text-xs font-bold text-slate-400">Upload WMSU Logo</span>
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <ImageIcon size={24} className="text-white" />
+                </div>
               </div>
+              <p className="text-[10px] text-slate-400 font-medium text-center italic">Recommended: Transparent PNG, 512x512px</p>
             </div>
 
-            {/* Layout Mode */}
-            <div className="grid md:grid-cols-2 gap-8">
-              <div className="space-y-6">
-                <h4 className="text-sm font-black text-slate-500 uppercase tracking-[0.2em]">Appearance Mode</h4>
-                <div className="flex gap-4">
-                  {['light', 'dark', 'system'].map((mode) => (
-                    <button
-                      key={mode}
-                      onClick={() => setThemeSettings({ ...themeSettings, mode })}
-                      className={`flex-1 py-4 rounded-xl font-black text-xs uppercase tracking-widest transition-all ${themeSettings.mode === mode
-                        ? 'bg-slate-900 text-white shadow-lg'
-                        : 'bg-slate-100 text-slate-400 hover:bg-slate-200'
-                        }`}
-                    >
-                      {mode}
-                    </button>
-                  ))}
+            {/* GCC Logo */}
+            <div className="space-y-4">
+              <label className="block text-xs font-black text-slate-500 uppercase tracking-widest">GCC Center Logo</label>
+              <div
+                onClick={() => triggerUpload('logos', ['gccLogo'])}
+                className="aspect-square bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 hover:border-teal-400 transition-all group relative overflow-hidden"
+              >
+                {logoSettings.gccLogo ? (
+                  <img src={logoSettings.gccLogo} className="w-full h-full object-contain p-8" alt="GCC Logo" />
+                ) : (
+                  <div className="text-center">
+                    <ImageIcon size={40} className="text-slate-300 mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                    <span className="text-xs font-bold text-slate-400">Upload GCC Logo</span>
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <ImageIcon size={24} className="text-white" />
                 </div>
               </div>
-
-              <div className="space-y-6">
-                <h4 className="text-sm font-black text-slate-500 uppercase tracking-[0.2em]">Corner Style</h4>
-                <div className="flex gap-4">
-                  {['sharp', 'rounded', 'pill'].map((style) => (
-                    <button
-                      key={style}
-                      onClick={() => setThemeSettings({ ...themeSettings, accentStyle: style })}
-                      className={`flex-1 py-4 rounded-xl font-black text-xs uppercase tracking-widest transition-all ${themeSettings.accentStyle === style
-                        ? 'bg-slate-900 text-white shadow-lg'
-                        : 'bg-slate-100 text-slate-400 hover:bg-slate-200'
-                        }`}
-                    >
-                      {style}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Live Preview Card */}
-            <div className="pt-8">
-              <h4 className="text-sm font-black text-slate-500 uppercase tracking-[0.2em] mb-6 text-center">Live Preview</h4>
-              <div className={`max-w-md mx-auto p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-2xl relative overflow-hidden`}>
-                <div className={`absolute top-0 right-0 w-32 h-32 bg-${themeSettings.primaryColor}-500/10 rounded-full blur-3xl`}></div>
-                <div className="relative z-10 space-y-4">
-                  <div className={`w-12 h-2 bg-${themeSettings.primaryColor}-500 rounded-full mb-4`}></div>
-                  <h5 className="text-xl font-black text-slate-800 tracking-tight">System Interface Preview</h5>
-                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                    This is how your primary selection will look across buttons, active states, and highlights.
-                  </p>
-                  <button className={`w-full py-3 bg-${themeSettings.primaryColor}-500 text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-${themeSettings.primaryColor}-500/30`}>
-                    Sample Button
-                  </button>
-                </div>
-              </div>
+              <p className="text-[10px] text-slate-400 font-medium text-center italic">Recommended: Transparent PNG, 512x512px</p>
             </div>
           </div>
         </motion.div>

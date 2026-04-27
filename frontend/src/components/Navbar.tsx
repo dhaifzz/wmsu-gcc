@@ -1,12 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Menu, X, ArrowRight } from 'lucide-react';
-import gccLogo from '../assets/logos/GCC.png';
-import wmsuLogo from '../assets/logos/WMSU.png';
+import gccLogoAsset from '../assets/logos/GCC.png';
+import wmsuLogoAsset from '../assets/logos/WMSU.png';
+import { cmsApi } from '../lib/api';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [logos, setLogos] = useState({
+    wmsuLogo: wmsuLogoAsset,
+    gccLogo: gccLogoAsset
+  });
   const location = useLocation();
 
   useEffect(() => {
@@ -14,6 +19,23 @@ const Navbar = () => {
       setIsScrolled(window.scrollY > 20);
     };
     window.addEventListener('scroll', handleScroll);
+    
+    // Fetch logos from CMS
+    const fetchLogos = async () => {
+      try {
+        const res = await cmsApi.getContent('logos');
+        if (res.ok && res.data) {
+          setLogos({
+            wmsuLogo: res.data.wmsuLogo || wmsuLogoAsset,
+            gccLogo: res.data.gccLogo || gccLogoAsset
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch logos:', error);
+      }
+    };
+    fetchLogos();
+
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -35,8 +57,8 @@ const Navbar = () => {
           {/* Logo Section */}
           <a href="/" className="flex items-center gap-3 group">
             <div className="flex -space-x-2">
-              <img src={wmsuLogo} alt="WMSU" className="h-12 w-12 object-contain drop-shadow-md" />
-              <img src={gccLogo} alt="GCC" className="h-12 w-12 object-contain drop-shadow-md" />
+              <img src={logos.wmsuLogo} alt="WMSU" className="h-12 w-12 object-contain drop-shadow-md" />
+              <img src={logos.gccLogo} alt="GCC" className="h-12 w-12 object-contain drop-shadow-md" />
             </div>
             <div className="flex flex-col leading-tight">
               <span className={`text-xl font-black tracking-tighter transition-colors ${isScrolled ? 'text-emerald-900' : 'text-white'}`}>
