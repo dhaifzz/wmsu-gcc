@@ -146,7 +146,7 @@ const ManagementSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen
             <button
               key={link.id}
               className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-bold transition-all relative group ${activeTab === link.id ? c.activeBtn : c.inactiveBtn}`}
-              onClick={() => { setActiveTab(link.id); onClose(); }}
+              onClick={() => { setActiveTab(link.id); onClose?.(); }}
             >
               <link.icon size={20} className={activeTab === link.id ? c.activeIcon : c.inactiveIcon} />
               {link.label}
