@@ -8,16 +8,13 @@ import {
   User as UserIcon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import UserSidebar from '../../../components/UserSidebar';
-import UserNavbar from '../../../components/UserNavbar';
+import ClientNavbar from '../../../components/ClientNavbar';
 import Profile from '../../Profile';
-import Settings from '../../Settings';
 import Counseling from '../Counseling';
 
 const OutsideClientDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [activeService, setActiveService] = useState<string | null>(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const [user] = useState({
     name: "Dela Cruz, Maria",
@@ -44,21 +41,13 @@ const OutsideClientDashboard = () => {
   const filteredServices = services;
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] flex font-sans text-slate-900">
-      <UserSidebar
+    <div className="min-h-screen bg-[#f8fafc] flex flex-col font-sans text-slate-900">
+      <ClientNavbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        userName={user.name}
-        userType={user.educationLevel}
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
       />
 
       <main className="flex-1 relative">
-        <UserNavbar
-          userName={user.name}
-          onMenuClick={() => setIsSidebarOpen(true)}
-        />
 
         <div className="p-6 lg:p-10 max-w-6xl mx-auto">
           <AnimatePresence mode="wait">
@@ -70,13 +59,13 @@ const OutsideClientDashboard = () => {
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
               >
-                {/* Welcome Section */}
                 <div className="mb-10">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600">Client Portal</span>
                   </div>
-                  <h3 className="text-4xl font-black tracking-tight">Welcome, {user.name.split(', ')[1]}</h3>
+                  <h3 className="text-4xl font-black tracking-tight">Good day, {user.name.split(', ')[1]}!</h3>
+                  <p className="text-slate-500 text-sm font-medium mt-1">Here's what's happening with your portal today.</p>
                 </div>
 
                 {/* Stats Row */}
@@ -168,7 +157,6 @@ const OutsideClientDashboard = () => {
             )}
 
             {activeTab === 'profile' && <Profile key="profile" user={user} />}
-            {activeTab === 'settings' && <Settings key="settings" />}
           </AnimatePresence>
         </div>
       </main>

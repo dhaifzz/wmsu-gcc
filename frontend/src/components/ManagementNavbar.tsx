@@ -1,11 +1,11 @@
 import { Bell, Menu } from 'lucide-react';
 
-interface UserNavbarProps {
+interface ManagementNavbarProps {
   userName: string;
   onMenuClick: () => void;
 }
 
-const UserNavbar = ({ userName, onMenuClick }: UserNavbarProps) => {
+const ManagementNavbar = ({ userName, onMenuClick }: ManagementNavbarProps) => {
   return (
     <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 px-6 lg:px-10 py-4 lg:py-6 flex items-center justify-between">
       <div className="flex items-center gap-4">
@@ -31,4 +31,4 @@ const UserNavbar = ({ userName, onMenuClick }: UserNavbarProps) => {
   );
 };
 
-export default UserNavbar;
+export default ManagementNavbar;

@@ -32,15 +32,15 @@ const AssessmentDetails = () => {
           
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
-            <div className="bg-white p-10 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100">
+            <div className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100">
               <h2 className="text-3xl font-black text-slate-900 mb-6">Overview</h2>
               <p className="text-slate-600 text-lg leading-relaxed mb-6 font-medium">
                 The Guidance and Counseling Center conducts standardized psychological assessments to help students monitor their mental and emotional states. These tests are essential tools for self-awareness and early intervention.
               </p>
               
               <div className="grid md:grid-cols-2 gap-8 mt-10">
-                <div className="group p-8 rounded-[2rem] bg-slate-50 border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50 transition-all">
-                  <div className="w-14 h-14 bg-white rounded-2xl shadow-md flex items-center justify-center text-emerald-600 mb-6 group-hover:scale-110 transition-transform">
+                <div className="group p-8 rounded-lg bg-slate-50 border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50 transition-all">
+                  <div className="w-14 h-14 bg-white rounded-lg shadow-md flex items-center justify-center text-emerald-600 mb-6 group-hover:scale-110 transition-transform">
                     <FileText size={28} />
                   </div>
                   <h3 className="text-xl font-black text-slate-900 mb-2">DASS-21 Test</h3>
@@ -50,8 +50,8 @@ const AssessmentDetails = () => {
                   </p>
                 </div>
                 
-                <div className="group p-8 rounded-[2rem] bg-slate-50 border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50 transition-all">
-                  <div className="w-14 h-14 bg-white rounded-2xl shadow-md flex items-center justify-center text-emerald-600 mb-6 group-hover:scale-110 transition-transform">
+                <div className="group p-8 rounded-lg bg-slate-50 border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50 transition-all">
+                  <div className="w-14 h-14 bg-white rounded-lg shadow-md flex items-center justify-center text-emerald-600 mb-6 group-hover:scale-110 transition-transform">
                     <Target size={28} />
                   </div>
                   <h3 className="text-xl font-black text-slate-900 mb-2">DASS-Y Test</h3>
@@ -63,7 +63,7 @@ const AssessmentDetails = () => {
               </div>
             </div>
 
-            <div className="bg-white p-10 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100">
+            <div className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100">
               <div className="flex items-center gap-3 mb-6">
                 <div className="p-2 bg-emerald-100 text-emerald-700 rounded-lg">
                   <Info size={24} />
@@ -94,7 +94,7 @@ const AssessmentDetails = () => {
 
           {/* Sidebar */}
           <div className="space-y-8">
-            <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50">
+            <div className="bg-white p-8 rounded-lg border border-slate-100 shadow-xl shadow-slate-200/50">
               <HelpCircle className="text-emerald-600 mb-4" size={32} />
               <h3 className="text-xl font-black text-slate-900 mb-4">Frequently Asked Questions</h3>
               <div className="space-y-6">
@@ -109,7 +109,7 @@ const AssessmentDetails = () => {
               </div>
             </div>
 
-            <div className="bg-emerald-900 p-8 rounded-[2.5rem] text-white shadow-2xl shadow-emerald-900/20">
+            <div className="bg-emerald-900 p-8 rounded-lg text-white shadow-2xl shadow-emerald-900/20">
               <ClipboardCheck className="text-emerald-400 mb-4" size={32} />
               <h3 className="text-2xl font-black mb-4">Start Assessment</h3>
               <p className="text-emerald-100/80 mb-8 font-medium">
@@ -125,7 +125,7 @@ const AssessmentDetails = () => {
                   Appointment Required
                 </div>
               </div>
-              <a href="/register" className="block w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-white text-center rounded-2xl font-black transition-all">
+              <a href="/register" className="block w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-white text-center rounded-lg font-black transition-all">
                 Get Started
               </a>
             </div>

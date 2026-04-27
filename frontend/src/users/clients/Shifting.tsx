@@ -25,7 +25,15 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
     targetCourse: '',
     reason: ''
   });
+  const [docStep, setDocStep] = useState(0);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const documents = [
+    { label: "2x2 Picture (with name tag)", icon: ImageIcon, note: "Accepted formats: JPG, PNG" },
+    { label: "All Downloadable Grades", icon: FileText, note: "Accepted format: PDF" },
+    { label: "Latest COR", icon: FileText, note: "Accepted format: PDF" },
+    { label: "College Entrance Test Result", icon: FileText, note: "Accepted format: PDF" }
+  ];
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -186,34 +194,60 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
               <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center">
                 <Upload size={24} />
               </div>
-              <div>
-                <h3 className="text-2xl font-black text-slate-900">Required Documents</h3>
-                <p className="text-slate-400 text-sm font-medium">Upload high-quality scans of your documents.</p>
+              <div className="flex-1 flex justify-between items-center w-full">
+                <div>
+                  <h3 className="text-2xl font-black text-slate-900">Required Documents</h3>
+                  <p className="text-slate-400 text-sm font-medium">Upload high-quality scans of your documents.</p>
+                </div>
+                <div className="hidden sm:block text-[10px] font-black uppercase tracking-widest bg-emerald-50 text-emerald-600 px-4 py-2 rounded-xl">
+                  Step {docStep + 1} of 4
+                </div>
               </div>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
-              {[
-                { label: "2x2 Picture (with name tag)", icon: ImageIcon, note: "Accepted formats: JPG, PNG" },
-                { label: "All Downloadable Grades", icon: FileText, note: "Accepted format: PDF" },
-                { label: "Latest COR", icon: FileText, note: "Accepted format: PDF" },
-                { label: "College Entrance Test Result", icon: FileText, note: "Accepted format: PDF" }
-              ].map((doc, idx) => (
-                <div key={idx} className="p-6 rounded-3xl bg-slate-50 border border-slate-100 hover:border-emerald-200 transition-all group">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-slate-400 group-hover:text-emerald-600 transition-colors shadow-sm">
-                      <doc.icon size={20} />
+            <div className="relative overflow-hidden py-4">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={docStep}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  className="flex justify-center w-full"
+                >
+                    <div className="aspect-square w-[280px] p-8 rounded-[2.5rem] bg-slate-50 border border-slate-100 hover:border-emerald-200 transition-all group flex flex-col items-center justify-center text-center shadow-sm shrink-0">
+                      <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-slate-400 group-hover:text-emerald-600 transition-colors shadow-sm mb-6 shrink-0">
+                        {(() => {
+                          const Icon = documents[docStep].icon;
+                          return <Icon size={28} />;
+                        })()}
+                      </div>
+                      <div className="mb-6">
+                        <p className="text-sm font-black text-slate-900 mb-1 leading-tight">{documents[docStep].label}*</p>
+                        <p className="text-[10px] text-slate-400 font-medium">{documents[docStep].note}</p>
+                      </div>
+                      <button className="w-full py-3.5 mt-auto bg-white border border-slate-200 rounded-xl font-black text-[10px] uppercase tracking-widest text-slate-500 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-all flex items-center justify-center gap-2 shadow-sm">
+                        <Upload size={14} /> Upload
+                      </button>
                     </div>
-                    <div>
-                      <p className="text-xs font-black text-slate-900">{doc.label}*</p>
-                      <p className="text-[10px] text-slate-400 font-medium">{doc.note}</p>
-                    </div>
-                  </div>
-                  <button className="w-full py-3 bg-white border border-slate-200 rounded-xl font-black text-[10px] uppercase tracking-widest text-slate-500 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-all flex items-center justify-center gap-2">
-                    <Upload size={14} /> Upload File
-                  </button>
-                </div>
-              ))}
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            <div className="flex justify-between mt-8 pt-6 border-t border-slate-100">
+              <button
+                onClick={() => setDocStep(Math.max(0, docStep - 1))}
+                disabled={docStep === 0}
+                className="px-6 py-3 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 text-slate-500"
+              >
+                Previous
+              </button>
+              <button
+                onClick={() => setDocStep(Math.min(3, docStep + 1))}
+                disabled={docStep === 3}
+                className="px-6 py-3 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                Next <ArrowRight size={14} />
+              </button>
             </div>
           </div>
         </div>

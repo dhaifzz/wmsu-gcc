@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import {
   LayoutDashboard,
   User,
-  Settings,
   LogOut,
   Clock as ClockIcon
 } from 'lucide-react';
@@ -17,17 +16,17 @@ interface NavLink {
   icon: any;
 }
 
-interface UserSidebarProps {
+interface ManagementSidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   userName: string;
   userType: string;
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
   links?: NavLink[];
 }
 
-const UserSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen, onClose, links }: UserSidebarProps) => {
+const ManagementSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen, onClose, links }: ManagementSidebarProps) => {
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
@@ -55,7 +54,6 @@ const UserSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen, onCl
   const defaultLinks: NavLink[] = [
     { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'profile', label: 'My Profile', icon: User },
-    { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
   const displayLinks = links || defaultLinks;
@@ -140,4 +138,4 @@ const UserSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen, onCl
   );
 };
 
-export default UserSidebar;
+export default ManagementSidebar;

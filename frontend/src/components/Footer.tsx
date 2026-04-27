@@ -21,8 +21,8 @@ const Footer = () => {
   return (
     <footer className="bg-[#BD2D2D] text-rose-100 pt-24 pb-12 overflow-hidden relative">
       {/* Decorative Spheres (Ball Design) */}
-      <div className="absolute -left-20 -top-20 w-96 h-96 bg-gradient-to-br from-rose-600 to-rose-900 rounded-full blur-3xl opacity-30"></div>
-      <div className="absolute -right-32 -bottom-32 w-[30rem] h-[30rem] bg-gradient-to-tr from-emerald-600 to-emerald-900 rounded-full blur-[120px] opacity-20"></div>
+      <div className="absolute -left-20 -top-20 w-96 h-96 rounded-full bg-gradient-to-br from-rose-600 to-rose-900 blur-3xl opacity-30"></div>
+      <div className="absolute -right-32 -bottom-32 w-[30rem] h-[30rem] rounded-full bg-gradient-to-tr from-emerald-600 to-emerald-900 blur-[120px] opacity-20"></div>
 
       {/* Sharp Decorative Spheres matching Login design */}
       <div className="absolute -right-20 top-20 h-64 w-64 rounded-full bg-gradient-to-br from-rose-500 to-rose-700 shadow-2xl opacity-20 hidden lg:block"></div>
@@ -44,10 +44,10 @@ const Footer = () => {
               Empowering WMSU students through professional guidance, psychological support, and career development services.
             </p>
             <div className="flex gap-4">
-              <a href="https://www.facebook.com/wmsugcc" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-rose-900/50 flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-all border border-rose-800">
+              <a href="https://www.facebook.com/wmsugcc" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-rose-900/50 rounded-lg flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-all border border-rose-800">
                 <FacebookIcon size={18} />
               </a>
-              <a href="mailto:gcc@wmsu.edu.ph" className="w-10 h-10 rounded-full bg-rose-900/50 flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-all border border-rose-800">
+              <a href="mailto:gcc@wmsu.edu.ph" className="w-10 h-10 bg-rose-900/50 rounded-lg flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-all border border-rose-800">
                 <Mail size={18} />
               </a>
             </div>
@@ -70,7 +70,7 @@ const Footer = () => {
             <h4 className="text-white font-black uppercase tracking-widest text-sm mb-6">Contact Us</h4>
             <ul className="space-y-6">
               <li className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-xl bg-rose-900/50 border border-rose-800 flex items-center justify-center shrink-0 text-emerald-400">
+                <div className="w-10 h-10 bg-rose-900/50 border border-rose-800 rounded-lg flex items-center justify-center shrink-0 text-emerald-400">
                   <Phone size={18} />
                 </div>
                 <div>
@@ -79,7 +79,7 @@ const Footer = () => {
                 </div>
               </li>
               <li className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-xl bg-rose-900/50 border border-rose-800 flex items-center justify-center shrink-0 text-emerald-400">
+                <div className="w-10 h-10 bg-rose-900/50 border border-rose-800 rounded-lg flex items-center justify-center shrink-0 text-emerald-400">
                   <Mail size={18} />
                 </div>
                 <div>
@@ -94,7 +94,7 @@ const Footer = () => {
           <div>
             <h4 className="text-white font-black uppercase tracking-widest text-sm mb-6">Office Location</h4>
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-rose-900/50 border border-rose-800 flex items-center justify-center shrink-0 text-emerald-400">
+              <div className="w-10 h-10 bg-rose-900/50 border border-rose-800 rounded-lg flex items-center justify-center shrink-0 text-emerald-400">
                 <MapPin size={18} />
               </div>
               <p className="text-sm font-bold leading-relaxed text-rose-50">

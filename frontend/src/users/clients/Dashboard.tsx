@@ -6,7 +6,6 @@ import {
   RefreshCw, 
   User, 
   LogOut, 
-  Settings, 
   Bell,
   Search,
   ChevronRight,
@@ -108,9 +107,6 @@ const Dashboard = () => {
           </button>
           <button className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl font-bold transition-all ${activeTab === 'profile' ? 'bg-emerald-50 text-emerald-700 shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`} onClick={() => setActiveTab('profile')}>
             <User size={20} /> My Profile
-          </button>
-          <button className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl font-bold transition-all ${activeTab === 'settings' ? 'bg-emerald-50 text-emerald-700 shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`} onClick={() => setActiveTab('settings')}>
-            <Settings size={20} /> Settings
           </button>
         </nav>
 

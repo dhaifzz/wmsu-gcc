@@ -117,12 +117,12 @@ export default function Register() {
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="relative z-30 flex w-full max-w-[1000px] max-h-full flex-col overflow-hidden rounded-[2rem] bg-white shadow-2xl md:flex-row"
+        className="relative z-30 flex w-full max-w-[1000px] max-h-full flex-col overflow-hidden rounded-lg bg-white shadow-2xl md:flex-row"
       >
         {/* Back to Home Button */}
         <Link
           to="/"
-          className="absolute top-4 left-4 md:top-6 md:left-8 z-50 flex items-center gap-2 text-sm font-bold text-emerald-700 transition-all duration-200 hover:bg-emerald-50 hover:text-emerald-800 bg-white rounded-2xl px-4 py-2.5 shadow-md group"
+          className="absolute top-4 left-4 md:top-6 md:left-8 z-50 flex items-center gap-2 text-sm font-bold text-emerald-700 transition-all duration-200 hover:bg-emerald-50 hover:text-emerald-800 bg-white rounded-lg px-4 py-2.5 shadow-md group"
         >
           <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
           Back to Home
@@ -170,7 +170,7 @@ export default function Register() {
                 {step === 1 && (
                   <div className="mb-6 animate-in fade-in slide-in-from-top-2 duration-300">
                     <p className="mb-2 text-sm font-bold text-gray-700">Are you from WMSU?</p>
-                    <div className="flex w-full rounded-xl bg-gray-100 p-1">
+                    <div className="flex w-full rounded-lg bg-gray-100 p-1">
                       <button
                         type="button"
                         onClick={() => setIsWMSU(true)}
@@ -244,7 +244,7 @@ export default function Register() {
                             if (error) setError('');
                           }}
                           required
-                          className="w-full rounded-xl bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
+                          className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
                         />
                       </div>
 
@@ -262,7 +262,7 @@ export default function Register() {
                             if (error) setError('');
                           }}
                           required
-                          className="w-full rounded-xl bg-gray-100 py-4 pl-12 pr-20 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
+                          className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-20 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
                         />
                         <button
                           type="button"
@@ -288,7 +288,7 @@ export default function Register() {
                             if (error) setError('');
                           }}
                           required
-                          className="w-full rounded-xl bg-gray-100 py-4 pl-12 pr-20 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
+                          className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-20 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
                         />
                         <button
                           type="button"
@@ -320,19 +320,18 @@ export default function Register() {
                               if (error) setError('');
                             }}
                             required
-                            className="w-full rounded-xl bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
+                            className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
                           />
                         </div>
 
-                        {/* Middle Initial */}
-                        <div className="relative flex w-24 items-center shrink-0">
+                        {/* Middle Name */}
+                        <div className="relative flex flex-1 items-center">
                           <input
                             type="text"
-                            placeholder="M.I."
+                            placeholder="Middle Name (optional)"
                             value={middleInitial}
                             onChange={(e) => setMiddleInitial(e.target.value)}
-                            maxLength={2}
-                            className="w-full rounded-xl bg-gray-100 py-4 px-4 text-center text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
+                            className="w-full rounded-lg bg-gray-100 py-4 px-4 text-center text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
                           />
                         </div>
                       </div>
@@ -351,7 +350,7 @@ export default function Register() {
                             if (error) setError('');
                           }}
                           required
-                          className="w-full rounded-xl bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
+                          className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
                         />
                       </div>
 
@@ -366,7 +365,7 @@ export default function Register() {
                           value={contactNumber}
                           onChange={(e) => setContactNumber(e.target.value)}
                           required
-                          className="w-full rounded-xl bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
+                          className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
                         />
                       </div>
 
@@ -382,7 +381,7 @@ export default function Register() {
                             value={city}
                             onChange={(e) => setCity(e.target.value)}
                             required
-                            className="w-full rounded-xl bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
+                            className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
                           />
                         </div>
                         <div className="relative flex flex-1 items-center">
@@ -395,7 +394,7 @@ export default function Register() {
                             value={barangay}
                             onChange={(e) => setBarangay(e.target.value)}
                             required
-                            className="w-full rounded-xl bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
+                            className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
                           />
                         </div>
                       </div>
@@ -411,7 +410,7 @@ export default function Register() {
                           value={street}
                           onChange={(e) => setStreet(e.target.value)}
                           required
-                          className="w-full rounded-xl bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
+                          className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
                         />
                       </div>
                     </div>
@@ -430,7 +429,7 @@ export default function Register() {
                           <button
                             type="button"
                             onClick={() => toggleDropdown('sex')}
-                            className={`w-full flex items-center justify-between rounded-xl bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold transition-all border-2 ${isDropdownOpen.sex ? 'border-emerald-500 bg-white ring-4 ring-emerald-500/10' : 'border-transparent'}`}
+                            className={`w-full flex items-center justify-between rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold transition-all border-2 ${isDropdownOpen.sex ? 'border-emerald-500 bg-white ring-4 ring-emerald-500/10' : 'border-transparent'}`}
                           >
                             <span className={sex ? 'text-slate-800' : 'text-gray-400'}>
                               {sex || 'Select Sex'}
@@ -444,7 +443,7 @@ export default function Register() {
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: 10 }}
-                                className="absolute z-50 top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-2xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto"
+                                className="absolute z-50 top-full left-0 right-0 mt-2 bg-white border border-slate-100 shadow-2xl overflow-hidden max-h-60 overflow-y-auto"
                               >
                                 {['Male', 'Female', 'Prefer not to say'].map((option) => (
                                   <button
@@ -466,18 +465,21 @@ export default function Register() {
                       </div>
 
                       {/* Birthdate */}
-                      <div className="relative flex items-center">
-                        <div className="absolute left-4 text-gray-700">
-                          <Calendar className="h-5 w-5" />
+                      <div className="relative animate-in fade-in slide-in-from-top-2 duration-300">
+                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4 mb-2 block">Birthdate</label>
+                        <div className="relative flex items-center">
+                          <div className="absolute left-4 text-gray-700">
+                            <Calendar className="h-5 w-5" />
+                          </div>
+                          <input
+                            type="date"
+                            value={birthdate}
+                            onChange={(e) => setBirthdate(e.target.value)}
+                            max={maxDate}
+                            required
+                            className={`w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all ${birthdate ? 'text-gray-700' : 'text-gray-400'}`}
+                          />
                         </div>
-                        <input
-                          type="date"
-                          value={birthdate}
-                          onChange={(e) => setBirthdate(e.target.value)}
-                          max={maxDate}
-                          required
-                          className={`w-full rounded-xl bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all ${birthdate ? 'text-gray-700' : 'text-gray-400'}`}
-                        />
                       </div>
 
                       {/* Department Selection for Faculty */}
@@ -491,7 +493,7 @@ export default function Register() {
                                 <button
                                   type="button"
                                   onClick={() => toggleDropdown('department')}
-                                  className={`w-full flex items-center justify-between rounded-xl bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold transition-all border-2 ${isDropdownOpen.department ? 'border-emerald-500 bg-white ring-4 ring-emerald-500/10' : 'border-transparent'}`}
+                                  className={`w-full flex items-center justify-between bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold transition-all border-2 ${isDropdownOpen.department ? 'border-emerald-500 bg-white ring-4 ring-emerald-500/10' : 'border-transparent'}`}
                                 >
                                   <span className={department ? 'text-slate-800' : 'text-gray-400'}>
                                     {department || 'Select Department/College'}
@@ -505,7 +507,7 @@ export default function Register() {
                                       initial={{ opacity: 0, y: 10 }}
                                       animate={{ opacity: 1, y: 0 }}
                                       exit={{ opacity: 0, y: 10 }}
-                                      className="absolute z-50 bottom-full left-0 right-0 mb-2 bg-white border border-slate-100 rounded-2xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto"
+                                      className="absolute z-50 bottom-full left-0 right-0 mb-2 bg-white border border-slate-100 rounded-lg shadow-2xl overflow-hidden max-h-60 overflow-y-auto"
                                     >
                                       {[
                                         { val: "CSM", label: "College of Science and Mathematics" },
@@ -551,7 +553,7 @@ export default function Register() {
                             <button
                               type="button"
                               onClick={() => toggleDropdown('occupation')}
-                              className={`w-full flex items-center justify-between rounded-xl bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold transition-all border-2 ${isDropdownOpen.occupation ? 'border-emerald-500 bg-white ring-4 ring-emerald-500/10' : 'border-transparent'}`}
+                              className={`w-full flex items-center justify-between bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold transition-all border-2 ${isDropdownOpen.occupation ? 'border-emerald-500 bg-white ring-4 ring-emerald-500/10' : 'border-transparent'}`}
                             >
                               <span className={occupation ? 'text-slate-800' : 'text-gray-400'}>
                                 {occupation || 'Select Occupation'}
@@ -565,7 +567,7 @@ export default function Register() {
                                   initial={{ opacity: 0, y: 10 }}
                                   animate={{ opacity: 1, y: 0 }}
                                   exit={{ opacity: 0, y: 10 }}
-                                  className="absolute z-50 bottom-full left-0 right-0 mb-2 bg-white border border-slate-100 rounded-2xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto"
+                                  className="absolute z-50 bottom-full left-0 right-0 mb-2 bg-white border border-slate-100 shadow-2xl overflow-hidden max-h-60 overflow-y-auto"
                                 >
                                   {['Student', 'Employee', 'Self Employed', 'Unemployed', 'Prefer not to say'].map((option) => (
                                     <button
@@ -594,24 +596,29 @@ export default function Register() {
                     <div className="flex flex-col gap-4">
 
                       {/* School */}
-                      <div className="relative flex items-center">
-                        <div className="absolute left-4 text-gray-700 opacity-60">
-                          <Building className="h-5 w-5" />
+                      {!isWMSU && (
+                        <div className="relative animate-in fade-in slide-in-from-top-2 duration-300 mb-4">
+                          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4 mb-2 block">School Name</label>
+                          <div className="relative flex items-center">
+                            <div className="absolute left-4 text-gray-700 opacity-60">
+                              <Building className="h-5 w-5" />
+                            </div>
+                            <input
+                              type="text"
+                              placeholder="School Name"
+                              value={school}
+                              onChange={(e) => setSchool(e.target.value)}
+                              required
+                              className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
+                            />
+                          </div>
                         </div>
-                        <input
-                          type="text"
-                          placeholder="School Name"
-                          value={school}
-                          onChange={(e) => setSchool(e.target.value)}
-                          required
-                          className="w-full rounded-xl bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
-                        />
-                      </div>
+                      )}
 
                       {/* Education Level Selection */}
                       <div className="mb-2 animate-in fade-in slide-in-from-top-2 duration-300">
                         <p className="mb-2 text-sm font-bold text-gray-700">Education Level</p>
-                        <div className="flex w-full rounded-xl bg-gray-100 p-1">
+                        <div className="flex w-full rounded-lg bg-gray-100 p-1">
                           <button
                             type="button"
                             onClick={() => {
@@ -647,7 +654,7 @@ export default function Register() {
                             value={course}
                             onChange={(e) => setCourse(e.target.value)}
                             required
-                            className="w-full rounded-xl bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
+                            className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
                           />
                         </div>
                       )}
@@ -664,7 +671,7 @@ export default function Register() {
                               <button
                                 type="button"
                                 onClick={() => toggleDropdown('gradeLevel')}
-                                className={`w-full flex items-center justify-between rounded-xl bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold transition-all border-2 ${isDropdownOpen.gradeLevel ? 'border-emerald-500 bg-white ring-4 ring-emerald-500/10' : 'border-transparent'}`}
+                                className={`w-full flex items-center justify-between bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold transition-all border-2 ${isDropdownOpen.gradeLevel ? 'border-emerald-500 bg-white ring-4 ring-emerald-500/10' : 'border-transparent'}`}
                               >
                                 <span className={gradeLevel ? 'text-slate-800' : 'text-gray-400'}>
                                   {gradeLevel ? `Grade ${gradeLevel}` : 'Select Grade Level'}
@@ -678,7 +685,7 @@ export default function Register() {
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: 10 }}
-                                    className="absolute z-50 top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-2xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto"
+                                    className="absolute z-50 top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-lg shadow-2xl overflow-hidden max-h-60 overflow-y-auto"
                                   >
                                     {['7', '8', '9', '10', '11', '12'].map((level) => (
                                       <button
@@ -704,7 +711,7 @@ export default function Register() {
                           {['11', '12'].includes(gradeLevel) && (
                             <div className="animate-in fade-in slide-in-from-top-2 duration-300">
                               <p className="mb-2 text-sm font-bold text-gray-700">Choose Track</p>
-                              <div className="flex w-full rounded-xl bg-gray-100 p-1">
+                              <div className="flex w-full rounded-lg bg-gray-100 p-1">
                                 <button
                                   type="button"
                                   onClick={() => setTrack('Academic')}
@@ -737,26 +744,26 @@ export default function Register() {
                           setError('');
                           window.scrollTo(0, 0);
                         }}
-                        className="w-1/3 rounded-xl bg-gray-200 py-4 text-sm font-bold text-gray-700 transition-all hover:bg-gray-300"
+                        className="w-1/3 rounded-lg bg-gray-200 py-4 text-sm font-bold text-gray-700 transition-all hover:bg-gray-300"
                       >
                         Back
                       </button>
                     )}
 
                     {step === 1 && (
-                      <button type="button" onClick={() => { handleNextStep1(); window.scrollTo(0, 0); }} className="w-full rounded-xl bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0">Next</button>
+                      <button type="button" onClick={() => { handleNextStep1(); window.scrollTo(0, 0); }} className="w-full rounded-lg bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0">Next</button>
                     )}
                     {step === 2 && (
-                      <button type="button" onClick={() => { handleNextStep2(); window.scrollTo(0, 0); }} className={step > 1 ? "w-2/3 rounded-xl bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0" : "w-full rounded-xl bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0"}>Next</button>
+                      <button type="button" onClick={() => { handleNextStep2(); window.scrollTo(0, 0); }} className={step > 1 ? "w-2/3 rounded-lg bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0" : "w-full rounded-lg bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0"}>Next</button>
                     )}
                     {step === 3 && ((isWMSU && !isFaculty) || (!isWMSU && occupation === 'Student')) && (
-                      <button type="button" onClick={() => { handleNextStep3(); window.scrollTo(0, 0); }} className="w-2/3 rounded-xl bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0">Next</button>
+                      <button type="button" onClick={() => { handleNextStep3(); window.scrollTo(0, 0); }} className="w-2/3 rounded-lg bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0">Next</button>
                     )}
                     {step === 3 && !((isWMSU && !isFaculty) || (!isWMSU && occupation === 'Student')) && (
-                      <button type="submit" className="w-2/3 rounded-xl bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0">Complete Sign up</button>
+                      <button type="submit" className="w-2/3 rounded-lg bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0">Complete Sign up</button>
                     )}
                     {step === 4 && (
-                      <button type="submit" className="w-2/3 rounded-xl bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0">Complete Sign up</button>
+                      <button type="submit" className="w-2/3 rounded-lg bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0">Complete Sign up</button>
                     )}
                   </div>
                 </form>

@@ -23,9 +23,9 @@ const AboutUs = () => {
           
           {/* Core Values / Vision-Mission */}
           <div className="lg:col-span-2 space-y-8">
-            <div className="bg-white p-10 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 transition-all hover:shadow-2xl">
+            <div className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100 transition-all hover:shadow-2xl">
               <div className="flex items-center gap-4 mb-6">
-                <div className="p-3 bg-emerald-100 text-emerald-700 rounded-2xl">
+                <div className="p-3 bg-emerald-100 text-emerald-700 rounded-lg">
                   <Eye size={32} />
                 </div>
                 <h2 className="text-3xl font-black text-slate-900">Our Vision</h2>
@@ -35,9 +35,9 @@ const AboutUs = () => {
               </p>
             </div>
 
-            <div className="bg-white p-10 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 transition-all hover:shadow-2xl">
+            <div className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100 transition-all hover:shadow-2xl">
               <div className="flex items-center gap-4 mb-6">
-                <div className="p-3 bg-emerald-100 text-emerald-700 rounded-2xl">
+                <div className="p-3 bg-emerald-100 text-emerald-700 rounded-lg">
                   <Target size={32} />
                 </div>
                 <h2 className="text-3xl font-black text-slate-900">Our Mission</h2>
@@ -47,9 +47,9 @@ const AboutUs = () => {
               </p>
             </div>
 
-            <div className="bg-white p-10 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 transition-all hover:shadow-2xl">
+            <div className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100 transition-all hover:shadow-2xl">
               <div className="flex items-center gap-4 mb-6">
-                <div className="p-3 bg-emerald-100 text-emerald-700 rounded-2xl">
+                <div className="p-3 bg-emerald-100 text-emerald-700 rounded-lg">
                   <ShieldCheck size={32} />
                 </div>
                 <h2 className="text-3xl font-black text-slate-900">Quality Policy</h2>
@@ -68,12 +68,12 @@ const AboutUs = () => {
           {/* Sidebar Info */}
           <div className="space-y-8">
             {/* Location & Hours */}
-            <div className="bg-emerald-700 p-8 rounded-[2.5rem] text-white shadow-2xl shadow-emerald-900/30 overflow-hidden relative">
+            <div className="bg-emerald-700 p-8 rounded-lg text-white shadow-2xl shadow-emerald-900/30 overflow-hidden relative">
               <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
               <h3 className="text-2xl font-black mb-8">Visit Us</h3>
               <div className="space-y-6">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center shrink-0 border border-white/20">
+                  <div className="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center shrink-0 border border-white/20">
                     <MapPin className="text-emerald-400" size={24} />
                   </div>
                   <div>
@@ -84,7 +84,7 @@ const AboutUs = () => {
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center shrink-0 border border-white/20">
+                  <div className="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center shrink-0 border border-white/20">
                     <Clock className="text-emerald-400" size={24} />
                   </div>
                   <div>
@@ -95,7 +95,7 @@ const AboutUs = () => {
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center shrink-0 border border-white/20">
+                  <div className="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center shrink-0 border border-white/20">
                     <Users className="text-emerald-400" size={24} />
                   </div>
                   <div>
@@ -107,10 +107,10 @@ const AboutUs = () => {
             </div>
 
             {/* Google Map & Waze Navigation */}
-            <div className="bg-white p-4 rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden">
+            <div className="bg-white p-4 rounded-lg shadow-xl border border-slate-100 overflow-hidden">
                <iframe 
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3960.916858546554!2d122.062033!3d6.9123!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x32504193639e78df%3A0x64700877997a66f7!2sWestern+Mindanao+State+University!5e0!3m2!1sen!2sph!4v1713862000000" 
-                className="w-full h-[250px] rounded-[2rem] mb-4"
+                className="w-full h-[250px] rounded-lg mb-4"
                 style={{ border: 0 }} 
                 allowFullScreen={true} 
                 loading="lazy" 
@@ -120,7 +120,7 @@ const AboutUs = () => {
                 href="https://www.waze.com/en-GB/live-map/directions/western-mindanao-state-university-normal-road-zamboanga-city?to=place.w.80019525.799933107.8020098"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-3 w-full py-4 bg-[#33ccff] hover:bg-[#2bb8e6] text-white font-black rounded-2xl transition-all shadow-lg"
+                className="flex items-center justify-center gap-3 w-full py-4 bg-[#33ccff] hover:bg-[#2bb8e6] text-white font-black rounded-lg transition-all shadow-lg"
               >
                 <img src="https://upload.wikimedia.org/wikipedia/commons/2/23/Waze_logo.svg" alt="Waze" className="w-6 h-6 invert brightness-0" />
                 Navigate with Waze
@@ -128,7 +128,7 @@ const AboutUs = () => {
             </div>
 
             {/* Services Quick Call */}
-            <div className="bg-emerald-50 p-8 rounded-[2.5rem] border border-emerald-100">
+            <div className="bg-emerald-50 p-8 rounded-lg border border-emerald-100">
               <GraduationCap className="text-emerald-600 mb-4" size={32} />
               <h3 className="text-xl font-black text-slate-900 mb-4">Our Services</h3>
               <ul className="space-y-3 text-sm font-bold text-slate-600">
@@ -154,7 +154,7 @@ const AboutUs = () => {
 
         </div>
         {/* Pill Contact Section */}
-        <div className="mt-12 bg-gradient-to-r from-emerald-600 to-emerald-900 rounded-full p-1 shadow-2xl shadow-emerald-900/20 overflow-hidden relative group max-w-5xl mx-auto">
+        <div className="mt-12 bg-gradient-to-r from-emerald-600 to-emerald-900 rounded-lg p-1 shadow-2xl shadow-emerald-900/20 overflow-hidden relative group max-w-5xl mx-auto">
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
           
           <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-white/10 relative z-10">

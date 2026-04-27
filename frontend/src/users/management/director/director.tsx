@@ -5,14 +5,12 @@ import {
   ClipboardCheck,
   RefreshCw,
   User,
-  Settings as SettingsIcon,
   BarChart3
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import UserSidebar from '../../../components/UserSidebar';
-import UserNavbar from '../../../components/UserNavbar';
+import ManagementSidebar from '../../../components/ManagementSidebar';
+import ManagementNavbar from '../../../components/ManagementNavbar';
 import Profile from '../../Profile';
-import Settings from '../../Settings';
 import Analytics from '../Analytics';
 import CounselingAppointments from '../Appointment/CounselingAppointments';
 import AssessmentAppointments from '../Appointment/AssessmentAppointments';
@@ -36,12 +34,11 @@ const DirectorDashboard = () => {
     { id: 'shifting', label: 'Shifting', icon: RefreshCw },
     { id: 'history', label: 'History', icon: Clock },
     { id: 'profile', label: 'My Profile', icon: User },
-    { id: 'settings', label: 'Settings', icon: SettingsIcon },
   ];
 
   return (
     <div className="min-h-screen bg-[#f1f5f9] flex font-sans text-slate-900">
-      <UserSidebar 
+      <ManagementSidebar 
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         userName={director.name}
@@ -52,7 +49,7 @@ const DirectorDashboard = () => {
       />
 
       <main className="flex-1 relative h-screen overflow-y-auto">
-        <UserNavbar 
+        <ManagementNavbar 
           userName={director.name}
           onMenuClick={() => setIsSidebarOpen(true)}
         />
@@ -83,12 +80,8 @@ const DirectorDashboard = () => {
               <Profile key="profile" user={{ ...director, type: 'director' } as any} />
             )}
 
-            {activeTab === 'settings' && (
-              <Settings key="settings" />
-            )}
-
             {/* Fallback for other tabs */}
-            {!['analytics', 'counseling', 'assessment', 'shifting', 'history', 'profile', 'settings'].includes(activeTab) && (
+            {!['analytics', 'counseling', 'assessment', 'shifting', 'history', 'profile'].includes(activeTab) && (
               <motion.div
                 key="coming-soon"
                 initial={{ opacity: 0 }}

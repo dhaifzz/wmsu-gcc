@@ -30,12 +30,12 @@ const OurTeam = () => {
   ];
 
   const MemberCard = ({ member }: { member: any }) => (
-    <div className="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 hover:shadow-2xl transition-all group overflow-hidden relative">
+    <div className="bg-white p-8 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100 hover:shadow-2xl transition-all group overflow-hidden relative">
       <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-emerald-500/10 transition-colors"></div>
       
       <div className="flex flex-col items-center text-center">
         {/* Placeholder Photo */}
-        <div className="w-24 h-24 bg-slate-100 rounded-3xl flex items-center justify-center text-slate-300 mb-6 group-hover:scale-110 transition-transform">
+        <div className="w-24 h-24 bg-slate-100 rounded-lg flex items-center justify-center text-slate-300 mb-6 group-hover:scale-110 transition-transform">
           <User size={48} strokeWidth={1.5} />
         </div>
         
@@ -46,7 +46,7 @@ const OurTeam = () => {
           <span className="text-xs font-black uppercase tracking-wider">{member.degree}</span>
         </div>
         
-        <div className="flex items-center gap-2 text-slate-500 bg-slate-50 px-4 py-2 rounded-xl w-full justify-center">
+        <div className="flex items-center gap-2 text-slate-500 bg-slate-50 px-4 py-2 rounded-lg w-full justify-center">
           <Building2 size={14} />
           <span className="text-xs font-bold">{member.dept}</span>
         </div>
@@ -76,7 +76,7 @@ const OurTeam = () => {
         <div className="flex flex-col sm:flex-row justify-center gap-4 mb-16">
           <button 
             onClick={() => setActiveTab('main')}
-            className={`px-8 py-5 rounded-[2rem] font-black transition-all flex items-center justify-center gap-3 shadow-xl ${
+            className={`px-8 py-5 rounded-lg font-black transition-all flex items-center justify-center gap-3 shadow-xl ${
               activeTab === 'main' 
               ? 'bg-white text-emerald-700 scale-105 border-2 border-emerald-500' 
               : 'bg-emerald-800 text-emerald-100 border-2 border-transparent hover:bg-emerald-700'
@@ -87,7 +87,7 @@ const OurTeam = () => {
           </button>
           <button 
             onClick={() => setActiveTab('esu')}
-            className={`px-8 py-5 rounded-[2rem] font-black transition-all flex items-center justify-center gap-3 shadow-xl ${
+            className={`px-8 py-5 rounded-lg font-black transition-all flex items-center justify-center gap-3 shadow-xl ${
               activeTab === 'esu' 
               ? 'bg-white text-emerald-700 scale-105 border-2 border-emerald-500' 
               : 'bg-emerald-800 text-emerald-100 border-2 border-transparent hover:bg-emerald-700'

@@ -57,10 +57,10 @@ const HomePage = () => {
         {/* Background Image Carousel with Overlay */}
         <div className="absolute inset-0 z-0">
           {heroImages.map((img, index) => (
-            <img 
+            <img
               key={index}
-              src={img} 
-              alt={`Hero Background ${index + 1}`} 
+              src={img}
+              alt={`Hero Background ${index + 1}`}
               className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${index === currentImageIndex ? 'opacity-100' : 'opacity-0'}`}
             />
           ))}
@@ -68,8 +68,8 @@ const HomePage = () => {
         </div>
 
         {/* Animated Spheres */}
-        <div className="absolute top-1/4 -right-20 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 left-1/3 w-64 h-64 bg-emerald-400/10 rounded-full blur-3xl animate-bounce duration-[10000ms]"></div>
+        <div className="absolute top-1/4 -right-20 w-96 h-96 bg-emerald-500/20 blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 left-1/3 w-64 h-64 bg-emerald-400/10 blur-3xl animate-bounce duration-[10000ms]"></div>
 
         <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-4xl">
@@ -80,20 +80,20 @@ const HomePage = () => {
               </span> <br />
             </h1>
             <p className="text-xl text-emerald-50/80 mb-10 leading-relaxed max-w-2xl animate-in fade-in slide-in-from-bottom-8 duration-1000">
-              The WMSU Guidance and Counseling Center provides a safe space for growth, 
+              The WMSU Guidance and Counseling Center provides a safe space for growth,
               empowerment, and emotional support. We are here to help you shine.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 animate-in fade-in slide-in-from-bottom-10 duration-1000">
-              <a 
-                href="/register" 
-                className="px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black shadow-2xl shadow-emerald-900/40 transition-all hover:-translate-y-1 active:translate-y-0 flex items-center justify-center gap-3 group"
+              <a
+                href="/register"
+                className="px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-black shadow-2xl shadow-emerald-900/40 transition-all hover:-translate-y-1 active:translate-y-0 flex items-center justify-center gap-3 group"
               >
                 Register Now
                 <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </a>
-              <a 
-                href="/about" 
-                className="px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/20 rounded-2xl font-black transition-all hover:-translate-y-1 active:translate-y-0 flex items-center justify-center"
+              <a
+                href="/about"
+                className="px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/20 rounded-lg font-black transition-all hover:-translate-y-1 active:translate-y-0 flex items-center justify-center"
               >
                 Learn More
               </a>
@@ -119,29 +119,29 @@ const HomePage = () => {
 
           <div className="grid md:grid-cols-3 gap-12">
             {features.map((feature, index) => (
-              <a 
+              <a
                 key={index}
                 href={feature.path}
                 className="group flex flex-col"
               >
-                <div className="relative h-64 mb-8 overflow-hidden rounded-[2rem] border-2 border-emerald-800 shadow-xl shadow-slate-200 transition-transform duration-500 group-hover:-translate-y-2">
-                  <img 
-                    src={feature.image} 
-                    alt={feature.title} 
+                <div className="relative h-64 mb-8 overflow-hidden rounded-lg border-2 border-emerald-800 shadow-xl shadow-slate-200 transition-transform duration-500 group-hover:-translate-y-2">
+                  <img
+                    src={feature.image}
+                    alt={feature.title}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-emerald-900/10 group-hover:bg-transparent transition-colors"></div>
                 </div>
-                
+
                 <div className="flex items-center gap-2 mb-4">
                   <ChevronRight className="h-5 w-5 text-emerald-600" />
                   <h4 className="text-2xl font-black text-slate-900 group-hover:text-emerald-700 transition-colors">{feature.title}</h4>
                 </div>
-                
+
                 <p className="text-slate-600 font-medium leading-relaxed">
                   {feature.description}
                 </p>
-                
+
                 <div className="mt-4 text-emerald-700 font-black text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
                   Read more about {feature.title.split(' ')[0]} <ArrowRight size={16} />
                 </div>
@@ -162,13 +162,13 @@ const HomePage = () => {
                 We're here to help <br /> you grow.
               </h3>
               <p className="text-emerald-100/70 text-lg mb-10 font-medium">
-                Our center offers a variety of services tailored to meet the diverse 
-                needs of the WMSU student body. From mental health support to 
+                Our center offers a variety of services tailored to meet the diverse
+                needs of the WMSU student body. From mental health support to
                 career planning, we've got you covered.
               </p>
               <div className="grid grid-cols-2 gap-4">
                 {services.map((service, index) => (
-                  <div key={index} className="flex items-center gap-3 text-white font-bold bg-white/5 p-4 rounded-2xl border border-white/10">
+                  <div key={index} className="flex items-center gap-3 text-white font-bold bg-white/5 p-4 rounded-lg border border-white/10">
                     <span className="text-emerald-400">{service.icon}</span>
                     {service.name}
                   </div>
@@ -176,18 +176,18 @@ const HomePage = () => {
               </div>
             </div>
             <div className="lg:w-1/2 relative">
-              <div className="relative rounded-[3rem] overflow-hidden shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-700">
-                <img 
-                  src={ourServicesImg} 
-                  alt="Our Services" 
+              <div className="relative overflow-hidden rounded-lg shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-700">
+                <img
+                  src={ourServicesImg}
+                  alt="Our Services"
                   className="w-full h-[500px] object-cover"
                 />
                 <div className="absolute inset-0 bg-emerald-900/20"></div>
               </div>
               {/* Floating Element */}
-              <div className="absolute -bottom-10 -left-10 bg-white p-8 rounded-[2rem] shadow-2xl animate-bounce duration-[4000ms]">
+              <div className="absolute -bottom-10 -left-10 bg-white p-8 shadow-2xl rounded-lg animate-bounce duration-[4000ms]">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600">
+                  <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600">
                     <MessageCircle />
                   </div>
                   <div>

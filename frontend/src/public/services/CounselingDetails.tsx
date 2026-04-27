@@ -32,7 +32,7 @@ const CounselingDetails = () => {
           
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
-            <div className="bg-white p-10 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100">
+            <div className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100">
               <h2 className="text-3xl font-black text-slate-900 mb-6">About the Service</h2>
               <p className="text-slate-600 text-lg leading-relaxed mb-6 font-medium">
                 Our counseling services are designed to provide students and outside clients with the professional support they need to navigate life's challenges. Whether you're dealing with academic stress, personal relationship issues, or mental health concerns, our certified counselors are here to listen and guide you.
@@ -42,12 +42,12 @@ const CounselingDetails = () => {
               </p>
               
               <div className="grid md:grid-cols-2 gap-6 mt-12">
-                <div className="p-6 rounded-3xl bg-emerald-50 border border-emerald-100">
+                <div className="p-6 rounded-lg bg-emerald-50 border border-emerald-100">
                   <Shield className="text-emerald-600 mb-4" size={32} />
                   <h3 className="text-xl font-bold text-slate-900 mb-2">100% Confidential</h3>
                   <p className="text-slate-600 text-sm">Everything discussed in our sessions stays within the room.</p>
                 </div>
-                <div className="p-6 rounded-3xl bg-emerald-50 border border-emerald-100">
+                <div className="p-6 rounded-lg bg-emerald-50 border border-emerald-100">
                   <MessageCircle className="text-emerald-600 mb-4" size={32} />
                   <h3 className="text-xl font-bold text-slate-900 mb-2">Expert Listeners</h3>
                   <p className="text-slate-600 text-sm">Licensed professionals dedicated to your mental wellness.</p>
@@ -55,7 +55,7 @@ const CounselingDetails = () => {
               </div>
             </div>
 
-            <div className="bg-white p-10 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100">
+            <div className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100">
               <h2 className="text-3xl font-black text-slate-900 mb-6">Requirements</h2>
               <ul className="space-y-4">
                 {[
@@ -73,7 +73,7 @@ const CounselingDetails = () => {
               </ul>
             </div>
 
-            <div className="bg-white p-10 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100">
+            <div className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100">
               <h2 className="text-3xl font-black text-slate-900 mb-8">How to Book</h2>
               
               <div className="space-y-8 relative before:absolute before:left-[17px] before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100">
@@ -98,7 +98,7 @@ const CounselingDetails = () => {
 
           {/* Sidebar / CTA */}
           <div className="space-y-8">
-            <div className="bg-emerald-900 p-8 rounded-[2.5rem] text-white shadow-2xl shadow-emerald-900/20">
+            <div className="bg-emerald-900 p-8 rounded-lg text-white shadow-2xl shadow-emerald-900/20">
               <h3 className="text-2xl font-black mb-4">Book a Session</h3>
               <p className="text-emerald-100/80 mb-8 font-medium">
                 Ready to talk? Schedule your consultation today and take the first step toward mental wellness.
@@ -113,17 +113,17 @@ const CounselingDetails = () => {
                   Appointment Required
                 </div>
               </div>
-              <a href="/register" className="block w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-white text-center rounded-2xl font-black transition-all shadow-lg">
+              <a href="/register" className="block w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-white text-center rounded-lg font-black transition-all shadow-lg">
                 Schedule Now
               </a>
             </div>
             
-            <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50">
+            <div className="bg-white p-8 rounded-lg border border-slate-100 shadow-xl shadow-slate-200/50">
               <h3 className="text-xl font-black text-slate-900 mb-4">Need Immediate Help?</h3>
               <p className="text-slate-500 text-sm font-medium mb-6">
                 If you are in a crisis, please reach out to our emergency hotline available during office hours.
               </p>
-              <button className="w-full py-4 border-2 border-emerald-600 text-emerald-700 font-black rounded-2xl hover:bg-emerald-50 transition-all">
+              <button className="w-full py-4 border-2 border-emerald-600 text-emerald-700 font-black rounded-lg hover:bg-emerald-50 transition-all">
                 Contact Hotline
               </button>
             </div>
