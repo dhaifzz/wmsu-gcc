@@ -70,9 +70,9 @@ function App() {
             </ProtectedRoute>
           } />
           <Route path="/superadmin" element={
-            <ProtectedRoute allowedRoles={['SuperAdmin']}>
+            // <ProtectedRoute allowedRoles={['SuperAdmin']}>
               <SuperAdminDashboard />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           } />
 
           {/* Legacy /student route redirects to login */}

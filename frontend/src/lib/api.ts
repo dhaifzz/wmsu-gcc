@@ -115,3 +115,11 @@ export const authApi = {
   getProfile: (token: string) =>
     api<{ user: UserProfile; redirectPath: string }>('/api/auth/profile', { token }),
 };
+
+export const cmsApi = {
+  getContent: (section: string) =>
+    api<any>(`/api/cms/${section}`),
+
+  updateContent: (section: string, content: any, token?: string) =>
+    api<any>(`/api/cms/${section}`, { method: 'PUT', body: content, token }),
+};
