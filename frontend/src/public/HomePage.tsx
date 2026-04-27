@@ -159,7 +159,7 @@ const HomePage = () => {
           </div>
 
           <div className="grid md:grid-cols-3 gap-12">
-            {features.map((feature, index) => (
+            {features.map((feature: any, index: number) => (
               <a
                 key={index}
                 href={feature.path}
@@ -206,7 +206,7 @@ const HomePage = () => {
                 {homeContent.growth.description}
               </p>
               <div className="grid grid-cols-2 gap-4">
-                {services.map((service, index) => (
+                {services.map((service: any, index: number) => (
                   <div key={index} className="flex items-center gap-3 text-white font-bold bg-white/5 p-4 rounded-lg border border-white/10">
                     <span className="text-emerald-400">{service.icon}</span>
                     {service.name}

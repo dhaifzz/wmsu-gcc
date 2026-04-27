@@ -384,7 +384,7 @@ const CMS = () => {
     );
 
     if (result.isConfirmed) {
-      let contentToSave;
+      let contentToSave: any;
       let sectionKey;
 
       switch (section) {
