@@ -19,151 +19,160 @@ import {
   GraduationCap,
   GripVertical,
   Palette,
-  Clock,
-  AlertCircle
+  Heart,
+  CheckCircle,
+  ClipboardCheck,
+  BookOpen,
+  FileText,
+  Target,
+  Activity,
+  Brain,
+  PenTool,
+  Shield,
+  HelpCircle
 } from 'lucide-react';
+
+const assessmentIconMap: Record<string, any> = {
+  FileText,
+  Target,
+  ClipboardCheck,
+  Activity,
+  Brain,
+  PenTool,
+  Shield,
+  Heart,
+  HelpCircle,
+  Info
+};
 import { showAlert } from '../../../components/modal-notification/sweetalert';
 import { showToast } from '../../../components/modal-notification/toast';
 import { cmsApi } from '../../../lib/api';
 import { supabase } from '../../../lib/supabaseClient';
+import Loader from '../../../components/loader/Loader';
 
 const CMS = () => {
   const [activeSection, setActiveSection] = useState<string | null>('home');
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Home Page Content State
-  const [homeContent, setHomeContent] = useState({
-    hero: {
-      title: "Take care of your Mental Health",
-      description: "The WMSU Guidance and Counseling Center provides a safe space for growth, empowerment, and emotional support. We are here to help you shine.",
-      images: [null, null, null]
-    },
-    support: {
-      title: "Support Services",
-      subtitle: "Need Help? Start Here",
-      description: "We provide comprehensive support services to help students navigate their academic journey and personal development.",
-      features: [
-        {
-          title: "Counseling",
-          path: "/services/counseling",
-          description: "Counseling services are available for both students and outside clients. Appointments are required for consultations, which include the completion of the Personal Data Form and Counseling Form before sessions.",
-          image: null
-        },
-        {
-          title: "Assessment for Students",
-          path: "/services/assessment",
-          description: "Conducts assessments for students taking the DASS-21 Test (College) and DASS-Y Test (High School). Students must schedule an appointment and complete the required forms before the assessment.",
-          image: null
-        },
-        {
-          title: "Shifting Exam",
-          path: "/services/shifting",
-          description: "Students changing programs. Applicants must schedule an appointment and complete the required forms before taking the exam.",
-          image: null
-        }
-      ]
-    },
-    growth: {
-      title: "We're here to help you grow.",
-      description: "Our center offers a variety of services tailored to meet the diverse needs of the WMSU student body. From mental health support to career planning, we've got you covered.",
-      image: null,
-      services: [
-        { name: "Individual Counseling" },
-        { name: "Career Guidance" },
-        { name: "Crisis Intervention" },
-        { name: "Peer Support" }
-      ]
-    }
-  });
-
-  const [aboutContent, setAboutContent] = useState({
-    hero: {
-      title: "About the Center",
-      description: "The Guidance and Counseling Center at Western Mindanao State University is a vital support unit dedicated to addressing the psychological, emotional, and personal development needs of students and staff.",
-      image: null
-    },
-    core: {
-      vision: "By 2040, WMSU is a Smart Research University generating competent professionals and global citizens engendered by the knowledge from sciences and liberal education, empowering communities, promoting peace, harmony, and cultural diversity.",
-      mission: "WMSU commits to create a vibrant atmosphere of learning where science, technology, innovation, research, the arts and humanities, and community engagement flourish, and produce world-class professionals committed to sustainable development and peace.",
-      qualityPolicy: "The Western Mindanao State University is committed to deliver academic excellence, to produce globally competitive human resources, and to conduct innovative research for sustainable development beyond the ASEAN region. It is defined as a Smart Research University, that adapts to the changing landscape of the stakeholders' needs.\n\nWMSU also commits to continually enhance its Quality Management System by integrating risk-based thinking into all processes to achieve intended results and guarantee customer satisfaction in compliance with applicable quality assurance standards."
-    },
-    sidebar: {
-      location: "2nd Floor, Executive Building",
-      campus: "WMSU Main Campus, Normal Road",
-      hours: "Monday - Friday, 8:00 AM - 5:00 PM",
-      serving: "Students, Returnees, & Transferees"
-    },
-    contact: {
-      phone: "(062) 991-6446",
-      email: "gcc@wmsu.edu.ph"
-    },
-    mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3960.916858546554!2d122.062033!3d6.9123!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x32504193639e78df%3A0x64700877997a66f7!2sWestern+Mindanao+State+University!5e0!3m2!1sen!2sph!4v1713862000000"
-  });
-
-  const [teamContent, setTeamContent] = useState({
-    hero: {
-      title: "Our Dedicated Team",
-      description: "Meet the professionals behind the Guidance and Counseling Center dedicated to your growth and well-being."
-    },
-    mainCampus: {
-      director: [
-        { name: "Dr. Jane Doe", degree: "PhD in Psychology", dept: "Director, GCC", profileImage: null }
-      ],
-      counselors: [
-        { name: "Dr. Maria Elena Santos", degree: "PhD in Guidance and Counseling", dept: "Main Campus - GCC", profileImage: null },
-        { name: "Prof. Ricardo Dela Cruz", degree: "MA in Psychology", dept: "Main Campus - GCC", profileImage: null }
-      ],
-      coordinators: [
-        { name: "Liza Marie Gomez", degree: "MAEd - Guidance", dept: "College of Education", profileImage: null },
-        { name: "Antonio Luna", degree: "MS Psychology", dept: "College of Science & Math", profileImage: null },
-        { name: "Elena Gilbert", degree: "MA in Counseling", dept: "College of Engineering", profileImage: null }
-      ],
-      staff: [
-        { name: "Juan Ponce", degree: "BS Psychology", dept: "Support Services", profileImage: null },
-        { name: "Maria Clara", degree: "BS Office Administration", dept: "Administrative Office", profileImage: null }
-      ]
-    },
-    esuCampus: [
-      { name: "Roberto Reyes", degree: "MA in Guidance", dept: "ESU Pagadian", profileImage: null },
-      { name: "Sarah Geronimo", degree: "MAEd Counseling", dept: "ESU Aurora", profileImage: null },
-      { name: "Piolo Pascual", degree: "MS Psychology", dept: "ESU Molave", profileImage: null },
-      { name: "Angel Locsin", degree: "MA Guidance", dept: "ESU Alicia", profileImage: null }
-    ]
-  });
-
+  // Content States (initially null, fetched from DB)
+  const [homeContent, setHomeContent] = useState<any>(null);
+  const [aboutContent, setAboutContent] = useState<any>(null);
+  const [teamContent, setTeamContent] = useState<any>(null);
   const [contactContent, setContactContent] = useState<any>(null);
   const [footerContent, setFooterContent] = useState<any>(null);
   const [systemData, setSystemData] = useState<any>(null);
-  const [logoSettings, setLogoSettings] = useState({
-    wmsuLogo: null,
-    gccLogo: null
-  });
+  const [logoSettings, setLogoSettings] = useState<any>(null);
+  const [counselingContent, setCounselingContent] = useState<any>(null);
+  const [assessmentContent, setAssessmentContent] = useState<any>(null);
+  const [shiftingContent, setShiftingContent] = useState<any>(null);
 
   const [savedStates, setSavedStates] = useState<Record<string, any>>({});
 
+
+
   const fetchAllContent = async () => {
-    const sectionsToFetch = ['home', 'about', 'team', 'contact', 'footer', 'system', 'logos'];
+    setIsLoading(true);
+    const sectionsToFetch = ['home', 'about', 'team', 'contact', 'footer', 'system', 'logos', 'counseling', 'assessment', 'shifting'];
     const newSavedStates: Record<string, any> = {};
 
-    for (const s of sectionsToFetch) {
-      const result = await cmsApi.getContent(s);
-      if (result.ok && result.data) {
-        newSavedStates[s] = JSON.parse(JSON.stringify(result.data));
-        switch (s) {
-          case 'home': setHomeContent(result.data); break;
-          case 'about': setAboutContent(result.data); break;
-          case 'team': 
-            const teamData = result.data;
-            if (teamData.mainCampus && !teamData.mainCampus.director) teamData.mainCampus.director = [];
-            setTeamContent(teamData); 
-            break;
-          case 'contact': setContactContent(result.data); break;
-          case 'footer': setFooterContent(result.data); break;
-          case 'system': setSystemData(result.data); break;
-          case 'logos': setLogoSettings(result.data); break;
+    try {
+      const defaultCounseling = {
+        hero: { title: "Professional Counseling", description: "A safe, confidential space for emotional growth and personal discovery.", image: null },
+        about: { description1: "Our counseling services are designed to provide students and outside clients with the professional support they need to navigate life's challenges. Whether you're dealing with academic stress, personal relationship issues, or mental health concerns, our certified counselors are here to listen and guide you.", description2: "We believe that every individual has the potential for growth. Our approach is student-centered, compassionate, and strictly confidential." },
+        requirements: ["Official Booking Receipt (From the GCC Portal)", "Personal Data Form (Must be completed before the session)", "Counseling Form (Available at the GCC center)", "Valid Student ID (For WMSU Students)", "Appointment Schedule"],
+        howToBook: [
+          { title: "Book a Session", desc: "Schedule your consultation through our online portal or visit the center." },
+          { title: "Get Your Receipt", desc: "Download or print your official booking receipt as proof of appointment." },
+          { title: "Visit GCC Office", desc: "Go to the GCC Office in WMSU Main Campus with your requirements." },
+          { title: "Center Verification", desc: "Arrive at the GCC center at your scheduled time with your requirements." },
+          { title: "Meet Your Counselor", desc: "Engage in a professional, one-on-one session in a safe environment." }
+        ],
+        cta: { title: "Book a Session", description: "Ready to talk? Schedule your consultation today and take the first step toward mental wellness." },
+        hotline: { title: "Need Immediate Help?", description: "If you are in a crisis, please reach out to our emergency hotline available during office hours." }
+      };
+
+      const defaultAssessment = {
+        hero: { title: "Student Assessments", description: "Helping you understand your mental well-being through professional testing.", image: null },
+        about: { description1: "The Guidance and Counseling Center conducts standardized psychological assessments to help students monitor their mental and emotional states." },
+        tests: [
+          { title: "DASS-21 Test", target: "For College Students", desc: "A clinical scale used to measure negative emotional states of depression, anxiety, and stress.", icon: "FileText" },
+          { title: "DASS-Y Test", target: "For High School Students", desc: "Specially designed version for younger students to accurately capture their emotional experiences.", icon: "Target" }
+        ],
+        steps: [
+          { title: "Book Appointment", desc: "Schedule your assessment slot through the GCC portal or walk-in." },
+          { title: "Get Receipt", desc: "Obtain your official assessment receipt/acknowledgment after booking." },
+          { title: "Visit GCC Office", desc: "Go to the GCC Office in WMSU Main Campus with your requirements." },
+          { title: "Complete Forms", desc: "Fill out the required personal data and consent forms." },
+          { title: "Take the Test", desc: "Complete the assessment in a quiet, supervised environment." },
+          { title: "Consultation", desc: "Meet with a counselor to interpret and discuss your results." }
+        ],
+        faqs: [
+          { q: "Is it graded?", a: "No, this is a psychological assessment, not an academic exam." },
+          { q: "How long does it take?", a: "Usually between 30 minutes to 1 hour." }
+        ],
+        cta: { title: "Start Assessment", description: "Ready to take the test? Ensure you have your requirements ready." }
+      };
+
+      const defaultShifting = {
+        hero: { title: "Shifting Examination", description: "Helping you find the right academic path for your future career.", image: null },
+        about: { 
+          description: "The Shifting Exam is a critical requirement for WMSU students who wish to transfer from one academic program to another. This assessment ensures that your aptitudes and interests align with the new course you intend to take.",
+          note: "Applicants must schedule an appointment and complete all required forms before being allowed to take the exam."
+        },
+        requirements: [
+          { title: "Booking Receipt", desc: "Digital or printed copy of your appointment confirmation." },
+          { title: "2x2 Picture", desc: "Formal 2x2 colored picture with name tag (Selfies are not allowed)." },
+          { title: "Downloadable Grades", desc: "A complete copy of all your previous semester's grades." },
+          { title: "Latest COR", desc: "Your most recent Certificate of Registration (COR)." },
+          { title: "Entrance Test Result", desc: "Original or certified copy of your college entrance test result." }
+        ],
+        steps: [
+          { title: "Book Examination", desc: "Register and select a shifting exam date through the portal." },
+          { title: "Get Your Receipt", desc: "Ensure you have your official booking receipt as proof of schedule." },
+          { title: "Visit GCC Office", desc: "Go to the GCC Office in WMSU Main Campus with your requirements." },
+          { title: "Document Submission", desc: "Submit all required documents to the GCC office for verification." },
+          { title: "Take the Exam", desc: "Attend the shifting examination on your scheduled date and time." }
+        ],
+        cta: { title: "Apply for Shifting", description: "Make sure you have met the minimum GPA requirements of your target college before applying." },
+        guidance: { title: "Career Guidance", description: "Not sure which course fits you best? Our counselors also offer career guidance sessions to help you make an informed decision." }
+      };
+
+      for (const s of sectionsToFetch) {
+        const result = await cmsApi.getContent(s);
+        
+        let data = result.data;
+        if (!result.ok || !data || Object.keys(data).length === 0) {
+          if (s === 'counseling') data = defaultCounseling;
+          else if (s === 'assessment') data = defaultAssessment;
+          else if (s === 'shifting') data = defaultShifting;
+        }
+
+        if (data && Object.keys(data).length > 0) {
+          newSavedStates[s] = JSON.parse(JSON.stringify(data));
+          switch (s) {
+            case 'home': setHomeContent(data); break;
+            case 'about': setAboutContent(data); break;
+            case 'team': 
+              if (data.mainCampus && !data.mainCampus.director) data.mainCampus.director = [];
+              setTeamContent(data); 
+              break;
+            case 'contact': setContactContent(data); break;
+            case 'footer': setFooterContent(data); break;
+            case 'system': setSystemData(data); break;
+            case 'logos': setLogoSettings(data); break;
+            case 'counseling': setCounselingContent(data); break;
+            case 'assessment': setAssessmentContent(data); break;
+            case 'shifting': setShiftingContent(data); break;
+          }
         }
       }
+      setSavedStates(newSavedStates);
+    } catch (error) {
+      console.error("Error fetching CMS content:", error);
+      showToast.error("Could not connect to the database. Please make sure the backend server is running.");
+    } finally {
+      setIsLoading(false);
     }
-    setSavedStates(newSavedStates);
   };
 
   useEffect(() => {
@@ -212,6 +221,18 @@ const CMS = () => {
       else if (section === 'team') updateContentState(setTeamContent);
       else if (section === 'about') updateContentState(setAboutContent);
       else if (section === 'logos') updateContentState(setLogoSettings);
+      else if (section === 'counseling') updateContentState(setCounselingContent);
+      else if (section === 'assessment') updateContentState(setAssessmentContent);
+      else if (section === 'shifting') updateContentState(setShiftingContent);
+
+      // Synchronization logic
+      if (section === 'home' && path.join('.') === 'support.features.0.image') {
+        setCounselingContent((prev: any) => ({ ...prev, hero: { ...prev.hero, image: publicUrl } }));
+      } else if (section === 'home' && path.join('.') === 'support.features.1.image') {
+        setAssessmentContent((prev: any) => ({ ...prev, hero: { ...prev.hero, image: publicUrl } }));
+      } else if (section === 'home' && path.join('.') === 'support.features.2.image') {
+        setShiftingContent((prev: any) => ({ ...prev, hero: { ...prev.hero, image: publicUrl } }));
+      }
 
       showToast.success('Image uploaded successfully!');
     } catch (error: any) {
@@ -247,6 +268,9 @@ const CMS = () => {
           case 'footer': setFooterContent(res.data); break;
           case 'system': setSystemData(res.data); break;
           case 'logos': setLogoSettings(res.data); break;
+          case 'counseling': setCounselingContent(res.data); break;
+          case 'assessment': setAssessmentContent(res.data); break;
+          case 'shifting': setShiftingContent(res.data); break;
         }
         showToast.info('Changes discarded.');
       }
@@ -261,7 +285,10 @@ const CMS = () => {
       contact: contactContent, 
       footer: footerContent, 
       system: systemData,
-      logos: logoSettings
+      logos: logoSettings,
+      counseling: counselingContent,
+      assessment: assessmentContent,
+      shifting: shiftingContent
     };
     return JSON.stringify(contentMap[sectionId]) !== JSON.stringify(savedStates[sectionId]);
   };
@@ -282,7 +309,10 @@ const CMS = () => {
         'Contact Info': { key: 'contact', data: contactContent }, 
         'System Data': { key: 'system', data: systemData }, 
         'Footer': { key: 'footer', data: footerContent },
-        'System Logos': { key: 'logos', data: logoSettings }
+        'System Logos': { key: 'logos', data: logoSettings },
+        'Counseling Service': { key: 'counseling', data: counselingContent },
+        'Assessment Service': { key: 'assessment', data: assessmentContent },
+        'Shifting Service': { key: 'shifting', data: shiftingContent }
       };
       const { key, data } = mapping[section];
 
@@ -300,13 +330,19 @@ const CMS = () => {
 
   const sections = [
     { id: 'home', title: 'Home Page', icon: Home, description: 'Manage hero text, images, and announcements.' },
+    { id: 'counseling', title: 'Counseling Service', icon: Heart, description: 'Manage counseling details & requirements.' },
+    { id: 'assessment', title: 'Assessment Service', icon: ClipboardCheck, description: 'Manage assessment details & tests.' },
+    { id: 'shifting', title: 'Shifting Service', icon: BookOpen, description: 'Manage shifting requirements & details.' },
     { id: 'about', title: 'About Us', icon: Info, description: 'Edit the mission, vision, and center history.' },
     { id: 'team', title: 'Our Team', icon: Users, description: 'Manage team members and counselors.' },
-    { id: 'contact', title: 'Contact Info', icon: Phone, description: 'Update phone numbers, emails, and address.' },
-    { id: 'system', title: 'System Data', icon: Database, description: 'Manage courses, SHS tracks, and occupations.' },
-    { id: 'footer', title: 'Footer', icon: Palette, description: 'Update footer links, copyright, and social media.' },
+    { id: 'system', title: 'System Data', icon: Database, description: 'Manage available courses and occupations.' },
     { id: 'logos', title: 'System Logos', icon: ImageIcon, description: 'Manage university and center logos.' },
+    { id: 'contact', title: 'Contact Info', icon: Phone, description: 'Update phone numbers, emails, and address.' },
+    { id: 'footer', title: 'Footer', icon: LayoutGrid, description: 'Manage footer brand text.' },
   ];
+  if (isLoading || !homeContent || !aboutContent || !teamContent || !contactContent || !footerContent || !systemData || !logoSettings || !counselingContent || !assessmentContent || !shiftingContent) {
+    return <Loader />;
+  }
 
 return (
   <motion.div
@@ -378,7 +414,7 @@ return (
               </button>
               <button
                 onClick={() => handleSave('Home Page')}
-                className="flex items-center gap-2 px-6 py-3 bg-teal-900 text-white rounded-xl font-black text-sm hover:bg-teal-800 transition-all shadow-lg shadow-teal-900/20"
+                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
               >
                 <Save size={16} />
                 Save Changes
@@ -710,7 +746,7 @@ return (
               </button>
               <button
                 onClick={() => handleSave('About Us')}
-                className="flex items-center gap-2 px-6 py-3 bg-teal-900 text-white rounded-xl font-black text-sm hover:bg-teal-800 transition-all shadow-lg shadow-teal-900/20"
+                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
               >
                 <Save size={16} />
                 Save Changes
@@ -887,7 +923,7 @@ return (
             </div>
             <button
               onClick={() => handleSave('Our Team')}
-              className="flex items-center gap-2 px-6 py-3 bg-teal-900 text-white rounded-xl font-black text-sm hover:bg-teal-800 transition-all shadow-lg shadow-teal-900/20"
+              className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
             >
               <Save size={16} />
               Save Changes
@@ -1425,7 +1461,7 @@ return (
             </div>
             <button
               onClick={() => handleSave('Contact Info')}
-              className="flex items-center gap-2 px-6 py-3 bg-teal-900 text-white rounded-xl font-black text-sm hover:bg-teal-800 transition-all shadow-lg shadow-teal-900/20"
+              className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
             >
               <Save size={16} />
               Save Changes
@@ -1522,14 +1558,14 @@ return (
             </div>
             <button
               onClick={() => handleSave('System Data')}
-              className="flex items-center gap-2 px-6 py-3 bg-teal-900 text-white rounded-xl font-black text-sm hover:bg-teal-800 transition-all shadow-lg shadow-teal-900/20"
+              className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
             >
               <Save size={16} />
               Save Changes
             </button>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 gap-8">
             {/* Courses Column */}
             <div className="space-y-6">
               <div className="flex items-center justify-between border-b border-slate-100 pb-2">
@@ -1545,7 +1581,7 @@ return (
                 </button>
               </div>
               <div className="max-h-[500px] overflow-y-auto pr-2 space-y-3 custom-scrollbar">
-                {systemData.courses.map((course, idx) => (
+                {systemData.courses.map((course: string, idx: number) => (
                   <div key={idx} className="flex gap-2 group">
                     <input
                       type="text"
@@ -1560,50 +1596,8 @@ return (
                     />
                     <button
                       onClick={() => {
-                        const newCourses = systemData.courses.filter((_, i) => i !== idx);
+                        const newCourses = systemData.courses.filter((_: string, i: number) => i !== idx);
                         setSystemData({ ...systemData, courses: newCourses });
-                      }}
-                      className="p-2 text-slate-300 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* SHS Tracks Column */}
-            <div className="space-y-6">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                <h4 className="text-lg font-black text-slate-900 flex items-center gap-2">
-                  <Database className="text-teal-500" size={20} />
-                  SHS Tracks
-                </h4>
-                <button
-                  onClick={() => setSystemData({ ...systemData, shsTracks: [...systemData.shsTracks, ""] })}
-                  className="p-1.5 bg-teal-50 text-teal-600 rounded-lg hover:bg-teal-100 transition-colors"
-                >
-                  <Plus size={16} />
-                </button>
-              </div>
-              <div className="max-h-[500px] overflow-y-auto pr-2 space-y-3 custom-scrollbar">
-                {systemData.shsTracks.map((track, idx) => (
-                  <div key={idx} className="flex gap-2 group">
-                    <input
-                      type="text"
-                      value={track}
-                      placeholder="Enter track name..."
-                      onChange={(e) => {
-                        const newTracks = [...systemData.shsTracks];
-                        newTracks[idx] = e.target.value;
-                        setSystemData({ ...systemData, shsTracks: newTracks });
-                      }}
-                      className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
-                    />
-                    <button
-                      onClick={() => {
-                        const newTracks = systemData.shsTracks.filter((_, i) => i !== idx);
-                        setSystemData({ ...systemData, shsTracks: newTracks });
                       }}
                       className="p-2 text-slate-300 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100"
                     >
@@ -1629,7 +1623,7 @@ return (
                 </button>
               </div>
               <div className="max-h-[500px] overflow-y-auto pr-2 space-y-3 custom-scrollbar">
-                {systemData.occupations.map((occ, idx) => (
+                {systemData.occupations.map((occ: string, idx: number) => (
                   <div key={idx} className="flex gap-2 group">
                     <input
                       type="text"
@@ -1644,7 +1638,7 @@ return (
                     />
                     <button
                       onClick={() => {
-                        const newOccs = systemData.occupations.filter((_, i) => i !== idx);
+                        const newOccs = systemData.occupations.filter((_: string, i: number) => i !== idx);
                         setSystemData({ ...systemData, occupations: newOccs });
                       }}
                       className="p-2 text-slate-300 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100"
@@ -1672,7 +1666,7 @@ return (
             </div>
             <button
               onClick={() => handleSave('Footer')}
-              className="flex items-center gap-2 px-6 py-3 bg-teal-900 text-white rounded-xl font-black text-sm hover:bg-teal-800 transition-all shadow-lg shadow-teal-900/20"
+              className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
             >
               <Save size={16} />
               Save Changes
@@ -1716,7 +1710,7 @@ return (
             </div>
             <button
               onClick={() => handleSave('System Logos')}
-              className="flex items-center gap-2 px-6 py-3 bg-teal-900 text-white rounded-xl font-black text-sm hover:bg-teal-800 transition-all shadow-lg shadow-teal-900/20"
+              className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
             >
               <Save size={16} />
               Save Logos
@@ -1770,6 +1764,769 @@ return (
           </div>
         </motion.div>
       )}
+      {activeSection === 'counseling' && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          className="bg-white p-10 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100"
+        >
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-8 bg-teal-500 rounded-full"></div>
+              <h3 className="text-2xl font-black text-slate-800">Counseling Service</h3>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => discardSection('counseling')}
+                className="px-6 py-3 bg-slate-100 text-slate-600 rounded-xl font-black text-sm hover:bg-slate-200 transition-all"
+              >
+                Discard
+              </button>
+              <button
+                onClick={() => handleSave('Counseling Service')}
+                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+              >
+                <Save size={16} />
+                Save Service
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-12">
+            {/* Hero Section */}
+            <div className="space-y-6">
+              <h4 className="text-lg font-black text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2">
+                <Type className="text-teal-500" size={20} />
+                Service Header
+              </h4>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Service Title</label>
+                  <input
+                    type="text"
+                    value={counselingContent?.hero?.title || ''}
+                    onChange={(e) => setCounselingContent({
+                      ...counselingContent,
+                      hero: { ...counselingContent.hero, title: e.target.value }
+                    })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Service Description</label>
+                  <textarea
+                    rows={4}
+                    value={counselingContent?.hero?.description || ''}
+                    onChange={(e) => setCounselingContent({
+                      ...counselingContent,
+                      hero: { ...counselingContent.hero, description: e.target.value }
+                    })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+
+            {/* About & Features */}
+            <div className="space-y-6">
+              <h4 className="text-lg font-black text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2">
+                <Info className="text-teal-500" size={20} />
+                About the Service
+              </h4>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Main Content Para 1</label>
+                  <textarea
+                    rows={4}
+                    value={counselingContent?.about?.description1 || ''}
+                    onChange={(e) => setCounselingContent({
+                      ...counselingContent,
+                      about: { ...counselingContent.about, description1: e.target.value }
+                    })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-teal-500"
+                  ></textarea>
+                </div>
+                <div>
+                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Main Content Para 2</label>
+                  <textarea
+                    rows={4}
+                    value={counselingContent?.about?.description2 || ''}
+                    onChange={(e) => setCounselingContent({
+                      ...counselingContent,
+                      about: { ...counselingContent.about, description2: e.target.value }
+                    })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-teal-500"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+
+            {/* Requirements & How to Book */}
+            <div className="grid md:grid-cols-2 gap-10">
+              <div className="space-y-6">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                  <h4 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                    <CheckCircle className="text-teal-500" size={20} />
+                    Requirements
+                  </h4>
+                  <button
+                    onClick={() => setCounselingContent({ ...counselingContent, requirements: [...counselingContent.requirements, "New Requirement"] })}
+                    className="p-1.5 bg-teal-50 text-teal-600 rounded-lg hover:bg-teal-100"
+                  >
+                    <Plus size={16} />
+                  </button>
+                </div>
+                <div className="space-y-3">
+                  {counselingContent?.requirements?.map((req: string, idx: number) => (
+                    <div key={idx} className="flex gap-2 group">
+                      <input
+                        type="text"
+                        value={req}
+                        onChange={(e) => {
+                          const newReqs = [...counselingContent.requirements];
+                          newReqs[idx] = e.target.value;
+                          setCounselingContent({ ...counselingContent, requirements: newReqs });
+                        }}
+                        className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-teal-500"
+                      />
+                      <button
+                        onClick={() => setCounselingContent({ ...counselingContent, requirements: counselingContent.requirements.filter((_: any, i: number) => i !== idx) })}
+                        className="p-2 text-slate-300 hover:text-teal-500 transition-colors opacity-0 group-hover:opacity-100"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                  <h4 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                    <LayoutGrid className="text-teal-500" size={20} />
+                    How to Book Steps
+                  </h4>
+                  <button
+                    onClick={() => setCounselingContent({ ...counselingContent, howToBook: [...counselingContent.howToBook, { title: "New Step", desc: "Description" }] })}
+                    className="p-1.5 bg-teal-50 text-teal-600 rounded-lg hover:bg-teal-100"
+                  >
+                    <Plus size={16} />
+                  </button>
+                </div>
+                <div className="space-y-4">
+                  {counselingContent?.howToBook?.map((step: any, idx: number) => (
+                    <div key={idx} className="p-4 bg-slate-50 rounded-2xl border border-slate-200 relative group">
+                      <button
+                        onClick={() => setCounselingContent({ ...counselingContent, howToBook: counselingContent.howToBook.filter((_: any, i: number) => i !== idx) })}
+                        className="absolute -top-2 -right-2 w-6 h-6 bg-teal-100 text-teal-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
+                      >
+                        ×
+                      </button>
+                      <input
+                        type="text"
+                        value={step.title}
+                        onChange={(e) => {
+                          const newSteps = [...counselingContent.howToBook];
+                          newSteps[idx].title = e.target.value;
+                          setCounselingContent({ ...counselingContent, howToBook: newSteps });
+                        }}
+                        className="w-full bg-transparent border-b border-slate-200 pb-2 mb-2 text-sm font-black text-slate-800 outline-none focus:border-teal-500"
+                      />
+                      <textarea
+                        rows={2}
+                        value={step.desc}
+                        onChange={(e) => {
+                          const newSteps = [...counselingContent.howToBook];
+                          newSteps[idx].desc = e.target.value;
+                          setCounselingContent({ ...counselingContent, howToBook: newSteps });
+                        }}
+                        className="w-full bg-transparent text-xs font-medium text-slate-500 outline-none resize-none"
+                      ></textarea>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* CTAs */}
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="p-8 bg-teal-900 rounded-[2rem] text-white">
+                <h4 className="text-xl font-black mb-4">Book a Session Sidebar</h4>
+                <div className="space-y-4">
+                  <input
+                    type="text"
+                    value={counselingContent?.cta?.title || ''}
+                    onChange={(e) => setCounselingContent({ ...counselingContent, cta: { ...counselingContent.cta, title: e.target.value } })}
+                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-sm font-bold text-white outline-none focus:ring-2 focus:ring-teal-500"
+                  />
+                  <textarea
+                    rows={2}
+                    value={counselingContent?.cta?.description || ''}
+                    onChange={(e) => setCounselingContent({ ...counselingContent, cta: { ...counselingContent.cta, description: e.target.value } })}
+                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-xs font-medium text-teal-100 outline-none resize-none"
+                  ></textarea>
+                </div>
+              </div>
+
+              <div className="p-8 bg-white rounded-[2rem] border border-slate-200">
+                <h4 className="text-xl font-black text-slate-900 mb-4">Immediate Help Sidebar</h4>
+                <div className="space-y-4">
+                  <input
+                    type="text"
+                    value={counselingContent?.hotline?.title || ''}
+                    onChange={(e) => setCounselingContent({ ...counselingContent, hotline: { ...counselingContent.hotline, title: e.target.value } })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-800 outline-none focus:ring-2 focus:ring-teal-500"
+                  />
+                  <textarea
+                    rows={2}
+                    value={counselingContent?.hotline?.description || ''}
+                    onChange={(e) => setCounselingContent({ ...counselingContent, hotline: { ...counselingContent.hotline, description: e.target.value } })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs font-medium text-slate-500 outline-none resize-none"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
+      
+      {activeSection === 'assessment' && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          className="bg-white p-10 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100"
+        >
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-8 bg-teal-500 rounded-full"></div>
+              <h3 className="text-2xl font-black text-slate-800">Assessment Service</h3>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => discardSection('assessment')}
+                className="px-6 py-3 bg-slate-100 text-slate-600 rounded-xl font-black text-sm hover:bg-slate-200 transition-all"
+              >
+                Discard
+              </button>
+              <button
+                onClick={() => handleSave('Assessment Service')}
+                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+              >
+                <Save size={16} />
+                Save Service
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-12">
+            {/* Hero Section */}
+            <div className="space-y-6">
+              <h4 className="text-lg font-black text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2">
+                <Type className="text-teal-500" size={20} />
+                Service Header
+              </h4>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Service Title</label>
+                  <input
+                    type="text"
+                    value={assessmentContent?.hero?.title || ''}
+                    onChange={(e) => setAssessmentContent({
+                      ...assessmentContent,
+                      hero: { ...assessmentContent.hero, title: e.target.value }
+                    })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Service Description</label>
+                  <textarea
+                    rows={4}
+                    value={assessmentContent?.hero?.description || ''}
+                    onChange={(e) => setAssessmentContent({
+                      ...assessmentContent,
+                      hero: { ...assessmentContent.hero, description: e.target.value }
+                    })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+
+            {/* About */}
+            <div className="space-y-6">
+              <h4 className="text-lg font-black text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2">
+                <Info className="text-teal-500" size={20} />
+                About the Service
+              </h4>
+              <div className="grid gap-6">
+                <div>
+                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Main Content</label>
+                  <textarea
+                    rows={4}
+                    value={assessmentContent?.about?.description1 || ''}
+                    onChange={(e) => setAssessmentContent({
+                      ...assessmentContent,
+                      about: { ...assessmentContent.about, description1: e.target.value }
+                    })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-teal-500"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+
+            {/* Tests & Steps */}
+            <div className="grid md:grid-cols-2 gap-10">
+              <div className="space-y-6">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                  <h4 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                    <ClipboardCheck className="text-teal-500" size={20} />
+                    Available Tests
+                  </h4>
+                  <button
+                    onClick={() => setAssessmentContent({ ...assessmentContent, tests: [...(assessmentContent.tests || []), { title: "New Test", target: "Target Audience", desc: "Description", icon: "FileText" }] })}
+                    className="p-1.5 bg-teal-50 text-teal-600 rounded-lg hover:bg-teal-100"
+                  >
+                    <Plus size={16} />
+                  </button>
+                </div>
+                <div className="space-y-4">
+                  {assessmentContent?.tests?.map((test: any, idx: number) => (
+                    <div key={idx} className="p-4 bg-slate-50 rounded-2xl border border-slate-200 relative group">
+                      <button
+                        onClick={() => setAssessmentContent({ ...assessmentContent, tests: assessmentContent.tests.filter((_: any, i: number) => i !== idx) })}
+                        className="absolute -top-2 -right-2 w-6 h-6 bg-teal-100 text-teal-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
+                      >
+                        ×
+                      </button>
+                      <input
+                        type="text"
+                        value={test.title}
+                        onChange={(e) => {
+                          const newTests = [...assessmentContent.tests];
+                          newTests[idx].title = e.target.value;
+                          setAssessmentContent({ ...assessmentContent, tests: newTests });
+                        }}
+                        placeholder="Test Title"
+                        className="w-full bg-transparent border-b border-slate-200 pb-2 mb-2 text-sm font-black text-slate-800 outline-none focus:border-teal-500"
+                      />
+                      <input
+                        type="text"
+                        value={test.target}
+                        onChange={(e) => {
+                          const newTests = [...assessmentContent.tests];
+                          newTests[idx].target = e.target.value;
+                          setAssessmentContent({ ...assessmentContent, tests: newTests });
+                        }}
+                        placeholder="Target Audience"
+                        className="w-full bg-transparent border-b border-slate-200 pb-2 mb-2 text-xs font-bold text-teal-700 outline-none focus:border-teal-500"
+                      />
+                      <div className="flex items-center gap-3 mb-2 pb-2 border-b border-slate-200">
+                        {(() => {
+                          const IconComponent = assessmentIconMap[test.icon || 'FileText'] || FileText;
+                          return (
+                            <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg shrink-0 shadow-sm border border-emerald-100">
+                              <IconComponent size={20} />
+                            </div>
+                          );
+                        })()}
+                        <select
+                          value={test.icon || 'FileText'}
+                          onChange={(e) => {
+                            const newTests = [...assessmentContent.tests];
+                            newTests[idx].icon = e.target.value;
+                            setAssessmentContent({ ...assessmentContent, tests: newTests });
+                          }}
+                          className="w-full bg-transparent text-xs font-bold text-slate-600 outline-none focus:border-teal-500 cursor-pointer"
+                        >
+                          <option value="FileText">Document Icon</option>
+                          <option value="Target">Target Icon</option>
+                          <option value="ClipboardCheck">Clipboard Check</option>
+                          <option value="Activity">Activity Monitor</option>
+                          <option value="Brain">Brain Icon</option>
+                          <option value="PenTool">Pen Tool</option>
+                          <option value="Shield">Shield Icon</option>
+                          <option value="Heart">Heart Icon</option>
+                          <option value="HelpCircle">Help Icon</option>
+                          <option value="Info">Info Icon</option>
+                        </select>
+                      </div>
+                      <textarea
+                        rows={2}
+                        value={test.desc}
+                        onChange={(e) => {
+                          const newTests = [...assessmentContent.tests];
+                          newTests[idx].desc = e.target.value;
+                          setAssessmentContent({ ...assessmentContent, tests: newTests });
+                        }}
+                        placeholder="Test Description"
+                        className="w-full bg-transparent text-xs font-medium text-slate-500 outline-none resize-none"
+                      ></textarea>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                  <h4 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                    <LayoutGrid className="text-teal-500" size={20} />
+                    Process Steps
+                  </h4>
+                  <button
+                    onClick={() => setAssessmentContent({ ...assessmentContent, steps: [...(assessmentContent.steps || []), { title: "New Step", desc: "Description" }] })}
+                    className="p-1.5 bg-teal-50 text-teal-600 rounded-lg hover:bg-teal-100"
+                  >
+                    <Plus size={16} />
+                  </button>
+                </div>
+                <div className="space-y-4">
+                  {assessmentContent?.steps?.map((step: any, idx: number) => (
+                    <div key={idx} className="p-4 bg-slate-50 rounded-2xl border border-slate-200 relative group">
+                      <button
+                        onClick={() => setAssessmentContent({ ...assessmentContent, steps: assessmentContent.steps.filter((_: any, i: number) => i !== idx) })}
+                        className="absolute -top-2 -right-2 w-6 h-6 bg-teal-100 text-teal-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
+                      >
+                        ×
+                      </button>
+                      <input
+                        type="text"
+                        value={step.title}
+                        onChange={(e) => {
+                          const newSteps = [...assessmentContent.steps];
+                          newSteps[idx].title = e.target.value;
+                          setAssessmentContent({ ...assessmentContent, steps: newSteps });
+                        }}
+                        className="w-full bg-transparent border-b border-slate-200 pb-2 mb-2 text-sm font-black text-slate-800 outline-none focus:border-teal-500"
+                      />
+                      <textarea
+                        rows={2}
+                        value={step.desc}
+                        onChange={(e) => {
+                          const newSteps = [...assessmentContent.steps];
+                          newSteps[idx].desc = e.target.value;
+                          setAssessmentContent({ ...assessmentContent, steps: newSteps });
+                        }}
+                        className="w-full bg-transparent text-xs font-medium text-slate-500 outline-none resize-none"
+                      ></textarea>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* FAQs & CTAs */}
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="space-y-6">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                  <h4 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                    <Info className="text-teal-500" size={20} />
+                    FAQs
+                  </h4>
+                  <button
+                    onClick={() => setAssessmentContent({ ...assessmentContent, faqs: [...(assessmentContent.faqs || []), { q: "Question", a: "Answer" }] })}
+                    className="p-1.5 bg-teal-50 text-teal-600 rounded-lg hover:bg-teal-100"
+                  >
+                    <Plus size={16} />
+                  </button>
+                </div>
+                <div className="space-y-4">
+                  {assessmentContent?.faqs?.map((faq: any, idx: number) => (
+                    <div key={idx} className="p-4 bg-slate-50 rounded-2xl border border-slate-200 relative group">
+                      <button
+                        onClick={() => setAssessmentContent({ ...assessmentContent, faqs: assessmentContent.faqs.filter((_: any, i: number) => i !== idx) })}
+                        className="absolute -top-2 -right-2 w-6 h-6 bg-teal-100 text-teal-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
+                      >
+                        ×
+                      </button>
+                      <input
+                        type="text"
+                        value={faq.q}
+                        onChange={(e) => {
+                          const newFaqs = [...assessmentContent.faqs];
+                          newFaqs[idx].q = e.target.value;
+                          setAssessmentContent({ ...assessmentContent, faqs: newFaqs });
+                        }}
+                        placeholder="Question"
+                        className="w-full bg-transparent border-b border-slate-200 pb-2 mb-2 text-sm font-black text-slate-800 outline-none focus:border-teal-500"
+                      />
+                      <textarea
+                        rows={2}
+                        value={faq.a}
+                        onChange={(e) => {
+                          const newFaqs = [...assessmentContent.faqs];
+                          newFaqs[idx].a = e.target.value;
+                          setAssessmentContent({ ...assessmentContent, faqs: newFaqs });
+                        }}
+                        placeholder="Answer"
+                        className="w-full bg-transparent text-xs font-medium text-slate-500 outline-none resize-none"
+                      ></textarea>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-8 bg-teal-900 rounded-[2rem] text-white self-start">
+                <h4 className="text-xl font-black mb-4">Start Assessment CTA</h4>
+                <div className="space-y-4">
+                  <input
+                    type="text"
+                    value={assessmentContent?.cta?.title || ''}
+                    onChange={(e) => setAssessmentContent({ ...assessmentContent, cta: { ...assessmentContent.cta, title: e.target.value } })}
+                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-sm font-bold text-white outline-none focus:ring-2 focus:ring-teal-500"
+                  />
+                  <textarea
+                    rows={2}
+                    value={assessmentContent?.cta?.description || ''}
+                    onChange={(e) => setAssessmentContent({ ...assessmentContent, cta: { ...assessmentContent.cta, description: e.target.value } })}
+                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-xs font-medium text-teal-100 outline-none resize-none"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {activeSection === 'shifting' && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          className="bg-white p-10 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100"
+        >
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-8 bg-teal-500 rounded-full"></div>
+              <h3 className="text-2xl font-black text-slate-800">Shifting Service</h3>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => discardSection('shifting')}
+                className="px-6 py-3 bg-slate-100 text-slate-600 rounded-xl font-black text-sm hover:bg-slate-200 transition-all"
+              >
+                Discard
+              </button>
+              <button
+                onClick={() => handleSave('Shifting Service')}
+                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+              >
+                <Save size={16} />
+                Save Service
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-12">
+            {/* Hero Section */}
+            <div className="space-y-6">
+              <h4 className="text-lg font-black text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2">
+                <Type className="text-teal-500" size={20} />
+                Service Header
+              </h4>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Service Title</label>
+                  <input
+                    type="text"
+                    value={shiftingContent?.hero?.title || ''}
+                    onChange={(e) => setShiftingContent({
+                      ...shiftingContent,
+                      hero: { ...shiftingContent.hero, title: e.target.value }
+                    })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Service Description</label>
+                  <textarea
+                    rows={4}
+                    value={shiftingContent?.hero?.description || ''}
+                    onChange={(e) => setShiftingContent({
+                      ...shiftingContent,
+                      hero: { ...shiftingContent.hero, description: e.target.value }
+                    })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+
+            {/* About */}
+            <div className="space-y-6">
+              <h4 className="text-lg font-black text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2">
+                <Info className="text-teal-500" size={20} />
+                About the Service
+              </h4>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Main Content</label>
+                  <textarea
+                    rows={4}
+                    value={shiftingContent?.about?.description || ''}
+                    onChange={(e) => setShiftingContent({
+                      ...shiftingContent,
+                      about: { ...shiftingContent.about, description: e.target.value }
+                    })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-teal-500"
+                  ></textarea>
+                </div>
+                <div>
+                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Important Note</label>
+                  <textarea
+                    rows={4}
+                    value={shiftingContent?.about?.note || ''}
+                    onChange={(e) => setShiftingContent({
+                      ...shiftingContent,
+                      about: { ...shiftingContent.about, note: e.target.value }
+                    })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-teal-500"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+
+            {/* Requirements & Steps */}
+            <div className="grid md:grid-cols-2 gap-10">
+              <div className="space-y-6">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                  <h4 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                    <CheckCircle className="text-teal-500" size={20} />
+                    Requirements
+                  </h4>
+                  <button
+                    onClick={() => setShiftingContent({ ...shiftingContent, requirements: [...(shiftingContent.requirements || []), { title: "New Req", desc: "Desc" }] })}
+                    className="p-1.5 bg-teal-50 text-teal-600 rounded-lg hover:bg-teal-100"
+                  >
+                    <Plus size={16} />
+                  </button>
+                </div>
+                <div className="space-y-4">
+                  {shiftingContent?.requirements?.map((req: any, idx: number) => (
+                    <div key={idx} className="p-4 bg-slate-50 rounded-2xl border border-slate-200 relative group">
+                      <button
+                        onClick={() => setShiftingContent({ ...shiftingContent, requirements: shiftingContent.requirements.filter((_: any, i: number) => i !== idx) })}
+                        className="absolute -top-2 -right-2 w-6 h-6 bg-teal-100 text-teal-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
+                      >
+                        ×
+                      </button>
+                      <input
+                        type="text"
+                        value={req.title}
+                        onChange={(e) => {
+                          const newReqs = [...shiftingContent.requirements];
+                          newReqs[idx].title = e.target.value;
+                          setShiftingContent({ ...shiftingContent, requirements: newReqs });
+                        }}
+                        className="w-full bg-transparent border-b border-slate-200 pb-2 mb-2 text-sm font-black text-slate-800 outline-none focus:border-teal-500"
+                      />
+                      <textarea
+                        rows={2}
+                        value={req.desc}
+                        onChange={(e) => {
+                          const newReqs = [...shiftingContent.requirements];
+                          newReqs[idx].desc = e.target.value;
+                          setShiftingContent({ ...shiftingContent, requirements: newReqs });
+                        }}
+                        className="w-full bg-transparent text-xs font-medium text-slate-500 outline-none resize-none"
+                      ></textarea>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                  <h4 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                    <LayoutGrid className="text-teal-500" size={20} />
+                    Process Steps
+                  </h4>
+                  <button
+                    onClick={() => setShiftingContent({ ...shiftingContent, steps: [...(shiftingContent.steps || []), { title: "New Step", desc: "Description" }] })}
+                    className="p-1.5 bg-teal-50 text-teal-600 rounded-lg hover:bg-teal-100"
+                  >
+                    <Plus size={16} />
+                  </button>
+                </div>
+                <div className="space-y-4">
+                  {shiftingContent?.steps?.map((step: any, idx: number) => (
+                    <div key={idx} className="p-4 bg-slate-50 rounded-2xl border border-slate-200 relative group">
+                      <button
+                        onClick={() => setShiftingContent({ ...shiftingContent, steps: shiftingContent.steps.filter((_: any, i: number) => i !== idx) })}
+                        className="absolute -top-2 -right-2 w-6 h-6 bg-teal-100 text-teal-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
+                      >
+                        ×
+                      </button>
+                      <input
+                        type="text"
+                        value={step.title}
+                        onChange={(e) => {
+                          const newSteps = [...shiftingContent.steps];
+                          newSteps[idx].title = e.target.value;
+                          setShiftingContent({ ...shiftingContent, steps: newSteps });
+                        }}
+                        className="w-full bg-transparent border-b border-slate-200 pb-2 mb-2 text-sm font-black text-slate-800 outline-none focus:border-teal-500"
+                      />
+                      <textarea
+                        rows={2}
+                        value={step.desc}
+                        onChange={(e) => {
+                          const newSteps = [...shiftingContent.steps];
+                          newSteps[idx].desc = e.target.value;
+                          setShiftingContent({ ...shiftingContent, steps: newSteps });
+                        }}
+                        className="w-full bg-transparent text-xs font-medium text-slate-500 outline-none resize-none"
+                      ></textarea>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* CTAs */}
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="p-8 bg-teal-900 rounded-[2rem] text-white">
+                <h4 className="text-xl font-black mb-4">Apply for Shifting Sidebar</h4>
+                <div className="space-y-4">
+                  <input
+                    type="text"
+                    value={shiftingContent?.cta?.title || ''}
+                    onChange={(e) => setShiftingContent({ ...shiftingContent, cta: { ...shiftingContent.cta, title: e.target.value } })}
+                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-sm font-bold text-white outline-none focus:ring-2 focus:ring-teal-500"
+                  />
+                  <textarea
+                    rows={2}
+                    value={shiftingContent?.cta?.description || ''}
+                    onChange={(e) => setShiftingContent({ ...shiftingContent, cta: { ...shiftingContent.cta, description: e.target.value } })}
+                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-xs font-medium text-teal-100 outline-none resize-none"
+                  ></textarea>
+                </div>
+              </div>
+
+              <div className="p-8 bg-white rounded-[2rem] border border-slate-200">
+                <h4 className="text-xl font-black text-slate-900 mb-4">Career Guidance Sidebar</h4>
+                <div className="space-y-4">
+                  <input
+                    type="text"
+                    value={shiftingContent?.guidance?.title || ''}
+                    onChange={(e) => setShiftingContent({ ...shiftingContent, guidance: { ...shiftingContent.guidance, title: e.target.value } })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-800 outline-none focus:ring-2 focus:ring-teal-500"
+                  />
+                  <textarea
+                    rows={2}
+                    value={shiftingContent?.guidance?.description || ''}
+                    onChange={(e) => setShiftingContent({ ...shiftingContent, guidance: { ...shiftingContent.guidance, description: e.target.value } })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs font-medium text-slate-500 outline-none resize-none"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
     </AnimatePresence>
   </motion.div>
 );
