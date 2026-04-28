@@ -37,8 +37,8 @@ export default function Register() {
     wmsuLogo: wmsuLogoAsset,
     gccLogo: gccLogoAsset
   });
-  const [undergradCourses, setUndergradCourses] = useState<string[]>([]);
-  const [gradCourses, setGradCourses] = useState<string[]>([]);
+  const [colleges, setColleges] = useState<any[]>([]);
+  const [selectedCollege, setSelectedCollege] = useState<string>('');
   const [occupations, setOccupations] = useState<string[]>([]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -83,9 +83,9 @@ export default function Register() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [logoRes, systemRes] = await Promise.all([
+        const [logoRes, academicRes] = await Promise.all([
           cmsApi.getContent('logos'),
-          cmsApi.getContent('system')
+          cmsApi.getAcademicData()
         ]);
         
         if (logoRes.ok && logoRes.data) {
@@ -95,77 +95,9 @@ export default function Register() {
           });
         }
 
-        if (systemRes.ok && systemRes.data && ((systemRes.data.undergradCourses && systemRes.data.undergradCourses.length > 0) || (systemRes.data.gradCourses && systemRes.data.gradCourses.length > 0))) {
-          setUndergradCourses(systemRes.data.undergradCourses || []);
-          setGradCourses(systemRes.data.gradCourses || []);
-          setOccupations(systemRes.data.occupations || []);
-        } else {
-          // Fallback if DB is empty
-          setUndergradCourses([
-            "Associate in Computer Technology – Application Development",
-            "Associate in Computer Technology – Networking",
-            "BA Asian Studies Major in ASEAN Community",
-            "BA English",
-            "BA History",
-            "BA Mass Communication – Broadcasting",
-            "BA Mass Communication – Journalism",
-            "BA Political Science",
-            "Bachelor of Agricultural Technology",
-            "Bachelor of Culture and Arts Education",
-            "Bachelor of Early Childhood Education",
-            "Bachelor of Elementary Education",
-            "Bachelor of Laws",
-            "Bachelor of Physical Education",
-            "Bachelor of Public Administration",
-            "Bachelor of Secondary Education",
-            "Bachelor of Special Needs Education",
-            "BS Accountancy",
-            "BS Agriculture",
-            "BS Agribusiness",
-            "BS Agricultural and Biosystems Engineering",
-            "BS Agroforestry",
-            "BS Architecture",
-            "BS Civil Engineering",
-            "BS Community Development",
-            "BS Computer Engineering",
-            "BS Computer Science",
-            "BS Criminology",
-            "BS Economics",
-            "BS Electrical Engineering",
-            "BS Electronics Engineering",
-            "BS Environmental Engineering",
-            "BS Environmental Science",
-            "BS Exercise and Sports Sciences",
-            "BS Food Technology",
-            "BS Forestry",
-            "BS Geodetic Engineering",
-            "BS Home Economics",
-            "BS Hospitality Management",
-            "BS Industrial Engineering",
-            "BS Information Technology",
-            "BS Mechanical Engineering",
-            "BS Nursing",
-            "BS Nutrition and Dietetics",
-            "BS Psychology",
-            "BS Sanitary Engineering",
-            "BS Social Work"
-          ]);
-          setGradCourses([
-            "Diploma in Physical Education",
-            "MA Education",
-            "MA Education – Home Economics",
-            "MA Education – Nutrition and Health Education",
-            "MA Nursing – Nursing Education",
-            "MA Nursing – Nursing Management",
-            "Master in Food Processing and Management",
-            "Master in Information Technology",
-            "Master in Physical Education",
-            "Master of Public Administration",
-            "MS Agronomy",
-            "MS Social Work",
-            "Ph.D. in Education"
-          ]);
-          setOccupations(["Student", "Employee", "Self Employed", "Unemployed", "Prefer not to say"]);
+        if (academicRes.ok && academicRes.data) {
+          setColleges(academicRes.data.colleges || []);
+          setOccupations(academicRes.data.occupations || []);
         }
       } catch (error) {
         console.error('Failed to fetch data:', error);
@@ -179,21 +111,39 @@ export default function Register() {
     department: false,
     occupation: false,
     course: false,
+    college: false,
     city: false,
     barangay: false
   });
 
-  const filteredUndergrad = undergradCourses.filter(c => c.toLowerCase().includes(courseSearch.toLowerCase()));
-  const filteredGrad = gradCourses.filter(c => c.toLowerCase().includes(courseSearch.toLowerCase()));
-  const filteredOccs = (occupations.length > 0 ? occupations : ['Student', 'Employee', 'Self Employed', 'Unemployed', 'Prefer not to say'])
-    .filter(o => o.toLowerCase().includes(occSearch.toLowerCase()));
+  const filteredUndergrad = useMemo(() => {
+    if (!selectedCollege) return [];
+    const col = colleges.find(c => c.name === selectedCollege);
+    return (col?.courses || [])
+      .filter((c: any) => c.type === 'Undergraduate')
+      .map((c: any) => c.name)
+      .filter((name: string) => name.toLowerCase().includes(courseSearch.toLowerCase()))
+      .sort();
+  }, [selectedCollege, colleges, courseSearch]);
+
+  const filteredGrad = useMemo(() => {
+    if (!selectedCollege) return [];
+    const col = colleges.find(c => c.name === selectedCollege);
+    return (col?.courses || [])
+      .filter((c: any) => c.type === 'Graduate')
+      .map((c: any) => c.name)
+      .filter((name: string) => name.toLowerCase().includes(courseSearch.toLowerCase()))
+      .sort();
+  }, [selectedCollege, colleges, courseSearch]);
+
+  const filteredOccs = occupations.filter(o => o.toLowerCase().includes(occSearch.toLowerCase()));
 
   const toggleDropdown = (key: string) => {
     setIsDropdownOpen(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
   const closeDropdowns = () => {
-    setIsDropdownOpen({ sex: false, gradeLevel: false, department: false, occupation: false, course: false, city: false });
+    setIsDropdownOpen({ sex: false, gradeLevel: false, department: false, occupation: false, course: false, college: false, city: false, barangay: false });
   };
 
 
@@ -261,7 +211,7 @@ export default function Register() {
   };
 
   const validateStep4 = (): boolean => {
-    if (!educationLevel) { showToast.error('Please select an education level.'); return false; }
+    if (educationLevel === 'College' && !selectedCollege) { showToast.error('Please select a college.'); return false; }
     if (educationLevel === 'College' && !course.trim()) { showToast.error('Course is required.'); return false; }
     if (educationLevel === 'College' && isWMSU && !/^\d{9}$/.test(schoolId.trim())) { showToast.error('School ID must be exactly 9 digits.'); return false; }
     if (educationLevel === 'High School' && !gradeLevel) { showToast.error('Grade level is required.'); return false; }
@@ -992,7 +942,57 @@ export default function Register() {
                         </div>
                       </div>
 
-                      {/* Conditional Fields */}
+                      {/* College Selection */}
+                      {educationLevel === 'College' && (
+                        <div className="relative animate-in fade-in slide-in-from-top-2 duration-300 mb-4">
+                          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4 mb-2 block">College</label>
+                          <div className="relative flex items-center">
+                            <div className="absolute left-4 z-10 text-gray-700 pointer-events-none">
+                              <Building className="h-5 w-5" />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => toggleDropdown('college')}
+                              className={`w-full flex items-center justify-between bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold transition-all border-2 ${isDropdownOpen.college ? 'border-emerald-500 bg-white ring-4 ring-emerald-500/10' : 'border-transparent'} rounded-lg`}
+                            >
+                              <span className={selectedCollege ? 'text-slate-800' : 'text-gray-400'}>
+                                {selectedCollege || 'Select College'}
+                              </span>
+                              <ChevronDown size={18} className={`text-emerald-600 transition-transform ${isDropdownOpen.college ? 'rotate-180' : ''}`} />
+                            </button>
+
+                            <AnimatePresence>
+                              {isDropdownOpen.college && (
+                                <motion.div
+                                  initial={{ opacity: 0, y: 10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  exit={{ opacity: 0, y: 10 }}
+                                  className="absolute z-50 bottom-full left-0 right-0 mb-2 bg-white border border-slate-100 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[300px]"
+                                >
+                                  <div className="overflow-y-auto custom-scrollbar">
+                                    {colleges.map((col) => (
+                                      <button
+                                        key={col.name}
+                                        type="button"
+                                        onClick={() => {
+                                          setSelectedCollege(col.name);
+                                          setCourse('');
+                                          toggleDropdown('college');
+                                        }}
+                                        className={`w-full px-6 py-4 text-left text-sm font-bold transition-colors border-b border-slate-50 last:border-0 ${selectedCollege === col.name ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-emerald-50/50'}`}
+                                      >
+                                        {col.name}
+                                      </button>
+                                    ))}
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Course Selection */}
                       {educationLevel === 'College' && (
                         <div className="relative animate-in fade-in slide-in-from-top-2 duration-300">
                           <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4 mb-2 block">Course</label>
@@ -1002,11 +1002,12 @@ export default function Register() {
                             </div>
                             <button
                               type="button"
+                              disabled={!selectedCollege}
                               onClick={() => toggleDropdown('course')}
-                              className={`w-full flex items-center justify-between bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold transition-all border-2 ${isDropdownOpen.course ? 'border-emerald-500 bg-white ring-4 ring-emerald-500/10' : 'border-transparent'}`}
+                              className={`w-full flex items-center justify-between py-4 pl-12 pr-4 text-sm font-semibold transition-all border-2 ${isDropdownOpen.course ? 'border-emerald-500 bg-white ring-4 ring-emerald-500/10' : 'border-transparent'} rounded-lg ${!selectedCollege ? 'bg-gray-50 opacity-50 cursor-not-allowed' : 'bg-gray-100'}`}
                             >
                               <span className={course ? 'text-slate-800' : 'text-gray-400'}>
-                                {course || 'Select Course'}
+                                {course || (selectedCollege ? 'Select Course' : 'Select college first')}
                               </span>
                               <ChevronDown size={18} className={`text-emerald-600 transition-transform ${isDropdownOpen.course ? 'rotate-180' : ''}`} />
                             </button>
@@ -1019,7 +1020,6 @@ export default function Register() {
                                   exit={{ opacity: 0, y: 10 }}
                                   className="absolute z-50 bottom-full left-0 right-0 mb-2 bg-white border border-slate-100 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[400px]"
                                 >
-                                  {/* Search Input */}
                                   <div className="p-3 border-b border-slate-50">
                                     <div className="relative flex items-center">
                                       <Search className="absolute left-3 h-4 w-4 text-slate-400" />
@@ -1035,7 +1035,6 @@ export default function Register() {
                                   </div>
 
                                   <div className="overflow-y-auto custom-scrollbar pb-2">
-                                    {/* Undergraduate Section */}
                                     {filteredUndergrad.length > 0 && (
                                       <div className="px-4 py-2 bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50">
                                         Undergraduate Programs
@@ -1056,7 +1055,6 @@ export default function Register() {
                                       </button>
                                     ))}
 
-                                    {/* Graduate Section */}
                                     {filteredGrad.length > 0 && (
                                       <div className="px-4 py-2 bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50 border-t">
                                         Graduate Programs
@@ -1079,7 +1077,9 @@ export default function Register() {
 
                                     {filteredUndergrad.length === 0 && filteredGrad.length === 0 && (
                                       <div className="p-8 text-center">
-                                        <p className="text-sm font-bold text-slate-400">No courses found matching "{courseSearch}"</p>
+                                        <p className="text-sm font-bold text-slate-400">
+                                          {!selectedCollege ? 'Please select a college first' : `No courses found matching "${courseSearch}"`}
+                                        </p>
                                       </div>
                                     )}
                                   </div>
@@ -1121,7 +1121,7 @@ export default function Register() {
                                 onClick={() => toggleDropdown('gradeLevel')}
                                 className={`w-full flex items-center justify-between bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold transition-all border-2 ${isDropdownOpen.gradeLevel ? 'border-emerald-500 bg-white ring-4 ring-emerald-500/10' : 'border-transparent'}`}
                               >
-                                <span className={gradeLevel ? 'text-slate-800' : 'text-gray-400'}>
+                                <span className={gradeLevel ? `Grade ${gradeLevel}` : 'Select Grade Level'}>
                                   {gradeLevel ? `Grade ${gradeLevel}` : 'Select Grade Level'}
                                 </span>
                                 <ChevronDown size={18} className={`text-emerald-600 transition-transform ${isDropdownOpen.gradeLevel ? 'rotate-180' : ''}`} />

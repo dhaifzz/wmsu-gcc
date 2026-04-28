@@ -138,69 +138,149 @@ const CMS = () => {
       };
 
       const defaultSystem = {
-        undergradCourses: [
-          "Associate in Computer Technology – Application Development",
-          "Associate in Computer Technology – Networking",
-          "BA Asian Studies Major in ASEAN Community",
-          "BA English",
-          "BA History",
-          "BA Mass Communication – Broadcasting",
-          "BA Mass Communication – Journalism",
-          "BA Political Science",
-          "Bachelor of Agricultural Technology",
-          "Bachelor of Culture and Arts Education",
-          "Bachelor of Early Childhood Education",
-          "Bachelor of Elementary Education",
-          "Bachelor of Laws",
-          "Bachelor of Physical Education",
-          "Bachelor of Public Administration",
-          "Bachelor of Secondary Education",
-          "Bachelor of Special Needs Education",
-          "BS Accountancy",
-          "BS Agriculture",
-          "BS Agribusiness",
-          "BS Agricultural and Biosystems Engineering",
-          "BS Agroforestry",
-          "BS Architecture",
-          "BS Civil Engineering",
-          "BS Community Development",
-          "BS Computer Engineering",
-          "BS Computer Science",
-          "BS Criminology",
-          "BS Economics",
-          "BS Electrical Engineering",
-          "BS Electronics Engineering",
-          "BS Environmental Engineering",
-          "BS Environmental Science",
-          "BS Exercise and Sports Sciences",
-          "BS Food Technology",
-          "BS Forestry",
-          "BS Geodetic Engineering",
-          "BS Home Economics",
-          "BS Hospitality Management",
-          "BS Industrial Engineering",
-          "BS Information Technology",
-          "BS Mechanical Engineering",
-          "BS Nursing",
-          "BS Nutrition and Dietetics",
-          "BS Psychology",
-          "BS Sanitary Engineering",
-          "BS Social Work"
-        ],
-        gradCourses: [
-          "Diploma in Physical Education",
-          "MA Education",
-          "MA Education – Home Economics",
-          "MA Education – Nutrition and Health Education",
-          "MA Nursing – Nursing Education",
-          "MA Nursing – Nursing Management",
-          "Master in Food Processing and Management",
-          "Master in Information Technology",
-          "Master in Physical Education",
-          "Master of Public Administration",
-          "MS Agronomy",
-          "MS Social Work",
-          "Ph.D. in Education"
+        colleges: [
+          {
+            id: '1',
+            name: "College of Law",
+            courses: [{ name: "Bachelor of Laws", type: "Undergraduate" }]
+          },
+          {
+            id: '2',
+            name: "College of Agriculture",
+            courses: [
+              { name: "BS Agriculture", type: "Undergraduate" },
+              { name: "BS Food Technology", type: "Undergraduate" },
+              { name: "BS Agribusiness", type: "Undergraduate" },
+              { name: "Bachelor of Agricultural Technology", type: "Undergraduate" },
+              { name: "MS Agronomy", type: "Graduate" },
+              { name: "Master in Food Processing and Management", type: "Graduate" }
+            ]
+          },
+          {
+            id: '3',
+            name: "College of Liberal Arts",
+            courses: [
+              { name: "BS Accountancy", type: "Undergraduate" },
+              { name: "BA History", type: "Undergraduate" },
+              { name: "BA English", type: "Undergraduate" },
+              { name: "BA Political Science", type: "Undergraduate" },
+              { name: "BA Mass Communication – Journalism", type: "Undergraduate" },
+              { name: "BA Mass Communication – Broadcasting", type: "Undergraduate" },
+              { name: "BS Economics", type: "Undergraduate" },
+              { name: "BS Psychology", type: "Undergraduate" },
+              { name: "Ph.D. in Education", type: "Graduate" },
+              { name: "MA Education", type: "Graduate" }
+            ]
+          },
+          {
+            id: '4',
+            name: "College of Architecture",
+            courses: [{ name: "BS Architecture", type: "Undergraduate" }]
+          },
+          {
+            id: '5',
+            name: "College of Nursing",
+            courses: [
+              { name: "BS Nursing", type: "Undergraduate" },
+              { name: "MA Nursing – Nursing Education", type: "Graduate" },
+              { name: "MA Nursing – Nursing Management", type: "Graduate" }
+            ]
+          },
+          {
+            id: '6',
+            name: "College of Asian and Islamic Studies",
+            courses: [{ name: "BA Asian Studies Major in ASEAN Community", type: "Undergraduate" }]
+          },
+          {
+            id: '7',
+            name: "College of Computing Studies",
+            courses: [
+              { name: "BS Computer Science", type: "Undergraduate" },
+              { name: "BS Information Technology", type: "Undergraduate" },
+              { name: "Associate in Computer Technology – Application Development", type: "Undergraduate" },
+              { name: "Associate in Computer Technology – Networking", type: "Undergraduate" },
+              { name: "Master in Information Technology", type: "Graduate" }
+            ]
+          },
+          {
+            id: '8',
+            name: "College of Forestry and Environmental Studies",
+            courses: [
+              { name: "BS Forestry", type: "Undergraduate" },
+              { name: "BS Agroforestry", type: "Undergraduate" },
+              { name: "BS Environmental Science", type: "Undergraduate" }
+            ]
+          },
+          {
+            id: '9',
+            name: "College of Criminal Justice Education",
+            courses: [{ name: "BS Criminology", type: "Undergraduate" }]
+          },
+          {
+            id: '10',
+            name: "College of Home Economics",
+            courses: [
+              { name: "BS Home Economics", type: "Undergraduate" },
+              { name: "BS Nutrition and Dietetics", type: "Undergraduate" },
+              { name: "BS Hospitality Management", type: "Undergraduate" },
+              { name: "MA Education – Home Economics", type: "Graduate" },
+              { name: "MA Education – Nutrition and Health Education", type: "Graduate" }
+            ]
+          },
+          {
+            id: '11',
+            name: "College of Engineering",
+            courses: [
+              { name: "BS Agricultural and Biosystems Engineering", type: "Undergraduate" },
+              { name: "BS Civil Engineering", type: "Undergraduate" },
+              { name: "BS Computer Engineering", type: "Undergraduate" },
+              { name: "BS Electrical Engineering", type: "Undergraduate" },
+              { name: "BS Electronics Engineering", type: "Undergraduate" },
+              { name: "BS Environmental Engineering", type: "Undergraduate" },
+              { name: "BS Geodetic Engineering", type: "Undergraduate" },
+              { name: "BS Industrial Engineering", type: "Undergraduate" },
+              { name: "BS Mechanical Engineering", type: "Undergraduate" },
+              { name: "BS Sanitary Engineering", type: "Undergraduate" }
+            ]
+          },
+          {
+            id: '12',
+            name: "College of Public Administration and Development Studies",
+            courses: [
+              { name: "Bachelor of Public Administration", type: "Undergraduate" },
+              { name: "Master of Public Administration", type: "Graduate" }
+            ]
+          },
+          {
+            id: '13',
+            name: "College of Sports Science and Physical Education",
+            courses: [
+              { name: "Bachelor of Physical Education", type: "Undergraduate" },
+              { name: "BS Exercise and Sports Sciences", type: "Undergraduate" },
+              { name: "Master in Physical Education", type: "Graduate" },
+              { name: "Diploma in Physical Education", type: "Graduate" }
+            ]
+          },
+          {
+            id: '14',
+            name: "College of Social Work and Community Development",
+            courses: [
+              { name: "BS Social Work", type: "Undergraduate" },
+              { name: "BS Community Development", type: "Undergraduate" },
+              { name: "MS Social Work", type: "Graduate" }
+            ]
+          },
+          {
+            id: '15',
+            name: "College of Teacher Education",
+            courses: [
+              { name: "Bachelor of Culture and Arts Education", type: "Undergraduate" },
+              { name: "Bachelor of Early Childhood Education", type: "Undergraduate" },
+              { name: "Bachelor of Elementary Education", type: "Undergraduate" },
+              { name: "Bachelor of Secondary Education", type: "Undergraduate" },
+              { name: "Bachelor of Special Needs Education", type: "Undergraduate" }
+            ]
+          }
         ],
         occupations: ["Student", "Employee", "Self Employed", "Unemployed", "Prefer not to say"]
       };
@@ -228,8 +308,7 @@ const CMS = () => {
             case 'contact': setContactContent(data); break;
             case 'footer': setFooterContent(data); break;
             case 'system': 
-              // If fetched data is old format (missing undergradCourses), use the new default list
-              const refinedSystem = (data && data.undergradCourses) ? data : defaultSystem;
+              const refinedSystem = (data && data.colleges) ? data : defaultSystem;
               setSystemData(refinedSystem); 
               break;
             case 'logos': setLogoSettings(data); break;
@@ -1662,120 +1741,175 @@ return (
             </div>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Undergraduate Courses Column */}
+          <div className="space-y-8">
+            {/* Colleges Section */}
             <div className="space-y-6">
               <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                <h4 className="text-lg font-black text-slate-900 flex items-center gap-2">
-                  <GraduationCap className="text-teal-500" size={20} />
-                  Undergraduate
+                <h4 className="text-xl font-black text-slate-900 flex items-center gap-2">
+                  <Building2 className="text-teal-500" size={24} />
+                  Colleges & Programs
                 </h4>
                 <button
-                  onClick={() => setSystemData({ ...systemData, undergradCourses: [...(systemData.undergradCourses || []), ""].sort() })}
-                  className="p-1.5 bg-teal-50 text-teal-600 rounded-lg hover:bg-teal-100 transition-colors"
+                  onClick={() => {
+                    const newColleges = [...(systemData.colleges || []), {
+                      id: crypto.randomUUID(),
+                      name: "New College",
+                      courses: []
+                    }];
+                    setSystemData({ ...systemData, colleges: newColleges });
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 bg-teal-50 text-teal-600 rounded-xl hover:bg-teal-100 transition-all font-black text-xs"
                 >
                   <Plus size={16} />
+                  Add College
                 </button>
               </div>
-              <div className="max-h-[500px] overflow-y-auto pr-2 space-y-3 custom-scrollbar">
-                {(systemData.undergradCourses || []).map((course: string, idx: number) => (
-                  <div key={idx} className="flex gap-2 group">
-                    <input
-                      type="text"
-                      value={course}
-                      placeholder="Course name..."
-                      onChange={(e) => {
-                        const newList = [...systemData.undergradCourses];
-                        newList[idx] = e.target.value;
-                        setSystemData({ ...systemData, undergradCourses: newList });
-                      }}
-                      onBlur={() => {
-                        const newList = [...systemData.undergradCourses].filter(c => c.trim()).sort();
-                        setSystemData({ ...systemData, undergradCourses: newList });
-                      }}
-                      className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
-                    />
-                    <button
-                      onClick={() => {
-                        const newList = systemData.undergradCourses.filter((_: string, i: number) => i !== idx);
-                        setSystemData({ ...systemData, undergradCourses: newList });
-                      }}
-                      className="p-2 text-slate-300 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+
+              <div className="grid gap-6">
+                {(systemData.colleges || []).map((college: any, cIdx: number) => (
+                  <div key={college.id || cIdx} className="bg-slate-50/50 rounded-[2rem] border border-slate-200 overflow-hidden">
+                    <div className="p-6 bg-white border-b border-slate-100 flex items-center justify-between gap-4">
+                      <div className="flex-1">
+                        <input
+                          type="text"
+                          value={college.name}
+                          onChange={(e) => {
+                            const newColleges = [...systemData.colleges];
+                            newColleges[cIdx].name = e.target.value;
+                            setSystemData({ ...systemData, colleges: newColleges });
+                          }}
+                          placeholder="College Name (e.g. College of Computing Studies)"
+                          className="w-full bg-transparent text-lg font-black text-slate-800 outline-none focus:text-teal-600 transition-colors"
+                        />
+                      </div>
+                      <button
+                        onClick={() => {
+                          const newColleges = systemData.colleges.filter((_: any, i: number) => i !== cIdx);
+                          setSystemData({ ...systemData, colleges: newColleges });
+                        }}
+                        className="p-2 text-slate-300 hover:text-rose-500 transition-colors"
+                      >
+                        <Trash2 size={20} />
+                      </button>
+                    </div>
+
+                    <div className="p-6 grid md:grid-cols-2 gap-6">
+                      {/* Undergraduate Programs */}
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between px-2">
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Undergraduate Programs</span>
+                          <button
+                            onClick={() => {
+                              const newColleges = [...systemData.colleges];
+                              newColleges[cIdx].courses = [...(newColleges[cIdx].courses || []), { name: "", type: "Undergraduate" }];
+                              setSystemData({ ...systemData, colleges: newColleges });
+                            }}
+                            className="p-1 bg-teal-50 text-teal-600 rounded-lg hover:bg-teal-100"
+                          >
+                            <Plus size={14} />
+                          </button>
+                        </div>
+                        <div className="space-y-2">
+                          {(college.courses || []).filter((c: any) => c.type === "Undergraduate").map((course: any, courseIdx: number) => (
+                            <div key={courseIdx} className="flex gap-2 group">
+                              <input
+                                type="text"
+                                value={course.name}
+                                onChange={(e) => {
+                                  const newColleges = [...systemData.colleges];
+                                  const actualIdx = newColleges[cIdx].courses.indexOf(course);
+                                  newColleges[cIdx].courses[actualIdx].name = e.target.value;
+                                  setSystemData({ ...systemData, colleges: newColleges });
+                                }}
+                                className="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
+                                placeholder="Course Name..."
+                              />
+                              <button
+                                onClick={() => {
+                                  const newColleges = [...systemData.colleges];
+                                  newColleges[cIdx].courses = newColleges[cIdx].courses.filter((c: any) => c !== course);
+                                  setSystemData({ ...systemData, colleges: newColleges });
+                                }}
+                                className="p-2 text-slate-300 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Graduate Programs */}
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between px-2">
+                          <span className="text-[10px] font-black text-teal-600 uppercase tracking-widest">Graduate Programs</span>
+                          <button
+                            onClick={() => {
+                              const newColleges = [...systemData.colleges];
+                              newColleges[cIdx].courses = [...(newColleges[cIdx].courses || []), { name: "", type: "Graduate" }];
+                              setSystemData({ ...systemData, colleges: newColleges });
+                            }}
+                            className="p-1 bg-teal-50 text-teal-600 rounded-lg hover:bg-teal-100"
+                          >
+                            <Plus size={14} />
+                          </button>
+                        </div>
+                        <div className="space-y-2">
+                          {(college.courses || []).filter((c: any) => c.type === "Graduate").map((course: any, courseIdx: number) => (
+                            <div key={courseIdx} className="flex gap-2 group">
+                              <input
+                                type="text"
+                                value={course.name}
+                                onChange={(e) => {
+                                  const newColleges = [...systemData.colleges];
+                                  const actualIdx = newColleges[cIdx].courses.indexOf(course);
+                                  newColleges[cIdx].courses[actualIdx].name = e.target.value;
+                                  setSystemData({ ...systemData, colleges: newColleges });
+                                }}
+                                className="flex-1 bg-teal-50/30 border border-teal-100 rounded-xl px-4 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
+                                placeholder="Program Name..."
+                              />
+                              <button
+                                onClick={() => {
+                                  const newColleges = [...systemData.colleges];
+                                  newColleges[cIdx].courses = newColleges[cIdx].courses.filter((c: any) => c !== course);
+                                  setSystemData({ ...systemData, colleges: newColleges });
+                                }}
+                                className="p-2 text-slate-300 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Graduate Courses Column */}
-            <div className="space-y-6">
+            {/* Occupations Section */}
+            <div className="space-y-6 pt-10 border-t border-slate-100">
               <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                <h4 className="text-lg font-black text-slate-900 flex items-center gap-2">
-                  <GraduationCap className="text-teal-600" size={20} />
-                  Graduate
-                </h4>
-                <button
-                  onClick={() => setSystemData({ ...systemData, gradCourses: [...(systemData.gradCourses || []), ""].sort() })}
-                  className="p-1.5 bg-teal-50 text-teal-600 rounded-lg hover:bg-teal-100 transition-colors"
-                >
-                  <Plus size={16} />
-                </button>
-              </div>
-              <div className="max-h-[500px] overflow-y-auto pr-2 space-y-3 custom-scrollbar">
-                {(systemData.gradCourses || []).map((course: string, idx: number) => (
-                  <div key={idx} className="flex gap-2 group">
-                    <input
-                      type="text"
-                      value={course}
-                      placeholder="Program name..."
-                      onChange={(e) => {
-                        const newList = [...systemData.gradCourses];
-                        newList[idx] = e.target.value;
-                        setSystemData({ ...systemData, gradCourses: newList });
-                      }}
-                      onBlur={() => {
-                        const newList = [...systemData.gradCourses].filter(c => c.trim()).sort();
-                        setSystemData({ ...systemData, gradCourses: newList });
-                      }}
-                      className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
-                    />
-                    <button
-                      onClick={() => {
-                        const newList = systemData.gradCourses.filter((_: string, i: number) => i !== idx);
-                        setSystemData({ ...systemData, gradCourses: newList });
-                      }}
-                      className="p-2 text-slate-300 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Occupations Column */}
-            <div className="space-y-6">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                <h4 className="text-lg font-black text-slate-900 flex items-center gap-2">
-                  <Briefcase className="text-teal-500" size={20} />
+                <h4 className="text-xl font-black text-slate-900 flex items-center gap-2">
+                  <Briefcase className="text-teal-500" size={24} />
                   Occupations
                 </h4>
                 <button
                   onClick={() => setSystemData({ ...systemData, occupations: [...systemData.occupations, ""] })}
-                  className="p-1.5 bg-teal-50 text-teal-600 rounded-lg hover:bg-teal-100 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-teal-50 text-teal-600 rounded-xl hover:bg-teal-100 transition-all font-black text-xs"
                 >
                   <Plus size={16} />
+                  Add Occupation
                 </button>
               </div>
-              <div className="max-h-[500px] overflow-y-auto pr-2 space-y-3 custom-scrollbar">
+              <div className="grid md:grid-cols-4 gap-4">
                 {systemData.occupations.map((occ: string, idx: number) => (
                   <div key={idx} className="flex gap-2 group">
                     <input
                       type="text"
                       value={occ}
-                      placeholder="Enter occupation..."
                       onChange={(e) => {
                         const newOccs = [...systemData.occupations];
                         newOccs[idx] = e.target.value;

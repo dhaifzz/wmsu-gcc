@@ -127,6 +127,9 @@ export const cmsApi = {
   getContent: (section: string) =>
     api<any>(`/api/cms/${section}`),
 
+  getAcademicData: () =>
+    api<any>('/api/cms/academic-data'),
+
   updateContent: (section: string, content: any, token?: string) =>
     api<any>(`/api/cms/${section}`, { method: 'PUT', body: content, token }),
 };
