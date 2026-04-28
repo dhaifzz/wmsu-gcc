@@ -1,14 +1,36 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, ArrowLeft, Send } from 'lucide-react';
 import { motion } from 'framer-motion';
 import authBg from '../assets/img/Auth-Background.jpg';
-import gccLogo from '../assets/logos/GCC.png';
-import wmsuLogo from '../assets/logos/WMSU.png';
+import gccLogoAsset from '../assets/logos/GCC.png';
+import wmsuLogoAsset from '../assets/logos/WMSU.png';
+import { cmsApi } from '../lib/api';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [logos, setLogos] = useState({
+    wmsuLogo: wmsuLogoAsset,
+    gccLogo: gccLogoAsset
+  });
+
+  useEffect(() => {
+    const fetchLogos = async () => {
+      try {
+        const res = await cmsApi.getContent('logos');
+        if (res.ok && res.data) {
+          setLogos({
+            wmsuLogo: res.data.wmsuLogo || wmsuLogoAsset,
+            gccLogo: res.data.gccLogo || gccLogoAsset
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch logos:', error);
+      }
+    };
+    fetchLogos();
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,9 +58,9 @@ export default function ForgotPassword() {
         <div className="relative z-10 flex flex-col items-center">
           {/* Header Logos */}
           <div className="mb-10 flex gap-4 justify-center items-center">
-            <img src={wmsuLogo} alt="WMSU Logo" className="h-16 w-16 object-contain drop-shadow-sm" />
+            <img src={logos.wmsuLogo} alt="WMSU Logo" className="h-16 w-16 object-contain drop-shadow-sm" />
             <div className="h-10 w-[1px] bg-slate-200"></div>
-            <img src={gccLogo} alt="GCC Logo" className="h-16 w-16 object-contain drop-shadow-sm" />
+            <img src={logos.gccLogo} alt="GCC Logo" className="h-16 w-16 object-contain drop-shadow-sm" />
           </div>
 
           {!isSubmitted ? (

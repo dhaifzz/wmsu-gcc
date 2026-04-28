@@ -21,9 +21,9 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import authBg from '../assets/img/Auth-Background.jpg';
-import gccLogo from '../assets/logos/GCC.png';
-import wmsuLogo from '../assets/logos/WMSU.png';
-import { authApi } from '../lib/api';
+import gccLogoAsset from '../assets/logos/GCC.png';
+import wmsuLogoAsset from '../assets/logos/WMSU.png';
+import { authApi, cmsApi } from '../lib/api';
 import { showToast } from '../components/modal-notification/toast';
 import { showAlert } from '../components/modal-notification/sweetalert';
 
@@ -31,6 +31,27 @@ export default function Register() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [logos, setLogos] = useState({
+    wmsuLogo: wmsuLogoAsset,
+    gccLogo: gccLogoAsset
+  });
+
+  useEffect(() => {
+    const fetchLogos = async () => {
+      try {
+        const res = await cmsApi.getContent('logos');
+        if (res.ok && res.data) {
+          setLogos({
+            wmsuLogo: res.data.wmsuLogo || wmsuLogoAsset,
+            gccLogo: res.data.gccLogo || gccLogoAsset
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch logos:', error);
+      }
+    };
+    fetchLogos();
+  }, []);
   const [isDropdownOpen, setIsDropdownOpen] = useState<{ [key: string]: boolean }>({
     sex: false,
     gradeLevel: false,
@@ -222,8 +243,8 @@ export default function Register() {
 
           <div className="relative z-10 mt-auto mb-auto">
             <div className="mb-8 flex gap-4">
-              <img src={wmsuLogo} alt="WMSU Logo" className="h-24 w-24 object-contain drop-shadow-md" />
-              <img src={gccLogo} alt="GCC Logo" className="h-24 w-24 object-contain drop-shadow-md" />
+              <img src={logos.wmsuLogo} alt="WMSU Logo" className="h-24 w-24 object-contain drop-shadow-md" />
+              <img src={logos.gccLogo} alt="GCC Logo" className="h-24 w-24 object-contain drop-shadow-md" />
             </div>
             <h1 className="mb-2 text-5xl font-bold tracking-wider text-white drop-shadow-sm">Join Us!</h1>
             <h2 className="mb-8 text-md font-bold tracking-wider text-emerald-100"> Portal</h2>
@@ -244,8 +265,8 @@ export default function Register() {
             <div className="flex min-h-full flex-col justify-center p-8 lg:p-16">
               <div className="mx-auto w-full max-w-sm">
                 <div className="md:hidden mb-6 mt-14 flex gap-4 justify-center">
-                  <img src={wmsuLogo} alt="WMSU Logo" className="h-14 w-14 object-contain" />
-                  <img src={gccLogo} alt="GCC Logo" className="h-14 w-14 object-contain" />
+                  <img src={logos.wmsuLogo} alt="WMSU Logo" className="h-14 w-14 object-contain" />
+                  <img src={logos.gccLogo} alt="GCC Logo" className="h-14 w-14 object-contain" />
                 </div>
 
                 <h2 className="mb-2 text-4xl font-bold text-gray-800">Sign up</h2>

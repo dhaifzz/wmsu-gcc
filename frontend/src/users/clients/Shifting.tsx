@@ -11,9 +11,21 @@ import {
   AlertCircle,
   GraduationCap,
   ArrowRight,
-  ChevronDown
+  ChevronDown,
+  ClipboardCheck,
+  Clock
 } from 'lucide-react';
 import MarqueeText from '../../components/MarqueeText';
+import { cmsApi } from '../../lib/api';
+
+const ICON_MAP: any = {
+  ImageIcon: ImageIcon,
+  FileText: FileText,
+  ClipboardCheck: ClipboardCheck,
+  Clock: Clock,
+  User: User,
+  AlertCircle: AlertCircle
+};
 
 interface ShiftingProps {
   onBack: () => void;
@@ -28,26 +40,25 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
   const [docStep, setDocStep] = useState(0);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const documents = [
-    { label: "2x2 Picture (with name tag)", icon: ImageIcon, note: "Accepted formats: JPG, PNG" },
-    { label: "All Downloadable Grades", icon: FileText, note: "Accepted format: PDF" },
-    { label: "Latest COR", icon: FileText, note: "Accepted format: PDF" },
-    { label: "College Entrance Test Result", icon: FileText, note: "Accepted format: PDF" }
-  ];
-
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
+  const header = { title: "Shifting Examination", subtitle: "Helping you find the right academic path for your future career." };
+  const academic = { title: "Academic Guidelines", subtitle: "Please provide your target course and reason for shifting." };
   const courses = [
-    "BS in Computer Science",
-    "BS in Information Technology",
-    "BS in Agriculture",
-    "BS in Food Technology",
-    "BS in Civil Engineering",
-    "BS in Nursing",
-    "BS in Architecture"
+    "BS Computer Science", "BS Information Technology", "BS Nursing", "BS Psychology",
+    "BS Civil Engineering", "BS Mechanical Engineering", "BS Education", "BS Criminology",
+    "BS Accountancy", "BS Business Administration", "BS Biology", "BS Social Work"
   ];
+  const documents = [
+    { label: "Booking Receipt", note: "Digital or printed copy of your appointment confirmation.", iconName: "ClipboardCheck" },
+    { label: "2x2 Picture", note: "Formal 2x2 colored picture with name tag (Selfies are not allowed).", iconName: "ImageIcon" },
+    { label: "Downloadable Grades", note: "A complete copy of all your previous semester's grades.", iconName: "FileText" },
+    { label: "Latest COR", note: "Your most recent Certificate of Registration (COR).", iconName: "FileText" },
+    { label: "Entrance Test Result", note: "Original or certified copy of your college entrance test result.", iconName: "ClipboardCheck" }
+  ];
+  const instructions = `Make sure you have met the minimum GPA requirements of your target college before applying. You are currently enrolled in ${user.course}.`;
 
   return (
     <motion.div
@@ -65,8 +76,8 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
           <ChevronLeft size={24} />
         </button>
         <div>
-          <h2 className="text-4xl font-black tracking-tight text-slate-900">Course Shifting</h2>
-          <p className="text-slate-500 font-medium text-sm">Review your details and select your target program.</p>
+          <h2 className="text-4xl font-black tracking-tight text-slate-900">{header.title}</h2>
+          <p className="text-slate-500 font-medium text-sm">{header.subtitle}</p>
         </div>
       </div>
 
@@ -98,8 +109,8 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
                 <BookOpen size={24} />
               </div>
               <div>
-                <h3 className="text-2xl font-black text-slate-900">Academic Shifting</h3>
-                <p className="text-slate-400 text-sm font-medium">Define your current and target academic programs.</p>
+                <h3 className="text-2xl font-black text-slate-900">{academic.title}</h3>
+                <p className="text-slate-400 text-sm font-medium">{academic.subtitle}</p>
               </div>
             </div>
 
@@ -200,7 +211,7 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
                   <p className="text-slate-400 text-sm font-medium">Upload high-quality scans of your documents.</p>
                 </div>
                 <div className="hidden sm:block text-[10px] font-black uppercase tracking-widest bg-emerald-50 text-emerald-600 px-4 py-2 rounded-xl">
-                  Step {docStep + 1} of 4
+                  Step {docStep + 1} of {documents.length}
                 </div>
               </div>
             </div>
@@ -217,7 +228,7 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
                     <div className="aspect-square w-[280px] p-8 rounded-[2.5rem] bg-slate-50 border border-slate-100 hover:border-emerald-200 transition-all group flex flex-col items-center justify-center text-center shadow-sm shrink-0">
                       <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-slate-400 group-hover:text-emerald-600 transition-colors shadow-sm mb-6 shrink-0">
                         {(() => {
-                          const Icon = documents[docStep].icon;
+                          const Icon = ICON_MAP[documents[docStep].iconName] || FileText;
                           return <Icon size={28} />;
                         })()}
                       </div>
@@ -242,8 +253,8 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
                 Previous
               </button>
               <button
-                onClick={() => setDocStep(Math.min(3, docStep + 1))}
-                disabled={docStep === 3}
+                onClick={() => setDocStep(Math.min(documents.length - 1, docStep + 1))}
+                disabled={docStep === documents.length - 1}
                 className="px-6 py-3 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 Next <ArrowRight size={14} />
@@ -290,7 +301,12 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
               <h4 className="font-black text-xs uppercase tracking-widest">Instructions</h4>
             </div>
             <p className="text-xs text-emerald-700/70 leading-relaxed font-medium">
-              You are currently shifting from <strong>{user.course}</strong>. Your profile data has been automatically loaded to ensure accuracy.
+              {instructions.split(user.course).map((part: string, i: number, arr: any[]) => (
+                <span key={i}>
+                  {part}
+                  {i < arr.length - 1 && <strong>{user.course}</strong>}
+                </span>
+              ))}
             </p>
           </div>
         </div>

@@ -7,6 +7,12 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
 
+  const header = { title: "Professional Counseling", subtitle: "A safe, confidential space for emotional growth and personal discovery." };
+  const preparation = { title: "Preparation", content: "Counseling sessions require a quiet environment and about 45-60 minutes of uninterrupted time." };
+  const duration = { title: "Session Length", content: "A standard counseling session lasts approximately 50 minutes." };
+  const important = { title: "Confidentiality", content: "Everything discussed in your sessions is strictly confidential between you and your counselor." };
+  const timeSlots = ["08:00 AM - 09:00 AM", "09:00 AM - 10:00 AM", "10:00 AM - 11:00 AM", "01:00 PM - 02:00 PM", "02:00 PM - 03:00 PM", "03:00 PM - 04:00 PM"];
+
   const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
   const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
@@ -24,10 +30,7 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
     if (nextDate.getMonth() < today.getMonth() && nextDate.getFullYear() <= today.getFullYear()) return;
     setCurrentDate(nextDate);
   };
-  const timeSlots = [
-    "08:00 AM - 09:00 AM", "09:00 AM - 10:00 AM", "10:00 AM - 11:00 AM", "11:00 AM - 12:00 PM",
-    "01:00 PM - 02:00 PM", "02:00 PM - 03:00 PM", "03:00 PM - 04:00 PM", "04:00 PM - 05:00 PM"
-  ];
+
 
   return (
     <motion.div
@@ -45,8 +48,8 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
           <ChevronLeft size={24} />
         </button>
         <div>
-          <h2 className="text-4xl font-black tracking-tight text-slate-900">Counseling Session</h2>
-          <p className="text-slate-500 font-medium text-sm">Pick a convenient time for your consultation.</p>
+          <h2 className="text-4xl font-black tracking-tight text-slate-900">{header.title}</h2>
+          <p className="text-slate-500 font-medium text-sm">{header.subtitle}</p>
         </div>
       </div>
 
@@ -114,10 +117,10 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
                 <div className="w-8 h-8 bg-white rounded-xl flex items-center justify-center shadow-sm border border-slate-100">
                   <Info size={16} />
                 </div>
-                <span className="text-[12px] font-black uppercase tracking-widest">Preparation</span>
+                <span className="text-[12px] font-black uppercase tracking-widest">{preparation.title}</span>
               </div>
               <p className="text-[13px] text-slate-500 font-bold leading-relaxed">
-                Please complete your intake forms at least 24 hours before your session.
+                {preparation.content}
               </p>
             </div>
             <div className="p-4 rounded-3xl bg-slate-50 border border-slate-100/50">
@@ -125,10 +128,10 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
                 <div className="w-8 h-8 bg-white rounded-xl flex items-center justify-center shadow-sm border border-slate-100">
                   <Clock size={16} />
                 </div>
-                <span className="text-[12px] font-black uppercase tracking-widest">Duration</span>
+                <span className="text-[12px] font-black uppercase tracking-widest">{duration.title}</span>
               </div>
               <p className="text-[13px] text-slate-500 font-bold leading-relaxed">
-                Standard counseling sessions last approximately 45-60 minutes.
+                {duration.content}
               </p>
             </div>
           </div>
@@ -226,10 +229,10 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
           <div className="bg-emerald-50 rounded-[2.5rem] p-8 border border-emerald-100">
             <div className="flex items-center gap-3 mb-4 text-emerald-700">
               <Info size={18} />
-              <h4 className="font-black text-xs uppercase tracking-widest">Important</h4>
+              <h4 className="font-black text-xs uppercase tracking-widest">{important.title}</h4>
             </div>
             <p className="text-xs text-emerald-700/70 leading-relaxed font-medium">
-              Please ensure you arrive 10 minutes before your scheduled appointment. Bring your student ID and required forms.
+              {important.content}
             </p>
           </div>
         </div>

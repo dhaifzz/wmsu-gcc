@@ -6,11 +6,12 @@ import {
   Clock as ClockIcon
 } from 'lucide-react';
 
-import WMSULogo from '../assets/logos/WMSU.png';
-import GCCLogo from '../assets/logos/GCC.png';
+import WMSULogoAsset from '../assets/logos/WMSU.png';
+import GCCLogoAsset from '../assets/logos/GCC.png';
 import MarqueeText from './MarqueeText';
 import { useAuth } from '../auth/AuthProvider';
 import { showAlert } from './modal-notification/sweetalert';
+import { cmsApi } from '../lib/api';
 
 interface NavLink {
   id: string;
@@ -32,6 +33,10 @@ interface ManagementSidebarProps {
 const ManagementSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen, onClose, links, colorScheme = 'emerald' }: ManagementSidebarProps) => {
   const { signOut } = useAuth();
   const [time, setTime] = useState(new Date());
+  const [logos, setLogos] = useState({
+    wmsuLogo: WMSULogoAsset,
+    gccLogo: GCCLogoAsset
+  });
 
   const c = colorScheme === 'teal' ? {
     aside: 'bg-teal-950 border-teal-800',
@@ -75,6 +80,22 @@ const ManagementSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
+
+    const fetchLogos = async () => {
+      try {
+        const res = await cmsApi.getContent('logos');
+        if (res.ok && res.data) {
+          setLogos({
+            wmsuLogo: res.data.wmsuLogo || WMSULogoAsset,
+            gccLogo: res.data.gccLogo || GCCLogoAsset
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch logos:', error);
+      }
+    };
+    fetchLogos();
+
     return () => clearInterval(timer);
   }, []);
 
@@ -114,8 +135,8 @@ const ManagementSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen
         {/* Logos & Brand */}
         <div className="flex items-center gap-4 mb-10 px-2">
           <div className="flex -space-x-3">
-            <img src={WMSULogo} alt="WMSU" className="w-12 h-12 object-contain drop-shadow-md z-10" />
-            <img src={GCCLogo} alt="GCC" className="w-12 h-12 object-contain drop-shadow-md" />
+            <img src={logos.wmsuLogo} alt="WMSU" className="w-12 h-12 object-contain drop-shadow-md z-10" />
+            <img src={logos.gccLogo} alt="GCC" className="w-12 h-12 object-contain drop-shadow-md" />
           </div>
           <div>
             <h1 className="font-black text-xl tracking-tighter leading-none">WMSU GCC</h1>
@@ -146,7 +167,7 @@ const ManagementSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen
             <button
               key={link.id}
               className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-bold transition-all relative group ${activeTab === link.id ? c.activeBtn : c.inactiveBtn}`}
-              onClick={() => { setActiveTab(link.id); onClose(); }}
+              onClick={() => { setActiveTab(link.id); onClose?.(); }}
             >
               <link.icon size={20} className={activeTab === link.id ? c.activeIcon : c.inactiveIcon} />
               {link.label}

@@ -1,8 +1,10 @@
+import { useState, useEffect } from 'react';
 import { Bell, LayoutDashboard, User, LogOut } from 'lucide-react';
-import gccLogo from '../assets/logos/GCC.png';
-import wmsuLogo from '../assets/logos/WMSU.png';
+import gccLogoAsset from '../assets/logos/GCC.png';
+import wmsuLogoAsset from '../assets/logos/WMSU.png';
 import { useAuth } from '../auth/AuthProvider';
 import { showAlert } from './modal-notification/sweetalert';
+import { cmsApi } from '../lib/api';
 
 interface ClientNavbarProps {
   activeTab: string;
@@ -12,13 +14,34 @@ interface ClientNavbarProps {
 
 const ClientNavbar = ({ activeTab, setActiveTab }: ClientNavbarProps) => {
   const { signOut } = useAuth();
+  const [logos, setLogos] = useState({
+    wmsuLogo: wmsuLogoAsset,
+    gccLogo: gccLogoAsset
+  });
+
+  useEffect(() => {
+    const fetchLogos = async () => {
+      try {
+        const res = await cmsApi.getContent('logos');
+        if (res.ok && res.data) {
+          setLogos({
+            wmsuLogo: res.data.wmsuLogo || wmsuLogoAsset,
+            gccLogo: res.data.gccLogo || gccLogoAsset
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch logos:', error);
+      }
+    };
+    fetchLogos();
+  }, []);
 
   return (
     <header className="bg-emerald-900 text-white sticky top-0 z-30 px-6 lg:px-10 py-4 flex items-center justify-between shadow-xl">
       <div className="flex items-center gap-3">
         <div className="flex items-center -space-x-1.5">
-          <img src={wmsuLogo} alt="WMSU Logo" className="w-11 h-11 object-contain z-10" />
-          <img src={gccLogo} alt="GCC Logo" className="w-11 h-11 object-contain z-20" />
+          <img src={logos.wmsuLogo} alt="WMSU Logo" className="w-11 h-11 object-contain z-10" />
+          <img src={logos.gccLogo} alt="GCC Logo" className="w-11 h-11 object-contain z-20" />
         </div>
         <div className="flex flex-col justify-center hidden sm:flex">
           <h1 className="text-2xl font-black tracking-wide uppercase leading-none text-white">WMSU GCC</h1>

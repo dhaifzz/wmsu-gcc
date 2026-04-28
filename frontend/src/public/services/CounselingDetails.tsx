@@ -1,9 +1,40 @@
-import { ArrowLeft, MessageCircle, Shield, Clock, Calendar, CheckCircle2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowLeft, MessageCircle, Shield, Clock, Calendar, CheckCircle } from 'lucide-react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
-import counselingImg from '../../assets/img/counseling-img.png';
+import { cmsApi } from '../../lib/api';
 
 const CounselingDetails = () => {
+  const [content, setContent] = useState<any>(null);
+  const [homeContent, setHomeContent] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const [counselingRes, homeRes] = await Promise.all([
+          cmsApi.getContent('counseling'),
+          cmsApi.getContent('home')
+        ]);
+        if (counselingRes.ok) setContent(counselingRes.data);
+        if (homeRes.ok) setHomeContent(homeRes.data);
+      } catch (error) {
+        console.error('Error fetching content:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchContent();
+  }, []);
+
+  if (isLoading || !content) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Navbar />
@@ -11,7 +42,11 @@ const CounselingDetails = () => {
       {/* Hero Section */}
       <div className="relative min-h-[450px] flex items-center justify-center overflow-hidden pt-32 pb-32">
         <div className="absolute inset-0 z-0">
-          <img src={counselingImg} alt="Counseling" className="w-full h-full object-cover blur-[2px] brightness-50" />
+          <img 
+            src={homeContent?.support?.features?.[0]?.image || content?.hero?.image || '/placeholder.png'} 
+            alt="Counseling" 
+            className="w-full h-full object-cover blur-[2px] brightness-50" 
+          />
           <div className="absolute inset-0 bg-emerald-900/60"></div>
         </div>
         
@@ -19,9 +54,9 @@ const CounselingDetails = () => {
           <a href="/" className="inline-flex items-center gap-2 text-emerald-200 hover:text-white transition-colors mb-6 font-bold">
             <ArrowLeft size={20} /> Back to Home
           </a>
-          <h1 className="text-5xl md:text-6xl font-black text-white mb-4">Professional Counseling</h1>
+          <h1 className="text-5xl md:text-6xl font-black text-white mb-4">{content?.hero?.title}</h1>
           <p className="text-xl text-emerald-100 max-w-2xl mx-auto font-medium">
-            A safe, confidential space for emotional growth and personal discovery.
+            {content?.hero?.description}
           </p>
         </div>
       </div>
@@ -35,10 +70,10 @@ const CounselingDetails = () => {
             <div className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100">
               <h2 className="text-3xl font-black text-slate-900 mb-6">About the Service</h2>
               <p className="text-slate-600 text-lg leading-relaxed mb-6 font-medium">
-                Our counseling services are designed to provide students and outside clients with the professional support they need to navigate life's challenges. Whether you're dealing with academic stress, personal relationship issues, or mental health concerns, our certified counselors are here to listen and guide you.
+                {content?.about?.description1}
               </p>
               <p className="text-slate-600 text-lg leading-relaxed font-medium">
-                We believe that every individual has the potential for growth. Our approach is student-centered, compassionate, and strictly confidential.
+                {content?.about?.description2}
               </p>
               
               <div className="grid md:grid-cols-2 gap-6 mt-12">
@@ -58,15 +93,9 @@ const CounselingDetails = () => {
             <div className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100">
               <h2 className="text-3xl font-black text-slate-900 mb-6">Requirements</h2>
               <ul className="space-y-4">
-                {[
-                  "Official Booking Receipt (From the GCC Portal)",
-                  "Personal Data Form (Must be completed before the session)",
-                  "Counseling Form (Available at the GCC center)",
-                  "Valid Student ID (For WMSU Students)",
-                  "Appointment Schedule"
-                ].map((item, i) => (
+                {content?.requirements?.map((item: string, i: number) => (
                   <li key={i} className="flex items-center gap-4 text-slate-700 font-bold">
-                    <CheckCircle2 className="text-emerald-500 shrink-0" size={24} />
+                    <CheckCircle className="text-emerald-500 shrink-0" size={24} />
                     {item}
                   </li>
                 ))}
@@ -77,13 +106,7 @@ const CounselingDetails = () => {
               <h2 className="text-3xl font-black text-slate-900 mb-8">How to Book</h2>
               
               <div className="space-y-8 relative before:absolute before:left-[17px] before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100">
-                {[
-                  { title: "Book a Session", desc: "Schedule your consultation through our online portal or visit the center." },
-                  { title: "Get Your Receipt", desc: "Download or print your official booking receipt as proof of appointment." },
-                  { title: "Visit GCC Office", desc: "Go to the GCC Office in WMSU Main Campus with your requirements." },
-                  { title: "Center Verification", desc: "Arrive at the GCC center at your scheduled time with your requirements." },
-                  { title: "Meet Your Counselor", desc: "Engage in a professional, one-on-one session in a safe environment." }
-                ].map((step, i) => (
+                {content?.howToBook?.map((step: any, i: number) => (
                   <div key={i} className="relative pl-12">
                     <div className="absolute left-0 top-0 w-9 h-9 bg-white border-2 border-emerald-500 rounded-full flex items-center justify-center text-emerald-600 font-black z-10">
                       {i + 1}
@@ -99,9 +122,9 @@ const CounselingDetails = () => {
           {/* Sidebar / CTA */}
           <div className="space-y-8">
             <div className="bg-emerald-900 p-8 rounded-lg text-white shadow-2xl shadow-emerald-900/20">
-              <h3 className="text-2xl font-black mb-4">Book a Session</h3>
+              <h3 className="text-2xl font-black mb-4">{content?.cta?.title}</h3>
               <p className="text-emerald-100/80 mb-8 font-medium">
-                Ready to talk? Schedule your consultation today and take the first step toward mental wellness.
+                {content?.cta?.description}
               </p>
               <div className="space-y-4 mb-8">
                 <div className="flex items-center gap-3 text-sm font-bold">
@@ -119,9 +142,9 @@ const CounselingDetails = () => {
             </div>
             
             <div className="bg-white p-8 rounded-lg border border-slate-100 shadow-xl shadow-slate-200/50">
-              <h3 className="text-xl font-black text-slate-900 mb-4">Need Immediate Help?</h3>
+              <h3 className="text-xl font-black text-slate-900 mb-4">{content?.hotline?.title}</h3>
               <p className="text-slate-500 text-sm font-medium mb-6">
-                If you are in a crisis, please reach out to our emergency hotline available during office hours.
+                {content?.hotline?.description}
               </p>
               <button className="w-full py-4 border-2 border-emerald-600 text-emerald-700 font-black rounded-lg hover:bg-emerald-50 transition-all">
                 Contact Hotline

@@ -8,10 +8,69 @@ import shiftingImg from '../assets/img/shifting-img.png';
 import ourServicesImg from '../assets/img/Presentation-GCC.jpg';
 import ourServicesImg2 from '../assets/img/our-services2.png';
 import ourServicesImg3 from '../assets/img/our-services3.png';
+import { cmsApi } from '../lib/api';
 
 const HomePage = () => {
-  const heroImages = [ourServicesImg, ourServicesImg2, ourServicesImg3];
+  const [homeContent, setHomeContent] = useState<any>({
+    hero: {
+      title: "Take care of your Mental Health",
+      description: "The WMSU Guidance and Counseling Center provides a safe space for growth, empowerment, and emotional support. We are here to help you shine.",
+      images: [null, null, null]
+    },
+    support: {
+      title: "Support Services",
+      subtitle: "Need Help? Start Here",
+      description: "We provide comprehensive support services to help students navigate their academic journey and personal development.",
+      features: [
+        {
+          image: counselingImg,
+          title: "Counseling",
+          path: "/services/counseling",
+          description: "Counseling services are available for both students and outside clients. Appointments are required for consultations, which include the completion of the Personal Data Form and Counseling Form before sessions."
+        },
+        {
+          image: assessmentImg,
+          title: "Assessment for Students",
+          path: "/services/assessment",
+          description: "Conducts assessments for students taking the DASS-21 Test (College) and DASS-Y Test (High School). Students must schedule an appointment and complete the required forms before the assessment."
+        },
+        {
+          image: shiftingImg,
+          title: "Shifting Exam",
+          path: "/services/shifting",
+          description: "Students changing programs. Applicants must schedule an appointment and complete the required forms before taking the exam."
+        }
+      ]
+    },
+    growth: {
+      title: "We're here to help you grow.",
+      description: "Our center offers a variety of services tailored to meet the diverse needs of the WMSU student body. From mental health support to career planning, we've got you covered.",
+      services: [
+        { name: "Individual Counseling", icon: <Users /> },
+        { name: "Career Guidance", icon: <Flag /> },
+        { name: "Crisis Intervention", icon: <MessageCircle /> },
+        { name: "Peer Support", icon: <Heart /> },
+      ]
+    }
+  });
+
+  const heroImages = [
+    homeContent.hero.images[0] || ourServicesImg,
+    homeContent.hero.images[1] || ourServicesImg2,
+    homeContent.hero.images[2] || ourServicesImg3
+  ];
+
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      const result = await cmsApi.getContent('home');
+      if (result.ok && result.data.hero) {
+        setHomeContent(result.data);
+      }
+    };
+    fetchContent();
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -20,33 +79,16 @@ const HomePage = () => {
     return () => clearInterval(timer);
   }, [heroImages.length]);
 
-  const features = [
-    {
-      image: counselingImg,
-      title: "Counseling",
-      path: "/services/counseling",
-      description: "Counseling services are available for both students and outside clients. Appointments are required for consultations, which include the completion of the Personal Data Form and Counseling Form before sessions."
-    },
-    {
-      image: assessmentImg,
-      title: "Assessment for Students",
-      path: "/services/assessment",
-      description: "Conducts assessments for students taking the DASS-21 Test (College) and DASS-Y Test (High School). Students must schedule an appointment and complete the required forms before the assessment."
-    },
-    {
-      image: shiftingImg,
-      title: "Shifting Exam",
-      path: "/services/shifting",
-      description: "Students changing programs. Applicants must schedule an appointment and complete the required forms before taking the exam."
-    }
-  ];
+  const features = homeContent.support.features.map((f: any, i: number) => ({
+    ...f,
+    // Use CMS image if available, otherwise fallback to defaults
+    image: f.image || (i === 0 ? counselingImg : i === 1 ? assessmentImg : shiftingImg)
+  }));
 
-  const services = [
-    { name: "Individual Counseling", icon: <Users /> },
-    { name: "Career Guidance", icon: <Flag /> },
-    { name: "Crisis Intervention", icon: <MessageCircle /> },
-    { name: "Peer Support", icon: <Heart /> },
-  ];
+  const services = homeContent.growth.services.map((s: any, i: number) => ({
+    ...s,
+    icon: i === 0 ? <Users /> : i === 1 ? <Flag /> : i === 2 ? <MessageCircle /> : <Heart />
+  }));
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
@@ -74,14 +116,13 @@ const HomePage = () => {
         <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-4xl">
             <h1 className="text-5xl md:text-7xl font-black text-white leading-tight mb-6 animate-in fade-in slide-in-from-bottom-6 duration-1000">
-              Take care of your <br />
+              {homeContent.hero.title.split(' ').slice(0, -2).join(' ')} <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300 pr-4">
-                Mental Health
+                {homeContent.hero.title.split(' ').slice(-2).join(' ')}
               </span> <br />
             </h1>
             <p className="text-xl text-emerald-50/80 mb-10 leading-relaxed max-w-2xl animate-in fade-in slide-in-from-bottom-8 duration-1000">
-              The WMSU Guidance and Counseling Center provides a safe space for growth,
-              empowerment, and emotional support. We are here to help you shine.
+              {homeContent.hero.description}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 animate-in fade-in slide-in-from-bottom-10 duration-1000">
               <a
@@ -108,17 +149,17 @@ const HomePage = () => {
       <section className="py-24 bg-white relative overflow-hidden">
         <div className="container mx-auto px-6">
           <div className="text-center max-w-3xl mx-auto mb-20">
-            <h2 className="text-emerald-600 text-sm font-black uppercase tracking-[0.2em] mb-4">Support Services</h2>
+            <h2 className="text-emerald-600 text-sm font-black uppercase tracking-[0.2em] mb-4">{homeContent.support.title}</h2>
             <h3 className="text-4xl md:text-5xl font-black text-slate-900 mb-6">
-              Need Help? Start Here
+              {homeContent.support.subtitle}
             </h3>
             <p className="text-lg text-slate-600 font-medium">
-              We provide comprehensive support services to help students navigate their academic journey and personal development.
+              {homeContent.support.description}
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-12">
-            {features.map((feature, index) => (
+            {features.map((feature: any, index: number) => (
               <a
                 key={index}
                 href={feature.path}
@@ -159,15 +200,13 @@ const HomePage = () => {
             <div className="lg:w-1/2">
               <h2 className="text-emerald-400 text-sm font-black uppercase tracking-[0.2em] mb-4">Our Services</h2>
               <h3 className="text-4xl md:text-5xl font-black text-white mb-8">
-                We're here to help <br /> you grow.
+                {homeContent.growth.title}
               </h3>
               <p className="text-emerald-100/70 text-lg mb-10 font-medium">
-                Our center offers a variety of services tailored to meet the diverse
-                needs of the WMSU student body. From mental health support to
-                career planning, we've got you covered.
+                {homeContent.growth.description}
               </p>
               <div className="grid grid-cols-2 gap-4">
-                {services.map((service, index) => (
+                {services.map((service: any, index: number) => (
                   <div key={index} className="flex items-center gap-3 text-white font-bold bg-white/5 p-4 rounded-lg border border-white/10">
                     <span className="text-emerald-400">{service.icon}</span>
                     {service.name}
@@ -178,7 +217,7 @@ const HomePage = () => {
             <div className="lg:w-1/2 relative">
               <div className="relative overflow-hidden rounded-lg shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-700">
                 <img
-                  src={ourServicesImg}
+                  src={homeContent.growth.image || ourServicesImg}
                   alt="Our Services"
                   className="w-full h-[500px] object-cover"
                 />

@@ -7,6 +7,12 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
 
+  const header = { title: "Psychological Assessment", subtitle: "Schedule your testing session" };
+  const requirements = { title: "Requirements", content: "Students must complete the Personal Data Form and have their Student ID ready before the assessment." };
+  const duration = { title: "Test Duration", content: "The assessment typically takes between 30 to 45 minutes to complete." };
+  const important = { title: "Important Note", content: "Please arrive at the GCC office 15 minutes before your scheduled slot for verification." };
+  const timeSlots = ["08:00 AM - 09:00 AM", "09:00 AM - 10:00 AM", "10:00 AM - 11:00 AM", "01:00 PM - 02:00 PM", "02:00 PM - 03:00 PM", "03:00 PM - 04:00 PM"];
+
   const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
   const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
@@ -24,10 +30,7 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
     if (nextDate.getMonth() < today.getMonth() && nextDate.getFullYear() <= today.getFullYear()) return;
     setCurrentDate(nextDate);
   };
-  const timeSlots = [
-    "08:00 AM - 09:00 AM", "09:00 AM - 10:00 AM", "10:00 AM - 11:00 AM", "11:00 AM - 12:00 PM",
-    "01:00 PM - 02:00 PM", "02:00 PM - 03:00 PM", "03:00 PM - 04:00 PM", "04:00 PM - 05:00 PM"
-  ];
+
 
   return (
     <motion.div
@@ -45,8 +48,8 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
           <ChevronLeft size={24} />
         </button>
         <div>
-          <h2 className="text-4xl font-black tracking-tight text-slate-900">Psychological Assessment</h2>
-          <p className="text-slate-500 font-medium text-sm">Schedule your DASS-21 or DASS-Y testing session.</p>
+          <h2 className="text-4xl font-black tracking-tight text-slate-900">{header.title}</h2>
+          <p className="text-slate-500 font-medium text-sm">{header.subtitle}</p>
         </div>
       </div>
 
@@ -114,10 +117,10 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
                 <div className="w-8 h-8 bg-white rounded-xl flex items-center justify-center shadow-sm border border-slate-100">
                   <ClipboardCheck size={16} />
                 </div>
-                <span className="text-[12px] font-black uppercase tracking-widest">Requirements</span>
+                <span className="text-[12px] font-black uppercase tracking-widest">{requirements.title}</span>
               </div>
               <p className="text-[13px] text-slate-500 font-bold leading-relaxed">
-                Bring a black ballpen and your valid Student ID for verification.
+                {requirements.content}
               </p>
             </div>
             <div className="p-4 rounded-3xl bg-slate-50 border border-slate-100/50">
@@ -125,10 +128,10 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
                 <div className="w-8 h-8 bg-white rounded-xl flex items-center justify-center shadow-sm border border-slate-100">
                   <Clock size={16} />
                 </div>
-                <span className="text-[12px] font-black uppercase tracking-widest">Testing Time</span>
+                <span className="text-[12px] font-black uppercase tracking-widest">{duration.title}</span>
               </div>
               <p className="text-[13px] text-slate-500 font-bold leading-relaxed">
-                Most assessments are completed within 30 to 45 minutes.
+                {duration.content}
               </p>
             </div>
           </div>
@@ -226,10 +229,10 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
           <div className="bg-slate-50 rounded-[2.5rem] p-8 border border-slate-200">
             <div className="flex items-center gap-3 mb-4 text-slate-600">
               <Info size={18} />
-              <h4 className="font-black text-[10px] uppercase tracking-[0.2em]">Requirement</h4>
+              <h4 className="font-black text-[10px] uppercase tracking-[0.2em]">{important.title}</h4>
             </div>
             <p className="text-xs text-slate-500 leading-relaxed font-bold">
-              Please bring your own ballpen (black ink) and a valid Student ID. Assessments take approximately 30-45 minutes.
+              {important.content}
             </p>
           </div>
         </div>
