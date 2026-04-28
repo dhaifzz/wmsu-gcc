@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import phAddresses from '../ph_addresses.json';
 import {
   User,
   Lock,
@@ -17,7 +18,8 @@ import {
   Map,
   ArrowLeft,
   ChevronDown,
-  Loader2
+  Loader2,
+  Search
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import authBg from '../assets/img/Auth-Background.jpg';
@@ -35,36 +37,9 @@ export default function Register() {
     wmsuLogo: wmsuLogoAsset,
     gccLogo: gccLogoAsset
   });
-
-  useEffect(() => {
-    const fetchLogos = async () => {
-      try {
-        const res = await cmsApi.getContent('logos');
-        if (res.ok && res.data) {
-          setLogos({
-            wmsuLogo: res.data.wmsuLogo || wmsuLogoAsset,
-            gccLogo: res.data.gccLogo || gccLogoAsset
-          });
-        }
-      } catch (error) {
-        console.error('Failed to fetch logos:', error);
-      }
-    };
-    fetchLogos();
-  }, []);
-  const [isDropdownOpen, setIsDropdownOpen] = useState<{ [key: string]: boolean }>({
-    sex: false,
-    gradeLevel: false,
-    department: false
-  });
-
-  const toggleDropdown = (key: string) => {
-    setIsDropdownOpen(prev => ({ ...prev, [key]: !prev[key] }));
-  };
-
-  const closeDropdowns = () => {
-    setIsDropdownOpen({ sex: false, gradeLevel: false, department: false });
-  };
+  const [undergradCourses, setUndergradCourses] = useState<string[]>([]);
+  const [gradCourses, setGradCourses] = useState<string[]>([]);
+  const [occupations, setOccupations] = useState<string[]>([]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -80,6 +55,147 @@ export default function Register() {
   const [sex, setSex] = useState('');
   const [birthdate, setBirthdate] = useState('');
   const [occupation, setOccupation] = useState('');
+  const [courseSearch, setCourseSearch] = useState('');
+  const [occSearch, setOccSearch] = useState('');
+  const [citySearch, setCitySearch] = useState('');
+
+  const ALL_CITIES = useMemo(() => {
+    const keys = Object.keys(phAddresses);
+    return keys.sort((a, b) => {
+      if (a === 'Zamboanga City') return -1;
+      if (b === 'Zamboanga City') return 1;
+      return a.localeCompare(b);
+    });
+  }, []);
+
+  const [barangaySearch, setBarangaySearch] = useState('');
+
+  const filteredCities = ALL_CITIES.filter(c => c.toLowerCase().includes(citySearch.toLowerCase()));
+
+  const filteredBarangays = useMemo(() => {
+    if (!city || !phAddresses[city as keyof typeof phAddresses]) return [];
+    const list = phAddresses[city as keyof typeof phAddresses];
+    return list.filter(b => 
+      b.toLowerCase().includes(barangaySearch.toLowerCase())
+    );
+  }, [city, barangaySearch]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [logoRes, systemRes] = await Promise.all([
+          cmsApi.getContent('logos'),
+          cmsApi.getContent('system')
+        ]);
+        
+        if (logoRes.ok && logoRes.data) {
+          setLogos({
+            wmsuLogo: logoRes.data.wmsuLogo || wmsuLogoAsset,
+            gccLogo: logoRes.data.gccLogo || gccLogoAsset
+          });
+        }
+
+        if (systemRes.ok && systemRes.data && ((systemRes.data.undergradCourses && systemRes.data.undergradCourses.length > 0) || (systemRes.data.gradCourses && systemRes.data.gradCourses.length > 0))) {
+          setUndergradCourses(systemRes.data.undergradCourses || []);
+          setGradCourses(systemRes.data.gradCourses || []);
+          setOccupations(systemRes.data.occupations || []);
+        } else {
+          // Fallback if DB is empty
+          setUndergradCourses([
+            "Associate in Computer Technology – Application Development",
+            "Associate in Computer Technology – Networking",
+            "BA Asian Studies Major in ASEAN Community",
+            "BA English",
+            "BA History",
+            "BA Mass Communication – Broadcasting",
+            "BA Mass Communication – Journalism",
+            "BA Political Science",
+            "Bachelor of Agricultural Technology",
+            "Bachelor of Culture and Arts Education",
+            "Bachelor of Early Childhood Education",
+            "Bachelor of Elementary Education",
+            "Bachelor of Laws",
+            "Bachelor of Physical Education",
+            "Bachelor of Public Administration",
+            "Bachelor of Secondary Education",
+            "Bachelor of Special Needs Education",
+            "BS Accountancy",
+            "BS Agriculture",
+            "BS Agribusiness",
+            "BS Agricultural and Biosystems Engineering",
+            "BS Agroforestry",
+            "BS Architecture",
+            "BS Civil Engineering",
+            "BS Community Development",
+            "BS Computer Engineering",
+            "BS Computer Science",
+            "BS Criminology",
+            "BS Economics",
+            "BS Electrical Engineering",
+            "BS Electronics Engineering",
+            "BS Environmental Engineering",
+            "BS Environmental Science",
+            "BS Exercise and Sports Sciences",
+            "BS Food Technology",
+            "BS Forestry",
+            "BS Geodetic Engineering",
+            "BS Home Economics",
+            "BS Hospitality Management",
+            "BS Industrial Engineering",
+            "BS Information Technology",
+            "BS Mechanical Engineering",
+            "BS Nursing",
+            "BS Nutrition and Dietetics",
+            "BS Psychology",
+            "BS Sanitary Engineering",
+            "BS Social Work"
+          ]);
+          setGradCourses([
+            "Diploma in Physical Education",
+            "MA Education",
+            "MA Education – Home Economics",
+            "MA Education – Nutrition and Health Education",
+            "MA Nursing – Nursing Education",
+            "MA Nursing – Nursing Management",
+            "Master in Food Processing and Management",
+            "Master in Information Technology",
+            "Master in Physical Education",
+            "Master of Public Administration",
+            "MS Agronomy",
+            "MS Social Work",
+            "Ph.D. in Education"
+          ]);
+          setOccupations(["Student", "Employee", "Self Employed", "Unemployed", "Prefer not to say"]);
+        }
+      } catch (error) {
+        console.error('Failed to fetch data:', error);
+      }
+    };
+    fetchData();
+  }, []);
+  const [isDropdownOpen, setIsDropdownOpen] = useState<{ [key: string]: boolean }>({
+    sex: false,
+    gradeLevel: false,
+    department: false,
+    occupation: false,
+    course: false,
+    city: false,
+    barangay: false
+  });
+
+  const filteredUndergrad = undergradCourses.filter(c => c.toLowerCase().includes(courseSearch.toLowerCase()));
+  const filteredGrad = gradCourses.filter(c => c.toLowerCase().includes(courseSearch.toLowerCase()));
+  const filteredOccs = (occupations.length > 0 ? occupations : ['Student', 'Employee', 'Self Employed', 'Unemployed', 'Prefer not to say'])
+    .filter(o => o.toLowerCase().includes(occSearch.toLowerCase()));
+
+  const toggleDropdown = (key: string) => {
+    setIsDropdownOpen(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const closeDropdowns = () => {
+    setIsDropdownOpen({ sex: false, gradeLevel: false, department: false, occupation: false, course: false, city: false });
+  };
+
 
   const [isWMSU, setIsWMSU] = useState<boolean>(true);
 
@@ -455,32 +571,138 @@ export default function Register() {
                       </div>
 
                       {/* Address Grid: City and Barangay */}
-                      <div className="flex flex-col sm:flex-row gap-4">
-                        <div className="relative flex flex-1 items-center">
-                          <div className="absolute left-4 text-gray-700">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* City Selection */}
+                        <div className="relative">
+                          <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10 text-gray-700 pointer-events-none">
                             <Building className="h-5 w-5" />
                           </div>
-                          <input
-                            type="text"
-                            placeholder="City"
-                            value={city}
-                            onChange={(e) => setCity(e.target.value)}
-                            required
-                            className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
-                          />
+                          <button
+                            type="button"
+                            onClick={() => toggleDropdown('city')}
+                            className={`w-full flex items-center justify-between bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold transition-all border-2 ${isDropdownOpen.city ? 'border-emerald-500 bg-white ring-4 ring-emerald-500/10' : 'border-transparent'} rounded-lg`}
+                          >
+                            <span className={city ? 'text-slate-800' : 'text-gray-400'}>
+                              {city || 'Select City'}
+                            </span>
+                            <ChevronDown size={18} className={`text-emerald-600 transition-transform ${isDropdownOpen.city ? 'rotate-180' : ''}`} />
+                          </button>
+
+                          <AnimatePresence>
+                            {isDropdownOpen.city && (
+                              <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 10 }}
+                                className="absolute z-50 top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[300px]"
+                              >
+                                <div className="p-3 border-b border-slate-50">
+                                  <div className="relative flex items-center">
+                                    <Search className="absolute left-3 h-4 w-4 text-slate-400" />
+                                    <input
+                                      type="text"
+                                      placeholder="Search city..."
+                                      value={citySearch}
+                                      onChange={(e) => setCitySearch(e.target.value)}
+                                      className="w-full bg-slate-50 border-none rounded-xl py-2 pl-9 pr-4 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none"
+                                      autoFocus
+                                    />
+                                  </div>
+                                </div>
+                                <div className="overflow-y-auto custom-scrollbar">
+                                  {filteredCities.map((opt) => (
+                                    <button
+                                      key={opt}
+                                      type="button"
+                                      onClick={() => {
+                                        setCity(opt);
+                                        setBarangay(''); 
+                                        toggleDropdown('city');
+                                        setCitySearch('');
+                                      }}
+                                      className={`w-full px-6 py-4 text-left text-sm font-bold transition-colors border-b border-slate-50 last:border-0 ${city === opt ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-emerald-50/50'}`}
+                                    >
+                                      {opt}
+                                    </button>
+                                  ))}
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
                         </div>
-                        <div className="relative flex flex-1 items-center">
-                          <div className="absolute left-4 text-gray-700">
+
+                        {/* Barangay Selection */}
+                        <div className="relative">
+                          <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10 text-gray-700 pointer-events-none">
                             <Map className="h-5 w-5" />
                           </div>
-                          <input
-                            type="text"
-                            placeholder="Barangay"
-                            value={barangay}
-                            onChange={(e) => setBarangay(e.target.value)}
-                            required
-                            className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
-                          />
+                          
+                          <button
+                            type="button"
+                            disabled={!city}
+                            onClick={() => toggleDropdown('barangay')}
+                            className={`w-full flex items-center justify-between py-4 pl-12 pr-4 text-sm font-semibold transition-all border-2 ${isDropdownOpen.barangay ? 'border-emerald-500 bg-white ring-4 ring-emerald-500/10' : 'border-transparent'} rounded-lg ${!city ? 'bg-gray-50 cursor-not-allowed opacity-50' : 'bg-gray-100'}`}
+                          >
+                            <span className={barangay ? 'text-slate-800' : 'text-gray-400'}>
+                              {barangay || (city ? 'Select or Type Barangay' : 'Select city first')}
+                            </span>
+                            <ChevronDown size={18} className={`text-emerald-600 transition-transform ${isDropdownOpen.barangay ? 'rotate-180' : ''}`} />
+                          </button>
+
+                          <AnimatePresence>
+                            {isDropdownOpen.barangay && (
+                              <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 10 }}
+                                className="absolute z-50 top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[300px]"
+                              >
+                                <div className="p-3 border-b border-slate-50">
+                                  <div className="relative flex items-center">
+                                    <Search className="absolute left-3 h-4 w-4 text-slate-400" />
+                                    <input
+                                      type="text"
+                                      placeholder="Type your barangay..."
+                                      value={barangay || barangaySearch}
+                                      onChange={(e) => {
+                                        const val = e.target.value;
+                                        setBarangaySearch(val);
+                                        // If not Zamboanga, update barangay state directly as they type
+                                        if (city !== 'Zamboanga City') {
+                                          setBarangay(val);
+                                        }
+                                      }}
+                                      className="w-full bg-slate-50 border-none rounded-xl py-2 pl-9 pr-4 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none"
+                                      autoFocus
+                                    />
+                                  </div>
+                                </div>
+                                <div className="overflow-y-auto custom-scrollbar">
+                                  {filteredBarangays.map((opt) => (
+                                    <button
+                                      key={opt}
+                                      type="button"
+                                      onClick={() => {
+                                        setBarangay(opt);
+                                        toggleDropdown('barangay');
+                                        setBarangaySearch('');
+                                      }}
+                                      className={`w-full px-6 py-4 text-left text-sm font-bold transition-colors border-b border-slate-50 last:border-0 ${barangay === opt ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-emerald-50/50'}`}
+                                    >
+                                      {opt}
+                                    </button>
+                                  ))}
+                                  {filteredBarangays.length === 0 && (
+                                    <div className="p-4 text-center">
+                                      <p className="text-[10px] font-bold text-slate-400 italic">
+                                        {city ? 'No barangays found for this city' : 'Select a city first'}
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
                         </div>
                       </div>
 
@@ -672,21 +894,44 @@ export default function Register() {
                                   initial={{ opacity: 0, y: 10 }}
                                   animate={{ opacity: 1, y: 0 }}
                                   exit={{ opacity: 0, y: 10 }}
-                                  className="absolute z-50 bottom-full left-0 right-0 mb-2 bg-white border border-slate-100 shadow-2xl overflow-hidden max-h-60 overflow-y-auto"
+                                  className="absolute z-50 bottom-full left-0 right-0 mb-2 bg-white border border-slate-100 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[300px]"
                                 >
-                                  {['Student', 'Employee', 'Self Employed', 'Unemployed', 'Prefer not to say'].map((option) => (
-                                    <button
-                                      key={option}
-                                      type="button"
-                                      onClick={() => {
-                                        setOccupation(option);
-                                        toggleDropdown('occupation');
-                                      }}
-                                      className={`w-full px-6 py-4 text-left text-sm font-bold transition-colors border-b border-slate-50 last:border-0 ${occupation === option ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-emerald-50/50'}`}
-                                    >
-                                      {option}
-                                    </button>
-                                  ))}
+                                  {/* Search Input */}
+                                  <div className="p-3 border-b border-slate-50">
+                                    <div className="relative flex items-center">
+                                      <Search className="absolute left-3 h-4 w-4 text-slate-400" />
+                                      <input
+                                        type="text"
+                                        placeholder="Search occupation..."
+                                        value={occSearch}
+                                        onChange={(e) => setOccSearch(e.target.value)}
+                                        className="w-full bg-slate-50 border-none rounded-xl py-2 pl-9 pr-4 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none"
+                                        autoFocus
+                                      />
+                                    </div>
+                                  </div>
+
+                                  <div className="overflow-y-auto custom-scrollbar">
+                                    {filteredOccs.map((option) => (
+                                      <button
+                                        key={option}
+                                        type="button"
+                                        onClick={() => {
+                                          setOccupation(option);
+                                          toggleDropdown('occupation');
+                                          setOccSearch('');
+                                        }}
+                                        className={`w-full px-6 py-4 text-left text-sm font-bold transition-colors border-b border-slate-50 last:border-0 ${occupation === option ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-emerald-50/50'}`}
+                                      >
+                                        {option}
+                                      </button>
+                                    ))}
+                                    {filteredOccs.length === 0 && (
+                                      <div className="p-4 text-center">
+                                        <p className="text-xs font-bold text-slate-400">No results found</p>
+                                      </div>
+                                    )}
+                                  </div>
                                 </motion.div>
                               )}
                             </AnimatePresence>
@@ -749,18 +994,99 @@ export default function Register() {
 
                       {/* Conditional Fields */}
                       {educationLevel === 'College' && (
-                        <div className="relative flex items-center animate-in fade-in slide-in-from-top-2 duration-300">
-                          <div className="absolute left-4 text-gray-700 opacity-60">
-                            <GraduationCap className="h-5 w-5" />
+                        <div className="relative animate-in fade-in slide-in-from-top-2 duration-300">
+                          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4 mb-2 block">Course</label>
+                          <div className="relative flex items-center">
+                            <div className="absolute left-4 z-10 text-gray-700 pointer-events-none">
+                              <GraduationCap className="h-5 w-5" />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => toggleDropdown('course')}
+                              className={`w-full flex items-center justify-between bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold transition-all border-2 ${isDropdownOpen.course ? 'border-emerald-500 bg-white ring-4 ring-emerald-500/10' : 'border-transparent'}`}
+                            >
+                              <span className={course ? 'text-slate-800' : 'text-gray-400'}>
+                                {course || 'Select Course'}
+                              </span>
+                              <ChevronDown size={18} className={`text-emerald-600 transition-transform ${isDropdownOpen.course ? 'rotate-180' : ''}`} />
+                            </button>
+
+                            <AnimatePresence>
+                              {isDropdownOpen.course && (
+                                <motion.div
+                                  initial={{ opacity: 0, y: 10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  exit={{ opacity: 0, y: 10 }}
+                                  className="absolute z-50 bottom-full left-0 right-0 mb-2 bg-white border border-slate-100 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[400px]"
+                                >
+                                  {/* Search Input */}
+                                  <div className="p-3 border-b border-slate-50">
+                                    <div className="relative flex items-center">
+                                      <Search className="absolute left-3 h-4 w-4 text-slate-400" />
+                                      <input
+                                        type="text"
+                                        placeholder="Search courses..."
+                                        value={courseSearch}
+                                        onChange={(e) => setCourseSearch(e.target.value)}
+                                        className="w-full bg-slate-50 border-none rounded-xl py-2 pl-9 pr-4 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none"
+                                        autoFocus
+                                      />
+                                    </div>
+                                  </div>
+
+                                  <div className="overflow-y-auto custom-scrollbar pb-2">
+                                    {/* Undergraduate Section */}
+                                    {filteredUndergrad.length > 0 && (
+                                      <div className="px-4 py-2 bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50">
+                                        Undergraduate Programs
+                                      </div>
+                                    )}
+                                    {filteredUndergrad.map((opt) => (
+                                      <button
+                                        key={opt}
+                                        type="button"
+                                        onClick={() => {
+                                          setCourse(opt);
+                                          toggleDropdown('course');
+                                          setCourseSearch('');
+                                        }}
+                                        className={`w-full px-6 py-3 text-left text-xs font-bold transition-colors border-b border-slate-50 last:border-0 ${course === opt ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-emerald-50/50'}`}
+                                      >
+                                        {opt}
+                                      </button>
+                                    ))}
+
+                                    {/* Graduate Section */}
+                                    {filteredGrad.length > 0 && (
+                                      <div className="px-4 py-2 bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50 border-t">
+                                        Graduate Programs
+                                      </div>
+                                    )}
+                                    {filteredGrad.map((opt) => (
+                                      <button
+                                        key={opt}
+                                        type="button"
+                                        onClick={() => {
+                                          setCourse(opt);
+                                          toggleDropdown('course');
+                                          setCourseSearch('');
+                                        }}
+                                        className={`w-full px-6 py-3 text-left text-xs font-bold transition-colors border-b border-slate-50 last:border-0 ${course === opt ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-emerald-50/50'}`}
+                                      >
+                                        {opt}
+                                      </button>
+                                    ))}
+
+                                    {filteredUndergrad.length === 0 && filteredGrad.length === 0 && (
+                                      <div className="p-8 text-center">
+                                        <p className="text-sm font-bold text-slate-400">No courses found matching "{courseSearch}"</p>
+                                      </div>
+                                    )}
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
                           </div>
-                          <input
-                            type="text"
-                            placeholder="Course"
-                            value={course}
-                            onChange={(e) => setCourse(e.target.value)}
-                            required
-                            className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
-                          />
                         </div>
                       )}
 

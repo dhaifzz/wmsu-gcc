@@ -137,6 +137,74 @@ const CMS = () => {
         guidance: { title: "Career Guidance", description: "Not sure which course fits you best? Our counselors also offer career guidance sessions to help you make an informed decision." }
       };
 
+      const defaultSystem = {
+        undergradCourses: [
+          "Associate in Computer Technology – Application Development",
+          "Associate in Computer Technology – Networking",
+          "BA Asian Studies Major in ASEAN Community",
+          "BA English",
+          "BA History",
+          "BA Mass Communication – Broadcasting",
+          "BA Mass Communication – Journalism",
+          "BA Political Science",
+          "Bachelor of Agricultural Technology",
+          "Bachelor of Culture and Arts Education",
+          "Bachelor of Early Childhood Education",
+          "Bachelor of Elementary Education",
+          "Bachelor of Laws",
+          "Bachelor of Physical Education",
+          "Bachelor of Public Administration",
+          "Bachelor of Secondary Education",
+          "Bachelor of Special Needs Education",
+          "BS Accountancy",
+          "BS Agriculture",
+          "BS Agribusiness",
+          "BS Agricultural and Biosystems Engineering",
+          "BS Agroforestry",
+          "BS Architecture",
+          "BS Civil Engineering",
+          "BS Community Development",
+          "BS Computer Engineering",
+          "BS Computer Science",
+          "BS Criminology",
+          "BS Economics",
+          "BS Electrical Engineering",
+          "BS Electronics Engineering",
+          "BS Environmental Engineering",
+          "BS Environmental Science",
+          "BS Exercise and Sports Sciences",
+          "BS Food Technology",
+          "BS Forestry",
+          "BS Geodetic Engineering",
+          "BS Home Economics",
+          "BS Hospitality Management",
+          "BS Industrial Engineering",
+          "BS Information Technology",
+          "BS Mechanical Engineering",
+          "BS Nursing",
+          "BS Nutrition and Dietetics",
+          "BS Psychology",
+          "BS Sanitary Engineering",
+          "BS Social Work"
+        ],
+        gradCourses: [
+          "Diploma in Physical Education",
+          "MA Education",
+          "MA Education – Home Economics",
+          "MA Education – Nutrition and Health Education",
+          "MA Nursing – Nursing Education",
+          "MA Nursing – Nursing Management",
+          "Master in Food Processing and Management",
+          "Master in Information Technology",
+          "Master in Physical Education",
+          "Master of Public Administration",
+          "MS Agronomy",
+          "MS Social Work",
+          "Ph.D. in Education"
+        ],
+        occupations: ["Student", "Employee", "Self Employed", "Unemployed", "Prefer not to say"]
+      };
+
       for (const s of sectionsToFetch) {
         const result = await cmsApi.getContent(s);
         
@@ -145,6 +213,7 @@ const CMS = () => {
           if (s === 'counseling') data = defaultCounseling;
           else if (s === 'assessment') data = defaultAssessment;
           else if (s === 'shifting') data = defaultShifting;
+          else if (s === 'system') data = defaultSystem;
         }
 
         if (data && Object.keys(data).length > 0) {
@@ -158,7 +227,11 @@ const CMS = () => {
               break;
             case 'contact': setContactContent(data); break;
             case 'footer': setFooterContent(data); break;
-            case 'system': setSystemData(data); break;
+            case 'system': 
+              // If fetched data is old format (missing undergradCourses), use the new default list
+              const refinedSystem = (data && data.undergradCourses) ? data : defaultSystem;
+              setSystemData(refinedSystem); 
+              break;
             case 'logos': setLogoSettings(data); break;
             case 'counseling': setCounselingContent(data); break;
             case 'assessment': setAssessmentContent(data); break;
@@ -921,13 +994,21 @@ return (
               <div className="w-2 h-8 bg-teal-500 rounded-full"></div>
               <h3 className="text-2xl font-black text-slate-800">Our Team Editor</h3>
             </div>
-            <button
-              onClick={() => handleSave('Our Team')}
-              className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
-            >
-              <Save size={16} />
-              Save Changes
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => discardSection('team')}
+                className="px-6 py-3 bg-slate-100 text-slate-500 rounded-xl font-black text-sm hover:bg-slate-200 transition-all"
+              >
+                Discard
+              </button>
+              <button
+                onClick={() => handleSave('Our Team')}
+                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+              >
+                <Save size={16} />
+                Save Changes
+              </button>
+            </div>
           </div>
 
           <div className="space-y-10">
@@ -1459,13 +1540,21 @@ return (
               <div className="w-2 h-8 bg-teal-500 rounded-full"></div>
               <h3 className="text-2xl font-black text-slate-800">Contact Info Editor</h3>
             </div>
-            <button
-              onClick={() => handleSave('Contact Info')}
-              className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
-            >
-              <Save size={16} />
-              Save Changes
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => discardSection('contact')}
+                className="px-6 py-3 bg-slate-100 text-slate-500 rounded-xl font-black text-sm hover:bg-slate-200 transition-all"
+              >
+                Discard
+              </button>
+              <button
+                onClick={() => handleSave('Contact Info')}
+                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+              >
+                <Save size={16} />
+                Save Changes
+              </button>
+            </div>
           </div>
 
           <div className="space-y-10">
@@ -1556,48 +1645,106 @@ return (
               <div className="w-2 h-8 bg-teal-500 rounded-full"></div>
               <h3 className="text-2xl font-black text-slate-800">System Data Manager</h3>
             </div>
-            <button
-              onClick={() => handleSave('System Data')}
-              className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
-            >
-              <Save size={16} />
-              Save Changes
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => discardSection('system')}
+                className="px-6 py-3 bg-slate-100 text-slate-500 rounded-xl font-black text-sm hover:bg-slate-200 transition-all"
+              >
+                Discard
+              </button>
+              <button
+                onClick={() => handleSave('System Data')}
+                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+              >
+                <Save size={16} />
+                Save Changes
+              </button>
+            </div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Courses Column */}
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Undergraduate Courses Column */}
             <div className="space-y-6">
               <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                 <h4 className="text-lg font-black text-slate-900 flex items-center gap-2">
                   <GraduationCap className="text-teal-500" size={20} />
-                  Courses
+                  Undergraduate
                 </h4>
                 <button
-                  onClick={() => setSystemData({ ...systemData, courses: [...systemData.courses, ""] })}
+                  onClick={() => setSystemData({ ...systemData, undergradCourses: [...(systemData.undergradCourses || []), ""].sort() })}
                   className="p-1.5 bg-teal-50 text-teal-600 rounded-lg hover:bg-teal-100 transition-colors"
                 >
                   <Plus size={16} />
                 </button>
               </div>
               <div className="max-h-[500px] overflow-y-auto pr-2 space-y-3 custom-scrollbar">
-                {systemData.courses.map((course: string, idx: number) => (
+                {(systemData.undergradCourses || []).map((course: string, idx: number) => (
                   <div key={idx} className="flex gap-2 group">
                     <input
                       type="text"
                       value={course}
-                      placeholder="Enter course name..."
+                      placeholder="Course name..."
                       onChange={(e) => {
-                        const newCourses = [...systemData.courses];
-                        newCourses[idx] = e.target.value;
-                        setSystemData({ ...systemData, courses: newCourses });
+                        const newList = [...systemData.undergradCourses];
+                        newList[idx] = e.target.value;
+                        setSystemData({ ...systemData, undergradCourses: newList });
+                      }}
+                      onBlur={() => {
+                        const newList = [...systemData.undergradCourses].filter(c => c.trim()).sort();
+                        setSystemData({ ...systemData, undergradCourses: newList });
                       }}
                       className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
                     />
                     <button
                       onClick={() => {
-                        const newCourses = systemData.courses.filter((_: string, i: number) => i !== idx);
-                        setSystemData({ ...systemData, courses: newCourses });
+                        const newList = systemData.undergradCourses.filter((_: string, i: number) => i !== idx);
+                        setSystemData({ ...systemData, undergradCourses: newList });
+                      }}
+                      className="p-2 text-slate-300 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Graduate Courses Column */}
+            <div className="space-y-6">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                <h4 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                  <GraduationCap className="text-teal-600" size={20} />
+                  Graduate
+                </h4>
+                <button
+                  onClick={() => setSystemData({ ...systemData, gradCourses: [...(systemData.gradCourses || []), ""].sort() })}
+                  className="p-1.5 bg-teal-50 text-teal-600 rounded-lg hover:bg-teal-100 transition-colors"
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
+              <div className="max-h-[500px] overflow-y-auto pr-2 space-y-3 custom-scrollbar">
+                {(systemData.gradCourses || []).map((course: string, idx: number) => (
+                  <div key={idx} className="flex gap-2 group">
+                    <input
+                      type="text"
+                      value={course}
+                      placeholder="Program name..."
+                      onChange={(e) => {
+                        const newList = [...systemData.gradCourses];
+                        newList[idx] = e.target.value;
+                        setSystemData({ ...systemData, gradCourses: newList });
+                      }}
+                      onBlur={() => {
+                        const newList = [...systemData.gradCourses].filter(c => c.trim()).sort();
+                        setSystemData({ ...systemData, gradCourses: newList });
+                      }}
+                      className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
+                    />
+                    <button
+                      onClick={() => {
+                        const newList = systemData.gradCourses.filter((_: string, i: number) => i !== idx);
+                        setSystemData({ ...systemData, gradCourses: newList });
                       }}
                       className="p-2 text-slate-300 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100"
                     >
@@ -1664,13 +1811,21 @@ return (
               <div className="w-2 h-8 bg-teal-500 rounded-full"></div>
               <h3 className="text-2xl font-black text-slate-800">Footer Editor</h3>
             </div>
-            <button
-              onClick={() => handleSave('Footer')}
-              className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
-            >
-              <Save size={16} />
-              Save Changes
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => discardSection('footer')}
+                className="px-6 py-3 bg-slate-100 text-slate-500 rounded-xl font-black text-sm hover:bg-slate-200 transition-all"
+              >
+                Discard
+              </button>
+              <button
+                onClick={() => handleSave('Footer')}
+                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+              >
+                <Save size={16} />
+                Save Changes
+              </button>
+            </div>
           </div>
 
           <div className="space-y-8">
@@ -1708,13 +1863,21 @@ return (
               <div className="w-2 h-8 bg-teal-500 rounded-full"></div>
               <h3 className="text-2xl font-black text-slate-800">System Logos</h3>
             </div>
-            <button
-              onClick={() => handleSave('System Logos')}
-              className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
-            >
-              <Save size={16} />
-              Save Logos
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => discardSection('logos')}
+                className="px-6 py-3 bg-slate-100 text-slate-500 rounded-xl font-black text-sm hover:bg-slate-200 transition-all"
+              >
+                Discard
+              </button>
+              <button
+                onClick={() => handleSave('System Logos')}
+                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+              >
+                <Save size={16} />
+                Save Logos
+              </button>
+            </div>
           </div>
 
           <div className="grid md:grid-cols-2 gap-10">
