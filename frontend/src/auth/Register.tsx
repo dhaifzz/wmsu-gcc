@@ -69,6 +69,9 @@ export default function Register() {
   const [track, setTrack] = useState('');
   const [isFaculty, setIsFaculty] = useState<boolean>(false);
   const [department, setDepartment] = useState('');
+  const [schoolId, setSchoolId] = useState('');
+  const [lrn, setLrn] = useState('');
+  const [employeeId, setEmployeeId] = useState('');
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -79,7 +82,6 @@ export default function Register() {
     if (scrollContainer) {
       scrollContainer.scrollTop = 0;
     }
-    closeDropdowns();
   }, [step]);
 
   const handleNextStep1 = () => {
@@ -90,6 +92,8 @@ export default function Register() {
     if (!/[A-Z]/.test(password)) { showToast.error('Password must contain at least one uppercase letter.'); return; }
     if (!/[0-9]/.test(password)) { showToast.error('Password must contain at least one number.'); return; }
     if (password !== confirmPassword) { showToast.error('Passwords do not match.'); return; }
+    
+    closeDropdowns();
     setStep(2);
   };
 
@@ -102,6 +106,8 @@ export default function Register() {
     if (!city.trim()) { showToast.error('City is required.'); return; }
     if (!barangay.trim()) { showToast.error('Barangay is required.'); return; }
     if (!street.trim()) { showToast.error('Street / House No. is required.'); return; }
+    
+    closeDropdowns();
     setStep(3);
   };
 
@@ -109,14 +115,20 @@ export default function Register() {
     if (!sex) { showToast.error('Please select your sex.'); return; }
     if (!birthdate) { showToast.error('Birthdate is required.'); return; }
     if (isWMSU && isFaculty && !department) { showToast.error('Please select your department.'); return; }
+    if (isWMSU && isFaculty && !employeeId.trim()) { showToast.error('Employee ID is required.'); return; }
+    if (isWMSU && isFaculty && !/^\d{6}$/.test(employeeId.trim())) { showToast.error('Employee ID must be exactly 6 digits.'); return; }
     if (!isWMSU && !occupation) { showToast.error('Please select your occupation.'); return; }
+    
+    closeDropdowns();
     setStep(4);
   };
 
   const validateStep4 = (): boolean => {
     if (!educationLevel) { showToast.error('Please select an education level.'); return false; }
     if (educationLevel === 'College' && !course.trim()) { showToast.error('Course is required.'); return false; }
+    if (educationLevel === 'College' && isWMSU && !/^\d{9}$/.test(schoolId.trim())) { showToast.error('School ID must be exactly 9 digits.'); return false; }
     if (educationLevel === 'High School' && !gradeLevel) { showToast.error('Grade level is required.'); return false; }
+    if (educationLevel === 'High School' && isWMSU && !/^\d{12}$/.test(lrn.trim())) { showToast.error('LRN must be exactly 12 digits.'); return false; }
     if (educationLevel === 'High School' && ['11', '12'].includes(gradeLevel) && !track) { showToast.error('Please select a track.'); return false; }
     if (!isWMSU && !school.trim()) { showToast.error('School name is required.'); return false; }
     return true;
@@ -150,7 +162,10 @@ export default function Register() {
         school: !isWMSU ? school : '',
         course,
         gradeLevel,
-        track
+        track,
+        schoolId: (educationLevel === 'College' && schoolId) ? parseInt(schoolId, 10) : null,
+        lrn: (educationLevel === 'High School' && lrn) ? parseInt(lrn, 10) : null,
+        employeeId: (isFaculty && employeeId) ? parseInt(employeeId, 10) : null
       });
 
       if (!result.ok) {
@@ -591,6 +606,26 @@ export default function Register() {
                         </div>
                       )}
 
+                      {/* Employee ID for Faculty */}
+                      {isWMSU && isFaculty && (
+                        <div className="relative animate-in fade-in slide-in-from-top-2 duration-300">
+                          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4 mb-2 block">Employee ID (6 Digits)</label>
+                          <div className="relative flex items-center">
+                            <div className="absolute left-4 text-gray-700">
+                              <Lock className="h-5 w-5" />
+                            </div>
+                            <input
+                              type="text"
+                              placeholder="Employee ID"
+                              value={employeeId}
+                              onChange={(e) => setEmployeeId(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                              required
+                              className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
+                            />
+                          </div>
+                        </div>
+                      )}
+
                       {/* Occupation */}
                       {!isWMSU && (
                         <div className="relative animate-in fade-in slide-in-from-top-2 duration-300">
@@ -708,6 +743,23 @@ export default function Register() {
                         </div>
                       )}
 
+                      {/* School ID for WMSU College Students */}
+                      {educationLevel === 'College' && isWMSU && (
+                        <div className="relative flex items-center animate-in fade-in slide-in-from-top-2 duration-300">
+                          <div className="absolute left-4 text-gray-700 opacity-60">
+                            <Lock className="h-5 w-5" />
+                          </div>
+                          <input
+                            type="text"
+                            placeholder="School ID (9 Digits)"
+                            value={schoolId}
+                            onChange={(e) => setSchoolId(e.target.value.replace(/\D/g, '').slice(0, 9))}
+                            required
+                            className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
+                          />
+                        </div>
+                      )}
+
                       {educationLevel === 'High School' && (
                         <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
                           {/* Grade Level Select */}
@@ -756,6 +808,23 @@ export default function Register() {
                             </div>
                           </div>
 
+                          {/* LRN for WMSU High School Students */}
+                          {isWMSU && (
+                            <div className="relative flex items-center animate-in fade-in slide-in-from-top-2 duration-300">
+                              <div className="absolute left-4 text-gray-700 opacity-60">
+                                <Lock className="h-5 w-5" />
+                              </div>
+                              <input
+                                type="text"
+                                placeholder="LRN (12 Digits)"
+                                value={lrn}
+                                onChange={(e) => setLrn(e.target.value.replace(/\D/g, '').slice(0, 12))}
+                                required
+                                className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
+                              />
+                            </div>
+                          )}
+
                           {/* Conditional Track Selection for Grade 11-12 */}
                           {['11', '12'].includes(gradeLevel) && (
                             <div className="animate-in fade-in slide-in-from-top-2 duration-300">
@@ -790,6 +859,7 @@ export default function Register() {
                         type="button"
                         disabled={loading}
                         onClick={() => {
+                          closeDropdowns();
                           setStep(step - 1);
                           window.scrollTo(0, 0);
                         }}

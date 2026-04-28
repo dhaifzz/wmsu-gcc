@@ -75,6 +75,10 @@ export interface UserProfile {
   gradeLevel: number | null;
   occupation: string | null;
   department?: string | null;
+  schoolId?: number | null;
+  lrn?: number | null;
+  employeeId?: number | null;
+  track?: string | null;
 }
 
 export interface RegisterPayload {
@@ -98,6 +102,9 @@ export interface RegisterPayload {
   course: string;
   gradeLevel: string;
   track: string;
+  schoolId: number | null;
+  lrn: number | null;
+  employeeId: number | null;
 }
 
 export interface RegisterResponse {
