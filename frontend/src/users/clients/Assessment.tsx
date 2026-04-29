@@ -1,12 +1,37 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar as CalendarIcon, Clock, ChevronLeft, ChevronRight, Info, ClipboardCheck } from 'lucide-react';
+import { io } from 'socket.io-client';
+import { appointmentApi, API_URL } from '../../lib/api';
+import { useAuth } from '../../auth/AuthContext';
+import { showToast } from '../../components/modal-notification/toast';
+
+const timeSlots = ['08:00 AM - 09:00 AM', '09:00 AM - 10:00 AM', '10:00 AM - 11:00 AM', '01:00 PM - 02:00 PM', '02:00 PM - 03:00 PM', '03:00 PM - 04:00 PM'];
+
+const hourToTimeSlot: Record<number, string> = {
+  8: '08:00 AM - 09:00 AM',
+  9: '09:00 AM - 10:00 AM',
+  10: '10:00 AM - 11:00 AM',
+  13: '01:00 PM - 02:00 PM',
+  14: '02:00 PM - 03:00 PM',
+  15: '03:00 PM - 04:00 PM'
+};
+
+const toDateKey = (year: number, monthIndex: number, day: number) => {
+  const mm = String(monthIndex + 1).padStart(2, '0');
+  const dd = String(day).padStart(2, '0');
+  return `${year}-${mm}-${dd}`;
+};
 
 const Assessment = ({ onBack }: { onBack: () => void }) => {
+  const { accessToken, user } = useAuth();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  
+  const [occupiedSlots, setOccupiedSlots] = useState<Record<string, string[]>>({});
+  const [loadingAvailability, setLoadingAvailability] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
   useEffect(() => {
     window.scrollTo(0, 0);
     const mainContainer = document.querySelector('main');
@@ -15,11 +40,16 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
     }
   }, []);
 
+  const assessmentType = useMemo<'Assessment (DAS-Y)' | 'Assessment (DAS-21)' | null>(() => {
+    if (user?.role === 'High School Student') return 'Assessment (DAS-Y)';
+    if (user?.role === 'College Student') return 'Assessment (DAS-21)';
+    return null;
+  }, [user?.role]);
+
   const header = { title: "Psychological Assessment", subtitle: "Schedule your testing session" };
   const requirements = { title: "Requirements", content: "Students must complete the Personal Data Form and have their Student ID ready before the assessment." };
   const duration = { title: "Test Duration", content: "The assessment typically takes between 30 to 45 minutes to complete." };
   const important = { title: "Important Note", content: "Please arrive at the GCC office 15 minutes before your scheduled slot for verification." };
-  const timeSlots = ["08:00 AM - 09:00 AM", "09:00 AM - 10:00 AM", "10:00 AM - 11:00 AM", "01:00 PM - 02:00 PM", "02:00 PM - 03:00 PM", "03:00 PM - 04:00 PM"];
 
   const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
   const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
@@ -37,6 +67,112 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
     const today = new Date();
     if (nextDate.getMonth() < today.getMonth() && nextDate.getFullYear() <= today.getFullYear()) return;
     setCurrentDate(nextDate);
+  };
+
+  const selectedDateKey = useMemo(() => {
+    if (!selectedDate) return null;
+    return toDateKey(currentDate.getFullYear(), currentDate.getMonth(), selectedDate);
+  }, [currentDate, selectedDate]);
+
+  const selectedDayOccupied = useMemo(
+    () => (selectedDateKey ? occupiedSlots[selectedDateKey] || [] : []),
+    [occupiedSlots, selectedDateKey]
+  );
+
+  const getMonthAvailabilityData = useCallback(async (date: Date, activeType: 'Assessment (DAS-Y)' | 'Assessment (DAS-21)') => {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const result = await appointmentApi.getAssessmentAvailability(activeType, year, month);
+    if (!result.ok) {
+      throw new Error((result.data as { error?: string })?.error || 'Failed to load availability');
+    }
+
+    const nextOccupied: Record<string, string[]> = {};
+    for (const iso of result.data.occupied || []) {
+      const utc = new Date(iso);
+      const key = `${utc.getUTCFullYear()}-${String(utc.getUTCMonth() + 1).padStart(2, '0')}-${String(utc.getUTCDate()).padStart(2, '0')}`;
+      const slot = hourToTimeSlot[utc.getUTCHours()];
+      if (!slot) continue;
+      if (!nextOccupied[key]) nextOccupied[key] = [];
+      if (!nextOccupied[key].includes(slot)) nextOccupied[key].push(slot);
+    }
+    return nextOccupied;
+  }, []);
+
+  const fetchMonthAvailability = useCallback(async (date: Date) => {
+    if (!assessmentType) {
+      setOccupiedSlots({});
+      return;
+    }
+    setLoadingAvailability(true);
+    try {
+      const nextOccupied = await getMonthAvailabilityData(date, assessmentType);
+      setOccupiedSlots(nextOccupied);
+    } catch {
+      showToast.error('Failed to load available assessment slots.');
+    } finally {
+      setLoadingAvailability(false);
+    }
+  }, [assessmentType, getMonthAvailabilityData]);
+
+  useEffect(() => {
+    void fetchMonthAvailability(currentDate);
+  }, [currentDate, fetchMonthAvailability]);
+
+  useEffect(() => {
+    const socketUrl = import.meta.env.VITE_WS_URL || API_URL;
+    const socket = io(socketUrl, { transports: ['websocket', 'polling'] });
+
+    const onSlotBooked = (payload?: { assessmentType?: string }) => {
+      if (!assessmentType) return;
+      if (payload?.assessmentType && payload.assessmentType !== assessmentType) return;
+      void fetchMonthAvailability(currentDate);
+    };
+
+    socket.on('assessment:slot-booked', onSlotBooked);
+    return () => {
+      socket.off('assessment:slot-booked', onSlotBooked);
+      socket.disconnect();
+    };
+  }, [assessmentType, currentDate, fetchMonthAvailability]);
+
+  useEffect(() => {
+    if (selectedTime && selectedDayOccupied.includes(selectedTime)) {
+      setSelectedTime(null);
+      showToast.warning('That assessment slot was just taken by another student.');
+    }
+  }, [selectedDayOccupied, selectedTime]);
+
+  const handleBookAppointment = async () => {
+    if (!selectedDate || !selectedTime) return;
+    if (!accessToken) {
+      showToast.error('Please sign in again before booking.');
+      return;
+    }
+    if (!assessmentType) {
+      showToast.error('Only high school and college students can book assessments.');
+      return;
+    }
+
+    const date = toDateKey(currentDate.getFullYear(), currentDate.getMonth(), selectedDate);
+    setSubmitting(true);
+    try {
+      const result = await appointmentApi.createAssessmentAppointment({ date, timeSlot: selectedTime }, accessToken);
+      if (!result.ok) {
+        const errorMessage = (result.data as { error?: string })?.error || 'Failed to book assessment appointment.';
+        showToast.error(errorMessage);
+        await fetchMonthAvailability(currentDate);
+        return;
+      }
+      showToast.success(`${assessmentType} appointment submitted. Staff will review your request.`);
+      setSelectedTime(null);
+      setSelectedDate(null);
+      await fetchMonthAvailability(currentDate);
+    } catch {
+      showToast.error('Unable to connect to booking service.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
 
@@ -101,7 +237,11 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
               {days.map(day => (
                 <button
                   key={day}
-                  onClick={() => !isPastDay(day) && setSelectedDate(day)}
+                  onClick={() => {
+                    if (isPastDay(day)) return;
+                    setSelectedDate(day);
+                    setSelectedTime(null);
+                  }}
                   disabled={isPastDay(day)}
                   className={`
                     aspect-square rounded-lg flex items-center justify-center font-bold text-lg transition-all
@@ -172,11 +312,16 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
                 <button
                   key={time}
                   onClick={() => setSelectedTime(time)}
+                  disabled={!selectedDate || selectedDayOccupied.includes(time)}
                   className={`
                     py-4 px-6 rounded-lg font-bold text-sm transition-all border text-left flex items-center justify-between group
                     ${selectedTime === time 
                       ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg shadow-emerald-100' 
-                      : 'bg-white border-slate-100 text-slate-600 hover:border-emerald-200 hover:bg-emerald-50/50'}
+                      : selectedDayOccupied.includes(time)
+                        ? 'bg-slate-50 border-slate-100 text-slate-300 cursor-not-allowed'
+                        : !selectedDate
+                          ? 'bg-white border-slate-100 text-slate-300 cursor-not-allowed'
+                          : 'bg-white border-slate-100 text-slate-600 hover:border-emerald-200 hover:bg-emerald-50/50'}
                   `}
                 >
                   {time}
@@ -195,6 +340,16 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
             <h3 className="font-black text-xl mb-8 relative z-10">Summary</h3>
             
             <div className="space-y-6 relative z-10">
+              <div className="flex items-center gap-4 p-4 bg-white/5 rounded-lg border border-white/5">
+                <div className="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-lg flex items-center justify-center shrink-0">
+                  <ClipboardCheck size={20} />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400/60 mb-0.5">Assessment Type</p>
+                  <p className="font-bold text-sm">{assessmentType || 'Students only (High School/College)'}</p>
+                </div>
+              </div>
+
               <div className="flex items-center gap-4 p-4 bg-white/5 rounded-lg border border-white/5">
                 <div className="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-lg flex items-center justify-center shrink-0">
                   <CalendarIcon size={20} />
@@ -221,15 +376,16 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
             </div>
 
             <button
-              disabled={!selectedDate || !selectedTime}
+              onClick={handleBookAppointment}
+              disabled={!selectedDate || !selectedTime || !assessmentType || submitting || loadingAvailability}
               className={`
                 w-full mt-10 py-5 rounded-lg font-black text-sm transition-all
-                ${selectedDate && selectedTime 
+                ${selectedDate && selectedTime && assessmentType && !submitting && !loadingAvailability
                   ? 'bg-white text-emerald-900 hover:bg-emerald-50 shadow-xl scale-[1.02] active:scale-[0.98]' 
                   : 'bg-white/5 text-white/20 cursor-not-allowed border border-white/5'}
               `}
             >
-              Confirm Appointment
+              {submitting ? 'Booking Appointment...' : 'Confirm Appointment'}
             </button>
           </div>
 

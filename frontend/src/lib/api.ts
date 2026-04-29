@@ -138,7 +138,16 @@ export interface CounselingAvailabilityResponse {
   occupied: string[];
 }
 
+export interface AssessmentAvailabilityResponse {
+  occupied: string[];
+}
+
 export interface CreateCounselingAppointmentPayload {
+  date: string;
+  timeSlot: string;
+}
+
+export interface CreateAssessmentAppointmentPayload {
   date: string;
   timeSlot: string;
 }
@@ -152,12 +161,32 @@ export interface CreateCounselingAppointmentResponse {
   };
 }
 
+export interface CreateAssessmentAppointmentResponse {
+  message: string;
+  appointment: {
+    id: string;
+    scheduled_time: string;
+    created_at: string;
+  };
+  assessmentType: 'Assessment (DAS-Y)' | 'Assessment (DAS-21)';
+}
+
 export const appointmentApi = {
   getCounselingAvailability: (year: number, month: number) =>
     api<CounselingAvailabilityResponse>(`/api/appointments/counseling/availability?year=${year}&month=${month}`),
 
+  getAssessmentAvailability: (type: 'Assessment (DAS-Y)' | 'Assessment (DAS-21)', year: number, month: number) =>
+    api<AssessmentAvailabilityResponse>(`/api/appointments/assessment/availability?type=${encodeURIComponent(type)}&year=${year}&month=${month}`),
+
   createCounselingAppointment: (payload: CreateCounselingAppointmentPayload, token: string) =>
     api<CreateCounselingAppointmentResponse>('/api/appointments/counseling', {
+      method: 'POST',
+      body: payload as unknown as Record<string, unknown>,
+      token
+    }),
+
+  createAssessmentAppointment: (payload: CreateAssessmentAppointmentPayload, token: string) =>
+    api<CreateAssessmentAppointmentResponse>('/api/appointments/assessment', {
       method: 'POST',
       body: payload as unknown as Record<string, unknown>,
       token
