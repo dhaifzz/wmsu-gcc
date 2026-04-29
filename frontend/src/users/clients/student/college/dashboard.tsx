@@ -54,7 +54,7 @@ const CollegeDashboard = () => {
     educationLevel: authUser?.educationLevel || "College Student",
     email: authUser?.email || "",
     studentId: authUser?.schoolId?.toString() || authUser?.id?.substring(0, 8).toUpperCase() || "N/A",
-    college: authUser?.collegeName || authUser?.school || authUser?.department || "WMSU College",
+    college: authUser?.collegeName || authUser?.department || "WMSU College",
     course: authUser?.courseName || authUser?.track || "Not specified in profile",
     joinedDate: "N/A"
   };

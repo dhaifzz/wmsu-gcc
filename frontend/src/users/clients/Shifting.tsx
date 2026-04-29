@@ -23,7 +23,9 @@ import { useAuth } from '../../auth/AuthContext';
 import { showToast } from '../../components/modal-notification/toast';
 import { appointmentApi } from '../../lib/api';
 
-const ICON_MAP: any = {
+type DocumentIconName = 'ImageIcon' | 'FileText' | 'ClipboardCheck' | 'Clock' | 'User' | 'AlertCircle';
+
+const ICON_MAP: Record<DocumentIconName, React.ComponentType<{ size?: number; className?: string }>> = {
   ImageIcon: ImageIcon,
   FileText: FileText,
   ClipboardCheck: ClipboardCheck,
@@ -32,9 +34,17 @@ const ICON_MAP: any = {
   AlertCircle: AlertCircle
 };
 
+interface DashboardUser {
+  name: string;
+  email?: string;
+  studentId?: string;
+  college?: string;
+  course?: string;
+}
+
 interface ShiftingProps {
   onBack: () => void;
-  user: any;
+  user: DashboardUser;
 }
 
 const timeSlots = ['08:00 AM - 09:00 AM', '09:00 AM - 10:00 AM', '10:00 AM - 11:00 AM', '01:00 PM - 02:00 PM', '02:00 PM - 03:00 PM', '03:00 PM - 04:00 PM'];
@@ -57,12 +67,6 @@ const toTitleCase = (value?: string | null) =>
 const Shifting = ({ onBack, user }: ShiftingProps) => {
   const { user: authUser, accessToken } = useAuth();
   const [formData, setFormData] = useState({
-    fullName: '',
-    studentId: '',
-    email: '',
-    contactNumber: '',
-    currentCollege: '',
-    currentCourse: '',
     targetCourse: '',
     reason: ''
   });
@@ -104,24 +108,23 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
     { key: "latestCor", label: "Latest COR", note: "Your most recent Certificate of Registration (COR).", iconName: "FileText", accept: ".pdf,.jpg,.jpeg,.png" },
     { key: "entranceResult", label: "Entrance Test Result", note: "Original or certified copy of your college entrance test result.", iconName: "ClipboardCheck", accept: ".pdf,.jpg,.jpeg,.png" }
   ];
-  const instructions = `Make sure you have met the minimum GPA requirements of your target college before applying. You are currently enrolled in ${formData.currentCourse || 'your current program'}.`;
-
-  useEffect(() => {
+  const profileData = useMemo(() => {
     const firstName = toTitleCase(authUser?.firstName);
     const lastName = toTitleCase(authUser?.lastName);
     const middleInitial = authUser?.middleName?.trim() ? `${authUser.middleName.trim().charAt(0).toUpperCase()}.` : '';
     const fullName = [firstName, middleInitial, lastName].filter(Boolean).join(' ');
 
-    setFormData((prev) => ({
-      ...prev,
+    return {
       fullName: fullName || user.name || '',
       studentId: authUser?.schoolId?.toString() || user.studentId || authUser?.id?.slice(0, 8).toUpperCase() || '',
       email: authUser?.email || user.email || '',
       contactNumber: authUser?.contactNumber || '',
-      currentCollege: authUser?.collegeName || authUser?.school || authUser?.department || user.college || 'Not specified in profile',
+      currentCollege: authUser?.collegeName || authUser?.department || user.college || 'Not specified in profile',
       currentCourse: authUser?.courseName || (user.course && user.course !== 'N/A' ? user.course : '') || 'Not specified in profile'
-    }));
+    };
   }, [authUser, user]);
+
+  const instructions = `Make sure you have met the minimum GPA requirements of your target college before applying. You are currently enrolled in ${profileData.currentCourse || 'your current program'}.`;
 
   useEffect(() => {
     const loadSubmissionStatus = async () => {
@@ -178,7 +181,7 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
       const result = await appointmentApi.createShiftingAppointment({
         date: examDate,
         timeSlot: examTimeSlot,
-        currentCourse: formData.currentCourse,
+        currentCourse: profileData.currentCourse,
         targetCourse: formData.targetCourse,
         reason: formData.reason,
         bookingReceiptName: uploadedDocs.bookingReceipt?.name || '',
@@ -251,33 +254,29 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
             <div className="grid md:grid-cols-2 gap-5">
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4">Full Name</label>
-                <input value={formData.fullName} readOnly className="w-full bg-slate-50 border border-slate-100 rounded-lg px-6 py-4 text-sm font-bold text-slate-700" />
+                <input value={profileData.fullName} readOnly className="w-full bg-slate-50 border border-slate-100 rounded-lg px-6 py-4 text-sm font-bold text-slate-700" />
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4">Student ID</label>
-                <input value={formData.studentId} readOnly className="w-full bg-slate-50 border border-slate-100 rounded-lg px-6 py-4 text-sm font-bold text-slate-700" />
+                <input value={profileData.studentId} readOnly className="w-full bg-slate-50 border border-slate-100 rounded-lg px-6 py-4 text-sm font-bold text-slate-700" />
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4">Email Address</label>
                 <div className="w-full bg-slate-50 border border-slate-100 rounded-lg px-6 py-4 text-sm font-bold text-slate-700 flex items-center gap-2">
                   <Mail size={15} className="text-slate-400" />
-                  <span>{formData.email || 'Not available'}</span>
+                  <span>{profileData.email || 'Not available'}</span>
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4">Contact Number</label>
                 <div className="w-full bg-slate-50 border border-slate-100 rounded-lg px-6 py-4 text-sm font-bold text-slate-700 flex items-center gap-2">
                   <Phone size={15} className="text-slate-400" />
-                  <span>{formData.contactNumber || 'Not available'}</span>
+                  <span>{profileData.contactNumber || 'Not available'}</span>
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4">Current College</label>
-                <input value={formData.currentCollege} readOnly className="w-full bg-slate-50 border border-slate-100 rounded-lg px-6 py-4 text-sm font-bold text-slate-700" />
-              </div>
-              <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4">Current Course</label>
-                <input value={formData.currentCourse} readOnly className="w-full bg-slate-50 border border-slate-100 rounded-lg px-6 py-4 text-sm font-bold text-slate-700" />
+                <input value={profileData.currentCourse} readOnly className="w-full bg-slate-50 border border-slate-100 rounded-lg px-6 py-4 text-sm font-bold text-slate-700" />
               </div>
             </div>
           </div>
@@ -299,7 +298,7 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
                 <div className="w-full bg-slate-50 border border-slate-100 rounded-lg px-6 py-4 font-bold text-slate-400 flex items-center gap-3 overflow-hidden">
                   <GraduationCap size={18} className="shrink-0" />
                   <MarqueeText
-                    text={formData.currentCourse}
+                    text={profileData.currentCourse}
                     className="text-sm font-bold"
                     containerClassName="flex-1"
                   />
@@ -340,7 +339,7 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
                         exit={{ opacity: 0, y: 10 }}
                         className="absolute z-50 top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-lg shadow-2xl shadow-emerald-900/10 overflow-hidden max-h-[250px] overflow-y-auto scrollbar-hide"
                       >
-                        {courses.filter(c => c !== formData.currentCourse).map(course => (
+                        {courses.filter(c => c !== profileData.currentCourse).map(course => (
                           <button
                             key={course}
                             onClick={() => {
@@ -596,10 +595,10 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
               <h4 className="font-black text-xs uppercase tracking-widest">Instructions</h4>
             </div>
             <p className="text-xs text-emerald-700/70 leading-relaxed font-medium">
-              {instructions.split(formData.currentCourse).map((part: string, i: number, arr: any[]) => (
+              {instructions.split(profileData.currentCourse).map((part: string, i: number, arr: string[]) => (
                 <span key={i}>
                   {part}
-                  {i < arr.length - 1 && <strong>{formData.currentCourse}</strong>}
+                  {i < arr.length - 1 && <strong>{profileData.currentCourse}</strong>}
                 </span>
               ))}
             </p>
