@@ -1,9 +1,54 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
-import { Shield, Lock, Eye, FileText, ChevronRight, ArrowLeft } from 'lucide-react';
+import { Shield, Lock, Eye, FileText, ArrowLeft } from 'lucide-react';
+import { cmsApi } from '../../lib/api';
+import Loader from '../../components/loader/Loader';
+
+const iconMap: Record<string, any> = {
+  Lock: Lock,
+  Eye: Eye,
+  Shield: Shield,
+  FileText: FileText
+};
 
 const PrivacyPolicy = () => {
+  const [content, setContent] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const res = await cmsApi.getContent('privacy');
+        if (res.ok && res.data && Object.keys(res.data).length > 0) {
+          setContent(res.data);
+        } else {
+          // Default content fallback
+          setContent({
+            hero: {
+              title: "Privacy Policy",
+              description: "Your privacy is our priority. This policy outlines how the WMSU Guidance and Counseling Center (GCC) collects, uses, and protects your information."
+            },
+            sections: [
+              { title: "1. Data Collection", icon: "Lock", content: "The WMSU GCC collects personal and sensitive information through our online portal and physical forms. This includes: Personal identification (Name, ID, Birthdate), Contact details (Email, Phone, Address), Academic records and history, Health and psychological assessments, and Appointment and consultation logs." },
+              { title: "2. Use of Information", icon: "Eye", content: "Your data is used exclusively for the purpose of providing guidance, counseling, and assessment services. We use this information to process appointment requests and shifting examinations, maintain accurate student counseling records as required by university policy, and analyze aggregated, non-identifiable data to improve our support programs." },
+              { title: "3. Confidentiality", icon: "Shield", content: "Confidentiality is the cornerstone of counseling. Information shared during counseling sessions will not be disclosed to any third party without your explicit written consent, except in cases where there is a clear risk of harm to yourself or others, or as required by law (e.g., court order)." },
+              { title: "4. Data Security", icon: "FileText", content: "We implement strict technical and organizational measures to protect your data against unauthorized access, loss, or alteration. All online data is encrypted and stored in secure cloud environments compliant with modern security standards." }
+            ]
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching privacy policy:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchContent();
+  }, []);
+
+  if (isLoading) return <Loader />;
+
   return (
     <div className="min-h-screen bg-emerald-50/30 flex flex-col relative overflow-hidden">
       {/* Decorative Background Elements */}
@@ -26,10 +71,10 @@ const PrivacyPolicy = () => {
                 Back to Home
               </a>
               <h1 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight">
-                Privacy Policy
+                {content.hero.title}
               </h1>
               <p className="text-emerald-100/80 font-medium max-w-2xl mx-auto leading-relaxed">
-                Your privacy is our priority. This policy outlines how the WMSU Guidance and Counseling Center (GCC) collects, uses, and protects your information.
+                {content.hero.description}
               </p>
             </motion.div>
           </div>
@@ -46,86 +91,23 @@ const PrivacyPolicy = () => {
               className="bg-white/80 backdrop-blur-xl rounded-[2.5rem] p-8 md:p-16 border border-emerald-100 shadow-2xl shadow-emerald-200/20"
             >
               <div className="prose prose-slate max-w-none">
-                <section className="mb-12">
-                  <h2 className="text-2xl font-black text-slate-900 flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center">
-                      <Lock size={20} />
-                    </div>
-                    1. Data Collection
-                  </h2>
-                  <p className="text-slate-600 font-medium leading-relaxed mb-4">
-                    The WMSU GCC collects personal and sensitive information through our online portal and physical forms. This includes:
-                  </p>
-                  <ul className="grid md:grid-cols-2 gap-4 list-none p-0">
-                    {[
-                      "Personal identification (Name, ID, Birthdate)",
-                      "Contact details (Email, Phone, Address)",
-                      "Academic records and history",
-                      "Health and psychological assessments",
-                      "Appointment and consultation logs"
-                    ].map((item, i) => (
-                      <li key={i} className="flex items-center gap-3 bg-slate-50 p-4 rounded-xl text-sm font-bold text-slate-700 border border-slate-100">
-                        <ChevronRight size={14} className="text-emerald-500" />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-
-                <section className="mb-12">
-                  <h2 className="text-2xl font-black text-slate-900 flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
-                      <Eye size={20} />
-                    </div>
-                    2. Use of Information
-                  </h2>
-                  <p className="text-slate-600 font-medium leading-relaxed">
-                    Your data is used exclusively for the purpose of providing guidance, counseling, and assessment services. We use this information to:
-                  </p>
-                  <ul className="space-y-3 mt-4">
-                    <li className="flex gap-3 text-sm text-slate-600 font-medium">
-                      <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-2 shrink-0"></span>
-                      Process appointment requests and shifting examinations.
-                    </li>
-                    <li className="flex gap-3 text-sm text-slate-600 font-medium">
-                      <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-2 shrink-0"></span>
-                      Maintain accurate student counseling records as required by university policy.
-                    </li>
-                    <li className="flex gap-3 text-sm text-slate-600 font-medium">
-                      <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-2 shrink-0"></span>
-                      Analyze aggregated, non-identifiable data to improve our support programs.
-                    </li>
-                  </ul>
-                </section>
-
-                <section className="mb-12">
-                  <h2 className="text-2xl font-black text-slate-900 flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center">
-                      <Shield size={20} />
-                    </div>
-                    3. Confidentiality
-                  </h2>
-                  <div className="bg-rose-50/50 border border-rose-100 p-6 rounded-2xl">
-                    <p className="text-rose-900 text-sm font-bold leading-relaxed mb-0">
-                      Confidentiality is the cornerstone of counseling. Information shared during counseling sessions will not be disclosed to any third party without your explicit written consent, except in cases where there is a clear risk of harm to yourself or others, or as required by law (e.g., court order).
-                    </p>
-                  </div>
-                </section>
-
-                <section>
-                  <h2 className="text-2xl font-black text-slate-900 flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 bg-slate-100 text-slate-600 rounded-xl flex items-center justify-center">
-                      <FileText size={20} />
-                    </div>
-                    4. Data Security
-                  </h2>
-                  <p className="text-slate-600 font-medium leading-relaxed">
-                    We implement strict technical and organizational measures to protect your data against unauthorized access, loss, or alteration. All online data is encrypted and stored in secure cloud environments compliant with modern security standards.
-                  </p>
-                </section>
+                {content.sections.map((section: any, idx: number) => {
+                  const Icon = iconMap[section.icon] || Shield;
+                  return (
+                    <section key={idx} className="mb-12 last:mb-0">
+                      <h2 className="text-2xl font-black text-slate-900 flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center">
+                          <Icon size={20} />
+                        </div>
+                        {section.title}
+                      </h2>
+                      <p className="text-slate-600 font-medium leading-relaxed">
+                        {section.content}
+                      </p>
+                    </section>
+                  );
+                })}
               </div>
-
-
             </motion.div>
           </div>
         </div>
