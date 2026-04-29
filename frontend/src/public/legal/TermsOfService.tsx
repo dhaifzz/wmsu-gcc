@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
-import Navbar from '../Navbar';
-import Footer from '../Footer';
-import { Gavel, CheckCircle, AlertTriangle, FileText, UserCheck } from 'lucide-react';
+import Navbar from '../../components/Navbar';
+import Footer from '../../components/Footer';
+import { Link } from 'react-router-dom';
+import { Gavel, CheckCircle, AlertTriangle, FileText, UserCheck, ArrowLeft } from 'lucide-react';
 
 const TermsOfService = () => {
   return (
@@ -17,7 +18,13 @@ const TermsOfService = () => {
               animate={{ opacity: 1, y: 0 }}
               className="mb-16 text-center"
             >
+              <Link to="/" className="inline-flex items-center gap-2 text-slate-400 hover:text-emerald-600 transition-colors mb-8 font-bold group">
+                <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+                Back to Home
+              </Link>
+              <div className="block"></div>
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-full text-xs font-black uppercase tracking-widest mb-6">
+
                 <Gavel size={14} />
                 User Agreement
               </div>
