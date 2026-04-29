@@ -25,11 +25,6 @@ const PrivacyPolicy = () => {
                 <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
                 Back to Home
               </a>
-              <div className="block"></div>
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-800/50 text-emerald-300 rounded-full text-xs font-black uppercase tracking-widest mb-6 border border-emerald-700/50">
-                <Shield size={14} />
-                Data Protection
-              </div>
               <h1 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight">
                 Privacy Policy
               </h1>
@@ -130,11 +125,7 @@ const PrivacyPolicy = () => {
                 </section>
               </div>
 
-              <div className="mt-16 pt-8 border-t border-slate-100 text-center">
-                <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">
-                  Last Updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                </p>
-              </div>
+
             </motion.div>
           </div>
         </div>
