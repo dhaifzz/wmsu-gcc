@@ -1033,7 +1033,7 @@ export default function Register() {
                                         Undergraduate Programs
                                       </div>
                                     )}
-                                    {filteredUndergrad.map((opt) => (
+                                    {filteredUndergrad.map((opt: string) => (
                                       <button
                                         key={opt}
                                         type="button"
@@ -1053,7 +1053,7 @@ export default function Register() {
                                         Graduate Programs
                                       </div>
                                     )}
-                                    {filteredGrad.map((opt) => (
+                                    {filteredGrad.map((opt: string) => (
                                       <button
                                         key={opt}
                                         type="button"

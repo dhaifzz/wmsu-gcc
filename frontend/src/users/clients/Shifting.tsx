@@ -16,7 +16,6 @@ import {
   Clock
 } from 'lucide-react';
 import MarqueeText from '../../components/MarqueeText';
-import { cmsApi } from '../../lib/api';
 
 const ICON_MAP: any = {
   ImageIcon: ImageIcon,
