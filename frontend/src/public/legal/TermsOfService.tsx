@@ -6,6 +6,7 @@ import { Gavel, CheckCircle, AlertTriangle, FileText, UserCheck, ArrowLeft, Shie
 import { cmsApi } from '../../lib/api';
 import Loader from '../../components/loader/Loader';
 
+
 const iconMap: Record<string, any> = {
   Gavel: Gavel,
   CheckCircle: CheckCircle,
@@ -54,8 +55,6 @@ const TermsOfService = () => {
     fetchContent();
   }, []);
 
-  if (isLoading) return <Loader />;
-
   return (
     <div className="min-h-screen bg-emerald-50/30 flex flex-col relative overflow-hidden">
       {/* Decorative Background Elements */}
@@ -66,58 +65,64 @@ const TermsOfService = () => {
       <Navbar />
       
       <main className="flex-1 pb-20 relative z-10">
-        {/* Hero Section */}
-        <div className="bg-emerald-900 pt-40 pb-32 mb-[-64px]">
-          <div className="container mx-auto px-6 text-center">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <a href="/" className="inline-flex items-center gap-2 text-emerald-300 hover:text-white transition-colors mb-8 font-bold group">
-                <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-                Back to Home
-              </a>
-              <h1 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight">
-                {content.hero.title}
-              </h1>
-              <p className="text-emerald-100/80 font-medium max-w-2xl mx-auto leading-relaxed">
-                {content.hero.description}
-              </p>
-            </motion.div>
-          </div>
-        </div>
-
-        <div className="container mx-auto px-6">
-          <div className="max-w-4xl mx-auto">
-
-            {/* Content Card */}
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-white/80 backdrop-blur-xl rounded-[2.5rem] p-8 md:p-16 border border-emerald-100 shadow-2xl shadow-emerald-200/20"
-            >
-              <div className="prose prose-slate max-w-none">
-                {content.sections.map((section: any, idx: number) => {
-                  const Icon = iconMap[section.icon] || Gavel;
-                  return (
-                    <section key={idx} className="mb-12 last:mb-0">
-                      <h2 className="text-2xl font-black text-slate-900 flex items-center gap-3 mb-6">
-                        <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center">
-                          <Icon size={20} />
-                        </div>
-                        {section.title}
-                      </h2>
-                      <p className="text-slate-600 font-medium leading-relaxed">
-                        {section.content}
-                      </p>
-                    </section>
-                  );
-                })}
+        {isLoading || !content ? (
+          <Loader type="legal" />
+        ) : (
+          <>
+            {/* Hero Section */}
+            <div className="bg-emerald-900 pt-40 pb-32 mb-[-64px]">
+              <div className="container mx-auto px-6 text-center">
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <a href="/" className="inline-flex items-center gap-2 text-emerald-300 hover:text-white transition-colors mb-8 font-bold group">
+                    <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+                    Back to Home
+                  </a>
+                  <h1 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight">
+                    {content?.hero?.title}
+                  </h1>
+                  <p className="text-emerald-100/80 font-medium max-w-2xl mx-auto leading-relaxed">
+                    {content?.hero?.description}
+                  </p>
+                </motion.div>
               </div>
-            </motion.div>
-          </div>
-        </div>
+            </div>
+
+            <div className="container mx-auto px-6">
+              <div className="max-w-4xl mx-auto">
+
+                {/* Content Card */}
+                <motion.div 
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="bg-white/80 backdrop-blur-xl rounded-[2.5rem] p-8 md:p-16 border border-emerald-100 shadow-2xl shadow-emerald-200/20"
+                >
+                  <div className="prose prose-slate max-w-none">
+                    {content?.sections?.map((section: any, idx: number) => {
+                      const Icon = iconMap[section.icon] || Gavel;
+                      return (
+                        <section key={idx} className="mb-12 last:mb-0">
+                          <h2 className="text-2xl font-black text-slate-900 flex items-center gap-3 mb-6">
+                            <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center">
+                              <Icon size={20} />
+                            </div>
+                            {section.title}
+                          </h2>
+                          <p className="text-slate-600 font-medium leading-relaxed">
+                            {section.content}
+                          </p>
+                        </section>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+          </>
+        )}
       </main>
 
       <Footer />

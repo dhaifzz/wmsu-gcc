@@ -14,10 +14,12 @@ import ManagementNavbar from '../../../components/ManagementNavbar';
 import Profile from '../../Profile';
 import StaffOverview from './StaffOverview';
 import Availability from './Availability';
+import OfficeSchedule from './OfficeSchedule';
 import CounselingAppointments from '../Appointment/CounselingAppointments';
 import AssessmentAppointments from '../Appointment/AssessmentAppointments';
 import ShiftingAppointments from '../Appointment/ShiftingAppointments';
-import History from '../History'; // Historical records module
+import History from '../History'; 
+import { Building2 } from 'lucide-react';
 import { useAuth } from '../../../auth/AuthContext';
 
 const StaffDashboardLayout = () => {
@@ -38,7 +40,8 @@ const StaffDashboardLayout = () => {
     { id: 'assessment', label: 'Assessment', icon: ClipboardCheck },
     { id: 'shifting', label: 'Shifting', icon: RefreshCw },
     { id: 'history', label: 'History', icon: Clock },
-    { id: 'availability', label: 'Availability', icon: CalendarIcon },
+    { id: 'availability', label: 'My Availability', icon: CalendarIcon },
+    { id: 'office-schedule', label: 'Office Schedule', icon: Building2 },
     { id: 'profile', label: 'My Profile', icon: User },
   ];
 
@@ -86,12 +89,16 @@ const StaffDashboardLayout = () => {
               <Availability key="availability-mgmt" />
             )}
 
+            {activeTab === 'office-schedule' && (
+              <OfficeSchedule key="office-mgmt" />
+            )}
+
             {activeTab === 'profile' && (
               <Profile key="profile" user={{ ...staff, type: 'staff' } as any} />
             )}
 
             {/* Fallback for other tabs */}
-            {!['dashboard', 'counseling', 'assessment', 'shifting', 'history', 'availability', 'profile'].includes(activeTab) && (
+            {!['dashboard', 'counseling', 'assessment', 'shifting', 'history', 'availability', 'office-schedule', 'profile'].includes(activeTab) && (
               <motion.div
                 key="coming-soon"
                 initial={{ opacity: 0 }}
