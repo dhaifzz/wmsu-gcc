@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './index.css';
 import { AuthProvider } from './auth/AuthProvider';
@@ -25,8 +26,21 @@ import SplashScreen from './components/loader/SplashScreen';
 
 function AppContent() {
   const { loading } = useAuth();
+  const [showSplash, setShowSplash] = useState(false);
 
-  if (loading) {
+  useEffect(() => {
+    const hasShownSplash = sessionStorage.getItem('hasShownSplash');
+    if (!hasShownSplash) {
+      setShowSplash(true);
+      const timer = setTimeout(() => {
+        setShowSplash(false);
+        sessionStorage.setItem('hasShownSplash', 'true');
+      }, 2000); // Show for at least 2 seconds
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  if (loading || showSplash) {
     return <SplashScreen />;
   }
 
