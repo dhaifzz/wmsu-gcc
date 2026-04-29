@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || 'https://gcc-backend-9t7w.onrender.com';
+export const API_URL = import.meta.env.VITE_API_URL || 'https://gcc-backend-9t7w.onrender.com';
 
 interface ApiOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
@@ -132,4 +132,34 @@ export const cmsApi = {
 
   updateContent: (section: string, content: any, token?: string) =>
     api<any>(`/api/cms/${section}`, { method: 'PUT', body: content, token }),
+};
+
+export interface CounselingAvailabilityResponse {
+  occupied: string[];
+}
+
+export interface CreateCounselingAppointmentPayload {
+  date: string;
+  timeSlot: string;
+}
+
+export interface CreateCounselingAppointmentResponse {
+  message: string;
+  appointment: {
+    id: string;
+    scheduled_time: string;
+    created_at: string;
+  };
+}
+
+export const appointmentApi = {
+  getCounselingAvailability: (year: number, month: number) =>
+    api<CounselingAvailabilityResponse>(`/api/appointments/counseling/availability?year=${year}&month=${month}`),
+
+  createCounselingAppointment: (payload: CreateCounselingAppointmentPayload, token: string) =>
+    api<CreateCounselingAppointmentResponse>('/api/appointments/counseling', {
+      method: 'POST',
+      body: payload as unknown as Record<string, unknown>,
+      token
+    })
 };

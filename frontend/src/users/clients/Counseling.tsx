@@ -1,12 +1,37 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar as CalendarIcon, Clock, ChevronLeft, ChevronRight, Info, MessageCircle } from 'lucide-react';
+import { io } from 'socket.io-client';
+import { appointmentApi, API_URL } from '../../lib/api';
+import { useAuth } from '../../auth/AuthContext';
+import { showToast } from '../../components/modal-notification/toast';
+
+const timeSlots = ['08:00 AM - 09:00 AM', '09:00 AM - 10:00 AM', '10:00 AM - 11:00 AM', '01:00 PM - 02:00 PM', '02:00 PM - 03:00 PM', '03:00 PM - 04:00 PM'];
+
+const hourToTimeSlot: Record<number, string> = {
+  8: '08:00 AM - 09:00 AM',
+  9: '09:00 AM - 10:00 AM',
+  10: '10:00 AM - 11:00 AM',
+  13: '01:00 PM - 02:00 PM',
+  14: '02:00 PM - 03:00 PM',
+  15: '03:00 PM - 04:00 PM'
+};
+
+const toDateKey = (year: number, monthIndex: number, day: number) => {
+  const mm = String(monthIndex + 1).padStart(2, '0');
+  const dd = String(day).padStart(2, '0');
+  return `${year}-${mm}-${dd}`;
+};
 
 const Counseling = ({ onBack }: { onBack: () => void }) => {
+  const { accessToken } = useAuth();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  
+  const [occupiedSlots, setOccupiedSlots] = useState<Record<string, string[]>>({});
+  const [loadingAvailability, setLoadingAvailability] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
   useEffect(() => {
     window.scrollTo(0, 0);
     const mainContainer = document.querySelector('main');
@@ -19,7 +44,6 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
   const preparation = { title: "Preparation", content: "Counseling sessions require a quiet environment and about 45-60 minutes of uninterrupted time." };
   const duration = { title: "Session Length", content: "A standard counseling session lasts approximately 50 minutes." };
   const important = { title: "Confidentiality", content: "Everything discussed in your sessions is strictly confidential between you and your counselor." };
-  const timeSlots = ["08:00 AM - 09:00 AM", "09:00 AM - 10:00 AM", "10:00 AM - 11:00 AM", "01:00 PM - 02:00 PM", "02:00 PM - 03:00 PM", "03:00 PM - 04:00 PM"];
 
   const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
   const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
@@ -39,6 +63,117 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
     setCurrentDate(nextDate);
   };
 
+  const selectedDateKey = useMemo(() => {
+    if (!selectedDate) return null;
+    return toDateKey(currentDate.getFullYear(), currentDate.getMonth(), selectedDate);
+  }, [currentDate, selectedDate]);
+
+  const selectedDayOccupied = useMemo(
+    () => (selectedDateKey ? occupiedSlots[selectedDateKey] || [] : []),
+    [occupiedSlots, selectedDateKey]
+  );
+
+  const getMonthAvailabilityData = useCallback(async (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const result = await appointmentApi.getCounselingAvailability(year, month);
+    if (!result.ok) {
+      throw new Error((result.data as { error?: string })?.error || 'Failed to load availability');
+    }
+
+    const nextOccupied: Record<string, string[]> = {};
+    for (const iso of result.data.occupied || []) {
+      const utc = new Date(iso);
+      const key = `${utc.getUTCFullYear()}-${String(utc.getUTCMonth() + 1).padStart(2, '0')}-${String(utc.getUTCDate()).padStart(2, '0')}`;
+      const slot = hourToTimeSlot[utc.getUTCHours()];
+      if (!slot) continue;
+      if (!nextOccupied[key]) nextOccupied[key] = [];
+      if (!nextOccupied[key].includes(slot)) nextOccupied[key].push(slot);
+    }
+    return nextOccupied;
+  }, []);
+
+  const fetchMonthAvailability = useCallback(async (date: Date) => {
+    setLoadingAvailability(true);
+    try {
+      const nextOccupied = await getMonthAvailabilityData(date);
+      setOccupiedSlots(nextOccupied);
+    } catch {
+      showToast.error('Failed to load available counseling slots.');
+    } finally {
+      setLoadingAvailability(false);
+    }
+  }, [getMonthAvailabilityData]);
+
+  useEffect(() => {
+    const loadAvailability = async () => {
+      setLoadingAvailability(true);
+      try {
+        const nextOccupied = await getMonthAvailabilityData(currentDate);
+        setOccupiedSlots(nextOccupied);
+      } catch {
+        showToast.error('Failed to load available counseling slots.');
+      } finally {
+        setLoadingAvailability(false);
+      }
+    };
+
+    void loadAvailability();
+  }, [currentDate, getMonthAvailabilityData]);
+
+  useEffect(() => {
+    const socketUrl = import.meta.env.VITE_WS_URL || API_URL;
+    const socket = io(socketUrl, { transports: ['websocket', 'polling'] });
+
+    const onSlotBooked = () => {
+      fetchMonthAvailability(currentDate);
+    };
+
+    socket.on('counseling:slot-booked', onSlotBooked);
+    return () => {
+      socket.off('counseling:slot-booked', onSlotBooked);
+      socket.disconnect();
+    };
+  }, [currentDate, fetchMonthAvailability]);
+
+  useEffect(() => {
+    const handleSlotTaken = () => {
+      if (selectedTime && selectedDayOccupied.includes(selectedTime)) {
+        setSelectedTime(null);
+        showToast.warning('That time slot was just taken by another user.');
+      }
+    };
+
+    handleSlotTaken();
+  }, [selectedDayOccupied, selectedTime]);
+
+  const handleBookAppointment = async () => {
+    if (!selectedDate || !selectedTime) return;
+    if (!accessToken) {
+      showToast.error('Please sign in again before booking.');
+      return;
+    }
+
+    const date = toDateKey(currentDate.getFullYear(), currentDate.getMonth(), selectedDate);
+    setSubmitting(true);
+    try {
+      const result = await appointmentApi.createCounselingAppointment({ date, timeSlot: selectedTime }, accessToken);
+      if (!result.ok) {
+        const errorMessage = (result.data as { error?: string })?.error || 'Failed to book appointment.';
+        showToast.error(errorMessage);
+        await fetchMonthAvailability(currentDate);
+        return;
+      }
+      showToast.success('Appointment submitted. Staff will review your request.');
+      setSelectedTime(null);
+      setSelectedDate(null);
+      await fetchMonthAvailability(currentDate);
+    } catch {
+      showToast.error('Unable to connect to booking service.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <motion.div
@@ -101,7 +236,11 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
               {days.map(day => (
                 <button
                   key={day}
-                  onClick={() => !isPastDay(day) && setSelectedDate(day)}
+                  onClick={() => {
+                    if (isPastDay(day)) return;
+                    setSelectedDate(day);
+                    setSelectedTime(null);
+                  }}
                   disabled={isPastDay(day)}
                   className={`
                     aspect-square rounded-lg flex items-center justify-center font-bold text-lg transition-all
@@ -172,11 +311,16 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
                 <button
                   key={time}
                   onClick={() => setSelectedTime(time)}
+                  disabled={!selectedDate || selectedDayOccupied.includes(time)}
                   className={`
                     py-4 px-6 rounded-lg font-bold text-sm transition-all border text-left flex items-center justify-between group
                     ${selectedTime === time 
                       ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-100' 
-                      : 'bg-white border-slate-100 text-slate-600 hover:border-blue-200 hover:bg-blue-50/50'}
+                      : selectedDayOccupied.includes(time)
+                        ? 'bg-slate-50 border-slate-100 text-slate-300 cursor-not-allowed'
+                        : !selectedDate
+                          ? 'bg-white border-slate-100 text-slate-300 cursor-not-allowed'
+                          : 'bg-white border-slate-100 text-slate-600 hover:border-blue-200 hover:bg-blue-50/50'}
                   `}
                 >
                   {time}
@@ -221,15 +365,16 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
             </div>
 
             <button
-              disabled={!selectedDate || !selectedTime}
+              onClick={handleBookAppointment}
+              disabled={!selectedDate || !selectedTime || submitting || loadingAvailability}
               className={`
                 w-full mt-10 py-5 rounded-lg font-black text-sm transition-all
-                ${selectedDate && selectedTime 
+                ${selectedDate && selectedTime && !submitting && !loadingAvailability
                   ? 'bg-white text-emerald-900 hover:bg-emerald-50 shadow-xl scale-[1.02] active:scale-[0.98]' 
                   : 'bg-white/5 text-white/20 cursor-not-allowed border border-white/5'}
               `}
             >
-              Confirm Appointment
+              {submitting ? 'Booking Appointment...' : 'Confirm Appointment'}
             </button>
           </div>
 
