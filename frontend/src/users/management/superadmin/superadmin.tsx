@@ -22,8 +22,11 @@ import History from '../History';
 import CMS from './SuperCMS';
 import UserManagement from './SuperAccountManagement';
 import Overview from './SuperDashboard';
+import Availability from '../staff/Availability';
+import OfficeSchedule from '../staff/OfficeSchedule';
 import { useAuth } from '../../../auth/AuthContext';
 import { ThemeProvider } from '../../../contexts/ThemeContext';
+import { Building2, Calendar as CalendarIcon } from 'lucide-react';
 
 const SuperAdminDashboard = () => {
   const { user: authUser } = useAuth();
@@ -45,6 +48,8 @@ const SuperAdminDashboard = () => {
     { id: 'assessment', label: 'Assessment', icon: ClipboardCheck },
     { id: 'shifting', label: 'Shifting', icon: RefreshCw },
     { id: 'history', label: 'System History', icon: Clock },
+    { id: 'availability', label: 'My Availability', icon: CalendarIcon },
+    { id: 'office-schedule', label: 'Office Schedule', icon: Building2 },
     { id: 'profile', label: 'My Profile', icon: User },
   ];
 
@@ -106,12 +111,20 @@ const SuperAdminDashboard = () => {
               <History key="history-list" />
             )}
 
+            { activeTab === 'availability' && (
+              <Availability key="availability-mgmt" />
+            )}
+
+            { activeTab === 'office-schedule' && (
+              <OfficeSchedule key="office-mgmt" />
+            )}
+
             {activeTab === 'profile' && (
               <Profile key="profile" user={{ ...superAdmin, type: 'director' } as any} />
             )}
 
             {/* Fallback for other tabs */}
-            {!['overview', 'analytics', 'counseling', 'assessment', 'shifting', 'cms', 'accounts', 'history', 'profile'].includes(activeTab) && (
+            {!['overview', 'analytics', 'counseling', 'assessment', 'shifting', 'cms', 'accounts', 'history', 'availability', 'office-schedule', 'profile'].includes(activeTab) && (
               <motion.div
                 key="coming-soon"
                 initial={{ opacity: 0 }}
