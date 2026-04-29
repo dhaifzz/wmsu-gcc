@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
-import { Link } from 'react-router-dom';
 import { Shield, Lock, Eye, FileText, ChevronRight, ArrowLeft } from 'lucide-react';
 
 const PrivacyPolicy = () => {
@@ -18,10 +17,10 @@ const PrivacyPolicy = () => {
               animate={{ opacity: 1, y: 0 }}
               className="mb-16 text-center"
             >
-              <Link to="/" className="inline-flex items-center gap-2 text-slate-400 hover:text-emerald-600 transition-colors mb-8 font-bold group">
+              <a href="/" className="inline-flex items-center gap-2 text-slate-400 hover:text-emerald-600 transition-colors mb-8 font-bold group">
                 <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
                 Back to Home
-              </Link>
+              </a>
               <div className="block"></div>
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 rounded-full text-xs font-black uppercase tracking-widest mb-6">
 

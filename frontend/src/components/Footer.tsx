@@ -153,8 +153,8 @@ const Footer = () => {
             © {new Date().getFullYear()} WMSU Guidance and Counseling Center. All rights reserved.
           </p>
           <div className="flex gap-8 text-xs font-bold text-white/70">
-            <Link to="/privacy-policy" className="hover:text-emerald-400">Privacy Policy</Link>
-            <Link to="/terms-of-service" className="hover:text-emerald-400">Terms of Service</Link>
+            <a href="/privacy-policy" className="hover:text-emerald-400">Privacy Policy</a>
+            <a href="/terms-of-service" className="hover:text-emerald-400">Terms of Service</a>
           </div>
         </div>
       </div>

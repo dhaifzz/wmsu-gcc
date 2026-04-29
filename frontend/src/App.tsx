@@ -25,7 +25,6 @@ import TermsOfService from './public/legal/TermsOfService';
 
 import { useAuth } from './auth/AuthProvider';
 import SplashScreen from './components/loader/SplashScreen';
-import ScrollToTop from './components/ScrollToTop';
 
 function AppContent() {
   const { loading } = useAuth();
@@ -48,67 +47,64 @@ function AppContent() {
   }
 
   return (
-    <>
-      <ScrollToTop />
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/about" element={<AboutUs />} />
-        <Route path="/team" element={<OurTeam />} />
-        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="/terms-of-service" element={<TermsOfService />} />
+    <Routes>
+      {/* Public Routes */}
+      <Route path="/" element={<HomePage />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/about" element={<AboutUs />} />
+      <Route path="/team" element={<OurTeam />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+      <Route path="/terms-of-service" element={<TermsOfService />} />
 
-        {/* Service Details Routes */}
-        <Route path="/services/counseling" element={<CounselingDetails />} />
-        <Route path="/services/assessment" element={<AssessmentDetails />} />
-        <Route path="/services/shifting" element={<ShiftingDetails />} />
+      {/* Service Details Routes */}
+      <Route path="/services/counseling" element={<CounselingDetails />} />
+      <Route path="/services/assessment" element={<AssessmentDetails />} />
+      <Route path="/services/shifting" element={<ShiftingDetails />} />
 
-        {/* Protected Client Routes */}
-        <Route path="/student/high-school" element={
-          <ProtectedRoute allowedRoles={['High School Student']}>
-            <HighSchoolDashboard />
-          </ProtectedRoute>
-        } />
-        <Route path="/student/college" element={
-          <ProtectedRoute allowedRoles={['College Student']}>
-            <CollegeDashboard />
-          </ProtectedRoute>
-        } />
-        <Route path="/faculty" element={
-          <ProtectedRoute allowedRoles={['Faculty']}>
-            <FacultyDashboard />
-          </ProtectedRoute>
-        } />
-        <Route path="/outsideClient" element={
-          <ProtectedRoute allowedRoles={['Outsider']}>
-            <OutsideClientDashboard />
-          </ProtectedRoute>
-        } />
-        <Route path="/staff" element={
-          <ProtectedRoute allowedRoles={['Staff', 'SuperAdmin']}>
-            <StaffDashboard />
-          </ProtectedRoute>
-        } />
-        <Route path="/director" element={
-          <ProtectedRoute allowedRoles={['Director', 'SuperAdmin']}>
-            <DirectorDashboard />
-          </ProtectedRoute>
-        } />
-        <Route path="/superadmin" element={
-          // <ProtectedRoute allowedRoles={['SuperAdmin']}>
-            <SuperAdminDashboard />
-          // </ProtectedRoute>
-        } />
+      {/* Protected Client Routes */}
+      <Route path="/student/high-school" element={
+        <ProtectedRoute allowedRoles={['High School Student']}>
+          <HighSchoolDashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/student/college" element={
+        <ProtectedRoute allowedRoles={['College Student']}>
+          <CollegeDashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/faculty" element={
+        <ProtectedRoute allowedRoles={['Faculty']}>
+          <FacultyDashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/outsideClient" element={
+        <ProtectedRoute allowedRoles={['Outsider']}>
+          <OutsideClientDashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/staff" element={
+        <ProtectedRoute allowedRoles={['Staff', 'SuperAdmin']}>
+          <StaffDashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/director" element={
+        <ProtectedRoute allowedRoles={['Director', 'SuperAdmin']}>
+          <DirectorDashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/superadmin" element={
+        // <ProtectedRoute allowedRoles={['SuperAdmin']}>
+          <SuperAdminDashboard />
+        // </ProtectedRoute>
+      } />
 
-        {/* Legacy /student route redirects to login */}
-        <Route path="/student" element={<Navigate to="/login" replace />} />
+      {/* Legacy /student route redirects to login */}
+      <Route path="/student" element={<Navigate to="/login" replace />} />
 
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </>
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 
