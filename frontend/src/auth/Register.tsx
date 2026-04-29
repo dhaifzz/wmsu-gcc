@@ -70,6 +70,38 @@ export default function Register() {
 
   const [barangaySearch, setBarangaySearch] = useState('');
 
+  const normalizeAcademicData = (payload: any) => {
+    const source = payload?.data || payload?.content || payload?.system || payload || {};
+    const rawColleges = Array.isArray(source.colleges) ? source.colleges : [];
+    const rawOccupations = Array.isArray(source.occupations) ? source.occupations : [];
+
+    const normalizedColleges = rawColleges
+      .map((col: any, index: number) => {
+        const normalizedCourses = (Array.isArray(col?.courses) ? col.courses : [])
+          .map((course: any) => ({
+            name: course?.name || course?.course_name || '',
+            type: course?.type || course?.program_type || 'Undergraduate'
+          }))
+          .filter((course: any) => Boolean(course.name));
+
+        return {
+          id: col?.id ?? index,
+          name: col?.name || col?.college_name || '',
+          courses: normalizedCourses
+        };
+      })
+      .filter((col: any) => Boolean(col.name));
+
+    const normalizedOccupations = rawOccupations
+      .map((occ: any) => (typeof occ === 'string' ? occ : occ?.occupation_name))
+      .filter((occ: any) => typeof occ === 'string' && occ.trim() !== '');
+
+    return {
+      colleges: normalizedColleges,
+      occupations: normalizedOccupations
+    };
+  };
+
   const filteredCities = ALL_CITIES.filter(c => c.toLowerCase().includes(citySearch.toLowerCase()));
 
   const filteredBarangays = useMemo(() => {
@@ -96,8 +128,16 @@ export default function Register() {
         }
 
         if (academicRes.ok && academicRes.data) {
-          setColleges(academicRes.data.colleges || []);
-          setOccupations(academicRes.data.occupations || []);
+          const parsed = normalizeAcademicData(academicRes.data);
+          setColleges(parsed.colleges);
+          setOccupations(parsed.occupations);
+        } else {
+          const systemRes = await cmsApi.getContent('system');
+          if (systemRes.ok && systemRes.data) {
+            const parsed = normalizeAcademicData(systemRes.data);
+            setColleges(parsed.colleges);
+            setOccupations(parsed.occupations);
+          }
         }
       } catch (error) {
         console.error('Failed to fetch data:', error);
@@ -108,7 +148,6 @@ export default function Register() {
   const [isDropdownOpen, setIsDropdownOpen] = useState<{ [key: string]: boolean }>({
     sex: false,
     gradeLevel: false,
-    department: false,
     occupation: false,
     course: false,
     college: false,
@@ -136,14 +175,12 @@ export default function Register() {
       .sort();
   }, [selectedCollege, colleges, courseSearch]);
 
-  const filteredOccs = occupations.filter(o => o.toLowerCase().includes(occSearch.toLowerCase()));
-
   const toggleDropdown = (key: string) => {
     setIsDropdownOpen(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
   const closeDropdowns = () => {
-    setIsDropdownOpen({ sex: false, gradeLevel: false, department: false, occupation: false, course: false, college: false, city: false, barangay: false });
+    setIsDropdownOpen({ sex: false, gradeLevel: false, occupation: false, course: false, college: false, city: false, barangay: false });
   };
 
 
@@ -154,11 +191,14 @@ export default function Register() {
   const [course, setCourse] = useState('');
   const [gradeLevel, setGradeLevel] = useState('');
   const [track, setTrack] = useState('');
-  const [isFaculty, setIsFaculty] = useState<boolean>(false);
-  const [department, setDepartment] = useState('');
   const [schoolId, setSchoolId] = useState('');
   const [lrn, setLrn] = useState('');
   const [employeeId, setEmployeeId] = useState('');
+  const WMSU_OCCUPATIONS = ['Student', 'WMSU Employee'];
+  const occupationOptions = isWMSU ? WMSU_OCCUPATIONS : occupations;
+  const isFaculty = isWMSU && occupation === 'WMSU Employee';
+  const shouldShowEducationStep = occupation === 'Student';
+  const filteredOccs = occupationOptions.filter(o => o.toLowerCase().includes(occSearch.toLowerCase()));
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -201,10 +241,9 @@ export default function Register() {
   const handleNextStep3 = () => {
     if (!sex) { showToast.error('Please select your sex.'); return; }
     if (!birthdate) { showToast.error('Birthdate is required.'); return; }
-    if (isWMSU && isFaculty && !department) { showToast.error('Please select your department.'); return; }
+    if (!occupation) { showToast.error('Please select your occupation.'); return; }
     if (isWMSU && isFaculty && !employeeId.trim()) { showToast.error('Employee ID is required.'); return; }
     if (isWMSU && isFaculty && !/^\d{6}$/.test(employeeId.trim())) { showToast.error('Employee ID must be exactly 6 digits.'); return; }
-    if (!isWMSU && !occupation) { showToast.error('Please select your occupation.'); return; }
     
     closeDropdowns();
     setStep(4);
@@ -243,8 +282,8 @@ export default function Register() {
         birthdate,
         isWMSU,
         isFaculty,
-        department: isFaculty ? department : '',
-        occupation: !isWMSU ? occupation : '',
+        department: '',
+        occupation,
         educationLevel,
         school: !isWMSU ? school : '',
         course,
@@ -345,7 +384,19 @@ export default function Register() {
                     <div className="flex w-full rounded-lg bg-gray-100 p-1">
                       <button
                         type="button"
-                        onClick={() => setIsWMSU(true)}
+                        onClick={() => {
+                          setIsWMSU(true);
+                          setOccupation('');
+                          setEmployeeId('');
+                          setEducationLevel('');
+                          setSelectedCollege('');
+                          setCourse('');
+                          setGradeLevel('');
+                          setTrack('');
+                          setSchoolId('');
+                          setLrn('');
+                          setOccSearch('');
+                        }}
                         className={`flex-1 rounded-lg py-2 text-sm font-bold transition-all ${isWMSU === true ? 'bg-rose-600 text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                       >
                         Yes, I am
@@ -354,7 +405,16 @@ export default function Register() {
                         type="button"
                         onClick={() => {
                           setIsWMSU(false);
-                          setIsFaculty(false);
+                          setOccupation('');
+                          setEmployeeId('');
+                          setEducationLevel('');
+                          setSelectedCollege('');
+                          setCourse('');
+                          setGradeLevel('');
+                          setTrack('');
+                          setSchoolId('');
+                          setLrn('');
+                          setOccSearch('');
                         }}
                         className={`flex-1 rounded-lg py-2 text-sm font-bold transition-all ${isWMSU === false ? 'bg-emerald-600 text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                       >
@@ -380,7 +440,7 @@ export default function Register() {
                     <div className={`flex h-8 w-8 items-center justify-center rounded-full font-bold transition-colors duration-300 ${step >= 3 ? 'bg-emerald-600 text-white shadow-md' : 'bg-gray-200 text-gray-500'}`}>3</div>
                     <span className={`mt-1 text-[10px] font-bold uppercase tracking-wider ${step >= 3 ? 'text-emerald-700' : 'text-gray-400'}`}>Details</span>
                   </div>
-                  {((isWMSU && !isFaculty) || (!isWMSU && occupation === 'Student')) && (
+                  {shouldShowEducationStep && (
                     <>
                       <div className={`h-1 flex-1 mx-1 rounded transition-colors duration-300 mb-4 ${step >= 4 ? 'bg-emerald-600' : 'bg-gray-200'}`}></div>
                       <div className="flex flex-col items-center">
@@ -739,67 +799,89 @@ export default function Register() {
                         </div>
                       </div>
 
-                      {/* Department Selection for Faculty */}
-                      {isWMSU && isFaculty && (
-                        <div className="relative animate-in fade-in slide-in-from-top-2 duration-300">
-                          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4 mb-2 block">Department / College</label>
-                          <div className="relative flex items-center">
-                            <div className="absolute left-4 z-10 text-gray-700 pointer-events-none">
-                              <Building className="h-5 w-5" />
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => toggleDropdown('department')}
-                              className={`w-full flex items-center justify-between bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold transition-all border-2 ${isDropdownOpen.department ? 'border-emerald-500 bg-white ring-4 ring-emerald-500/10' : 'border-transparent'}`}
-                            >
-                              <span className={department ? 'text-slate-800' : 'text-gray-400'}>
-                                {department || 'Select Department/College'}
-                              </span>
-                              <ChevronDown size={18} className={`text-emerald-600 transition-transform ${isDropdownOpen.department ? 'rotate-180' : ''}`} />
-                            </button>
+                      {/* Occupation */}
+                      <div className="relative animate-in fade-in slide-in-from-top-2 duration-300">
+                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4 mb-2 block">
+                          Occupation
+                        </label>
+                        <div className="relative flex items-center">
+                          <div className="absolute left-4 z-10 text-gray-700 pointer-events-none">
+                            <Briefcase className="h-5 w-5" />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => toggleDropdown('occupation')}
+                            className={`w-full flex items-center justify-between bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold transition-all border-2 ${isDropdownOpen.occupation ? 'border-emerald-500 bg-white ring-4 ring-emerald-500/10' : 'border-transparent'}`}
+                          >
+                            <span className={occupation ? 'text-slate-800' : 'text-gray-400'}>
+                              {occupation || 'Select Occupation'}
+                            </span>
+                            <ChevronDown size={18} className={`text-emerald-600 transition-transform ${isDropdownOpen.occupation ? 'rotate-180' : ''}`} />
+                          </button>
 
-                            <AnimatePresence>
-                              {isDropdownOpen.department && (
-                                <motion.div
-                                  initial={{ opacity: 0, y: 10 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  exit={{ opacity: 0, y: 10 }}
-                                  className="absolute z-50 bottom-full left-0 right-0 mb-2 bg-white border border-slate-100 rounded-lg shadow-2xl overflow-hidden max-h-60 overflow-y-auto"
-                                >
-                                  {[
-                                    { val: "CSM", label: "College of Science and Mathematics" },
-                                    { val: "CLA", label: "College of Liberal Arts" },
-                                    { val: "CTE", label: "College of Teacher Education" },
-                                    { val: "COE", label: "College of Engineering" },
-                                    { val: "CA", label: "College of Agriculture" },
-                                    { val: "CN", label: "College of Nursing" },
-                                    { val: "CCJE", label: "College of Criminal Justice Education" },
-                                    { val: "CSWCD", label: "College of Social Work and Community Development" },
-                                    { val: "CHomeE", label: "College of Home Economics" },
-                                    { val: "CFCES", label: "College of Forestry and Environmental Studies" },
-                                    { val: "CPADS", label: "College of Public Administration and Development Studies" },
-                                    { val: "ILS", label: "Integrated Laboratory School" }
-                                  ].map((opt) => (
+                          <AnimatePresence>
+                            {isDropdownOpen.occupation && (
+                              <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 10 }}
+                                className="absolute z-50 bottom-full left-0 right-0 mb-2 bg-white border border-slate-100 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[300px]"
+                              >
+                                {/* Search Input */}
+                                <div className="p-3 border-b border-slate-50">
+                                  <div className="relative flex items-center">
+                                    <Search className="absolute left-3 h-4 w-4 text-slate-400" />
+                                    <input
+                                      type="text"
+                                      placeholder="Search occupation..."
+                                      value={occSearch}
+                                      onChange={(e) => setOccSearch(e.target.value)}
+                                      className="w-full bg-slate-50 border-none rounded-xl py-2 pl-9 pr-4 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none"
+                                      autoFocus
+                                    />
+                                  </div>
+                                </div>
+
+                                <div className="overflow-y-auto custom-scrollbar">
+                                  {filteredOccs.map((option) => (
                                     <button
-                                      key={opt.val}
+                                      key={option}
                                       type="button"
                                       onClick={() => {
-                                        setDepartment(opt.val);
-                                        toggleDropdown('department');
+                                        setOccupation(option);
+                                        if (option !== 'WMSU Employee') {
+                                          setEmployeeId('');
+                                        }
+                                        if (option !== 'Student') {
+                                          setEducationLevel('');
+                                          setSelectedCollege('');
+                                          setCourse('');
+                                          setGradeLevel('');
+                                          setTrack('');
+                                          setSchoolId('');
+                                          setLrn('');
+                                        }
+                                        toggleDropdown('occupation');
+                                        setOccSearch('');
                                       }}
-                                      className={`w-full px-6 py-4 text-left text-sm font-bold transition-colors border-b border-slate-50 last:border-0 ${department === opt.val ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-emerald-50/50'}`}
+                                      className={`w-full px-6 py-4 text-left text-sm font-bold transition-colors border-b border-slate-50 last:border-0 ${occupation === option ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-emerald-50/50'}`}
                                     >
-                                      {opt.label}
+                                      {option}
                                     </button>
                                   ))}
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-                          </div>
+                                  {filteredOccs.length === 0 && (
+                                    <div className="p-4 text-center">
+                                      <p className="text-xs font-bold text-slate-400">No results found</p>
+                                    </div>
+                                  )}
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
                         </div>
-                      )}
+                      </div>
 
-                      {/* Employee ID for Faculty */}
+                      {/* Employee ID for WMSU Employee */}
                       {isWMSU && isFaculty && (
                         <div className="relative animate-in fade-in slide-in-from-top-2 duration-300">
                           <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4 mb-2 block">Employee ID (6 Digits)</label>
@@ -819,80 +901,11 @@ export default function Register() {
                         </div>
                       )}
 
-                      {/* Occupation */}
-                      {!isWMSU && (
-                        <div className="relative animate-in fade-in slide-in-from-top-2 duration-300">
-                          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4 mb-2 block">Occupation</label>
-                          <div className="relative flex items-center">
-                            <div className="absolute left-4 z-10 text-gray-700 pointer-events-none">
-                              <Briefcase className="h-5 w-5" />
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => toggleDropdown('occupation')}
-                              className={`w-full flex items-center justify-between bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold transition-all border-2 ${isDropdownOpen.occupation ? 'border-emerald-500 bg-white ring-4 ring-emerald-500/10' : 'border-transparent'}`}
-                            >
-                              <span className={occupation ? 'text-slate-800' : 'text-gray-400'}>
-                                {occupation || 'Select Occupation'}
-                              </span>
-                              <ChevronDown size={18} className={`text-emerald-600 transition-transform ${isDropdownOpen.occupation ? 'rotate-180' : ''}`} />
-                            </button>
-
-                            <AnimatePresence>
-                              {isDropdownOpen.occupation && (
-                                <motion.div
-                                  initial={{ opacity: 0, y: 10 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  exit={{ opacity: 0, y: 10 }}
-                                  className="absolute z-50 bottom-full left-0 right-0 mb-2 bg-white border border-slate-100 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[300px]"
-                                >
-                                  {/* Search Input */}
-                                  <div className="p-3 border-b border-slate-50">
-                                    <div className="relative flex items-center">
-                                      <Search className="absolute left-3 h-4 w-4 text-slate-400" />
-                                      <input
-                                        type="text"
-                                        placeholder="Search occupation..."
-                                        value={occSearch}
-                                        onChange={(e) => setOccSearch(e.target.value)}
-                                        className="w-full bg-slate-50 border-none rounded-xl py-2 pl-9 pr-4 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none"
-                                        autoFocus
-                                      />
-                                    </div>
-                                  </div>
-
-                                  <div className="overflow-y-auto custom-scrollbar">
-                                    {filteredOccs.map((option) => (
-                                      <button
-                                        key={option}
-                                        type="button"
-                                        onClick={() => {
-                                          setOccupation(option);
-                                          toggleDropdown('occupation');
-                                          setOccSearch('');
-                                        }}
-                                        className={`w-full px-6 py-4 text-left text-sm font-bold transition-colors border-b border-slate-50 last:border-0 ${occupation === option ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-emerald-50/50'}`}
-                                      >
-                                        {option}
-                                      </button>
-                                    ))}
-                                    {filteredOccs.length === 0 && (
-                                      <div className="p-4 text-center">
-                                        <p className="text-xs font-bold text-slate-400">No results found</p>
-                                      </div>
-                                    )}
-                                  </div>
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-                          </div>
-                        </div>
-                      )}
                     </div>
                   )}
 
                   {/* STEP 4: Education Details */}
-                  {step === 4 && ((isWMSU && !isFaculty) || (!isWMSU && occupation === 'Student')) && (
+                  {step === 4 && shouldShowEducationStep && (
                     <div className="flex flex-col gap-4">
 
                       {/* School */}
@@ -1222,10 +1235,10 @@ export default function Register() {
                     {step === 2 && (
                       <button type="button" disabled={loading} onClick={() => { handleNextStep2(); window.scrollTo(0, 0); }} className={step > 1 ? "w-2/3 rounded-lg bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0 disabled:opacity-50" : "w-full rounded-lg bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0 disabled:opacity-50"}>Next</button>
                     )}
-                    {step === 3 && ((isWMSU && !isFaculty) || (!isWMSU && occupation === 'Student')) && (
+                    {step === 3 && shouldShowEducationStep && (
                       <button type="button" disabled={loading} onClick={() => { handleNextStep3(); window.scrollTo(0, 0); }} className="w-2/3 rounded-lg bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0 disabled:opacity-50">Next</button>
                     )}
-                    {step === 3 && !((isWMSU && !isFaculty) || (!isWMSU && occupation === 'Student')) && (
+                    {step === 3 && !shouldShowEducationStep && (
                       <button type="submit" disabled={loading} className="w-2/3 rounded-lg bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0 disabled:opacity-70 flex items-center justify-center gap-2">
                         {loading ? (<><Loader2 className="h-4 w-4 animate-spin" />Creating account...</>) : 'Complete Sign up'}
                       </button>
