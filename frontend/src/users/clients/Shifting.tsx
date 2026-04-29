@@ -21,7 +21,7 @@ import {
 import MarqueeText from '../../components/MarqueeText';
 import { useAuth } from '../../auth/AuthContext';
 import { showToast } from '../../components/modal-notification/toast';
-import { appointmentApi } from '../../lib/api';
+import { appointmentApi, cmsApi } from '../../lib/api';
 
 type DocumentIconName = 'ImageIcon' | 'FileText' | 'ClipboardCheck' | 'Clock' | 'User' | 'AlertCircle';
 
@@ -78,7 +78,6 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
   const [isSubmissionOpen, setIsSubmissionOpen] = useState(false);
   const [submittedInfo, setSubmittedInfo] = useState<{ submittedAt: string; scheduledAt: string } | null>(null);
   const [uploadedDocs, setUploadedDocs] = useState<Record<string, File | null>>({
-    bookingReceipt: null,
     picture: null,
     grades: null,
     latestCor: null,
@@ -96,13 +95,8 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
   const header = { title: "Shifting Examination", subtitle: "Helping you find the right academic path for your future career." };
   const profileInfo = { title: "Student Information", subtitle: "Profile details are pre-filled to reduce repeat typing." };
   const academic = { title: "Academic Guidelines", subtitle: "Complete your shifting details and upload all required files." };
-  const courses = [
-    "BS Computer Science", "BS Information Technology", "BS Nursing", "BS Psychology",
-    "BS Civil Engineering", "BS Mechanical Engineering", "BS Education", "BS Criminology",
-    "BS Accountancy", "BS Business Administration", "BS Biology", "BS Social Work"
-  ];
+  const [courses, setCourses] = useState<string[]>([]);
   const documents = [
-    { key: "bookingReceipt", label: "Booking Receipt", note: "Digital or printed copy of your appointment confirmation.", iconName: "ClipboardCheck", accept: ".pdf,.jpg,.jpeg,.png" },
     { key: "picture", label: "2x2 Picture", note: "Formal 2x2 colored picture with name tag (Selfies are not allowed).", iconName: "ImageIcon", accept: ".jpg,.jpeg,.png" },
     { key: "grades", label: "Downloadable Grades", note: "A complete copy of all your previous semester's grades.", iconName: "FileText", accept: ".pdf,.jpg,.jpeg,.png" },
     { key: "latestCor", label: "Latest COR", note: "Your most recent Certificate of Registration (COR).", iconName: "FileText", accept: ".pdf,.jpg,.jpeg,.png" },
@@ -150,6 +144,47 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
     void loadLatest();
   }, [accessToken]);
 
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        let academicData = null;
+        const result = await cmsApi.getAcademicData();
+        if (result.ok && result.data) {
+          academicData = result.data;
+        } else {
+          const sysRes = await cmsApi.getContent('system');
+          if (sysRes.ok && sysRes.data) {
+            academicData = sysRes.data;
+          }
+        }
+        
+        if (academicData) {
+          const payloadObject = typeof academicData === 'object' && academicData !== null ? academicData : {};
+          const source = 'data' in payloadObject ? (payloadObject as any).data : ('content' in payloadObject ? (payloadObject as any).content : ('system' in payloadObject ? (payloadObject as any).system : payloadObject));
+          
+          const rawColleges = Array.isArray(source?.colleges) ? source.colleges : [];
+          const allCourses: string[] = [];
+          
+          rawColleges.forEach((col: any) => {
+            if (col && Array.isArray(col.courses)) {
+              col.courses.forEach((course: any) => {
+                if (course && typeof course === 'object') {
+                  const name = typeof course.name === 'string' ? course.name : (typeof course.course_name === 'string' ? course.course_name : '');
+                  if (name.trim()) allCourses.push(name.trim());
+                }
+              });
+            }
+          });
+          
+          setCourses(Array.from(new Set(allCourses)).sort());
+        }
+      } catch (error) {
+        console.error('Failed to fetch courses:', error);
+      }
+    };
+    void fetchCourses();
+  }, []);
+
   const uploadedCount = useMemo(
     () => Object.values(uploadedDocs).filter(Boolean).length,
     [uploadedDocs]
@@ -184,7 +219,7 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
         currentCourse: profileData.currentCourse,
         targetCourse: formData.targetCourse,
         reason: formData.reason,
-        bookingReceiptName: uploadedDocs.bookingReceipt?.name || '',
+        bookingReceiptName: '',
         pictureName: uploadedDocs.picture?.name || '',
         gradesName: uploadedDocs.grades?.name || '',
         latestCorName: uploadedDocs.latestCor?.name || '',
@@ -203,7 +238,6 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
       showToast.success('Shifting application submitted. Staff will review your requirements.');
       setFormData((prev) => ({ ...prev, targetCourse: '', reason: '' }));
       setUploadedDocs({
-        bookingReceipt: null,
         picture: null,
         grades: null,
         latestCor: null,
