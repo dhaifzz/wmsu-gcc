@@ -242,3 +242,26 @@ export const appointmentApi = {
   getShiftingSubmissionStatus: () =>
     api<ShiftingSubmissionStatusResponse>('/api/appointments/shifting/submission-status')
 };
+
+// ------------------------------------------
+// Analytics API helpers
+// ------------------------------------------
+
+export interface AnalyticsDashboardResponse {
+  stats: {
+    totalAppointments: number;
+    approvalRate: string;
+    avgReviewTime: string;
+    pendingCount: number;
+  };
+  distribution: Array<{ label: string; count: number; percent: number }>;
+  topCourses: Array<{ course: string; count: number; trend: string }>;
+  topStaff: Array<{ name: string; role: string; count: number }>;
+  rolesDistribution: Array<{ role: string; count: number; percent: number }>;
+  systemActivity: Array<{ action: string; time: string; type: string }>;
+}
+
+export const analyticsApi = {
+  getAnalyticsDashboardData: (token: string) =>
+    api<AnalyticsDashboardResponse>('/api/analytics', { token }),
+};

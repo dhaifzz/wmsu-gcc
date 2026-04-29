@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   TrendingUp, 
@@ -16,21 +17,63 @@ import {
   UserCheck
 } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useAuth } from '../../auth/AuthContext';
+import { analyticsApi, type AnalyticsDashboardResponse } from '../../lib/api';
 
 const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }) => {
   const theme = useTheme();
+  const { accessToken } = useAuth();
+  const [data, setData] = useState<AnalyticsDashboardResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!accessToken) return;
+      try {
+        const result = await analyticsApi.getAnalyticsDashboardData(accessToken);
+        if (result.ok) {
+          setData(result.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch analytics:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [accessToken]);
+
+  if (loading) {
+    return <div className="p-8 flex items-center justify-center min-h-[400px]">
+      <div className="w-8 h-8 border-4 border-slate-200 border-t-blue-500 rounded-full animate-spin"></div>
+    </div>;
+  }
+
+  const currentData: AnalyticsDashboardResponse = data || {
+    stats: { totalAppointments: 0, approvalRate: '0.0', avgReviewTime: '0 Hours', pendingCount: 0 },
+    distribution: [],
+    topCourses: [],
+    topStaff: [],
+    rolesDistribution: [],
+    systemActivity: []
+  };
+
   const stats = [
-    { label: "Total Evaluations", value: "1,284", trend: "+12.5%", icon: BarChart3, color: "blue" },
-    { label: "Completion Rate", value: "94.2%", trend: "+2.1%", icon: Activity, color: "teal" },
-    { label: "Avg. Processing Time", value: "1.5 Days", trend: "-15%", icon: TrendingUp, color: "purple" },
-    { label: "Student Satisfaction", value: "4.8/5", trend: "+0.3", icon: Users, color: "amber" }
+    { label: "Total Appointments", value: currentData.stats.totalAppointments.toString(), trend: "", icon: BarChart3, color: "blue" },
+    { label: "Approval Rate", value: `${currentData.stats.approvalRate}%`, trend: "", icon: CheckCircle2, color: "teal" },
+    { label: "Avg. Review Time", value: currentData.stats.avgReviewTime, trend: "", icon: TrendingUp, color: "purple" },
+    { label: "Pending Reviews", value: currentData.stats.pendingCount.toString(), trend: "", icon: Activity, color: "amber" }
   ];
 
-  const distribution = [
-    { label: "Counseling", percent: 45, color: "bg-blue-500" },
-    { label: "Assessment", percent: 35, color: theme.bg600 },
-    { label: "Shifting", percent: 20, color: "bg-rose-500" }
-  ];
+  const distribution = currentData.distribution.map((item, idx) => {
+    const colors = ["bg-blue-500", theme.bg600, "bg-rose-500", "bg-amber-500"];
+    return { ...item, color: colors[idx % colors.length] };
+  });
+
+  const rolesDistribution = currentData.rolesDistribution.map((item, idx) => {
+    const colors = ["bg-blue-500", "bg-purple-500", theme.bg600, "bg-amber-500"];
+    return { ...item, color: colors[idx % colors.length] };
+  });
 
   return (
     <motion.div
@@ -58,8 +101,8 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
             <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1">{stat.label}</p>
             <div className="flex items-baseline justify-between">
               <h4 className="text-2xl font-black text-slate-900">{stat.value}</h4>
-              <span className={`text-[10px] font-black ${stat.trend.startsWith('+') ? theme.text500 : 'text-rose-500'} flex items-center gap-1`}>
-                <ArrowUpRight size={12} /> {stat.trend}
+              <span className={`text-[10px] font-black ${theme.text500} flex items-center gap-1`}>
+                {stat.trend && <><ArrowUpRight size={12} /> {stat.trend}</>}
               </span>
             </div>
           </div>
@@ -121,13 +164,7 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
             Top 5 Courses to Shift
           </h3>
           <div className="space-y-6 relative z-10">
-            {[
-              { course: 'BS Information Technology', count: 120, trend: '+15%' },
-              { course: 'BS Computer Science', count: 85, trend: '+8%' },
-              { course: 'BS Psychology', count: 64, trend: '+12%' },
-              { course: 'BS Nursing', count: 50, trend: '-2%' },
-              { course: 'BS Criminology', count: 42, trend: '+5%' }
-            ].map((item, idx) => (
+            {currentData.topCourses.map((item, idx) => (
               <div key={idx} className="flex items-center gap-4 group">
                 <div className={`text-center py-2 px-3 bg-white/10 rounded-lg border border-white/10 h-fit min-w-[50px] flex items-center justify-center ${theme.hoverBg600} transition-colors`}>
                   <span className={`text-lg font-black leading-none ${theme.text400} group-hover:text-white`}>#{idx + 1}</span>
@@ -136,7 +173,7 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
                   <p className="text-sm font-bold leading-tight line-clamp-1">{item.course}</p>
                   <div className="flex items-center justify-between">
                     <span className={`text-[10px] font-black uppercase tracking-widest ${theme.text400}`}>{item.count} Requests</span>
-                    <span className={`text-[9px] font-black ${item.trend.startsWith('+') ? theme.text400.replace('400','300') : 'text-rose-400'}`}>{item.trend}</span>
+                    <span className={`text-[9px] font-black ${theme.text400}`}>{item.trend}</span>
                   </div>
                 </div>
               </div>
@@ -154,19 +191,13 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
             <Award className={theme.text500} size={24} />
             Top 5 Performing Staff
           </h3>
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Based on evaluations completed</p>
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Based on appointments reviewed</p>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          {[
-            { name: 'Elena Rodriguez', role: 'Senior Counselor', count: 145, color: 'bg-amber-100 text-amber-600 border-amber-200' },
-            { name: 'Roberto Gomez', role: 'Assessment Specialist', count: 132, color: 'bg-slate-100 text-slate-600 border-slate-200' },
-            { name: 'Maria Clara', role: 'Guidance Staff', count: 98, color: 'bg-orange-50 text-orange-600 border-orange-100' },
-            { name: 'Juan Luna', role: 'Guidance Staff', count: 87, color: 'bg-slate-50 text-slate-500 border-slate-100' },
-            { name: 'Jose Rizal', role: 'Counselor', count: 76, color: 'bg-slate-50 text-slate-500 border-slate-100' }
-          ].map((staff, idx) => (
+          {currentData.topStaff.length > 0 ? currentData.topStaff.map((staff, idx) => (
             <div key={idx} className={`bg-slate-50 rounded-lg p-5 border border-slate-100 flex flex-col items-center text-center relative group ${theme.hoverBg50} hover:${theme.border200} transition-colors`}>
-              <div className={`absolute -top-3 -right-3 w-8 h-8 rounded-full border-2 border-white flex items-center justify-center font-black text-xs ${staff.color}`}>
+              <div className={`absolute -top-3 -right-3 w-8 h-8 rounded-full border-2 border-white flex items-center justify-center font-black text-xs bg-slate-100 text-slate-600 border-slate-200`}>
                 #{idx + 1}
               </div>
               <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-200 mb-3 group-hover:scale-110 transition-transform">
@@ -175,10 +206,10 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
               <h4 className="font-bold text-sm text-slate-900 leading-tight mb-1">{staff.name}</h4>
               <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-4">{staff.role}</p>
               <div className="mt-auto w-full pt-3 border-t border-slate-200/50 group-hover:border-emerald-200/50">
-                <p className={`text-[10px] font-black ${theme.text600} uppercase tracking-widest`}>{staff.count} Evaluated</p>
+                <p className={`text-[10px] font-black ${theme.text600} uppercase tracking-widest`}>{staff.count} Reviewed</p>
               </div>
             </div>
-          ))}
+          )) : <div className="col-span-5 text-center text-slate-400 font-bold py-8">No staff performance data yet.</div>}
         </div>
       </div>
 
@@ -225,12 +256,7 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
                 </h3>
               </div>
               <div className="space-y-6">
-                {[
-                  { role: "Students", count: 2850, percent: 83, color: "bg-blue-500" },
-                  { role: "Faculty", count: 420, percent: 12, color: "bg-purple-500" },
-                  { role: "Guidance Staff", count: 35, percent: 3, color: theme.bg600 },
-                  { role: "Directors & Admins", count: 10, percent: 1, color: "bg-amber-500" }
-                ].map((item) => (
+                {rolesDistribution.map((item) => (
                   <div key={item.role} className="space-y-2">
                     <div className="flex justify-between items-center px-1">
                       <span className="text-sm font-bold text-slate-700">{item.role}</span>
@@ -256,12 +282,7 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
                 Recent System Activity
               </h3>
               <div className="space-y-6 relative z-10">
-                {[
-                  { action: "Database Backup Completed", time: "10 mins ago", type: "system" },
-                  { action: "New Staff Account Created", time: "1 hour ago", type: "user" },
-                  { action: "CMS: Home Page Updated", time: "3 hours ago", type: "content" },
-                  { action: "System Update v2.1 Applied", time: "1 day ago", type: "system" }
-                ].map((log, idx) => (
+                {currentData.systemActivity.map((log, idx) => (
                   <div key={idx} className="flex gap-4">
                     <div className="mt-1">
                       <div className={`w-2 h-2 rounded-full ${log.type === 'system' ? 'bg-amber-400' : log.type === 'user' ? theme.bg600.replace('600', '400') : 'bg-purple-400'}`}></div>
