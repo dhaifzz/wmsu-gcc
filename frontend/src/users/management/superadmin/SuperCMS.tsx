@@ -16,9 +16,7 @@ import {
   Plus,
   Trash2,
   Briefcase,
-  GraduationCap,
   GripVertical,
-  Palette,
   Heart,
   CheckCircle,
   ClipboardCheck,
@@ -697,7 +695,7 @@ return (
               <div className="space-y-4">
                 <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Support Features (3 Items)</label>
                 <div className="grid md:grid-cols-3 gap-4">
-                  {homeContent.support.features.map((feature, idx) => (
+                  {homeContent.support.features.map((feature: any, idx: number) => (
                     <div key={idx} className="bg-slate-50 p-5 rounded-[2rem] border border-slate-200 space-y-3">
                       <div className="grid grid-cols-2 gap-2">
                         <div className="space-y-1">
@@ -846,7 +844,7 @@ return (
                 <div className="space-y-4">
                   <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Service Cards (4 Items)</label>
                   <div className="grid grid-cols-2 gap-3">
-                    {homeContent.growth.services.map((service, idx) => (
+                    {homeContent.growth.services.map((service: any, idx: number) => (
                       <div key={idx} className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col gap-2">
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6 bg-teal-100 rounded-md flex items-center justify-center text-teal-600">
@@ -1154,7 +1152,7 @@ return (
                   onReorder={(newOrder) => setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, director: newOrder } })}
                   className="grid md:grid-cols-2 lg:grid-cols-4 gap-4"
                 >
-                  {(teamContent.mainCampus.director || []).map((member, idx) => (
+                  {(teamContent.mainCampus.director || []).map((member: any, idx: number) => (
                     <Reorder.Item 
                       key={member.name + idx} 
                       value={member}
@@ -1166,7 +1164,7 @@ return (
                         </div>
                         <button
                           onClick={() => {
-                            const newItems = teamContent.mainCampus.director.filter((_, i) => i !== idx);
+                             const newItems = teamContent.mainCampus.director.filter((_: any, i: number) => i !== idx);
                             setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, director: newItems } });
                           }}
                           className="w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
@@ -1253,7 +1251,7 @@ return (
                   onReorder={(newOrder) => setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, counselors: newOrder } })}
                   className="grid md:grid-cols-2 lg:grid-cols-4 gap-4"
                 >
-                  {teamContent.mainCampus.counselors.map((member, idx) => (
+                  {teamContent.mainCampus.counselors.map((member: any, idx: number) => (
                     <Reorder.Item 
                       key={member.name + idx} 
                       value={member}
@@ -1265,7 +1263,7 @@ return (
                         </div>
                         <button
                           onClick={() => {
-                            const newCounselors = teamContent.mainCampus.counselors.filter((_, i) => i !== idx);
+                            const newCounselors = teamContent.mainCampus.counselors.filter((_: any, i: number) => i !== idx);
                             setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, counselors: newCounselors } });
                           }}
                           className="w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
@@ -1352,7 +1350,7 @@ return (
                   onReorder={(newOrder) => setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, staff: newOrder } })}
                   className="grid md:grid-cols-2 lg:grid-cols-4 gap-4"
                 >
-                  {teamContent.mainCampus.staff.map((member, idx) => (
+                  {teamContent.mainCampus.staff.map((member: any, idx: number) => (
                     <Reorder.Item 
                       key={member.name + idx} 
                       value={member}
@@ -1364,7 +1362,7 @@ return (
                         </div>
                         <button
                           onClick={() => {
-                            const newItems = teamContent.mainCampus.staff.filter((_, i) => i !== idx);
+                            const newItems = teamContent.mainCampus.staff.filter((_: any, i: number) => i !== idx);
                             setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, staff: newItems } });
                           }}
                           className="w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
@@ -1451,7 +1449,7 @@ return (
                   onReorder={(newOrder) => setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, coordinators: newOrder } })}
                   className="grid md:grid-cols-2 lg:grid-cols-4 gap-4"
                 >
-                  {teamContent.mainCampus.coordinators.map((member, idx) => (
+                  {teamContent.mainCampus.coordinators.map((member: any, idx: number) => (
                     <Reorder.Item 
                       key={member.name + idx} 
                       value={member}
@@ -1463,7 +1461,7 @@ return (
                         </div>
                         <button
                           onClick={() => {
-                            const newItems = teamContent.mainCampus.coordinators.filter((_, i) => i !== idx);
+                            const newItems = teamContent.mainCampus.coordinators.filter((_: any, i: number) => i !== idx);
                             setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, coordinators: newItems } });
                           }}
                           className="w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
@@ -1554,7 +1552,7 @@ return (
                 onReorder={(newOrder) => setTeamContent({ ...teamContent, esuCampus: newOrder })}
                 className="grid md:grid-cols-4 gap-4"
               >
-                  {teamContent.esuCampus.map((member, idx) => (
+                  {teamContent.esuCampus.map((member: any, idx: number) => (
                     <Reorder.Item 
                       key={member.name + idx} 
                       value={member}
@@ -1566,7 +1564,7 @@ return (
                         </div>
                         <button
                           onClick={() => {
-                            const newItems = teamContent.esuCampus.filter((_, i) => i !== idx);
+                            const newItems = teamContent.esuCampus.filter((_: any, i: number) => i !== idx);
                             setTeamContent({ ...teamContent, esuCampus: newItems });
                           }}
                           className="w-5 h-5 bg-red-100 text-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-bold z-10"
