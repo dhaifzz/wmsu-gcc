@@ -175,12 +175,9 @@ export interface CreateAssessmentAppointmentResponse {
 }
 
 export interface CreateShiftingAppointmentPayload {
-  date: string;
-  timeSlot: string;
   currentCourse: string;
   targetCourse: string;
   reason: string;
-  bookingReceiptName: string;
   pictureName: string;
   gradesName: string;
   latestCorName: string;
@@ -201,6 +198,8 @@ export interface LatestShiftingAppointmentResponse {
     id: string;
     scheduled_time: string;
     created_at: string;
+    currentCourse?: string;
+    targetCourse?: string;
   } | null;
 }
 

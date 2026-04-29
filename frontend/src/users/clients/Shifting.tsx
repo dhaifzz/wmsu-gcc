@@ -47,14 +47,7 @@ interface ShiftingProps {
   user: DashboardUser;
 }
 
-const timeSlots = ['08:00 AM - 09:00 AM', '09:00 AM - 10:00 AM', '10:00 AM - 11:00 AM', '01:00 PM - 02:00 PM', '02:00 PM - 03:00 PM', '03:00 PM - 04:00 PM'];
 
-const toDateKey = (date: Date) => {
-  const yyyy = date.getFullYear();
-  const mm = String(date.getMonth() + 1).padStart(2, '0');
-  const dd = String(date.getDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}`;
-};
 
 const toTitleCase = (value?: string | null) =>
   (value || '')
@@ -70,13 +63,11 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
     targetCourse: '',
     reason: ''
   });
-  const [examDate, setExamDate] = useState(toDateKey(new Date()));
-  const [examTimeSlot, setExamTimeSlot] = useState('');
   const [docStep, setDocStep] = useState(0);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmissionOpen, setIsSubmissionOpen] = useState(false);
-  const [submittedInfo, setSubmittedInfo] = useState<{ submittedAt: string; scheduledAt: string } | null>(null);
+  const [submittedInfo, setSubmittedInfo] = useState<{ submittedAt: string; currentCourse?: string; targetCourse?: string } | null>(null);
   const [uploadedDocs, setUploadedDocs] = useState<Record<string, File | null>>({
     picture: null,
     grades: null,
@@ -137,7 +128,8 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
       if (result.ok && result.data.appointment) {
         setSubmittedInfo({
           submittedAt: result.data.appointment.created_at,
-          scheduledAt: result.data.appointment.scheduled_time
+          currentCourse: result.data.appointment.currentCourse,
+          targetCourse: result.data.appointment.targetCourse
         });
       }
     };
@@ -191,7 +183,7 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
   );
 
   const allDocsUploaded = uploadedCount === documents.length;
-  const canSubmit = isSubmissionOpen && !!formData.targetCourse.trim() && !!formData.reason.trim() && !!examDate && !!examTimeSlot && allDocsUploaded && !isSubmitting;
+  const canSubmit = isSubmissionOpen && !!formData.targetCourse.trim() && !!formData.reason.trim() && allDocsUploaded && !isSubmitting;
 
   const handleFileUpload = (key: string, file: File | null) => {
     setUploadedDocs((prev) => ({ ...prev, [key]: file }));
@@ -214,12 +206,9 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
     setIsSubmitting(true);
     try {
       const result = await appointmentApi.createShiftingAppointment({
-        date: examDate,
-        timeSlot: examTimeSlot,
         currentCourse: profileData.currentCourse,
         targetCourse: formData.targetCourse,
         reason: formData.reason,
-        bookingReceiptName: '',
         pictureName: uploadedDocs.picture?.name || '',
         gradesName: uploadedDocs.grades?.name || '',
         latestCorName: uploadedDocs.latestCor?.name || '',
@@ -233,7 +222,8 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
 
       setSubmittedInfo({
         submittedAt: result.data.appointment.created_at,
-        scheduledAt: result.data.appointment.scheduled_time
+        currentCourse: profileData.currentCourse,
+        targetCourse: formData.targetCourse
       });
       showToast.success('Shifting application submitted. Staff will review your requirements.');
       setFormData((prev) => ({ ...prev, targetCourse: '', reason: '' }));
@@ -243,12 +233,110 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
         latestCor: null,
         entranceResult: null
       });
-      setExamTimeSlot('');
       setDocStep(0);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  if (submittedInfo) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -20 }}
+        className="w-full max-w-3xl mx-auto"
+      >
+        <div className="flex items-center gap-4 mb-10 print:mb-6">
+          <button 
+            onClick={onBack}
+            className="p-3 hover:bg-white rounded-lg transition-all text-slate-400 hover:text-slate-900 shadow-sm border border-transparent hover:border-slate-100 print:hidden"
+          >
+            <ChevronLeft size={24} />
+          </button>
+          <div>
+            <h2 className="text-4xl font-black tracking-tight text-slate-900">Application Receipt</h2>
+            <p className="text-slate-500 font-medium text-sm">Please keep this for your records.</p>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden relative print:shadow-none print:border-slate-300">
+          <div className="bg-emerald-600 p-8 text-white text-center print:bg-emerald-100 print:text-emerald-900">
+            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 print:bg-emerald-200">
+              <CheckCircle2 size={32} className="text-white print:text-emerald-600" />
+            </div>
+            <h3 className="text-2xl font-black mb-2">Application Submitted!</h3>
+            <p className="text-emerald-100 text-sm font-medium print:text-emerald-800">Your shifting application has been successfully submitted and is pending staff review.</p>
+          </div>
+
+          <div className="p-8 space-y-8">
+            <div>
+              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 border-b border-slate-100 pb-2">Personal Information</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Name</p>
+                  <p className="font-bold text-slate-900 text-sm">{profileData.fullName}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Student ID</p>
+                  <p className="font-bold text-slate-900 text-sm">{profileData.studentId}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Email</p>
+                  <p className="font-bold text-slate-900 text-sm">{profileData.email}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Contact Number</p>
+                  <p className="font-bold text-slate-900 text-sm">{profileData.contactNumber}</p>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 border-b border-slate-100 pb-2">Shifting Details</h4>
+              <div className="bg-slate-50 rounded-lg p-6 flex flex-col md:flex-row items-center gap-6 justify-between border border-slate-100 print:bg-white print:border-slate-300">
+                <div className="flex-1 text-center md:text-left">
+                  <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">From</p>
+                  <p className="font-black text-slate-700">{submittedInfo.currentCourse || profileData.currentCourse}</p>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                  <ArrowRight size={16} />
+                </div>
+                <div className="flex-1 text-center md:text-right">
+                  <p className="text-[10px] uppercase tracking-wider text-emerald-600 font-bold mb-1">To</p>
+                  <p className="font-black text-slate-900">{submittedInfo.targetCourse || 'N/A'}</p>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 border-b border-slate-100 pb-2">Submission Details</h4>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Date & Time</p>
+                  <p className="font-bold text-slate-900 text-sm">{new Date(submittedInfo.submittedAt).toLocaleString()}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Status</p>
+                  <span className="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest print:bg-white print:border print:border-amber-300">Pending Review</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-8 flex justify-center print:hidden">
+          <button
+            onClick={() => window.print()}
+            className="bg-slate-900 text-white px-8 py-4 rounded-xl font-black text-sm hover:bg-slate-800 transition-colors shadow-xl shadow-slate-900/20 flex items-center gap-3"
+          >
+            <FileText size={18} />
+            Print Receipt
+          </button>
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
@@ -494,51 +582,6 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg p-10 border border-slate-100 shadow-sm">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
-                <CalendarIcon size={24} />
-              </div>
-              <div>
-                <h3 className="text-2xl font-black text-slate-900">Exam Schedule</h3>
-                <p className="text-slate-400 text-sm font-medium">Set your preferred schedule for the shifting exam.</p>
-              </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-5">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4">Exam Date</label>
-                <input
-                  type="date"
-                  value={examDate}
-                  min={toDateKey(new Date())}
-                  disabled={!isSubmissionOpen}
-                  onChange={(e) => setExamDate(e.target.value)}
-                  className="w-full bg-white border border-slate-100 rounded-lg px-6 py-4 font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4">Exam Time Slot</label>
-                <div className="grid grid-cols-1 gap-2 max-h-[180px] overflow-y-auto pr-1">
-                  {timeSlots.map((slot) => (
-                    <button
-                      key={slot}
-                      onClick={() => setExamTimeSlot(slot)}
-                      type="button"
-                      disabled={!isSubmissionOpen}
-                      className={`py-3 px-4 rounded-lg border font-bold text-xs text-left transition-all ${
-                        examTimeSlot === slot
-                          ? 'bg-emerald-600 text-white border-emerald-600'
-                          : 'bg-white border-slate-200 text-slate-700 hover:bg-emerald-50 hover:border-emerald-200'
-                      }`}
-                    >
-                      {slot}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Right Column: Progress & Tips */}
@@ -568,17 +611,6 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
                   </p>
                 </div>
               </div>
-              <div className={`flex items-start gap-4 ${examDate && examTimeSlot ? '' : 'opacity-30'}`}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${examDate && examTimeSlot ? 'bg-emerald-500' : 'bg-white/20'}`}>
-                  {examDate && examTimeSlot ? <CheckCircle2 size={16} /> : <CalendarIcon size={14} />}
-                </div>
-                <div>
-                  <p className={`font-bold text-sm ${examDate && examTimeSlot ? '' : 'text-white/50'}`}>Exam Schedule</p>
-                  <p className={`text-[10px] font-medium uppercase tracking-widest ${examDate && examTimeSlot ? 'text-emerald-300' : 'text-white/20'}`}>
-                    {examDate && examTimeSlot ? 'Selected' : 'Not Set'}
-                  </p>
-                </div>
-              </div>
               <div className={`flex items-start gap-4 ${isSubmissionOpen ? '' : 'opacity-70'}`}>
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isSubmissionOpen ? 'bg-emerald-500' : 'bg-amber-500'}`}>
                   {isSubmissionOpen ? <CheckCircle2 size={16} /> : <AlertCircle size={14} />}
@@ -605,22 +637,6 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
             </button>
           </div>
 
-          <div className="bg-white rounded-lg p-8 border border-slate-100 shadow-sm">
-            <h4 className="font-black text-sm text-slate-900 mb-5">Latest Application</h4>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-black uppercase tracking-widest text-slate-400">Date Submitted</span>
-                <span className="font-bold text-slate-700">
-                  {submittedInfo?.submittedAt ? new Date(submittedInfo.submittedAt).toLocaleString() : 'No submission yet'}
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-black uppercase tracking-widest text-slate-400">Exam Schedule</span>
-                <span className="font-bold text-slate-700">
-                  {submittedInfo?.scheduledAt ? new Date(submittedInfo.scheduledAt).toLocaleString() : `${examDate || '---'} ${examTimeSlot || ''}`.trim() || 'Not selected'}
-                </span>
-              </div>
-            </div>
           </div>
 
           <div className="bg-emerald-50 rounded-lg p-8 border border-emerald-100">
