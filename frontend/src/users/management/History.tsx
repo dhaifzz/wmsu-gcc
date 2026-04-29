@@ -1,16 +1,39 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Clock, Search, Filter, Calendar as CalendarIcon, CheckCircle2, XCircle } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useAuth } from '../../auth/AuthContext';
+import { appointmentApi, type HistoryItem } from '../../lib/api';
 
 const History = () => {
   const theme = useTheme();
-  const historyItems = [
-    { id: 1, student: "Luna, Juan", level: "College", type: "Counseling", date: "May 20, 2024", status: "Completed" },
-    { id: 2, student: "Clara, Maria", level: "High School", type: "Assessment", date: "May 18, 2024", status: "Cancelled" },
-    { id: 3, student: "Rizal, Jose", level: "College", type: "Shifting", date: "May 15, 2024", status: "Completed" },
-    { id: 4, student: "Bonifacio, Andres", level: "College", type: "Counseling", date: "May 12, 2024", status: "Completed" },
-    { id: 5, student: "Mabini, Apolinario", level: "College", type: "Assessment", date: "May 10, 2024", status: "Cancelled" },
-  ];
+  const { accessToken } = useAuth();
+  const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      if (!accessToken) return;
+      try {
+        const result = await appointmentApi.getAppointmentHistory(accessToken);
+        if (result.ok && result.data.history) {
+          setHistoryItems(result.data.history);
+        }
+      } catch (error) {
+        console.error('Failed to fetch history:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHistory();
+  }, [accessToken]);
+
+  if (loading) {
+    return <div className="p-8 flex items-center justify-center min-h-[400px]">
+      <div className="w-8 h-8 border-4 border-slate-200 border-t-blue-500 rounded-full animate-spin"></div>
+    </div>;
+  }
 
   return (
     <motion.div
@@ -55,7 +78,7 @@ const History = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {historyItems.map((item) => (
+              {historyItems.length > 0 ? historyItems.map((item) => (
                 <tr key={item.id} className="group hover:bg-slate-50/50 transition-colors">
                   <td className="px-8 py-6 font-bold text-sm text-slate-900">{item.student}</td>
                   <td className="px-8 py-6">
@@ -96,7 +119,13 @@ const History = () => {
                     <button className={`${theme.text600} text-[10px] font-black uppercase tracking-widest hover:underline`}>View Receipt</button>
                   </td>
                 </tr>
-              ))}
+              )) : (
+                <tr>
+                  <td colSpan={6} className="px-8 py-12 text-center text-slate-500 font-bold">
+                    No history records found.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

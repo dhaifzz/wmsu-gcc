@@ -208,6 +208,19 @@ export interface ShiftingSubmissionStatusResponse {
   status: string;
 }
 
+export interface HistoryItem {
+  id: string;
+  student: string;
+  level: string;
+  type: string;
+  date: string;
+  status: string;
+}
+
+export interface AppointmentHistoryResponse {
+  history: HistoryItem[];
+}
+
 export const appointmentApi = {
   getCounselingAvailability: (year: number, month: number) =>
     api<CounselingAvailabilityResponse>(`/api/appointments/counseling/availability?year=${year}&month=${month}`),
@@ -240,7 +253,10 @@ export const appointmentApi = {
     api<LatestShiftingAppointmentResponse>('/api/appointments/shifting/latest', { token }),
 
   getShiftingSubmissionStatus: () =>
-    api<ShiftingSubmissionStatusResponse>('/api/appointments/shifting/submission-status')
+    api<ShiftingSubmissionStatusResponse>('/api/appointments/shifting/submission-status'),
+
+  getAppointmentHistory: (token: string) =>
+    api<AppointmentHistoryResponse>('/api/appointments/history', { token })
 };
 
 // ------------------------------------------
