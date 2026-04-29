@@ -6,6 +6,7 @@ interface AuthContextType {
   user: UserProfile | null;
   accessToken: string | null;
   loading: boolean;
+  isInitialLoad: boolean;
   redirectPath: string | null;
   signOut: () => Promise<void>;
   setAuthData: (user: UserProfile, token: string, redirect: string) => void;
@@ -15,6 +16,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   accessToken: null,
   loading: true,
+  isInitialLoad: true,
   redirectPath: null,
   signOut: async () => {},
   setAuthData: () => {},
@@ -29,6 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [redirectPath, setRedirectPath] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   // Fetch profile from backend using the access token
   const fetchProfile = useCallback(async (token: string) => {
@@ -58,6 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await fetchProfile(session.access_token);
       }
       setLoading(false);
+      setIsInitialLoad(false);
     };
 
     initSession();
@@ -94,7 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, accessToken, loading, redirectPath, signOut, setAuthData }}>
+    <AuthContext.Provider value={{ user, accessToken, loading, isInitialLoad, redirectPath, signOut, setAuthData }}>
       {children}
     </AuthContext.Provider>
   );

@@ -3,6 +3,7 @@ import { ArrowLeft, MessageCircle, Shield, Clock, Calendar, CheckCircle } from '
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { cmsApi } from '../../lib/api';
+import Loader from '../../components/loader/Loader';
 
 const CounselingDetails = () => {
   const [content, setContent] = useState<any>(null);
@@ -29,8 +30,10 @@ const CounselingDetails = () => {
 
   if (isLoading || !content) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-[#f8fafc] p-6 lg:p-10">
+        <div className="max-w-screen-2xl mx-auto">
+          <Loader />
+        </div>
       </div>
     );
   }

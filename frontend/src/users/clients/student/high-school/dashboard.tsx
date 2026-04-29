@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   MessageCircle,
   ClipboardCheck,
@@ -13,6 +13,7 @@ import ClientNavbar from '../../../../components/ClientNavbar';
 import Profile from '../../../Profile';
 import MarqueeText from '../../../../components/MarqueeText';
 import Counseling from '../../Counseling';
+import Loader from '../../../../components/loader/Loader';
 import Assessment from '../../Assessment';
 import { useAuth } from '../../../../auth/AuthProvider';
 
@@ -20,6 +21,15 @@ const HighSchoolDashboard = () => {
   const { user: authUser } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
   const [activeService, setActiveService] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate real data fetching
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Map authUser to the structure expected by the dashboard and Profile component
   const user = {
@@ -59,8 +69,11 @@ const HighSchoolDashboard = () => {
       />
 
       <main className="flex-1 relative">
-        <div className="p-6 lg:p-10 max-w-6xl mx-auto">
-          <AnimatePresence mode="wait">
+        <div className="p-6 lg:p-10 max-w-screen-2xl mx-auto">
+          {isLoading ? (
+            <Loader />
+          ) : (
+            <AnimatePresence mode="wait">
             {activeTab === 'overview' && !activeService && (
               <motion.div
                 key="overview"
@@ -80,22 +93,22 @@ const HighSchoolDashboard = () => {
 
                 {/* Stats Row */}
                 <div className="grid md:grid-cols-3 gap-6 mb-10">
-                  <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm transition-all hover:shadow-md">
-                    <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mb-4">
+                  <div className="bg-white p-6 rounded-lg border border-slate-100 shadow-sm transition-all hover:shadow-md">
+                    <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center mb-4">
                       <Calendar size={24} />
                     </div>
                     <p className="text-slate-500 text-xs font-black uppercase tracking-widest mb-1">Appointments</p>
                     <p className="text-xl font-black">0 Pending</p>
                   </div>
-                  <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm transition-all hover:shadow-md">
-                    <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-4">
+                  <div className="bg-white p-6 rounded-lg border border-slate-100 shadow-sm transition-all hover:shadow-md">
+                    <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mb-4">
                       <Clock size={24} />
                     </div>
                     <p className="text-slate-500 text-xs font-black uppercase tracking-widest mb-1">Wait Time</p>
                     <p className="text-xl font-black">Fast Track</p>
                   </div>
-                  <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm transition-all hover:shadow-md">
-                    <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center mb-4">
+                  <div className="bg-white p-6 rounded-lg border border-slate-100 shadow-sm transition-all hover:shadow-md">
+                    <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center mb-4">
                       <GraduationCap size={24} />
                     </div>
                     <p className="text-slate-500 text-xs font-black uppercase tracking-widest mb-1">Status</p>
@@ -121,9 +134,9 @@ const HighSchoolDashboard = () => {
                         key={service.id}
                         layout
                         onClick={() => setActiveService(service.id)}
-                        className="p-8 rounded-[2.5rem] border bg-white border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 group cursor-pointer transition-all flex flex-col"
+                        className="p-8 rounded-lg border bg-white border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 group cursor-pointer transition-all flex flex-col"
                       >
-                        <div className={`w-14 h-14 ${service.color} text-white rounded-3xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform`}>
+                        <div className={`w-14 h-14 ${service.color} text-white rounded-lg flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform`}>
                           <service.icon size={28} className="text-white" />
                         </div>
                         <h4 className="text-xl font-black mb-3 text-slate-900">{service.name}</h4>
@@ -139,7 +152,7 @@ const HighSchoolDashboard = () => {
                 </div>
 
                 {/* Banner */}
-                <div className="bg-emerald-900 rounded-[3rem] p-10 text-white relative overflow-hidden">
+                <div className="bg-emerald-900 rounded-lg p-10 text-white relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2"></div>
                   <div className="relative z-10 grid md:grid-cols-2 gap-10 items-center">
                     <div>
@@ -154,7 +167,7 @@ const HighSchoolDashboard = () => {
                         </div>
                       </div>
                     </div>
-                    <div className="bg-white/10 backdrop-blur-md rounded-[2.5rem] p-8 border border-white/10">
+                    <div className="bg-white/10 backdrop-blur-md rounded-lg p-8 border border-white/10">
                       <p className="text-emerald-300 text-xs font-black uppercase mb-4 tracking-widest">Office Hours</p>
                       <p className="font-bold text-lg leading-relaxed">
                         Visit us at the 2nd Floor for personal consultations and assessments.
@@ -175,6 +188,7 @@ const HighSchoolDashboard = () => {
 
             {activeTab === 'profile' && <Profile key="profile" user={user} />}
           </AnimatePresence>
+          )}
         </div>
       </main>
     </div>

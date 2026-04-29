@@ -10,6 +10,7 @@ import ourServicesImg2 from '../assets/img/our-services2.png';
 import ourServicesImg3 from '../assets/img/our-services3.png';
 import { cmsApi } from '../lib/api';
 
+
 const HomePage = () => {
   const [homeContent, setHomeContent] = useState<any>({
     hero: {

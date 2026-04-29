@@ -16,9 +16,7 @@ import {
   Plus,
   Trash2,
   Briefcase,
-  GraduationCap,
   GripVertical,
-  Palette,
   Heart,
   CheckCircle,
   ClipboardCheck,
@@ -29,7 +27,8 @@ import {
   Brain,
   PenTool,
   Shield,
-  HelpCircle
+  HelpCircle,
+  Scale
 } from 'lucide-react';
 
 const assessmentIconMap: Record<string, any> = {
@@ -43,6 +42,33 @@ const assessmentIconMap: Record<string, any> = {
   Heart,
   HelpCircle,
   Info
+};
+
+const STANDARD_PRIVACY_CONTENT = {
+  hero: { 
+    title: "Privacy Policy", 
+    description: "Your privacy is our priority. This policy outlines how the WMSU Guidance and Counseling Center (GCC) collects, uses, and protects your information." 
+  },
+  sections: [
+    { title: "1. Data Collection", icon: "Lock", content: "The WMSU GCC collects personal and sensitive information through our online portal and physical forms. This includes: Personal identification (Name, ID, Birthdate), Contact details (Email, Phone, Address), Academic records and history, Health and psychological assessments, and Appointment and consultation logs." },
+    { title: "2. Use of Information", icon: "Eye", content: "Your data is used exclusively for the purpose of providing guidance, counseling, and assessment services. We use this information to process appointment requests and shifting examinations, maintain accurate student counseling records as required by university policy, and analyze aggregated, non-identifiable data to improve our support programs." },
+    { title: "3. Confidentiality", icon: "Shield", content: "Confidentiality is the cornerstone of counseling. Information shared during counseling sessions will not be disclosed to any third party without your explicit written consent, except in cases where there is a clear risk of harm to yourself or others, or as required by law (e.g., court order)." },
+    { title: "4. Data Security", icon: "FileText", content: "We implement strict technical and organizational measures to protect your data against unauthorized access, loss, or alteration. All online data is encrypted and stored in secure cloud environments compliant with modern security standards." }
+  ]
+};
+
+const STANDARD_TERMS_CONTENT = {
+  hero: { 
+    title: "Terms of Service", 
+    description: "By accessing and using the WMSU GCC Portal, you agree to comply with and be bound by the following terms and conditions." 
+  },
+  sections: [
+    { title: "1. Account Eligibility", icon: "Users", content: "The portal is intended for use by current students, faculty, and authorized staff of Western Mindanao State University, as well as registered outside clients seeking specific center services. You are responsible for maintaining the confidentiality of your account credentials." },
+    { title: "2. Service Use & Conduct", icon: "CheckCircle", content: "Users agree to: Provide accurate and truthful information in all forms and assessments, use the portal exclusively for its intended guidance and academic purposes, respect the appointment schedules and the time of the center professionals, and abide by the University Student Code of Conduct in all interactions." },
+    { title: "3. Appointment Policy", icon: "Clock", content: "Booking an appointment through the portal does not guarantee immediate service. All appointments are subject to verification and counselor availability. Failure to show up for multiple scheduled appointments without prior notice may result in temporary suspension of portal booking privileges." },
+    { title: "4. Intellectual Property", icon: "FileText", content: "All content, assessments, logos, and materials provided on this portal are the property of WMSU and the Guidance and Counseling Center. Unauthorized reproduction, distribution, or commercial use of these materials is strictly prohibited." },
+    { title: "5. Modifications", icon: "Gavel", content: "The WMSU GCC reserves the right to modify these terms at any time. Significant changes will be communicated through the portal notifications or university email." }
+  ]
 };
 import { showAlert } from '../../../components/modal-notification/sweetalert';
 import { showToast } from '../../../components/modal-notification/toast';
@@ -65,6 +91,8 @@ const CMS = () => {
   const [counselingContent, setCounselingContent] = useState<any>(null);
   const [assessmentContent, setAssessmentContent] = useState<any>(null);
   const [shiftingContent, setShiftingContent] = useState<any>(null);
+  const [privacyContent, setPrivacyContent] = useState<any>(null);
+  const [termsContent, setTermsContent] = useState<any>(null);
 
   const [savedStates, setSavedStates] = useState<Record<string, any>>({});
 
@@ -72,7 +100,7 @@ const CMS = () => {
 
   const fetchAllContent = async () => {
     setIsLoading(true);
-    const sectionsToFetch = ['home', 'about', 'team', 'contact', 'footer', 'system', 'logos', 'counseling', 'assessment', 'shifting'];
+    const sectionsToFetch = ['home', 'about', 'team', 'contact', 'footer', 'system', 'logos', 'counseling', 'assessment', 'shifting', 'privacy', 'terms'];
     const newSavedStates: Record<string, any> = {};
 
     try {
@@ -136,6 +164,9 @@ const CMS = () => {
         cta: { title: "Apply for Shifting", description: "Make sure you have met the minimum GPA requirements of your target college before applying." },
         guidance: { title: "Career Guidance", description: "Not sure which course fits you best? Our counselors also offer career guidance sessions to help you make an informed decision." }
       };
+
+      const defaultPrivacy = STANDARD_PRIVACY_CONTENT;
+      const defaultTerms = STANDARD_TERMS_CONTENT;
 
       const defaultSystem = {
         colleges: [
@@ -294,6 +325,8 @@ const CMS = () => {
           else if (s === 'assessment') data = defaultAssessment;
           else if (s === 'shifting') data = defaultShifting;
           else if (s === 'system') data = defaultSystem;
+          else if (s === 'privacy') data = defaultPrivacy;
+          else if (s === 'terms') data = defaultTerms;
         }
 
         if (data && Object.keys(data).length > 0) {
@@ -315,6 +348,8 @@ const CMS = () => {
             case 'counseling': setCounselingContent(data); break;
             case 'assessment': setAssessmentContent(data); break;
             case 'shifting': setShiftingContent(data); break;
+            case 'privacy': setPrivacyContent(data); break;
+            case 'terms': setTermsContent(data); break;
           }
         }
       }
@@ -423,6 +458,8 @@ const CMS = () => {
           case 'counseling': setCounselingContent(res.data); break;
           case 'assessment': setAssessmentContent(res.data); break;
           case 'shifting': setShiftingContent(res.data); break;
+          case 'privacy': setPrivacyContent(res.data); break;
+          case 'terms': setTermsContent(res.data); break;
         }
         showToast.info('Changes discarded.');
       }
@@ -440,7 +477,9 @@ const CMS = () => {
       logos: logoSettings,
       counseling: counselingContent,
       assessment: assessmentContent,
-      shifting: shiftingContent
+      shifting: shiftingContent,
+      privacy: privacyContent,
+      terms: termsContent
     };
     return JSON.stringify(contentMap[sectionId]) !== JSON.stringify(savedStates[sectionId]);
   };
@@ -464,7 +503,9 @@ const CMS = () => {
         'System Logos': { key: 'logos', data: logoSettings },
         'Counseling Service': { key: 'counseling', data: counselingContent },
         'Assessment Service': { key: 'assessment', data: assessmentContent },
-        'Shifting Service': { key: 'shifting', data: shiftingContent }
+        'Shifting Service': { key: 'shifting', data: shiftingContent },
+        'Privacy Policy': { key: 'privacy', data: privacyContent },
+        'Terms of Service': { key: 'terms', data: termsContent }
       };
       const { key, data } = mapping[section];
 
@@ -490,9 +531,11 @@ const CMS = () => {
     { id: 'system', title: 'System Data', icon: Database, description: 'Manage available courses and occupations.' },
     { id: 'logos', title: 'System Logos', icon: ImageIcon, description: 'Manage university and center logos.' },
     { id: 'contact', title: 'Contact Info', icon: Phone, description: 'Update phone numbers, emails, and address.' },
+    { id: 'privacy', title: 'Privacy Policy', icon: Shield, description: 'Manage privacy and data protection rules.' },
+    { id: 'terms', title: 'Terms of Service', icon: Scale, description: 'Manage user agreement and site rules.' },
     { id: 'footer', title: 'Footer', icon: LayoutGrid, description: 'Manage footer brand text.' },
   ];
-  if (isLoading || !homeContent || !aboutContent || !teamContent || !contactContent || !footerContent || !systemData || !logoSettings || !counselingContent || !assessmentContent || !shiftingContent) {
+  if (isLoading || !homeContent || !aboutContent || !teamContent || !contactContent || !footerContent || !systemData || !logoSettings || !counselingContent || !assessmentContent || !shiftingContent || !privacyContent || !termsContent) {
     return <Loader />;
   }
 
@@ -697,7 +740,7 @@ return (
               <div className="space-y-4">
                 <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Support Features (3 Items)</label>
                 <div className="grid md:grid-cols-3 gap-4">
-                  {homeContent.support.features.map((feature, idx) => (
+                  {homeContent.support.features.map((feature: any, idx: number) => (
                     <div key={idx} className="bg-slate-50 p-5 rounded-[2rem] border border-slate-200 space-y-3">
                       <div className="grid grid-cols-2 gap-2">
                         <div className="space-y-1">
@@ -846,7 +889,7 @@ return (
                 <div className="space-y-4">
                   <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Service Cards (4 Items)</label>
                   <div className="grid grid-cols-2 gap-3">
-                    {homeContent.growth.services.map((service, idx) => (
+                    {homeContent.growth.services.map((service: any, idx: number) => (
                       <div key={idx} className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col gap-2">
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6 bg-teal-100 rounded-md flex items-center justify-center text-teal-600">
@@ -1154,7 +1197,7 @@ return (
                   onReorder={(newOrder) => setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, director: newOrder } })}
                   className="grid md:grid-cols-2 lg:grid-cols-4 gap-4"
                 >
-                  {(teamContent.mainCampus.director || []).map((member, idx) => (
+                  {(teamContent.mainCampus.director || []).map((member: any, idx: number) => (
                     <Reorder.Item 
                       key={member.name + idx} 
                       value={member}
@@ -1166,7 +1209,7 @@ return (
                         </div>
                         <button
                           onClick={() => {
-                            const newItems = teamContent.mainCampus.director.filter((_, i) => i !== idx);
+                             const newItems = teamContent.mainCampus.director.filter((_: any, i: number) => i !== idx);
                             setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, director: newItems } });
                           }}
                           className="w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
@@ -1253,7 +1296,7 @@ return (
                   onReorder={(newOrder) => setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, counselors: newOrder } })}
                   className="grid md:grid-cols-2 lg:grid-cols-4 gap-4"
                 >
-                  {teamContent.mainCampus.counselors.map((member, idx) => (
+                  {teamContent.mainCampus.counselors.map((member: any, idx: number) => (
                     <Reorder.Item 
                       key={member.name + idx} 
                       value={member}
@@ -1265,7 +1308,7 @@ return (
                         </div>
                         <button
                           onClick={() => {
-                            const newCounselors = teamContent.mainCampus.counselors.filter((_, i) => i !== idx);
+                            const newCounselors = teamContent.mainCampus.counselors.filter((_: any, i: number) => i !== idx);
                             setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, counselors: newCounselors } });
                           }}
                           className="w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
@@ -1352,7 +1395,7 @@ return (
                   onReorder={(newOrder) => setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, staff: newOrder } })}
                   className="grid md:grid-cols-2 lg:grid-cols-4 gap-4"
                 >
-                  {teamContent.mainCampus.staff.map((member, idx) => (
+                  {teamContent.mainCampus.staff.map((member: any, idx: number) => (
                     <Reorder.Item 
                       key={member.name + idx} 
                       value={member}
@@ -1364,7 +1407,7 @@ return (
                         </div>
                         <button
                           onClick={() => {
-                            const newItems = teamContent.mainCampus.staff.filter((_, i) => i !== idx);
+                            const newItems = teamContent.mainCampus.staff.filter((_: any, i: number) => i !== idx);
                             setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, staff: newItems } });
                           }}
                           className="w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
@@ -1451,7 +1494,7 @@ return (
                   onReorder={(newOrder) => setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, coordinators: newOrder } })}
                   className="grid md:grid-cols-2 lg:grid-cols-4 gap-4"
                 >
-                  {teamContent.mainCampus.coordinators.map((member, idx) => (
+                  {teamContent.mainCampus.coordinators.map((member: any, idx: number) => (
                     <Reorder.Item 
                       key={member.name + idx} 
                       value={member}
@@ -1463,7 +1506,7 @@ return (
                         </div>
                         <button
                           onClick={() => {
-                            const newItems = teamContent.mainCampus.coordinators.filter((_, i) => i !== idx);
+                            const newItems = teamContent.mainCampus.coordinators.filter((_: any, i: number) => i !== idx);
                             setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, coordinators: newItems } });
                           }}
                           className="w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
@@ -1554,7 +1597,7 @@ return (
                 onReorder={(newOrder) => setTeamContent({ ...teamContent, esuCampus: newOrder })}
                 className="grid md:grid-cols-4 gap-4"
               >
-                  {teamContent.esuCampus.map((member, idx) => (
+                  {teamContent.esuCampus.map((member: any, idx: number) => (
                     <Reorder.Item 
                       key={member.name + idx} 
                       value={member}
@@ -1566,7 +1609,7 @@ return (
                         </div>
                         <button
                           onClick={() => {
-                            const newItems = teamContent.esuCampus.filter((_, i) => i !== idx);
+                            const newItems = teamContent.esuCampus.filter((_: any, i: number) => i !== idx);
                             setTeamContent({ ...teamContent, esuCampus: newItems });
                           }}
                           className="w-5 h-5 bg-red-100 text-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-bold z-10"
@@ -1711,6 +1754,221 @@ return (
           </div>
         </motion.div>
       )}
+
+      {activeSection === 'privacy' && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          className="bg-white p-10 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100"
+        >
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-8 bg-teal-500 rounded-full"></div>
+              <h3 className="text-2xl font-black text-slate-800">Privacy Policy Editor</h3>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => discardSection('privacy')}
+                className="px-6 py-3 bg-slate-100 text-slate-600 rounded-xl font-black text-sm hover:bg-slate-200 transition-all"
+              >
+                Discard
+              </button>
+              <button
+                onClick={() => handleSave('Privacy Policy')}
+                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+              >
+                <Save size={16} />
+                Save Changes
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-12">
+            <div className="space-y-6">
+              <h4 className="text-lg font-black text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2">
+                <Type className="text-teal-500" size={20} />
+                Hero Section
+              </h4>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Policy Title</label>
+                  <input
+                    type="text"
+                    value={privacyContent?.hero?.title || ''}
+                    onChange={(e) => setPrivacyContent({ ...privacyContent, hero: { ...privacyContent.hero, title: e.target.value } })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-teal-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Policy Description</label>
+                  <textarea
+                    rows={3}
+                    value={privacyContent?.hero?.description || ''}
+                    onChange={(e) => setPrivacyContent({ ...privacyContent, hero: { ...privacyContent.hero, description: e.target.value } })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-teal-500 resize-none"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                <h4 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                  <Shield className="text-teal-500" size={20} />
+                  Policy Sections
+                </h4>
+                <button
+                  onClick={() => setPrivacyContent({ ...privacyContent, sections: [...(privacyContent.sections || []), { title: "New Section", content: "Description content...", icon: "Lock" }] })}
+                  className="p-1.5 bg-teal-50 text-teal-600 rounded-lg hover:bg-teal-100"
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
+              <div className="grid md:grid-cols-2 gap-6">
+                {privacyContent?.sections?.map((section: any, idx: number) => (
+                  <div key={idx} className="p-6 bg-slate-50 rounded-3xl border border-slate-200 relative group">
+                    <button
+                      onClick={() => setPrivacyContent({ ...privacyContent, sections: privacyContent.sections.filter((_: any, i: number) => i !== idx) })}
+                      className="absolute -top-2 -right-2 w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
+                    >
+                      ×
+                    </button>
+                    <input
+                      type="text"
+                      value={section.title}
+                      onChange={(e) => {
+                        const newSecs = [...privacyContent.sections];
+                        newSecs[idx].title = e.target.value;
+                        setPrivacyContent({ ...privacyContent, sections: newSecs });
+                      }}
+                      className="w-full bg-transparent border-b border-slate-200 pb-2 mb-3 text-sm font-black text-slate-800 outline-none focus:border-teal-500"
+                    />
+                    <textarea
+                      rows={4}
+                      value={section.content}
+                      onChange={(e) => {
+                        const newSecs = [...privacyContent.sections];
+                        newSecs[idx].content = e.target.value;
+                        setPrivacyContent({ ...privacyContent, sections: newSecs });
+                      }}
+                      className="w-full bg-transparent text-xs font-medium text-slate-500 outline-none resize-none"
+                    ></textarea>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {activeSection === 'terms' && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          className="bg-white p-10 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100"
+        >
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-8 bg-teal-500 rounded-full"></div>
+              <h3 className="text-2xl font-black text-slate-800">Terms of Service Editor</h3>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => discardSection('terms')}
+                className="px-6 py-3 bg-slate-100 text-slate-600 rounded-xl font-black text-sm hover:bg-slate-200 transition-all"
+              >
+                Discard
+              </button>
+              <button
+                onClick={() => handleSave('Terms of Service')}
+                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+              >
+                <Save size={16} />
+                Save Changes
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-12">
+            <div className="space-y-6">
+              <h4 className="text-lg font-black text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2">
+                <Type className="text-teal-500" size={20} />
+                Hero Section
+              </h4>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Terms Title</label>
+                  <input
+                    type="text"
+                    value={termsContent?.hero?.title || ''}
+                    onChange={(e) => setTermsContent({ ...termsContent, hero: { ...termsContent.hero, title: e.target.value } })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-teal-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Terms Description</label>
+                  <textarea
+                    rows={3}
+                    value={termsContent?.hero?.description || ''}
+                    onChange={(e) => setTermsContent({ ...termsContent, hero: { ...termsContent.hero, description: e.target.value } })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-teal-500 resize-none"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                <h4 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                  <Scale className="text-teal-500" size={20} />
+                  Agreement Clauses
+                </h4>
+                <button
+                  onClick={() => setTermsContent({ ...termsContent, sections: [...(termsContent.sections || []), { title: "New Clause", content: "Content here...", icon: "CheckCircle" }] })}
+                  className="p-1.5 bg-teal-50 text-teal-600 rounded-lg hover:bg-teal-100"
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
+              <div className="grid md:grid-cols-2 gap-6">
+                {termsContent?.sections?.map((section: any, idx: number) => (
+                  <div key={idx} className="p-6 bg-slate-50 rounded-3xl border border-slate-200 relative group">
+                    <button
+                      onClick={() => setTermsContent({ ...termsContent, sections: termsContent.sections.filter((_: any, i: number) => i !== idx) })}
+                      className="absolute -top-2 -right-2 w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
+                    >
+                      ×
+                    </button>
+                    <input
+                      type="text"
+                      value={section.title}
+                      onChange={(e) => {
+                        const newSecs = [...termsContent.sections];
+                        newSecs[idx].title = e.target.value;
+                        setTermsContent({ ...termsContent, sections: newSecs });
+                      }}
+                      className="w-full bg-transparent border-b border-slate-200 pb-2 mb-3 text-sm font-black text-slate-800 outline-none focus:border-teal-500"
+                    />
+                    <textarea
+                      rows={4}
+                      value={section.content}
+                      onChange={(e) => {
+                        const newSecs = [...termsContent.sections];
+                        newSecs[idx].content = e.target.value;
+                        setTermsContent({ ...termsContent, sections: newSecs });
+                      }}
+                      className="w-full bg-transparent text-xs font-medium text-slate-500 outline-none resize-none"
+                    ></textarea>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
 
       {activeSection === 'system' && (
         <motion.div

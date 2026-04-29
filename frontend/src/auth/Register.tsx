@@ -583,20 +583,28 @@ export default function Register() {
                       {/* Address Grid: City and Barangay */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {/* City Selection */}
-                        <div className="relative">
-                          <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10 text-gray-700 pointer-events-none">
-                            <Building className="h-5 w-5" />
+                        <div className="relative group">
+                          <div className={`w-full flex items-center bg-gray-100 transition-all border-2 rounded-lg overflow-hidden ${isDropdownOpen.city ? 'border-emerald-500 bg-white ring-4 ring-emerald-500/10' : 'border-transparent'}`}>
+                            <div className="pl-4 text-gray-700 flex items-center justify-center">
+                              <Building className="h-5 w-5" />
+                            </div>
+                            <div className="flex-1">
+                              <input
+                                type="text"
+                                placeholder="Select City"
+                                value={isDropdownOpen.city ? citySearch : (city || '')}
+                                onFocus={() => {
+                                  setIsDropdownOpen(prev => ({ ...prev, city: true }));
+                                  setCitySearch('');
+                                }}
+                                onChange={(e) => setCitySearch(e.target.value)}
+                                className="w-full bg-transparent py-4 pl-3 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:outline-none"
+                              />
+                            </div>
+                            <div className="pr-4 pointer-events-none">
+                              <ChevronDown size={18} className={`text-emerald-600 transition-transform ${isDropdownOpen.city ? 'rotate-180' : ''}`} />
+                            </div>
                           </div>
-                          <button
-                            type="button"
-                            onClick={() => toggleDropdown('city')}
-                            className={`w-full flex items-center justify-between bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold transition-all border-2 ${isDropdownOpen.city ? 'border-emerald-500 bg-white ring-4 ring-emerald-500/10' : 'border-transparent'} rounded-lg`}
-                          >
-                            <span className={city ? 'text-slate-800' : 'text-gray-400'}>
-                              {city || 'Select City'}
-                            </span>
-                            <ChevronDown size={18} className={`text-emerald-600 transition-transform ${isDropdownOpen.city ? 'rotate-180' : ''}`} />
-                          </button>
 
                           <AnimatePresence>
                             {isDropdownOpen.city && (
@@ -606,19 +614,6 @@ export default function Register() {
                                 exit={{ opacity: 0, y: 10 }}
                                 className="absolute z-50 top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[300px]"
                               >
-                                <div className="p-3 border-b border-slate-50">
-                                  <div className="relative flex items-center">
-                                    <Search className="absolute left-3 h-4 w-4 text-slate-400" />
-                                    <input
-                                      type="text"
-                                      placeholder="Search city..."
-                                      value={citySearch}
-                                      onChange={(e) => setCitySearch(e.target.value)}
-                                      className="w-full bg-slate-50 border-none rounded-xl py-2 pl-9 pr-4 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none"
-                                      autoFocus
-                                    />
-                                  </div>
-                                </div>
                                 <div className="overflow-y-auto custom-scrollbar">
                                   {filteredCities.map((opt) => (
                                     <button
@@ -627,7 +622,7 @@ export default function Register() {
                                       onClick={() => {
                                         setCity(opt);
                                         setBarangay(''); 
-                                        toggleDropdown('city');
+                                        setIsDropdownOpen(prev => ({ ...prev, city: false }));
                                         setCitySearch('');
                                       }}
                                       className={`w-full px-6 py-4 text-left text-sm font-bold transition-colors border-b border-slate-50 last:border-0 ${city === opt ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-emerald-50/50'}`}
@@ -635,6 +630,9 @@ export default function Register() {
                                       {opt}
                                     </button>
                                   ))}
+                                  {filteredCities.length === 0 && (
+                                    <div className="p-4 text-center text-slate-400 text-xs italic">No cities found</div>
+                                  )}
                                 </div>
                               </motion.div>
                             )}
@@ -642,22 +640,37 @@ export default function Register() {
                         </div>
 
                         {/* Barangay Selection */}
-                        <div className="relative">
-                          <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10 text-gray-700 pointer-events-none">
-                            <Map className="h-5 w-5" />
+                        <div className="relative group">
+                          <div className={`w-full flex items-center transition-all border-2 rounded-lg overflow-hidden ${!city ? 'bg-gray-50 cursor-not-allowed opacity-50 border-transparent' : isDropdownOpen.barangay ? 'border-emerald-500 bg-white ring-4 ring-emerald-500/10' : 'bg-gray-100 border-transparent'}`}>
+                            <div className="pl-4 text-gray-700 flex items-center justify-center">
+                              <Map className="h-5 w-5" />
+                            </div>
+                            <div className="flex-1">
+                              <input
+                                type="text"
+                                placeholder={city ? "Select or Type Barangay" : "Select city first"}
+                                disabled={!city}
+                                value={isDropdownOpen.barangay ? barangaySearch : (barangay || '')}
+                                onFocus={() => {
+                                  if (city) {
+                                    setIsDropdownOpen(prev => ({ ...prev, barangay: true }));
+                                    setBarangaySearch('');
+                                  }
+                                }}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setBarangaySearch(val);
+                                  if (city !== 'Zamboanga City') {
+                                    setBarangay(val);
+                                  }
+                                }}
+                                className="w-full bg-transparent py-4 pl-3 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:outline-none disabled:cursor-not-allowed"
+                              />
+                            </div>
+                            <div className="pr-4 pointer-events-none">
+                              <ChevronDown size={18} className={`text-emerald-600 transition-transform ${isDropdownOpen.barangay ? 'rotate-180' : ''}`} />
+                            </div>
                           </div>
-                          
-                          <button
-                            type="button"
-                            disabled={!city}
-                            onClick={() => toggleDropdown('barangay')}
-                            className={`w-full flex items-center justify-between py-4 pl-12 pr-4 text-sm font-semibold transition-all border-2 ${isDropdownOpen.barangay ? 'border-emerald-500 bg-white ring-4 ring-emerald-500/10' : 'border-transparent'} rounded-lg ${!city ? 'bg-gray-50 cursor-not-allowed opacity-50' : 'bg-gray-100'}`}
-                          >
-                            <span className={barangay ? 'text-slate-800' : 'text-gray-400'}>
-                              {barangay || (city ? 'Select or Type Barangay' : 'Select city first')}
-                            </span>
-                            <ChevronDown size={18} className={`text-emerald-600 transition-transform ${isDropdownOpen.barangay ? 'rotate-180' : ''}`} />
-                          </button>
 
                           <AnimatePresence>
                             {isDropdownOpen.barangay && (
@@ -667,26 +680,6 @@ export default function Register() {
                                 exit={{ opacity: 0, y: 10 }}
                                 className="absolute z-50 top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[300px]"
                               >
-                                <div className="p-3 border-b border-slate-50">
-                                  <div className="relative flex items-center">
-                                    <Search className="absolute left-3 h-4 w-4 text-slate-400" />
-                                    <input
-                                      type="text"
-                                      placeholder="Type your barangay..."
-                                      value={barangay || barangaySearch}
-                                      onChange={(e) => {
-                                        const val = e.target.value;
-                                        setBarangaySearch(val);
-                                        // If not Zamboanga, update barangay state directly as they type
-                                        if (city !== 'Zamboanga City') {
-                                          setBarangay(val);
-                                        }
-                                      }}
-                                      className="w-full bg-slate-50 border-none rounded-xl py-2 pl-9 pr-4 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none"
-                                      autoFocus
-                                    />
-                                  </div>
-                                </div>
                                 <div className="overflow-y-auto custom-scrollbar">
                                   {filteredBarangays.map((opt) => (
                                     <button
@@ -694,7 +687,7 @@ export default function Register() {
                                       type="button"
                                       onClick={() => {
                                         setBarangay(opt);
-                                        toggleDropdown('barangay');
+                                        setIsDropdownOpen(prev => ({ ...prev, barangay: false }));
                                         setBarangaySearch('');
                                       }}
                                       className={`w-full px-6 py-4 text-left text-sm font-bold transition-colors border-b border-slate-50 last:border-0 ${barangay === opt ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-emerald-50/50'}`}
@@ -705,7 +698,7 @@ export default function Register() {
                                   {filteredBarangays.length === 0 && (
                                     <div className="p-4 text-center">
                                       <p className="text-[10px] font-bold text-slate-400 italic">
-                                        {city ? 'No barangays found for this city' : 'Select a city first'}
+                                        {city ? 'No matching barangays found' : 'Select a city first'}
                                       </p>
                                     </div>
                                   )}
@@ -1053,7 +1046,7 @@ export default function Register() {
                                         Undergraduate Programs
                                       </div>
                                     )}
-                                    {filteredUndergrad.map((opt) => (
+                                    {filteredUndergrad.map((opt: string) => (
                                       <button
                                         key={opt}
                                         type="button"
@@ -1073,7 +1066,7 @@ export default function Register() {
                                         Graduate Programs
                                       </div>
                                     )}
-                                    {filteredGrad.map((opt) => (
+                                    {filteredGrad.map((opt: string) => (
                                       <button
                                         key={opt}
                                         type="button"
