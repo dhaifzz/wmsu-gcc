@@ -266,15 +266,26 @@ export const appointmentApi = {
 export interface AnalyticsDashboardResponse {
   stats: {
     totalAppointments: number;
+    todaysBookings: number;
     approvalRate: string;
     avgReviewTime: string;
     pendingCount: number;
+    completedTests: number;
   };
   distribution: Array<{ label: string; count: number; percent: number }>;
   topCourses: Array<{ course: string; count: number; trend: string }>;
   topStaff: Array<{ name: string; role: string; count: number }>;
   rolesDistribution: Array<{ role: string; count: number; percent: number }>;
   systemActivity: Array<{ action: string; time: string; type: string }>;
+  pendingAppointmentsList?: Array<{
+    id: string;
+    student: string;
+    level: string;
+    type: string;
+    date: string;
+    time: string;
+    status: string;
+  }>;
 }
 
 export const analyticsApi = {

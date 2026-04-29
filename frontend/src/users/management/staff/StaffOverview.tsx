@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { 
   Users, 
   Calendar, 
@@ -8,14 +9,38 @@ import {
   XCircle
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useAuth } from '../../../auth/AuthContext';
+import { analyticsApi, type AnalyticsDashboardResponse } from '../../../lib/api';
 
 const StaffDashboard = () => {
-  const appointments = [
-    { id: 1, student: "Juan Luna", level: "College", type: "Counseling", time: "09:00 AM", date: "May 24, 2024", status: "Pending" },
-    { id: 2, student: "Maria Clara", level: "High School", type: "Assessment", time: "10:30 AM", date: "May 24, 2024", status: "Approved" },
-    { id: 3, student: "Jose Rizal", level: "College", type: "Shifting", time: "02:00 PM", date: "May 24, 2024", status: "Pending" },
-    { id: 4, student: "Andres Bonifacio", level: "College", type: "Counseling", time: "04:00 PM", date: "May 25, 2024", status: "Pending" }
-  ];
+  const { accessToken } = useAuth();
+  const [dashboardData, setDashboardData] = useState<AnalyticsDashboardResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      if (!accessToken) return;
+      try {
+        const res = await analyticsApi.getAnalyticsDashboardData(accessToken);
+        if (res.ok) {
+          setDashboardData(res.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch staff dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDashboard();
+  }, [accessToken]);
+
+  const appointments = dashboardData?.pendingAppointmentsList || [];
+
+  if (loading) {
+    return <div className="p-8 flex items-center justify-center min-h-[400px]">
+      <div className="w-8 h-8 border-4 border-slate-200 border-t-emerald-500 rounded-full animate-spin"></div>
+    </div>;
+  }
 
   return (
     <motion.div
@@ -27,10 +52,10 @@ const StaffDashboard = () => {
       {/* Stats Row */}
       <div className="grid md:grid-cols-4 gap-6">
         {[
-          { label: "Today's Bookings", val: "12", trend: "+3", icon: Calendar, color: "emerald" },
-          { label: "Pending Review", val: "45", trend: "+8", icon: Clock, color: "blue" },
-          { label: "Total Students", val: "2,450", trend: "+12", icon: Users, color: "purple" },
-          { label: "Completed Tests", val: "89", trend: "+5", icon: CheckCircle2, color: "rose" }
+          { label: "Today's Bookings", val: dashboardData?.stats.todaysBookings || 0, trend: "Live", icon: Calendar, color: "emerald" },
+          { label: "Pending Review", val: dashboardData?.stats.pendingCount || 0, trend: "Live", icon: Clock, color: "blue" },
+          { label: "Total Students", val: (dashboardData?.rolesDistribution?.find(r => r.role === 'College Students')?.count || 0) + (dashboardData?.rolesDistribution?.find(r => r.role === 'High School Students')?.count || 0), trend: "Live", icon: Users, color: "purple" },
+          { label: "Completed Tests", val: dashboardData?.stats.completedTests || 0, trend: "Live", icon: CheckCircle2, color: "rose" }
         ].map((stat, idx) => (
           <div key={idx} className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
             <div className={`w-12 h-12 bg-${stat.color}-50 text-${stat.color}-600 rounded-lg flex items-center justify-center mb-6`}>
@@ -119,26 +144,24 @@ const StaffDashboard = () => {
             <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-400/20 rounded-full blur-3xl"></div>
             <h3 className="text-xl font-black mb-8 relative z-10">User Distribution</h3>
             <div className="space-y-6 relative z-10">
-              {[
-                { label: 'Students', count: 1840, color: 'bg-emerald-400', percent: '75%' },
-                { label: 'Faculty', count: 420, color: 'bg-blue-400', percent: '17%' },
-                { label: 'Outside Clients', count: 190, color: 'bg-amber-400', percent: '8%' }
-              ].map((role) => (
-                <div key={role.label} className="space-y-2">
+              {(dashboardData?.rolesDistribution || []).map((role, idx) => {
+                const colors = ['bg-emerald-400', 'bg-blue-400', 'bg-amber-400', 'bg-purple-400'];
+                return (
+                <div key={role.role} className="space-y-2">
                   <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
-                    <span className="text-emerald-200">{role.label}</span>
+                    <span className="text-emerald-200">{role.role}</span>
                     <span>{role.count}</span>
                   </div>
                   <div className="h-2 bg-white/10 rounded-full overflow-hidden border border-white/5">
                     <motion.div 
                       initial={{ width: 0 }}
-                      animate={{ width: role.percent }}
+                      animate={{ width: `${role.percent}%` }}
                       transition={{ duration: 1, delay: 0.2 }}
-                      className={`h-full ${role.color} rounded-full shadow-[0_0_10px_rgba(52,211,153,0.3)]`}
+                      className={`h-full ${colors[idx % colors.length]} rounded-full shadow-[0_0_10px_rgba(52,211,153,0.3)]`}
                     ></motion.div>
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
           </div>
 
