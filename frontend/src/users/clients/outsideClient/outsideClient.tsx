@@ -12,7 +12,7 @@ import ClientNavbar from '../../../components/ClientNavbar';
 import Profile from '../../Profile';
 import Counseling from '../Counseling';
 import Loader from '../../../components/loader/Loader';
-import { useAuth } from '../../../auth/AuthProvider';
+import { useAuth } from '../../../auth/AuthContext';
 
 const OutsideClientDashboard = () => {
   const { user: authUser } = useAuth();

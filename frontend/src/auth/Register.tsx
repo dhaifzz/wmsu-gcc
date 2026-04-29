@@ -29,6 +29,97 @@ import { authApi, cmsApi } from '../lib/api';
 import { showToast } from '../components/modal-notification/toast';
 import { showAlert } from '../components/modal-notification/sweetalert';
 
+type AcademicCourse = {
+  name: string;
+  type: string;
+};
+
+type AcademicCollege = {
+  id: string | number;
+  name: string;
+  courses: AcademicCourse[];
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const isString = (value: unknown): value is string =>
+  typeof value === 'string';
+
+const normalizeAcademicData = (payload: unknown) => {
+  const payloadObject = isRecord(payload) ? payload : {};
+  const source = isRecord(payloadObject.data)
+    ? payloadObject.data
+    : isRecord(payloadObject.content)
+    ? payloadObject.content
+    : isRecord(payloadObject.system)
+    ? payloadObject.system
+    : payloadObject;
+
+  const rawColleges = Array.isArray(source.colleges) ? source.colleges : [];
+  const rawOccupations = Array.isArray(source.occupations) ? source.occupations : [];
+
+  const normalizedColleges = rawColleges
+    .map((col, index) => {
+      if (!isRecord(col)) return null;
+
+      const parsedCourses = Array.isArray(col.courses) ? col.courses : [];
+      const normalizedCourses = parsedCourses
+        .map((course) => {
+          if (!isRecord(course)) return null;
+
+          const name = isString(course.name)
+            ? course.name
+            : isString(course.course_name)
+            ? course.course_name
+            : '';
+          const type = isString(course.type)
+            ? course.type
+            : isString(course.program_type)
+            ? course.program_type
+            : 'Undergraduate';
+
+          return name.trim()
+            ? { name: name.trim(), type: type.trim() || 'Undergraduate' }
+            : null;
+        })
+        .filter((course): course is AcademicCourse => course !== null);
+
+      const name = isString(col.name)
+        ? col.name
+        : isString(col.college_name)
+        ? col.college_name
+        : '';
+      if (!name.trim()) return null;
+
+      const id = isString(col.id)
+        ? col.id
+        : typeof col.id === 'number'
+        ? col.id
+        : index;
+
+      return {
+        id,
+        name: name.trim(),
+        courses: normalizedCourses
+      };
+    })
+    .filter((col): col is AcademicCollege => col !== null);
+
+  const normalizedOccupations = rawOccupations
+    .map((occ) => {
+      if (isString(occ)) return occ.trim();
+      if (isRecord(occ) && isString(occ.occupation_name)) return occ.occupation_name.trim();
+      return '';
+    })
+    .filter((occ): occ is string => occ !== '');
+
+  return {
+    colleges: normalizedColleges,
+    occupations: normalizedOccupations
+  };
+};
+
 export default function Register() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
@@ -37,7 +128,8 @@ export default function Register() {
     wmsuLogo: wmsuLogoAsset,
     gccLogo: gccLogoAsset
   });
-  const [colleges, setColleges] = useState<any[]>([]);
+
+  const [colleges, setColleges] = useState<AcademicCollege[]>([]);
   const [selectedCollege, setSelectedCollege] = useState<string>('');
   const [occupations, setOccupations] = useState<string[]>([]);
   const [email, setEmail] = useState('');
@@ -69,38 +161,6 @@ export default function Register() {
   }, []);
 
   const [barangaySearch, setBarangaySearch] = useState('');
-
-  const normalizeAcademicData = (payload: any) => {
-    const source = payload?.data || payload?.content || payload?.system || payload || {};
-    const rawColleges = Array.isArray(source.colleges) ? source.colleges : [];
-    const rawOccupations = Array.isArray(source.occupations) ? source.occupations : [];
-
-    const normalizedColleges = rawColleges
-      .map((col: any, index: number) => {
-        const normalizedCourses = (Array.isArray(col?.courses) ? col.courses : [])
-          .map((course: any) => ({
-            name: course?.name || course?.course_name || '',
-            type: course?.type || course?.program_type || 'Undergraduate'
-          }))
-          .filter((course: any) => Boolean(course.name));
-
-        return {
-          id: col?.id ?? index,
-          name: col?.name || col?.college_name || '',
-          courses: normalizedCourses
-        };
-      })
-      .filter((col: any) => Boolean(col.name));
-
-    const normalizedOccupations = rawOccupations
-      .map((occ: any) => (typeof occ === 'string' ? occ : occ?.occupation_name))
-      .filter((occ: any) => typeof occ === 'string' && occ.trim() !== '');
-
-    return {
-      colleges: normalizedColleges,
-      occupations: normalizedOccupations
-    };
-  };
 
   const filteredCities = ALL_CITIES.filter(c => c.toLowerCase().includes(citySearch.toLowerCase()));
 
@@ -157,20 +217,20 @@ export default function Register() {
 
   const filteredUndergrad = useMemo(() => {
     if (!selectedCollege) return [];
-    const col = colleges.find(c => c.name === selectedCollege);
+    const col = colleges.find((college) => college.name === selectedCollege);
     return (col?.courses || [])
-      .filter((c: any) => c.type === 'Undergraduate')
-      .map((c: any) => c.name)
+      .filter((course) => course.type === 'Undergraduate')
+      .map((course) => course.name)
       .filter((name: string) => name.toLowerCase().includes(courseSearch.toLowerCase()))
       .sort();
   }, [selectedCollege, colleges, courseSearch]);
 
   const filteredGrad = useMemo(() => {
     if (!selectedCollege) return [];
-    const col = colleges.find(c => c.name === selectedCollege);
+    const col = colleges.find((college) => college.name === selectedCollege);
     return (col?.courses || [])
-      .filter((c: any) => c.type === 'Graduate')
-      .map((c: any) => c.name)
+      .filter((course) => course.type === 'Graduate')
+      .map((course) => course.name)
       .filter((name: string) => name.toLowerCase().includes(courseSearch.toLowerCase()))
       .sort();
   }, [selectedCollege, colleges, courseSearch]);

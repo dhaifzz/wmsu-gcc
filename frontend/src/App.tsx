@@ -23,24 +23,23 @@ import SuperAdminDashboard from './users/management/superadmin/superadmin';
 import PrivacyPolicy from './public/legal/PrivacyPolicy';
 import TermsOfService from './public/legal/TermsOfService';
 
-import { useAuth } from './auth/AuthProvider';
+import { useAuth } from './auth/AuthContext';
 import SplashScreen from './components/loader/SplashScreen';
 
 function AppContent() {
   const { loading } = useAuth();
-  const [showSplash, setShowSplash] = useState(false);
+  const [showSplash, setShowSplash] = useState(() => !sessionStorage.getItem('hasShownSplash'));
 
   useEffect(() => {
-    const hasShownSplash = sessionStorage.getItem('hasShownSplash');
-    if (!hasShownSplash) {
-      setShowSplash(true);
-      const timer = setTimeout(() => {
-        setShowSplash(false);
-        sessionStorage.setItem('hasShownSplash', 'true');
-      }, 2000); // Show for at least 2 seconds
-      return () => clearTimeout(timer);
-    }
-  }, []);
+    if (!showSplash) return;
+
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+      sessionStorage.setItem('hasShownSplash', 'true');
+    }, 2000); // Show for at least 2 seconds
+
+    return () => clearTimeout(timer);
+  }, [showSplash]);
 
   if (loading || showSplash) {
     return <SplashScreen />;

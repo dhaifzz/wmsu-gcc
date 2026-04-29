@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Bell, LayoutDashboard, User, LogOut } from 'lucide-react';
 import gccLogoAsset from '../assets/logos/GCC.png';
 import wmsuLogoAsset from '../assets/logos/WMSU.png';
-import { useAuth } from '../auth/AuthProvider';
+import { useAuth } from '../auth/AuthContext';
 import { showAlert } from './modal-notification/sweetalert';
 import { cmsApi } from '../lib/api';
 

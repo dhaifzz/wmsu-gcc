@@ -6,7 +6,7 @@ import authBg from '../assets/img/Auth-Background.jpg';
 import gccLogoAsset from '../assets/logos/GCC.png';
 import wmsuLogoAsset from '../assets/logos/WMSU.png';
 import { authApi, cmsApi } from '../lib/api';
-import { useAuth } from './AuthProvider';
+import { useAuth } from './AuthContext';
 import { supabase } from '../lib/supabaseClient';
 import { showToast } from '../components/modal-notification/toast';
 

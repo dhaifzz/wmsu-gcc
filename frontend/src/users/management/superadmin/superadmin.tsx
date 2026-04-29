@@ -22,7 +22,7 @@ import History from '../History';
 import CMS from './SuperCMS';
 import UserManagement from './SuperAccountManagement';
 import Overview from './SuperDashboard';
-import { useAuth } from '../../../auth/AuthProvider';
+import { useAuth } from '../../../auth/AuthContext';
 import { ThemeProvider } from '../../../contexts/ThemeContext';
 
 const SuperAdminDashboard = () => {

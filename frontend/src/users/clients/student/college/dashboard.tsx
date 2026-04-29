@@ -17,7 +17,7 @@ import Counseling from '../../Counseling';
 import Assessment from '../../Assessment';
 import Shifting from '../../Shifting';
 import Loader from '../../../../components/loader/Loader';
-import { useAuth } from '../../../../auth/AuthProvider';
+import { useAuth } from '../../../../auth/AuthContext';
 
 const CollegeDashboard = () => {
   const { user: authUser } = useAuth();

@@ -9,7 +9,7 @@ import {
 import WMSULogoAsset from '../assets/logos/WMSU.png';
 import GCCLogoAsset from '../assets/logos/GCC.png';
 import MarqueeText from './MarqueeText';
-import { useAuth } from '../auth/AuthProvider';
+import { useAuth } from '../auth/AuthContext';
 import { showAlert } from './modal-notification/sweetalert';
 import { cmsApi } from '../lib/api';
 

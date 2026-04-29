@@ -18,7 +18,7 @@ import CounselingAppointments from '../Appointment/CounselingAppointments';
 import AssessmentAppointments from '../Appointment/AssessmentAppointments';
 import ShiftingAppointments from '../Appointment/ShiftingAppointments';
 import History from '../History'; // Historical records module
-import { useAuth } from '../../../auth/AuthProvider';
+import { useAuth } from '../../../auth/AuthContext';
 
 const StaffDashboardLayout = () => {
   const { user: authUser } = useAuth();

@@ -15,7 +15,7 @@ import MarqueeText from '../../../../components/MarqueeText';
 import Counseling from '../../Counseling';
 import Loader from '../../../../components/loader/Loader';
 import Assessment from '../../Assessment';
-import { useAuth } from '../../../../auth/AuthProvider';
+import { useAuth } from '../../../../auth/AuthContext';
 
 const HighSchoolDashboard = () => {
   const { user: authUser } = useAuth();

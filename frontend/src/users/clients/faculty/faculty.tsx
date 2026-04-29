@@ -13,7 +13,7 @@ import Profile from '../../Profile';
 import MarqueeText from '../../../components/MarqueeText';
 import Counseling from '../Counseling';
 import Loader from '../../../components/loader/Loader';
-import { useAuth } from '../../../auth/AuthProvider';
+import { useAuth } from '../../../auth/AuthContext';
 
 const FacultyDashboard = () => {
   const { user: authUser } = useAuth();

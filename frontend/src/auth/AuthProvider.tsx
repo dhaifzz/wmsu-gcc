@@ -1,30 +1,7 @@
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import { useState, useEffect, useCallback, type ReactNode } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { authApi, type UserProfile } from '../lib/api';
-
-interface AuthContextType {
-  user: UserProfile | null;
-  accessToken: string | null;
-  loading: boolean;
-  isInitialLoad: boolean;
-  redirectPath: string | null;
-  signOut: () => Promise<void>;
-  setAuthData: (user: UserProfile, token: string, redirect: string) => void;
-}
-
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  accessToken: null,
-  loading: true,
-  isInitialLoad: true,
-  redirectPath: null,
-  signOut: async () => {},
-  setAuthData: () => {},
-});
-
-export function useAuth() {
-  return useContext(AuthContext);
-}
+import { AuthContext } from './AuthContext';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
