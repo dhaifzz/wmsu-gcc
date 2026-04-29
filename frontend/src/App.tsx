@@ -20,6 +20,8 @@ import OutsideClientDashboard from './users/clients/outsideClient/outsideClient'
 import DirectorDashboard from './users/management/director/director';
 import StaffDashboard from './users/management/staff/staff';
 import SuperAdminDashboard from './users/management/superadmin/superadmin';
+import PrivacyPolicy from './public/legal/PrivacyPolicy';
+import TermsOfService from './public/legal/TermsOfService';
 
 import { useAuth } from './auth/AuthProvider';
 import SplashScreen from './components/loader/SplashScreen';
@@ -53,6 +55,8 @@ function AppContent() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/about" element={<AboutUs />} />
       <Route path="/team" element={<OurTeam />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+      <Route path="/terms-of-service" element={<TermsOfService />} />
 
       {/* Service Details Routes */}
       <Route path="/services/counseling" element={<CounselingDetails />} />

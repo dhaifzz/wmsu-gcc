@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin } from 'lucide-react';
 import gccLogoAsset from '../assets/logos/GCC.png';
 import wmsuLogoAsset from '../assets/logos/WMSU.png';
@@ -98,11 +99,11 @@ const Footer = () => {
           <div>
             <h4 className="text-white font-black uppercase tracking-widest text-sm mb-6">Quick Links</h4>
             <ul className="space-y-4 text-sm font-bold">
-              <li><a href="/" className="hover:text-emerald-400 transition-colors">Home</a></li>
-              <li><a href="/about" className="hover:text-emerald-400 transition-colors">About Us</a></li>
-              <li><a href="/team" className="hover:text-emerald-400 transition-colors">Our Team</a></li>
-              <li><a href="/services/counseling" className="hover:text-emerald-400 transition-colors">Counseling</a></li>
-              <li><a href="/register" className="hover:text-emerald-400 transition-colors">Register Now</a></li>
+              <li><Link to="/" className="hover:text-emerald-400 transition-colors">Home</Link></li>
+              <li><Link to="/about" className="hover:text-emerald-400 transition-colors">About Us</Link></li>
+              <li><Link to="/team" className="hover:text-emerald-400 transition-colors">Our Team</Link></li>
+              <li><Link to="/services/counseling" className="hover:text-emerald-400 transition-colors">Counseling</Link></li>
+              <li><Link to="/register" className="hover:text-emerald-400 transition-colors">Register Now</Link></li>
             </ul>
           </div>
 
@@ -152,8 +153,8 @@ const Footer = () => {
             © {new Date().getFullYear()} WMSU Guidance and Counseling Center. All rights reserved.
           </p>
           <div className="flex gap-8 text-xs font-bold text-white/70">
-            <a href="#" className="hover:text-emerald-400">Privacy Policy</a>
-            <a href="#" className="hover:text-emerald-400">Terms of Service</a>
+            <Link to="/privacy-policy" className="hover:text-emerald-400">Privacy Policy</Link>
+            <Link to="/terms-of-service" className="hover:text-emerald-400">Terms of Service</Link>
           </div>
         </div>
       </div>
