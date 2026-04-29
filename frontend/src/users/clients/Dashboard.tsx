@@ -1,90 +1,21 @@
 import { useState } from 'react';
 import { 
   LayoutDashboard, 
-  MessageCircle, 
-  ClipboardCheck, 
-  RefreshCw, 
   User, 
   LogOut, 
   Bell,
   Search,
-  ChevronRight,
   GraduationCap,
   Calendar,
   Clock,
   MapPin
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-
-type UserRole = 'college' | 'highschool' | 'returnee' | 'transferee';
-
-interface UserProfile {
-  name: string;
-  type: UserRole;
-  educationLevel: string;
-  email: string;
-  avatar?: string;
-}
+import { motion } from 'framer-motion';
+import { useAuth } from '../../auth/AuthContext';
 
 const Dashboard = () => {
-  const [activeUser, setActiveUser] = useState<UserProfile>({
-    name: "Juan Luna",
-    type: "college",
-    educationLevel: "College Student",
-    email: "juan.luna@wmsu.edu.ph"
-  });
-
+  const { user: authUser } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
-
-  const services = [
-    { 
-      id: 'counseling', 
-      name: 'Counseling', 
-      icon: MessageCircle, 
-      color: 'bg-blue-500',
-      allowed: ['college', 'highschool', 'returnee', 'transferee'],
-      desc: 'Professional one-on-one psychological support and guidance.'
-    },
-    { 
-      id: 'assessment', 
-      name: 'Assessment', 
-      icon: ClipboardCheck, 
-      color: 'bg-emerald-500',
-      allowed: ['college', 'highschool', 'returnee', 'transferee'],
-      desc: 'Standardized testing for mental health and personality.'
-    },
-    { 
-      id: 'shifting', 
-      name: 'Shifting', 
-      icon: RefreshCw, 
-      color: 'bg-rose-500',
-      allowed: ['college', 'returnee', 'transferee'], // High School excluded
-      desc: 'Assistance for students changing their courses or departments.'
-    }
-  ];
-
-  const filteredServices = services.filter(s => s.allowed.includes(activeUser.type));
-
-  const UserSelector = () => (
-    <div className="mb-8 p-4 bg-slate-900 rounded-lg text-white shadow-2xl">
-      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 px-2">Mock User Switcher (Debug)</p>
-      <div className="grid grid-cols-2 gap-2">
-        {(['college', 'highschool', 'returnee', 'transferee'] as UserRole[]).map(role => (
-          <button
-            key={role}
-            onClick={() => setActiveUser({
-              ...activeUser,
-              type: role,
-              educationLevel: role === 'college' ? 'College Student' : role === 'highschool' ? 'High School Student' : role === 'returnee' ? 'Returning Student' : 'Transfer Student'
-            })}
-            className={`py-2 px-3 rounded-lg text-[10px] font-bold capitalize transition-all ${activeUser.type === role ? 'bg-emerald-600 text-white shadow-lg' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
-          >
-            {role}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-[#f8fafc] flex overflow-hidden font-sans text-slate-900">
@@ -96,8 +27,6 @@ const Dashboard = () => {
           <div className="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center text-white font-black shadow-lg shadow-emerald-600/30">G</div>
           <span className="font-black text-xl tracking-tighter">GCC Portal</span>
         </div>
-
-        <UserSelector />
 
         {/* Nav Links */}
         <nav className="space-y-2 flex-1">
@@ -123,7 +52,7 @@ const Dashboard = () => {
                   transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
                   className="font-black text-sm whitespace-nowrap inline-block"
                 >
-                  {activeUser.name}
+                  {authUser ? `${authUser.firstName} ${authUser.lastName}` : 'User'}
                 </motion.p>
               </div>
               <div className="scroll-container mt-0.5">
@@ -132,7 +61,7 @@ const Dashboard = () => {
                   transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 1 }}
                   className="text-xs text-slate-500 whitespace-nowrap inline-block"
                 >
-                  {activeUser.educationLevel}
+                  {authUser?.educationLevel || 'Student'}
                 </motion.p>
               </div>
             </div>
@@ -148,7 +77,7 @@ const Dashboard = () => {
         {/* Header */}
         <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 px-10 py-6 flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-black tracking-tight">Good day, {activeUser.name.split(' ')[0]}!</h2>
+            <h2 className="text-2xl font-black tracking-tight">Good day, {authUser?.firstName || 'User'}!</h2>
             <p className="text-slate-500 text-sm font-medium">Here's what's happening with your portal today.</p>
           </div>
 
@@ -196,59 +125,9 @@ const Dashboard = () => {
                   transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
                   className="text-xl font-black whitespace-nowrap inline-block"
                 >
-                  {activeUser.educationLevel}
+                  {authUser?.educationLevel || 'Student'}
                 </motion.p>
               </div>
-            </div>
-          </div>
-
-          {/* Services Section */}
-          <div className="mb-10">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h3 className="text-2xl font-black tracking-tight mb-1">Available Services</h3>
-                <p className="text-slate-500 text-sm font-medium">Services tailored for your student type.</p>
-              </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <AnimatePresence mode='popLayout'>
-                {filteredServices.map((service) => (
-                  <motion.div
-                    key={service.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.3 }}
-                    className="bg-white p-8 rounded-lg border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group cursor-pointer"
-                  >
-                    <div className={`w-14 h-14 ${service.color} text-white rounded-lg flex items-center justify-center mb-6 shadow-lg shadow-${service.color.split('-')[1]}-500/20 group-hover:scale-110 transition-transform`}>
-                      <service.icon size={28} />
-                    </div>
-                    <h4 className="text-xl font-black mb-3">{service.name}</h4>
-                    <p className="text-slate-500 text-sm leading-relaxed mb-6 font-medium">
-                      {service.desc}
-                    </p>
-                    <div className="flex items-center gap-2 text-emerald-600 font-black text-sm">
-                      Book Now <ChevronRight size={16} />
-                    </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-
-              {/* Disabled/Excluded Section for HS */}
-              {activeUser.type === 'highschool' && (
-                <div className="bg-slate-50 p-8 rounded-lg border border-dashed border-slate-200 flex flex-col items-center justify-center text-center opacity-60">
-                   <div className="w-14 h-14 bg-slate-200 text-slate-400 rounded-lg flex items-center justify-center mb-4">
-                    <RefreshCw size={28} />
-                  </div>
-                  <h4 className="text-lg font-black text-slate-400">Shifting Restricted</h4>
-                  <p className="text-slate-400 text-xs font-bold px-4 mt-2">
-                    Shifting services are only available for College students.
-                  </p>
-                </div>
-              )}
             </div>
           </div>
 
