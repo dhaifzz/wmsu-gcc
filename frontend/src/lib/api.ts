@@ -75,6 +75,9 @@ export interface UserProfile {
   gradeLevel: number | null;
   occupation: string | null;
   department?: string | null;
+  courseId?: string | null;
+  courseName?: string | null;
+  collegeName?: string | null;
   schoolId?: number | null;
   lrn?: number | null;
   employeeId?: number | null;
@@ -171,6 +174,41 @@ export interface CreateAssessmentAppointmentResponse {
   assessmentType: 'Assessment (DAS-Y)' | 'Assessment (DAS-21)';
 }
 
+export interface CreateShiftingAppointmentPayload {
+  date: string;
+  timeSlot: string;
+  currentCourse: string;
+  targetCourse: string;
+  reason: string;
+  bookingReceiptName: string;
+  pictureName: string;
+  gradesName: string;
+  latestCorName: string;
+  entranceResultName: string;
+}
+
+export interface CreateShiftingAppointmentResponse {
+  message: string;
+  appointment: {
+    id: string;
+    scheduled_time: string;
+    created_at: string;
+  };
+}
+
+export interface LatestShiftingAppointmentResponse {
+  appointment: {
+    id: string;
+    scheduled_time: string;
+    created_at: string;
+  } | null;
+}
+
+export interface ShiftingSubmissionStatusResponse {
+  isOpen: boolean;
+  status: string;
+}
+
 export const appointmentApi = {
   getCounselingAvailability: (year: number, month: number) =>
     api<CounselingAvailabilityResponse>(`/api/appointments/counseling/availability?year=${year}&month=${month}`),
@@ -190,5 +228,18 @@ export const appointmentApi = {
       method: 'POST',
       body: payload as unknown as Record<string, unknown>,
       token
-    })
+    }),
+
+  createShiftingAppointment: (payload: CreateShiftingAppointmentPayload, token: string) =>
+    api<CreateShiftingAppointmentResponse>('/api/appointments/shifting', {
+      method: 'POST',
+      body: payload as unknown as Record<string, unknown>,
+      token
+    }),
+
+  getLatestShiftingAppointment: (token: string) =>
+    api<LatestShiftingAppointmentResponse>('/api/appointments/shifting/latest', { token }),
+
+  getShiftingSubmissionStatus: () =>
+    api<ShiftingSubmissionStatusResponse>('/api/appointments/shifting/submission-status')
 };

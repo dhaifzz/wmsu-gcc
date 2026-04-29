@@ -18,12 +18,14 @@ import Assessment from '../../Assessment';
 import Shifting from '../../Shifting';
 import Loader from '../../../../components/loader/Loader';
 import { useAuth } from '../../../../auth/AuthContext';
+import { appointmentApi } from '../../../../lib/api';
 
 const CollegeDashboard = () => {
   const { user: authUser } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
   const [activeService, setActiveService] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isShiftingOpen, setIsShiftingOpen] = useState(false);
 
   useEffect(() => {
     // Simulate real data fetching
@@ -33,15 +35,27 @@ const CollegeDashboard = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    const loadShiftingStatus = async () => {
+      const result = await appointmentApi.getShiftingSubmissionStatus();
+      if (result.ok) {
+        setIsShiftingOpen(!!result.data.isOpen);
+      } else {
+        setIsShiftingOpen(false);
+      }
+    };
+    void loadShiftingStatus();
+  }, []);
+
   // Map authUser to the structure expected by the dashboard and Profile component
   const user = {
     name: authUser ? `${authUser.firstName} ${authUser.lastName}` : "User",
     type: "college",
     educationLevel: authUser?.educationLevel || "College Student",
     email: authUser?.email || "",
-    studentId: authUser?.id?.substring(0, 8).toUpperCase() || "N/A",
-    college: authUser?.department || "WMSU College",
-    course: "N/A", // This should ideally be linked via course_id in a real app
+    studentId: authUser?.schoolId?.toString() || authUser?.id?.substring(0, 8).toUpperCase() || "N/A",
+    college: authUser?.collegeName || authUser?.school || authUser?.department || "WMSU College",
+    course: authUser?.courseName || authUser?.track || "Not specified in profile",
     joinedDate: "N/A"
   };
 
@@ -138,23 +152,41 @@ const CollegeDashboard = () => {
 
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {services.map((service) => (
-                      <motion.div
-                        key={service.id}
-                        layout
-                        onClick={() => setActiveService(service.id)}
-                        className="p-8 rounded-lg border bg-white border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 group cursor-pointer transition-all flex flex-col"
-                      >
-                        <div className={`w-14 h-14 ${service.color} text-white rounded-lg flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform`}>
-                          <service.icon size={28} className="text-white" />
-                        </div>
-                        <h4 className="text-xl font-black mb-3 text-slate-900">{service.name}</h4>
-                        <p className="text-sm leading-relaxed mb-6 font-medium text-slate-500">
-                          {service.desc}
-                        </p>
-                        <div className="mt-auto flex items-center gap-2 text-emerald-600 font-black text-sm">
-                          Book Now <ChevronRight size={16} />
-                        </div>
-                      </motion.div>
+                      (() => {
+                        const isShiftingService = service.id === 'shifting';
+                        const isDisabled = isShiftingService && !isShiftingOpen;
+                        return (
+                          <motion.div
+                            key={service.id}
+                            layout
+                            onClick={() => !isDisabled && setActiveService(service.id)}
+                            className={`p-8 rounded-lg border transition-all flex flex-col ${
+                              isDisabled
+                                ? 'bg-slate-50 border-dashed border-slate-200 opacity-70 cursor-not-allowed'
+                                : 'bg-white border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 group cursor-pointer'
+                            }`}
+                          >
+                            <div className={`w-14 h-14 ${isDisabled ? 'bg-slate-200' : service.color} text-white rounded-lg flex items-center justify-center mb-6 shadow-lg ${isDisabled ? '' : 'group-hover:scale-110'} transition-transform`}>
+                              <service.icon size={28} className={isDisabled ? 'text-slate-400' : 'text-white'} />
+                            </div>
+                            <h4 className={`text-xl font-black mb-3 ${isDisabled ? 'text-slate-500' : 'text-slate-900'}`}>{service.name}</h4>
+                            <p className={`text-sm leading-relaxed mb-6 font-medium ${isDisabled ? 'text-slate-400' : 'text-slate-500'}`}>
+                              {service.desc}
+                            </p>
+                            {isDisabled ? (
+                              <div className="mt-auto">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 inline-block">
+                                  Shifting submission is not yet open
+                                </p>
+                              </div>
+                            ) : (
+                              <div className="mt-auto flex items-center gap-2 text-emerald-600 font-black text-sm">
+                                Book Now <ChevronRight size={16} />
+                              </div>
+                            )}
+                          </motion.div>
+                        );
+                      })()
                     ))}
                   </div>
                 </div>
