@@ -5,10 +5,15 @@ import { Gavel, CheckCircle, AlertTriangle, FileText, UserCheck, ArrowLeft } fro
 
 const TermsOfService = () => {
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-[#fdfdfd] flex flex-col relative overflow-hidden">
+      {/* Decorative Background Elements */}
+      <div className="absolute top-0 right-0 w-full h-[600px] bg-gradient-to-b from-emerald-50/40 to-transparent z-0"></div>
+      <div className="absolute -bottom-48 -left-48 w-[600px] h-[600px] bg-emerald-50/50 rounded-full blur-[150px] z-0"></div>
+      <div className="absolute top-1/4 -right-24 w-80 h-80 bg-emerald-100/30 rounded-full blur-3xl z-0"></div>
+
       <Navbar />
       
-      <main className="flex-1 pt-32 pb-20">
+      <main className="flex-1 pt-32 pb-20 relative z-10">
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto">
             {/* Header */}
@@ -40,7 +45,7 @@ const TermsOfService = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-white rounded-[2rem] p-8 md:p-16 border border-slate-100 shadow-2xl shadow-slate-200/50"
+              className="bg-white/80 backdrop-blur-xl rounded-[2.5rem] p-8 md:p-16 border border-emerald-100 shadow-2xl shadow-emerald-200/20"
             >
               <div className="prose prose-slate max-w-none">
                 <section className="mb-12">
