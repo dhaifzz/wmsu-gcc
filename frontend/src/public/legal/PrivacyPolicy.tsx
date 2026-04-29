@@ -5,40 +5,43 @@ import { Shield, Lock, Eye, FileText, ChevronRight, ArrowLeft } from 'lucide-rea
 
 const PrivacyPolicy = () => {
   return (
-    <div className="min-h-screen bg-[#fdfdfd] flex flex-col relative overflow-hidden">
+    <div className="min-h-screen bg-emerald-50/30 flex flex-col relative overflow-hidden">
       {/* Decorative Background Elements */}
-      <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-emerald-50/50 to-transparent z-0"></div>
-      <div className="absolute -top-24 -right-24 w-96 h-96 bg-emerald-100/40 rounded-full blur-3xl z-0"></div>
-      <div className="absolute top-1/2 -left-48 w-[500px] h-[500px] bg-emerald-50/30 rounded-full blur-[120px] z-0"></div>
+      <div className="absolute top-0 left-0 w-full h-[600px] bg-gradient-to-b from-emerald-100/50 to-transparent z-0"></div>
+      <div className="absolute -top-24 -right-24 w-96 h-96 bg-emerald-200/30 rounded-full blur-3xl z-0"></div>
+      <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-emerald-100/20 rounded-full blur-[120px] z-0"></div>
 
       <Navbar />
       
-      <main className="flex-1 pt-32 pb-20 relative z-10">
-        <div className="container mx-auto px-6">
-          <div className="max-w-4xl mx-auto">
-            {/* Header */}
+      <main className="flex-1 pb-20 relative z-10">
+        {/* Hero Section */}
+        <div className="bg-emerald-900 pt-40 pb-32 mb-[-64px]">
+          <div className="container mx-auto px-6 text-center">
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-16 text-center"
             >
-              <a href="/" className="inline-flex items-center gap-2 text-slate-400 hover:text-emerald-600 transition-colors mb-8 font-bold group">
+              <a href="/" className="inline-flex items-center gap-2 text-emerald-300 hover:text-white transition-colors mb-8 font-bold group">
                 <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
                 Back to Home
               </a>
               <div className="block"></div>
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 rounded-full text-xs font-black uppercase tracking-widest mb-6">
-
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-800/50 text-emerald-300 rounded-full text-xs font-black uppercase tracking-widest mb-6 border border-emerald-700/50">
                 <Shield size={14} />
                 Data Protection
               </div>
-              <h1 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight">
+              <h1 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight">
                 Privacy Policy
               </h1>
-              <p className="text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">
+              <p className="text-emerald-100/80 font-medium max-w-2xl mx-auto leading-relaxed">
                 Your privacy is our priority. This policy outlines how the WMSU Guidance and Counseling Center (GCC) collects, uses, and protects your information.
               </p>
             </motion.div>
+          </div>
+        </div>
+
+        <div className="container mx-auto px-6">
+          <div className="max-w-4xl mx-auto">
 
             {/* Content Card */}
             <motion.div 
