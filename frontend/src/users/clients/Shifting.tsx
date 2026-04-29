@@ -407,7 +407,7 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
                     <div className="aspect-square w-[280px] p-8 rounded-lg bg-slate-50 border border-slate-100 hover:border-emerald-200 transition-all group flex flex-col items-center justify-center text-center shadow-sm shrink-0">
                       <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center text-slate-400 group-hover:text-emerald-600 transition-colors shadow-sm mb-6 shrink-0">
                         {(() => {
-                          const Icon = ICON_MAP[documents[docStep].iconName] || FileText;
+                          const Icon = ICON_MAP[documents[docStep].iconName as DocumentIconName] || FileText;
                           return <Icon size={28} />;
                         })()}
                       </div>
