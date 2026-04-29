@@ -46,7 +46,7 @@ const UserManagement = () => {
         </div>
         <button 
           onClick={handleCreateUser}
-          className="flex items-center justify-center gap-2 px-8 py-4 bg-teal-600 hover:bg-teal-700 text-white font-black rounded-2xl transition-all shadow-lg shadow-teal-200"
+          className="flex items-center justify-center gap-2 px-8 py-4 bg-teal-600 hover:bg-teal-700 text-white font-black rounded-lg transition-all shadow-lg shadow-teal-200"
         >
           <UserPlus size={20} />
           Create Account
@@ -55,29 +55,29 @@ const UserManagement = () => {
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/40">
+        <div className="bg-white p-6 rounded-lg border border-slate-100 shadow-xl shadow-slate-200/40">
           <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Total Admin</p>
           <p className="text-3xl font-black text-slate-900">12</p>
         </div>
-        <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/40">
+        <div className="bg-white p-6 rounded-lg border border-slate-100 shadow-xl shadow-slate-200/40">
           <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Active Now</p>
           <p className="text-3xl font-black text-teal-600">5</p>
         </div>
-        <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/40">
+        <div className="bg-white p-6 rounded-lg border border-slate-100 shadow-xl shadow-slate-200/40">
           <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Pending Invites</p>
           <p className="text-3xl font-black text-amber-500">3</p>
         </div>
       </div>
 
       {/* User List */}
-      <div className="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
+      <div className="bg-white rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
         <div className="p-8 border-b border-slate-50 flex items-center justify-between">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input 
               type="text" 
               placeholder="Search users by name or email..."
-              className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
+              className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-lg text-sm font-bold focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
             />
           </div>
           <div className="flex gap-2">
@@ -102,7 +102,7 @@ const UserManagement = () => {
                 <tr key={user.id} className="hover:bg-slate-50/30 transition-colors">
                   <td className="px-8 py-6">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-teal-100 flex items-center justify-center text-teal-700 font-black">
+                      <div className="w-12 h-12 rounded-lg bg-teal-100 flex items-center justify-center text-teal-700 font-black">
                         {user.name.charAt(0)}
                       </div>
                       <div>

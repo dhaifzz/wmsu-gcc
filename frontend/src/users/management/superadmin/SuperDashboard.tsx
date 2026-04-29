@@ -102,7 +102,7 @@ const BookingPanel = ({ onBack }: { onBack: () => void }) => {
       <div className="flex items-center gap-4 mb-8">
         <button
           onClick={onBack}
-          className="p-3 hover:bg-white rounded-2xl transition-all text-slate-400 hover:text-slate-900 shadow-sm border border-transparent hover:border-slate-100"
+          className="p-3 hover:bg-white rounded-lg transition-all text-slate-400 hover:text-slate-900 shadow-sm border border-transparent hover:border-slate-100"
         >
           <ChevronLeft size={22} />
         </button>
@@ -126,9 +126,9 @@ const BookingPanel = ({ onBack }: { onBack: () => void }) => {
                   setStep('calendar');
                 }
               }}
-              className="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 group cursor-pointer transition-all flex flex-col text-left"
+              className="p-8 bg-white rounded-lg border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 group cursor-pointer transition-all flex flex-col text-left"
             >
-              <div className={`w-14 h-14 ${s.color} text-white rounded-3xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform`}>
+              <div className={`w-14 h-14 ${s.color} text-white rounded-lg flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform`}>
                 <s.icon size={28} />
               </div>
               <h4 className="text-xl font-black mb-2 text-slate-900">{s.label}</h4>
@@ -144,15 +144,15 @@ const BookingPanel = ({ onBack }: { onBack: () => void }) => {
       {step === 'calendar' && (
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Calendar */}
-          <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
+          <div className="bg-white rounded-lg p-8 border border-slate-100 shadow-sm">
             <div className="flex items-center justify-between mb-6">
-              <button onClick={() => changeMonth(-1)} className="p-2 rounded-xl hover:bg-slate-50">
+              <button onClick={() => changeMonth(-1)} className="p-2 rounded-lg hover:bg-slate-50">
                 <ChevronLeft size={20} />
               </button>
               <h4 className="text-lg font-black text-slate-900">
                 {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
               </h4>
-              <button onClick={() => changeMonth(1)} className="p-2 rounded-xl hover:bg-slate-50">
+              <button onClick={() => changeMonth(1)} className="p-2 rounded-lg hover:bg-slate-50">
                 <ChevronRight size={20} />
               </button>
             </div>
@@ -169,7 +169,7 @@ const BookingPanel = ({ onBack }: { onBack: () => void }) => {
                   key={day}
                   disabled={isPast(day)}
                   onClick={() => setSelectedDay(day)}
-                  className={`h-10 w-full rounded-xl text-sm font-bold transition-all 
+                  className={`h-10 w-full rounded-lg text-sm font-bold transition-all 
                     ${isPast(day) ? 'text-slate-200 cursor-not-allowed' : ''}
                     ${selectedDay === day ? 'bg-teal-600 text-white shadow-lg' : !isPast(day) ? 'hover:bg-teal-50 text-slate-700' : ''}
                   `}
@@ -181,7 +181,7 @@ const BookingPanel = ({ onBack }: { onBack: () => void }) => {
           </div>
 
           {/* Time slots */}
-          <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm flex flex-col">
+          <div className="bg-white rounded-lg p-8 border border-slate-100 shadow-sm flex flex-col">
             <h4 className="font-black text-slate-900 mb-4">
               {selectedDay
                 ? `Available Slots — ${currentDate.toLocaleString('default', { month: 'short' })} ${selectedDay}`
@@ -193,7 +193,7 @@ const BookingPanel = ({ onBack }: { onBack: () => void }) => {
                   <button
                     key={slot}
                     onClick={() => setSelectedTime(slot)}
-                    className={`flex items-center gap-3 px-5 py-4 rounded-2xl text-sm font-bold border transition-all
+                    className={`flex items-center gap-3 px-5 py-4 rounded-lg text-sm font-bold border transition-all
                       ${selectedTime === slot
                         ? 'bg-teal-600 text-white border-teal-600 shadow-lg'
                         : 'bg-slate-50 text-slate-700 border-slate-100 hover:border-teal-200 hover:bg-teal-50'}
@@ -213,14 +213,14 @@ const BookingPanel = ({ onBack }: { onBack: () => void }) => {
             <div className="mt-6 flex gap-3">
               <button
                 onClick={() => { setStep('type'); setSelectedDay(null); setSelectedTime(null); }}
-                className="flex-1 py-4 bg-slate-100 text-slate-700 font-black rounded-2xl hover:bg-slate-200 transition-all"
+                className="flex-1 py-4 bg-slate-100 text-slate-700 font-black rounded-lg hover:bg-slate-200 transition-all"
               >
                 Back
               </button>
               <button
                 disabled={!selectedDay || !selectedTime}
                 onClick={handleConfirm}
-                className="flex-1 py-4 bg-teal-600 text-white font-black rounded-2xl hover:bg-teal-700 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg"
+                className="flex-1 py-4 bg-teal-600 text-white font-black rounded-lg hover:bg-teal-700 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg"
               >
                 Confirm Booking
               </button>
@@ -297,7 +297,7 @@ const Overview = ({ userName, onNavigate }: OverviewProps) => {
         </div>
         <button
           onClick={() => setView('book')}
-          className="flex items-center gap-2 px-8 py-4 bg-teal-600 hover:bg-teal-700 text-white font-black rounded-2xl transition-all shadow-lg shadow-teal-200 shrink-0"
+          className="flex items-center gap-2 px-8 py-4 bg-teal-600 hover:bg-teal-700 text-white font-black rounded-lg transition-all shadow-lg shadow-teal-200 shrink-0"
         >
           <Plus size={20} />
           Book Appointment
@@ -306,22 +306,22 @@ const Overview = ({ userName, onNavigate }: OverviewProps) => {
 
       {/* Stats */}
       <div className="grid md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-md transition-all">
-          <div className="w-12 h-12 bg-teal-100 text-teal-600 rounded-2xl flex items-center justify-center mb-4">
+        <div className="bg-white p-6 rounded-lg border border-slate-100 shadow-sm hover:shadow-md transition-all">
+          <div className="w-12 h-12 bg-teal-100 text-teal-600 rounded-lg flex items-center justify-center mb-4">
             <Calendar size={24} />
           </div>
           <p className="text-slate-500 text-xs font-black uppercase tracking-widest mb-1">Total Appointments</p>
           <p className="text-2xl font-black">248</p>
         </div>
-        <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-md transition-all">
-          <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center mb-4">
+        <div className="bg-white p-6 rounded-lg border border-slate-100 shadow-sm hover:shadow-md transition-all">
+          <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-lg flex items-center justify-center mb-4">
             <AlertCircle size={24} />
           </div>
           <p className="text-slate-500 text-xs font-black uppercase tracking-widest mb-1">Pending Approval</p>
           <p className="text-2xl font-black">{queue.length}</p>
         </div>
-        <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-md transition-all">
-          <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center mb-4">
+        <div className="bg-white p-6 rounded-lg border border-slate-100 shadow-sm hover:shadow-md transition-all">
+          <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center mb-4">
             <Users size={24} />
           </div>
           <p className="text-slate-500 text-xs font-black uppercase tracking-widest mb-1">Active Users</p>
@@ -330,10 +330,10 @@ const Overview = ({ userName, onNavigate }: OverviewProps) => {
       </div>
 
       {/* Approval Queue */}
-      <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-lg border border-slate-100 shadow-sm overflow-hidden">
         <div className="p-8 border-b border-slate-50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-amber-100 rounded-2xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
               <ListChecks size={20} className="text-amber-600" />
             </div>
             <div>
@@ -348,7 +348,7 @@ const Overview = ({ userName, onNavigate }: OverviewProps) => {
               placeholder="Search by name or type..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="bg-slate-50 border border-slate-100 rounded-xl py-2.5 pl-10 pr-4 text-xs font-bold w-64 focus:ring-2 focus:ring-teal-500/20 outline-none transition-all"
+              className="bg-slate-50 border border-slate-100 rounded-lg py-2.5 pl-10 pr-4 text-xs font-bold w-64 focus:ring-2 focus:ring-teal-500/20 outline-none transition-all"
             />
           </div>
         </div>
@@ -370,7 +370,7 @@ const Overview = ({ userName, onNavigate }: OverviewProps) => {
                   className="flex items-center justify-between px-8 py-5 hover:bg-slate-50/50 transition-colors gap-4"
                 >
                   <div className="flex items-center gap-4 min-w-0">
-                    <div className="w-12 h-12 bg-teal-100 rounded-2xl flex items-center justify-center text-teal-700 font-black shrink-0 text-sm">
+                    <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center text-teal-700 font-black shrink-0 text-sm">
                       {appt.name.charAt(0)}
                     </div>
                     <div className="min-w-0">
@@ -393,14 +393,14 @@ const Overview = ({ userName, onNavigate }: OverviewProps) => {
                   <div className="flex items-center gap-2 shrink-0">
                     <button
                       onClick={() => handleApprove(appt.id)}
-                      className="flex items-center gap-1.5 px-4 py-2.5 bg-teal-50 hover:bg-teal-600 text-teal-600 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border border-teal-200 hover:border-teal-600"
+                      className="flex items-center gap-1.5 px-4 py-2.5 bg-teal-50 hover:bg-teal-600 text-teal-600 hover:text-white rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border border-teal-200 hover:border-teal-600"
                     >
                       <CheckCircle2 size={14} />
                       Approve
                     </button>
                     <button
                       onClick={() => handleDecline(appt.id)}
-                      className="flex items-center gap-1.5 px-4 py-2.5 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border border-rose-200 hover:border-rose-600"
+                      className="flex items-center gap-1.5 px-4 py-2.5 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border border-rose-200 hover:border-rose-600"
                     >
                       <XCircle size={14} />
                       Decline
@@ -428,9 +428,9 @@ const Overview = ({ userName, onNavigate }: OverviewProps) => {
             <button
               key={s.id}
               onClick={() => onNavigate(s.id)}
-              className="p-6 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 group cursor-pointer transition-all flex items-center gap-4 text-left"
+              className="p-6 bg-white rounded-lg border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 group cursor-pointer transition-all flex items-center gap-4 text-left"
             >
-              <div className={`w-12 h-12 ${s.color} text-white rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform shrink-0`}>
+              <div className={`w-12 h-12 ${s.color} text-white rounded-lg flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform shrink-0`}>
                 <s.icon size={22} />
               </div>
               <div>

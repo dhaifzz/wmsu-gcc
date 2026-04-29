@@ -207,11 +207,11 @@ const Availability = () => {
           </button>
         </div>
 
-        <div className="flex items-center gap-3 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="flex items-center gap-3 bg-white p-2 rounded-lg border border-slate-200 shadow-sm">
           <button 
             onClick={() => changeMonth(-1)}
             disabled={currentDate.getMonth() === new Date().getMonth() && currentDate.getFullYear() === new Date().getFullYear()}
-            className="p-2 hover:bg-slate-50 rounded-xl transition-all text-slate-400 hover:text-emerald-600 disabled:opacity-30 disabled:cursor-not-allowed"
+            className="p-2 hover:bg-slate-50 rounded-lg transition-all text-slate-400 hover:text-emerald-600 disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <ChevronLeft size={20} />
           </button>
@@ -220,7 +220,7 @@ const Availability = () => {
           </span>
           <button 
             onClick={() => changeMonth(1)}
-            className="p-2 hover:bg-slate-50 rounded-xl transition-all text-slate-400 hover:text-emerald-600"
+            className="p-2 hover:bg-slate-50 rounded-lg transition-all text-slate-400 hover:text-emerald-600"
           >
             <ChevronRight size={20} />
           </button>
@@ -230,7 +230,7 @@ const Availability = () => {
       <div className="grid lg:grid-cols-12 gap-8 items-stretch">
         {/* Calendar View */}
         <div className="lg:col-span-8 h-full">
-          <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-xl shadow-slate-200/50 overflow-hidden h-full flex flex-col">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-xl shadow-slate-200/50 overflow-hidden h-full flex flex-col">
             <div className="grid grid-cols-7 bg-slate-50 border-b border-slate-100">
               {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
                 <div key={day} className="py-4 text-center text-[10px] font-black uppercase tracking-widest text-slate-400">
@@ -253,10 +253,10 @@ const Availability = () => {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                className="bg-white rounded-[2.5rem] border border-slate-200 p-8 shadow-xl shadow-slate-200/50 flex flex-col h-full"
+                className="bg-white rounded-lg border border-slate-200 p-8 shadow-xl shadow-slate-200/50 flex flex-col h-full"
               >
                 <div className="flex items-center gap-4 mb-8">
-                  <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center shadow-inner">
+                  <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center shadow-inner">
                     <Clock size={24} />
                   </div>
                   <div>
@@ -273,19 +273,19 @@ const Availability = () => {
                     <div className="flex gap-2">
                       <button 
                         onClick={() => setPreset('morning')}
-                        className="flex-1 py-3 bg-emerald-50 text-emerald-700 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-100 transition-all border border-emerald-100"
+                        className="flex-1 py-3 bg-emerald-50 text-emerald-700 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-emerald-100 transition-all border border-emerald-100"
                       >
                         Morning Only
                       </button>
                       <button 
                         onClick={() => setPreset('afternoon')}
-                        className="flex-1 py-3 bg-emerald-50 text-emerald-700 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-100 transition-all border border-emerald-100"
+                        className="flex-1 py-3 bg-emerald-50 text-emerald-700 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-emerald-100 transition-all border border-emerald-100"
                       >
                         Afternoon Only
                       </button>
                       <button 
                         onClick={() => setPreset('clear')}
-                        className="px-4 py-3 bg-rose-50 text-rose-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-rose-100 transition-all border border-rose-100 flex items-center justify-center"
+                        className="px-4 py-3 bg-rose-50 text-rose-600 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-rose-100 transition-all border border-rose-100 flex items-center justify-center"
                         title="Clear All"
                       >
                         <Trash2 size={16} />
@@ -304,7 +304,7 @@ const Availability = () => {
                         <button
                           key={time}
                           onClick={() => toggleTimeSlot(time)}
-                          className={`py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border-2 ${
+                          className={`py-4 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border-2 ${
                             isSelected 
                             ? 'bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-600/20 scale-[0.98]' 
                             : 'bg-white border-slate-100 text-slate-500 hover:border-emerald-200 hover:bg-emerald-50/50'
@@ -318,20 +318,20 @@ const Availability = () => {
                 </div>
 
                 <div className="mt-auto pt-6 border-t border-slate-100">
-                  <div className="flex items-start gap-3 bg-amber-50 p-4 rounded-2xl border border-amber-100 mb-6">
+                  <div className="flex items-start gap-3 bg-amber-50 p-4 rounded-lg border border-amber-100 mb-6">
                     <AlertCircle size={18} className="text-amber-600 shrink-0" />
                     <p className="text-[10px] font-bold text-amber-800/80 leading-relaxed uppercase tracking-wider">
                       Changing these slots will update the student booking calendar in real-time.
                     </p>
                   </div>
-                  <button className="w-full py-5 bg-emerald-900 text-white rounded-3xl font-black text-xs uppercase tracking-[0.2em] hover:bg-emerald-800 transition-all shadow-xl shadow-emerald-900/20 active:scale-[0.98]">
+                  <button className="w-full py-5 bg-emerald-900 text-white rounded-lg font-black text-xs uppercase tracking-[0.2em] hover:bg-emerald-800 transition-all shadow-xl shadow-emerald-900/20 active:scale-[0.98]">
                     Save Availability
                   </button>
                 </div>
               </motion.div>
             ) : (
-              <div className="bg-slate-50 rounded-[2.5rem] border border-slate-100 p-8 flex flex-col items-center justify-center text-center h-[600px] border-dashed border-2">
-                <div className="w-16 h-16 bg-slate-200 text-slate-400 rounded-3xl flex items-center justify-center mb-4">
+              <div className="bg-slate-50 rounded-lg border border-slate-100 p-8 flex flex-col items-center justify-center text-center h-[600px] border-dashed border-2">
+                <div className="w-16 h-16 bg-slate-200 text-slate-400 rounded-lg flex items-center justify-center mb-4">
                   <CalendarIcon size={32} />
                 </div>
                 <p className="text-slate-400 font-bold italic">Select a date from the calendar to manage time slots</p>

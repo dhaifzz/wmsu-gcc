@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Bell, LayoutDashboard, User, LogOut } from 'lucide-react';
+import { Bell, LayoutDashboard, User } from 'lucide-react';
 import gccLogoAsset from '../assets/logos/GCC.png';
 import wmsuLogoAsset from '../assets/logos/WMSU.png';
-import { useAuth } from '../auth/AuthContext';
-import { showAlert } from './modal-notification/sweetalert';
 import { cmsApi } from '../lib/api';
 
 interface ClientNavbarProps {
@@ -13,7 +11,6 @@ interface ClientNavbarProps {
 }
 
 const ClientNavbar = ({ activeTab, setActiveTab }: ClientNavbarProps) => {
-  const { signOut } = useAuth();
   const [logos, setLogos] = useState({
     wmsuLogo: wmsuLogoAsset,
     gccLogo: gccLogoAsset
@@ -60,19 +57,17 @@ const ClientNavbar = ({ activeTab, setActiveTab }: ClientNavbarProps) => {
 
         <nav className="flex items-center gap-2 bg-emerald-950/30 p-1.5 rounded-full border border-emerald-800/30">
           {/* Dashboard Button */}
-          <button 
+          <button
             onClick={() => setActiveTab('overview')}
-            className={`group relative flex items-center transition-all duration-300 ease-out overflow-hidden rounded-full font-bold text-sm ${
-              activeTab === 'overview' 
-                ? 'bg-white text-emerald-900 px-5 py-2.5 shadow-lg' 
+            className={`group relative flex items-center transition-all duration-300 ease-out overflow-hidden rounded-full font-bold text-sm ${activeTab === 'overview'
+                ? 'bg-white text-emerald-900 px-5 py-2.5 shadow-lg'
                 : 'text-emerald-100 hover:bg-emerald-800/50 px-3 py-2.5'
-            }`}
+              }`}
           >
             <div className="flex items-center">
               <LayoutDashboard size={18} className={activeTab === 'overview' ? 'mr-2' : 'group-hover:mr-2 transition-all'} />
-              <span className={`transition-all duration-300 ease-out overflow-hidden whitespace-nowrap ${
-                activeTab === 'overview' ? 'max-w-xs opacity-100' : 'max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100'
-              }`}>
+              <span className={`transition-all duration-300 ease-out overflow-hidden whitespace-nowrap ${activeTab === 'overview' ? 'max-w-xs opacity-100' : 'max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100'
+                }`}>
                 Dashboard
               </span>
             </div>
@@ -80,40 +75,23 @@ const ClientNavbar = ({ activeTab, setActiveTab }: ClientNavbarProps) => {
           </button>
 
           {/* Profile Button */}
-          <button 
+          <button
             onClick={() => setActiveTab('profile')}
-            className={`group relative flex items-center transition-all duration-300 ease-out overflow-hidden rounded-full font-bold text-sm ${
-              activeTab === 'profile' 
-                ? 'bg-white text-emerald-900 px-5 py-2.5 shadow-lg' 
+            className={`group relative flex items-center transition-all duration-300 ease-out overflow-hidden rounded-full font-bold text-sm ${activeTab === 'profile'
+                ? 'bg-white text-emerald-900 px-5 py-2.5 shadow-lg'
                 : 'text-emerald-100 hover:bg-emerald-800/50 px-3 py-2.5'
-            }`}
+              }`}
           >
             <div className="flex items-center">
               <User size={18} className={activeTab === 'profile' ? 'mr-2' : 'group-hover:mr-2 transition-all'} />
-              <span className={`transition-all duration-300 ease-out overflow-hidden whitespace-nowrap ${
-                activeTab === 'profile' ? 'max-w-xs opacity-100' : 'max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100'
-              }`}>
+              <span className={`transition-all duration-300 ease-out overflow-hidden whitespace-nowrap ${activeTab === 'profile' ? 'max-w-xs opacity-100' : 'max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100'
+                }`}>
                 My Profile
               </span>
             </div>
             {activeTab === 'profile' && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 ml-2 animate-pulse"></span>}
           </button>
         </nav>
-
-        <div className="flex items-center pl-3 border-l border-emerald-800/50">
-          <button 
-            onClick={async () => {
-              const result = await showAlert.confirm('Logout', 'Are you sure you want to sign out?', 'Logout', 'Stay');
-              if (result.isConfirmed) {
-                await signOut();
-              }
-            }}
-            className="w-10 h-10 bg-emerald-800/30 border border-emerald-700/30 rounded-full flex items-center justify-center hover:bg-rose-600/90 hover:border-rose-500 transition-all text-emerald-200 hover:text-white"
-            title="Logout"
-          >
-            <LogOut size={18} />
-          </button>
-        </div>
       </div>
     </header>
   );

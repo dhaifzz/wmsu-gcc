@@ -41,11 +41,11 @@ const CounselingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director
         <div className="flex flex-col sm:flex-row items-center gap-3">
           {role === 'director' && (
             <div className="flex items-center gap-2 mr-2">
-              <button className={`px-4 py-2.5 ${theme.bg50} ${theme.hoverBg600} ${theme.text600} hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${theme.border200} ${theme.hoverBorder600} flex items-center gap-2 shadow-sm`}>
+              <button className={`px-4 py-2.5 ${theme.bg50} ${theme.hoverBg600} ${theme.text600} hover:text-white rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border ${theme.border200} ${theme.hoverBorder600} flex items-center gap-2 shadow-sm`}>
                 <CheckCircle2 size={14} />
                 Accept All
               </button>
-              <button className="px-4 py-2.5 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border border-rose-200 hover:border-rose-600 flex items-center gap-2 shadow-sm">
+              <button className="px-4 py-2.5 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border border-rose-200 hover:border-rose-600 flex items-center gap-2 shadow-sm">
                 <X size={14} />
                 Decline All
               </button>
@@ -56,16 +56,16 @@ const CounselingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director
             <input
               type="text"
               placeholder="Search appointments..."
-              className="bg-white border border-slate-200 rounded-xl py-2.5 pl-10 pr-4 text-xs font-bold w-64 focus:ring-2 focus:ring-blue-500 transition-all outline-none"
+              className="bg-white border border-slate-200 rounded-lg py-2.5 pl-10 pr-4 text-xs font-bold w-64 focus:ring-2 focus:ring-blue-500 transition-all outline-none"
             />
           </div>
-          <button className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50" title="Filter">
+          <button className="p-2.5 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50" title="Filter">
             <Filter size={18} />
           </button>
         </div>
       </div>
 
-      <div className="bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden shadow-sm">
+      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
@@ -133,7 +133,7 @@ const CounselingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director
                     <div className="flex items-center justify-end gap-3">
                       <button
                         onClick={() => handleEvaluate(app)}
-                        className={`px-4 py-2 ${theme.bg600} text-white rounded-xl text-[10px] font-black uppercase tracking-widest ${theme.hoverBg700} transition-all flex items-center gap-2`}
+                        className={`px-4 py-2 ${theme.bg600} text-white rounded-lg text-[10px] font-black uppercase tracking-widest ${theme.hoverBg700} transition-all flex items-center gap-2`}
                       >
                         <ClipboardCheck size={14} />
                         {role === 'director' ? 'Final Review' : 'Review'}

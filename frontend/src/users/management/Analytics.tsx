@@ -44,15 +44,15 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
           <p className="text-slate-500 font-medium text-sm mt-1">Real-time performance metrics and distribution data.</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm">Export Data</button>
-          <button className={`px-4 py-2 ${theme.bg600} text-white rounded-xl text-xs font-black uppercase tracking-widest ${theme.hoverBg700} transition-all shadow-lg ${theme.shadow200}`}>Generate Report</button>
+          <button className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm">Export Data</button>
+          <button className={`px-4 py-2 ${theme.bg600} text-white rounded-lg text-xs font-black uppercase tracking-widest ${theme.hoverBg700} transition-all shadow-lg ${theme.shadow200}`}>Generate Report</button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, idx) => (
-          <div key={idx} className={`bg-white p-6 rounded-[2.5rem] border border-slate-200 shadow-sm group ${theme.hoverBg50} hover:${theme.border200} transition-all`}>
-            <div className={`w-12 h-12 bg-${stat.color}-50 text-${stat.color}-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+          <div key={idx} className={`bg-white p-6 rounded-lg border border-slate-200 shadow-sm group ${theme.hoverBg50} hover:${theme.border200} transition-all`}>
+            <div className={`w-12 h-12 bg-${stat.color}-50 text-${stat.color}-600 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
               <stat.icon size={24} />
             </div>
             <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1">{stat.label}</p>
@@ -67,13 +67,13 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
       </div>
 
       <div className="grid lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-8 bg-white rounded-[3rem] p-8 border border-slate-200 shadow-sm relative overflow-hidden">
+        <div className="lg:col-span-8 bg-white rounded-lg p-8 border border-slate-200 shadow-sm relative overflow-hidden">
           <div className="flex items-center justify-between mb-10">
             <h3 className="text-xl font-black tracking-tight flex items-center gap-3">
               <PieChartIcon className={theme.text500} size={24} />
               Service Distribution
             </h3>
-            <select className={`bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 focus:outline-none focus:ring-2 ${theme.focusRing}`}>
+            <select className={`bg-slate-50 border border-slate-100 rounded-lg px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 focus:outline-none focus:ring-2 ${theme.focusRing}`}>
               <option>Last 30 Days</option>
               <option>Last Quarter</option>
               <option>Year to Date</option>
@@ -99,9 +99,9 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
             ))}
           </div>
 
-          <div className="mt-12 p-6 bg-slate-50 rounded-2xl border border-slate-100">
+          <div className="mt-12 p-6 bg-slate-50 rounded-lg border border-slate-100">
             <div className="flex items-start gap-3">
-              <div className={`w-10 h-10 bg-white rounded-xl flex items-center justify-center ${theme.text600} shadow-sm border border-slate-100 shrink-0`}>
+              <div className={`w-10 h-10 bg-white rounded-lg flex items-center justify-center ${theme.text600} shadow-sm border border-slate-100 shrink-0`}>
                 <CheckCircle2 size={20} />
               </div>
               <div>
@@ -114,7 +114,7 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
           </div>
         </div>
 
-        <div className={`lg:col-span-4 ${theme.bg900} rounded-[3rem] p-8 text-white relative overflow-hidden shadow-xl`}>
+        <div className={`lg:col-span-4 ${theme.bg900} rounded-lg p-8 text-white relative overflow-hidden shadow-xl`}>
           <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-400/20 rounded-full blur-3xl"></div>
           <h3 className="text-xl font-black mb-8 relative z-10 flex items-center gap-3">
             <BookOpen className={theme.text400} size={24} />
@@ -129,7 +129,7 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
               { course: 'BS Criminology', count: 42, trend: '+5%' }
             ].map((item, idx) => (
               <div key={idx} className="flex items-center gap-4 group">
-                <div className={`text-center py-2 px-3 bg-white/10 rounded-2xl border border-white/10 h-fit min-w-[50px] flex items-center justify-center ${theme.hoverBg600} transition-colors`}>
+                <div className={`text-center py-2 px-3 bg-white/10 rounded-lg border border-white/10 h-fit min-w-[50px] flex items-center justify-center ${theme.hoverBg600} transition-colors`}>
                   <span className={`text-lg font-black leading-none ${theme.text400} group-hover:text-white`}>#{idx + 1}</span>
                 </div>
                 <div className="flex-1 space-y-1">
@@ -142,13 +142,13 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
               </div>
             ))}
           </div>
-          <button className={`w-full mt-10 py-4 bg-white ${theme.text700} rounded-2xl font-black text-xs uppercase tracking-widest ${theme.hoverBg50} transition-all`}>
+          <button className={`w-full mt-10 py-4 bg-white ${theme.text700} rounded-lg font-black text-xs uppercase tracking-widest ${theme.hoverBg50} transition-all`}>
             View Full Report
           </button>
         </div>
       </div>
 
-      <div className="bg-white rounded-[3rem] p-8 border border-slate-200 shadow-sm relative overflow-hidden">
+      <div className="bg-white rounded-lg p-8 border border-slate-200 shadow-sm relative overflow-hidden">
         <div className="flex items-center justify-between mb-8">
           <h3 className="text-xl font-black tracking-tight flex items-center gap-3">
             <Award className={theme.text500} size={24} />
@@ -165,7 +165,7 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
             { name: 'Juan Luna', role: 'Guidance Staff', count: 87, color: 'bg-slate-50 text-slate-500 border-slate-100' },
             { name: 'Jose Rizal', role: 'Counselor', count: 76, color: 'bg-slate-50 text-slate-500 border-slate-100' }
           ].map((staff, idx) => (
-            <div key={idx} className={`bg-slate-50 rounded-[2rem] p-5 border border-slate-100 flex flex-col items-center text-center relative group ${theme.hoverBg50} hover:${theme.border200} transition-colors`}>
+            <div key={idx} className={`bg-slate-50 rounded-lg p-5 border border-slate-100 flex flex-col items-center text-center relative group ${theme.hoverBg50} hover:${theme.border200} transition-colors`}>
               <div className={`absolute -top-3 -right-3 w-8 h-8 rounded-full border-2 border-white flex items-center justify-center font-black text-xs ${staff.color}`}>
                 #{idx + 1}
               </div>
@@ -201,8 +201,8 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
               { label: "Database Load", value: "42%", trend: "-5%", icon: Database, color: "amber" },
               { label: "System Uptime", value: "99.9%", trend: "Stable", icon: Server, color: "purple" }
             ].map((stat, idx) => (
-              <div key={idx} className={`bg-white p-6 rounded-[2.5rem] border border-slate-200 shadow-sm group ${theme.hoverBg50} hover:${theme.border200} transition-all`}>
-                <div className={`w-12 h-12 bg-${stat.color}-50 text-${stat.color}-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+              <div key={idx} className={`bg-white p-6 rounded-lg border border-slate-200 shadow-sm group ${theme.hoverBg50} hover:${theme.border200} transition-all`}>
+                <div className={`w-12 h-12 bg-${stat.color}-50 text-${stat.color}-600 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
                   <stat.icon size={24} />
                 </div>
                 <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1">{stat.label}</p>
@@ -217,7 +217,7 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
           </div>
 
           <div className="grid lg:grid-cols-2 gap-8">
-            <div className="bg-white rounded-[3rem] p-8 border border-slate-200 shadow-sm relative overflow-hidden">
+            <div className="bg-white rounded-lg p-8 border border-slate-200 shadow-sm relative overflow-hidden">
               <div className="flex items-center justify-between mb-8">
                 <h3 className="text-xl font-black tracking-tight flex items-center gap-3">
                   <Users className={theme.text500} size={24} />
@@ -249,7 +249,7 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
               </div>
             </div>
 
-            <div className={`${theme.bg900} rounded-[3rem] p-8 text-white relative overflow-hidden shadow-xl`}>
+            <div className={`${theme.bg900} rounded-lg p-8 text-white relative overflow-hidden shadow-xl`}>
               <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent"></div>
               <h3 className="text-xl font-black tracking-tight mb-8 relative z-10 flex items-center gap-3">
                 <Activity className={theme.text400} size={24} />
@@ -273,7 +273,7 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
                   </div>
                 ))}
               </div>
-              <button className={`w-full mt-8 py-3 bg-white/10 border border-white/20 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-white/20 transition-all`}>
+              <button className={`w-full mt-8 py-3 bg-white/10 border border-white/20 text-white rounded-lg font-black text-xs uppercase tracking-widest hover:bg-white/20 transition-all`}>
                 View All Audit Logs
               </button>
             </div>

@@ -560,12 +560,12 @@ return (
     </div>
 
     {/* Tabs Navigation */}
-    <div className="flex flex-wrap gap-2 p-2 bg-slate-100/50 rounded-[2rem] border border-slate-200/60 backdrop-blur-sm">
+    <div className="flex flex-wrap gap-2 p-2 bg-slate-100/50 rounded-lg border border-slate-200/60 backdrop-blur-sm">
       {sections.map((section) => (
         <button
           key={section.id}
           onClick={() => setActiveSection(section.id)}
-          className={`flex items-center gap-3 px-6 py-4 rounded-2xl font-black transition-all duration-300 ${activeSection === section.id
+          className={`flex items-center gap-3 px-6 py-4 rounded-lg font-black transition-all duration-300 ${activeSection === section.id
             ? 'bg-white text-teal-600 shadow-lg shadow-slate-200/50 scale-[1.02]'
             : 'text-slate-400 hover:text-slate-600 hover:bg-white/50'
             }`}
@@ -588,7 +588,7 @@ return (
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="bg-white p-10 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100"
+          className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
         >
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
@@ -603,13 +603,13 @@ return (
             <div className="flex items-center gap-2">
               <button
                 onClick={() => discardSection('home')}
-                className="px-6 py-3 bg-slate-100 text-slate-500 rounded-xl font-black text-sm hover:bg-slate-200 transition-all"
+                className="px-6 py-3 bg-slate-100 text-slate-500 rounded-lg font-black text-sm hover:bg-slate-200 transition-all"
               >
                 Discard
               </button>
               <button
                 onClick={() => handleSave('Home Page')}
-                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
               >
                 <Save size={16} />
                 Save Changes
@@ -635,7 +635,7 @@ return (
                         ...homeContent,
                         hero: { ...homeContent.hero, title: e.target.value }
                       })}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
                     />
                   </div>
                   <div>
@@ -647,7 +647,7 @@ return (
                         ...homeContent,
                         hero: { ...homeContent.hero, description: e.target.value }
                       })}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
                     ></textarea>
                   </div>
                 </div>
@@ -658,7 +658,7 @@ return (
                       <div
                         key={idx}
                         onClick={() => triggerUpload('home', ['hero', 'images'], idx)}
-                        className={`aspect-square bg-slate-100 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center text-slate-400 hover:bg-slate-50 hover:border-teal-400 hover:text-teal-500 transition-colors cursor-pointer group relative overflow-hidden ${homeContent.hero.images[idx] !== savedStates.home?.hero?.images[idx] ? 'border-amber-400 ring-2 ring-amber-400/20' : 'border-slate-300'
+                        className={`aspect-square bg-slate-100 rounded-lg border-2 border-dashed flex flex-col items-center justify-center text-slate-400 hover:bg-slate-50 hover:border-teal-400 hover:text-teal-500 transition-colors cursor-pointer group relative overflow-hidden ${homeContent.hero.images[idx] !== savedStates.home?.hero?.images[idx] ? 'border-amber-400 ring-2 ring-amber-400/20' : 'border-slate-300'
                           }`}
                       >
                         {homeContent.hero.images[idx] ? (
@@ -707,7 +707,7 @@ return (
                       ...homeContent,
                       support: { ...homeContent.support, title: e.target.value }
                     })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
                   />
                 </div>
                 <div>
@@ -719,7 +719,7 @@ return (
                       ...homeContent,
                       support: { ...homeContent.support, subtitle: e.target.value }
                     })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
                   />
                 </div>
                 <div className="md:col-span-2">
@@ -731,7 +731,7 @@ return (
                       ...homeContent,
                       support: { ...homeContent.support, description: e.target.value }
                     })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
                   ></textarea>
                 </div>
               </div>
@@ -741,7 +741,7 @@ return (
                 <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Support Features (3 Items)</label>
                 <div className="grid md:grid-cols-3 gap-4">
                   {homeContent.support.features.map((feature: any, idx: number) => (
-                    <div key={idx} className="bg-slate-50 p-5 rounded-[2rem] border border-slate-200 space-y-3">
+                    <div key={idx} className="bg-slate-50 p-5 rounded-lg border border-slate-200 space-y-3">
                       <div className="grid grid-cols-2 gap-2">
                         <div className="space-y-1">
                           <label className="text-[8px] font-black text-slate-400 uppercase">Title</label>
@@ -756,7 +756,7 @@ return (
                                 support: { ...homeContent.support, features: newFeatures }
                               });
                             }}
-                            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-black text-slate-800 focus:ring-2 focus:ring-teal-500 outline-none"
+                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-black text-slate-800 focus:ring-2 focus:ring-teal-500 outline-none"
                           />
                         </div>
                         <div className="space-y-1">
@@ -772,7 +772,7 @@ return (
                                 support: { ...homeContent.support, features: newFeatures }
                               });
                             }}
-                            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-teal-600 focus:ring-2 focus:ring-teal-500 outline-none"
+                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium text-teal-600 focus:ring-2 focus:ring-teal-500 outline-none"
                           />
                         </div>
                       </div>
@@ -789,11 +789,11 @@ return (
                               support: { ...homeContent.support, features: newFeatures }
                             });
                           }}
-                          className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-[10px] font-medium text-slate-600 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
+                          className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-[10px] font-medium text-slate-600 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
                         ></textarea>
                       </div>
                       <div
-                        className={`h-20 bg-slate-100 rounded-xl border-2 border-dashed flex flex-col items-center justify-center text-slate-400 cursor-pointer hover:bg-slate-50 transition-colors relative overflow-hidden group ${feature.image !== savedStates.home?.support?.features?.[idx]?.image ? 'border-amber-400 ring-2 ring-amber-400/20' : 'border-slate-300'
+                        className={`h-20 bg-slate-100 rounded-lg border-2 border-dashed flex flex-col items-center justify-center text-slate-400 cursor-pointer hover:bg-slate-50 transition-colors relative overflow-hidden group ${feature.image !== savedStates.home?.support?.features?.[idx]?.image ? 'border-amber-400 ring-2 ring-amber-400/20' : 'border-slate-300'
                           }`}
                         onClick={() => triggerUpload('home', ['support', 'features', idx, 'image'])}
                       >
@@ -841,7 +841,7 @@ return (
                         ...homeContent,
                         growth: { ...homeContent.growth, title: e.target.value }
                       })}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
                     />
                   </div>
                   <div>
@@ -853,14 +853,14 @@ return (
                         ...homeContent,
                         growth: { ...homeContent.growth, description: e.target.value }
                       })}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
                     ></textarea>
                   </div>
                   <div>
                     <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Main Display Image</label>
                     <div
                       onClick={() => triggerUpload('home', ['growth', 'image'])}
-                      className={`h-32 bg-slate-100 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center text-slate-400 hover:bg-slate-50 hover:border-teal-400 hover:text-teal-500 transition-colors cursor-pointer group relative overflow-hidden ${homeContent.growth.image !== savedStates.home?.growth?.image ? 'border-amber-400 ring-2 ring-amber-400/20' : 'border-slate-300'
+                      className={`h-32 bg-slate-100 rounded-lg border-2 border-dashed flex flex-col items-center justify-center text-slate-400 hover:bg-slate-50 hover:border-teal-400 hover:text-teal-500 transition-colors cursor-pointer group relative overflow-hidden ${homeContent.growth.image !== savedStates.home?.growth?.image ? 'border-amber-400 ring-2 ring-amber-400/20' : 'border-slate-300'
                         }`}
                     >
                       {homeContent.growth.image ? (
@@ -890,7 +890,7 @@ return (
                   <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Service Cards (4 Items)</label>
                   <div className="grid grid-cols-2 gap-3">
                     {homeContent.growth.services.map((service: any, idx: number) => (
-                      <div key={idx} className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col gap-2">
+                      <div key={idx} className="bg-slate-50 p-4 rounded-lg border border-slate-200 flex flex-col gap-2">
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6 bg-teal-100 rounded-md flex items-center justify-center text-teal-600">
                             <span className="text-[10px] font-black">{idx + 1}</span>
@@ -925,7 +925,7 @@ return (
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="bg-white p-10 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100"
+          className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
         >
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
@@ -935,13 +935,13 @@ return (
             <div className="flex items-center gap-2">
               <button
                 onClick={() => discardSection('about')}
-                className="px-6 py-3 bg-slate-100 text-slate-500 rounded-xl font-black text-sm hover:bg-slate-200 transition-all"
+                className="px-6 py-3 bg-slate-100 text-slate-500 rounded-lg font-black text-sm hover:bg-slate-200 transition-all"
               >
                 Discard
               </button>
               <button
                 onClick={() => handleSave('About Us')}
-                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
               >
                 <Save size={16} />
                 Save Changes
@@ -966,7 +966,7 @@ return (
                       ...aboutContent,
                       hero: { ...aboutContent.hero, title: e.target.value }
                     })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
                   />
                 </div>
                 <div>
@@ -978,7 +978,7 @@ return (
                       ...aboutContent,
                       hero: { ...aboutContent.hero, description: e.target.value }
                     })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
                   ></textarea>
                 </div>
               </div>
@@ -1000,7 +1000,7 @@ return (
                       ...aboutContent,
                       core: { ...aboutContent.core, vision: e.target.value }
                     })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
                   ></textarea>
                 </div>
                 <div>
@@ -1012,7 +1012,7 @@ return (
                       ...aboutContent,
                       core: { ...aboutContent.core, mission: e.target.value }
                     })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
                   ></textarea>
                 </div>
                 <div>
@@ -1024,7 +1024,7 @@ return (
                       ...aboutContent,
                       core: { ...aboutContent.core, qualityPolicy: e.target.value }
                     })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
                   ></textarea>
                 </div>
               </div>
@@ -1046,7 +1046,7 @@ return (
                       ...aboutContent,
                       sidebar: { ...aboutContent.sidebar, location: e.target.value }
                     })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
                   />
                 </div>
                 <div>
@@ -1058,7 +1058,7 @@ return (
                       ...aboutContent,
                       sidebar: { ...aboutContent.sidebar, campus: e.target.value }
                     })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
                   />
                 </div>
                 <div>
@@ -1070,7 +1070,7 @@ return (
                       ...aboutContent,
                       sidebar: { ...aboutContent.sidebar, hours: e.target.value }
                     })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
                   />
                 </div>
                 <div>
@@ -1082,7 +1082,7 @@ return (
                       ...aboutContent,
                       sidebar: { ...aboutContent.sidebar, serving: e.target.value }
                     })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
                   />
                 </div>
                 <div className="md:col-span-2">
@@ -1095,7 +1095,7 @@ return (
                       mapUrl: e.target.value
                     })}
                     placeholder="https://www.google.com/maps/embed?pb=..."
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[10px] font-medium text-slate-500 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-[10px] font-medium text-slate-500 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
                   ></textarea>
                 </div>
               </div>
@@ -1109,7 +1109,7 @@ return (
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="bg-white p-10 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100"
+          className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
         >
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
@@ -1119,13 +1119,13 @@ return (
             <div className="flex items-center gap-2">
               <button
                 onClick={() => discardSection('team')}
-                className="px-6 py-3 bg-slate-100 text-slate-500 rounded-xl font-black text-sm hover:bg-slate-200 transition-all"
+                className="px-6 py-3 bg-slate-100 text-slate-500 rounded-lg font-black text-sm hover:bg-slate-200 transition-all"
               >
                 Discard
               </button>
               <button
                 onClick={() => handleSave('Our Team')}
-                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
               >
                 <Save size={16} />
                 Save Changes
@@ -1150,7 +1150,7 @@ return (
                       ...teamContent,
                       hero: { ...teamContent.hero, title: e.target.value }
                     })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
                   />
                 </div>
                 <div>
@@ -1162,7 +1162,7 @@ return (
                       ...teamContent,
                       hero: { ...teamContent.hero, description: e.target.value }
                     })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
                   ></textarea>
                 </div>
               </div>
@@ -1201,7 +1201,7 @@ return (
                     <Reorder.Item 
                       key={member.name + idx} 
                       value={member}
-                      className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3 relative group cursor-default"
+                      className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3 relative group cursor-default"
                     >
                       <div className="flex items-center justify-between">
                         <div className="text-slate-300 cursor-grab active:cursor-grabbing hover:text-teal-500 transition-colors">
@@ -1300,7 +1300,7 @@ return (
                     <Reorder.Item 
                       key={member.name + idx} 
                       value={member}
-                      className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3 relative group cursor-default"
+                      className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3 relative group cursor-default"
                     >
                       <div className="flex items-center justify-between">
                         <div className="text-slate-300 cursor-grab active:cursor-grabbing hover:text-teal-500 transition-colors">
@@ -1399,7 +1399,7 @@ return (
                     <Reorder.Item 
                       key={member.name + idx} 
                       value={member}
-                      className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3 relative group cursor-default"
+                      className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3 relative group cursor-default"
                     >
                       <div className="flex items-center justify-between">
                         <div className="text-slate-300 cursor-grab active:cursor-grabbing hover:text-teal-500 transition-colors">
@@ -1498,7 +1498,7 @@ return (
                     <Reorder.Item 
                       key={member.name + idx} 
                       value={member}
-                      className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3 relative group cursor-default"
+                      className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3 relative group cursor-default"
                     >
                       <div className="flex items-center justify-between">
                         <div className="text-slate-300 cursor-grab active:cursor-grabbing hover:text-teal-500 transition-colors">
@@ -1601,7 +1601,7 @@ return (
                     <Reorder.Item 
                       key={member.name + idx} 
                       value={member}
-                      className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2 relative group cursor-default"
+                      className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-2 relative group cursor-default"
                     >
                       <div className="flex items-center justify-between mb-2">
                         <div className="text-slate-300 cursor-grab active:cursor-grabbing hover:text-teal-500 transition-colors">
@@ -1655,7 +1655,7 @@ return (
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="bg-white p-10 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100"
+          className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
         >
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
@@ -1665,13 +1665,13 @@ return (
             <div className="flex items-center gap-2">
               <button
                 onClick={() => discardSection('contact')}
-                className="px-6 py-3 bg-slate-100 text-slate-500 rounded-xl font-black text-sm hover:bg-slate-200 transition-all"
+                className="px-6 py-3 bg-slate-100 text-slate-500 rounded-lg font-black text-sm hover:bg-slate-200 transition-all"
               >
                 Discard
               </button>
               <button
                 onClick={() => handleSave('Contact Info')}
-                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
               >
                 <Save size={16} />
                 Save Changes
@@ -1693,7 +1693,7 @@ return (
                       type="text"
                       value={contactContent.phone}
                       onChange={(e) => setContactContent({ ...contactContent, phone: e.target.value })}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
                     />
                   </div>
                   <div>
@@ -1702,7 +1702,7 @@ return (
                       type="email"
                       value={contactContent.email}
                       onChange={(e) => setContactContent({ ...contactContent, email: e.target.value })}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
                     />
                   </div>
                 </div>
@@ -1719,7 +1719,7 @@ return (
                     rows={4}
                     value={contactContent.address}
                     onChange={(e) => setContactContent({ ...contactContent, address: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
                   ></textarea>
                 </div>
               </div>
@@ -1736,7 +1736,7 @@ return (
                       type="text"
                       value={contactContent.facebook}
                       onChange={(e) => setContactContent({ ...contactContent, facebook: e.target.value })}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
                     />
                   </div>
                   <div>
@@ -1745,7 +1745,7 @@ return (
                       type="text"
                       value={contactContent.messenger}
                       onChange={(e) => setContactContent({ ...contactContent, messenger: e.target.value })}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
                     />
                   </div>
                 </div>
@@ -1760,7 +1760,7 @@ return (
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="bg-white p-10 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100"
+          className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
         >
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
@@ -1770,13 +1770,13 @@ return (
             <div className="flex gap-3">
               <button
                 onClick={() => discardSection('privacy')}
-                className="px-6 py-3 bg-slate-100 text-slate-600 rounded-xl font-black text-sm hover:bg-slate-200 transition-all"
+                className="px-6 py-3 bg-slate-100 text-slate-600 rounded-lg font-black text-sm hover:bg-slate-200 transition-all"
               >
                 Discard
               </button>
               <button
                 onClick={() => handleSave('Privacy Policy')}
-                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
               >
                 <Save size={16} />
                 Save Changes
@@ -1797,7 +1797,7 @@ return (
                     type="text"
                     value={privacyContent?.hero?.title || ''}
                     onChange={(e) => setPrivacyContent({ ...privacyContent, hero: { ...privacyContent.hero, title: e.target.value } })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-teal-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-teal-500"
                   />
                 </div>
                 <div>
@@ -1806,7 +1806,7 @@ return (
                     rows={3}
                     value={privacyContent?.hero?.description || ''}
                     onChange={(e) => setPrivacyContent({ ...privacyContent, hero: { ...privacyContent.hero, description: e.target.value } })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-teal-500 resize-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-teal-500 resize-none"
                   ></textarea>
                 </div>
               </div>
@@ -1827,7 +1827,7 @@ return (
               </div>
               <div className="grid md:grid-cols-2 gap-6">
                 {privacyContent?.sections?.map((section: any, idx: number) => (
-                  <div key={idx} className="p-6 bg-slate-50 rounded-3xl border border-slate-200 relative group">
+                  <div key={idx} className="p-6 bg-slate-50 rounded-lg border border-slate-200 relative group">
                     <button
                       onClick={() => setPrivacyContent({ ...privacyContent, sections: privacyContent.sections.filter((_: any, i: number) => i !== idx) })}
                       className="absolute -top-2 -right-2 w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
@@ -1867,7 +1867,7 @@ return (
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="bg-white p-10 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100"
+          className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
         >
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
@@ -1877,13 +1877,13 @@ return (
             <div className="flex gap-3">
               <button
                 onClick={() => discardSection('terms')}
-                className="px-6 py-3 bg-slate-100 text-slate-600 rounded-xl font-black text-sm hover:bg-slate-200 transition-all"
+                className="px-6 py-3 bg-slate-100 text-slate-600 rounded-lg font-black text-sm hover:bg-slate-200 transition-all"
               >
                 Discard
               </button>
               <button
                 onClick={() => handleSave('Terms of Service')}
-                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
               >
                 <Save size={16} />
                 Save Changes
@@ -1904,7 +1904,7 @@ return (
                     type="text"
                     value={termsContent?.hero?.title || ''}
                     onChange={(e) => setTermsContent({ ...termsContent, hero: { ...termsContent.hero, title: e.target.value } })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-teal-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-teal-500"
                   />
                 </div>
                 <div>
@@ -1913,7 +1913,7 @@ return (
                     rows={3}
                     value={termsContent?.hero?.description || ''}
                     onChange={(e) => setTermsContent({ ...termsContent, hero: { ...termsContent.hero, description: e.target.value } })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-teal-500 resize-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-teal-500 resize-none"
                   ></textarea>
                 </div>
               </div>
@@ -1934,7 +1934,7 @@ return (
               </div>
               <div className="grid md:grid-cols-2 gap-6">
                 {termsContent?.sections?.map((section: any, idx: number) => (
-                  <div key={idx} className="p-6 bg-slate-50 rounded-3xl border border-slate-200 relative group">
+                  <div key={idx} className="p-6 bg-slate-50 rounded-lg border border-slate-200 relative group">
                     <button
                       onClick={() => setTermsContent({ ...termsContent, sections: termsContent.sections.filter((_: any, i: number) => i !== idx) })}
                       className="absolute -top-2 -right-2 w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
@@ -1975,7 +1975,7 @@ return (
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="bg-white p-10 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100"
+          className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
         >
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
@@ -1985,13 +1985,13 @@ return (
             <div className="flex items-center gap-2">
               <button
                 onClick={() => discardSection('system')}
-                className="px-6 py-3 bg-slate-100 text-slate-500 rounded-xl font-black text-sm hover:bg-slate-200 transition-all"
+                className="px-6 py-3 bg-slate-100 text-slate-500 rounded-lg font-black text-sm hover:bg-slate-200 transition-all"
               >
                 Discard
               </button>
               <button
                 onClick={() => handleSave('System Data')}
-                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
               >
                 <Save size={16} />
                 Save Changes
@@ -2016,7 +2016,7 @@ return (
                     }];
                     setSystemData({ ...systemData, colleges: newColleges });
                   }}
-                  className="flex items-center gap-2 px-4 py-2 bg-teal-50 text-teal-600 rounded-xl hover:bg-teal-100 transition-all font-black text-xs"
+                  className="flex items-center gap-2 px-4 py-2 bg-teal-50 text-teal-600 rounded-lg hover:bg-teal-100 transition-all font-black text-xs"
                 >
                   <Plus size={16} />
                   Add College
@@ -2025,7 +2025,7 @@ return (
 
               <div className="grid gap-6">
                 {(systemData.colleges || []).map((college: any, cIdx: number) => (
-                  <div key={college.id || cIdx} className="bg-slate-50/50 rounded-[2rem] border border-slate-200 overflow-hidden">
+                  <div key={college.id || cIdx} className="bg-slate-50/50 rounded-lg border border-slate-200 overflow-hidden">
                     <div className="p-6 bg-white border-b border-slate-100 flex items-center justify-between gap-4">
                       <div className="flex-1">
                         <input
@@ -2079,7 +2079,7 @@ return (
                                   newColleges[cIdx].courses[actualIdx].name = e.target.value;
                                   setSystemData({ ...systemData, colleges: newColleges });
                                 }}
-                                className="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
+                                className="flex-1 bg-white border border-slate-200 rounded-lg px-4 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
                                 placeholder="Course Name..."
                               />
                               <button
@@ -2124,7 +2124,7 @@ return (
                                   newColleges[cIdx].courses[actualIdx].name = e.target.value;
                                   setSystemData({ ...systemData, colleges: newColleges });
                                 }}
-                                className="flex-1 bg-teal-50/30 border border-teal-100 rounded-xl px-4 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
+                                className="flex-1 bg-teal-50/30 border border-teal-100 rounded-lg px-4 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
                                 placeholder="Program Name..."
                               />
                               <button
@@ -2156,7 +2156,7 @@ return (
                 </h4>
                 <button
                   onClick={() => setSystemData({ ...systemData, occupations: [...systemData.occupations, ""] })}
-                  className="flex items-center gap-2 px-4 py-2 bg-teal-50 text-teal-600 rounded-xl hover:bg-teal-100 transition-all font-black text-xs"
+                  className="flex items-center gap-2 px-4 py-2 bg-teal-50 text-teal-600 rounded-lg hover:bg-teal-100 transition-all font-black text-xs"
                 >
                   <Plus size={16} />
                   Add Occupation
@@ -2173,7 +2173,7 @@ return (
                         newOccs[idx] = e.target.value;
                         setSystemData({ ...systemData, occupations: newOccs });
                       }}
-                      className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
+                      className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
                     />
                     <button
                       onClick={() => {
@@ -2196,7 +2196,7 @@ return (
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="bg-white p-10 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100"
+          className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
         >
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
@@ -2206,13 +2206,13 @@ return (
             <div className="flex items-center gap-2">
               <button
                 onClick={() => discardSection('footer')}
-                className="px-6 py-3 bg-slate-100 text-slate-500 rounded-xl font-black text-sm hover:bg-slate-200 transition-all"
+                className="px-6 py-3 bg-slate-100 text-slate-500 rounded-lg font-black text-sm hover:bg-slate-200 transition-all"
               >
                 Discard
               </button>
               <button
                 onClick={() => handleSave('Footer')}
-                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
               >
                 <Save size={16} />
                 Save Changes
@@ -2221,7 +2221,7 @@ return (
           </div>
 
           <div className="space-y-8">
-            <div className="p-6 bg-amber-50 rounded-2xl border border-amber-100 flex gap-4 items-start mb-6">
+            <div className="p-6 bg-amber-50 rounded-lg border border-amber-100 flex gap-4 items-start mb-6">
               <Info className="text-amber-500 shrink-0 mt-1" size={20} />
               <p className="text-xs font-medium text-amber-800 leading-relaxed">
                 Note: Contact details (Phone, Email, Address) displayed in the footer are automatically synchronized with the <strong>Contact Info</strong> section. Use this tab only for footer-specific brand text.
@@ -2235,7 +2235,7 @@ return (
                   rows={4}
                   value={footerContent.description}
                   onChange={(e) => setFooterContent({ ...footerContent, description: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
                   placeholder="Describe the center's mission in the footer..."
                 ></textarea>
               </div>
@@ -2248,7 +2248,7 @@ return (
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="bg-white p-10 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100"
+          className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
         >
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
@@ -2258,13 +2258,13 @@ return (
             <div className="flex items-center gap-2">
               <button
                 onClick={() => discardSection('logos')}
-                className="px-6 py-3 bg-slate-100 text-slate-500 rounded-xl font-black text-sm hover:bg-slate-200 transition-all"
+                className="px-6 py-3 bg-slate-100 text-slate-500 rounded-lg font-black text-sm hover:bg-slate-200 transition-all"
               >
                 Discard
               </button>
               <button
                 onClick={() => handleSave('System Logos')}
-                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
               >
                 <Save size={16} />
                 Save Logos
@@ -2278,7 +2278,7 @@ return (
               <label className="block text-xs font-black text-slate-500 uppercase tracking-widest">WMSU University Logo</label>
               <div
                 onClick={() => triggerUpload('logos', ['wmsuLogo'])}
-                className="aspect-square bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 hover:border-teal-400 transition-all group relative overflow-hidden"
+                className="aspect-square bg-slate-50 rounded-lg border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 hover:border-teal-400 transition-all group relative overflow-hidden"
               >
                 {logoSettings.wmsuLogo ? (
                   <img src={logoSettings.wmsuLogo} className="w-full h-full object-contain p-8" alt="WMSU Logo" />
@@ -2300,7 +2300,7 @@ return (
               <label className="block text-xs font-black text-slate-500 uppercase tracking-widest">GCC Center Logo</label>
               <div
                 onClick={() => triggerUpload('logos', ['gccLogo'])}
-                className="aspect-square bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 hover:border-teal-400 transition-all group relative overflow-hidden"
+                className="aspect-square bg-slate-50 rounded-lg border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 hover:border-teal-400 transition-all group relative overflow-hidden"
               >
                 {logoSettings.gccLogo ? (
                   <img src={logoSettings.gccLogo} className="w-full h-full object-contain p-8" alt="GCC Logo" />
@@ -2324,7 +2324,7 @@ return (
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="bg-white p-10 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100"
+          className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
         >
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
@@ -2334,13 +2334,13 @@ return (
             <div className="flex gap-3">
               <button
                 onClick={() => discardSection('counseling')}
-                className="px-6 py-3 bg-slate-100 text-slate-600 rounded-xl font-black text-sm hover:bg-slate-200 transition-all"
+                className="px-6 py-3 bg-slate-100 text-slate-600 rounded-lg font-black text-sm hover:bg-slate-200 transition-all"
               >
                 Discard
               </button>
               <button
                 onClick={() => handleSave('Counseling Service')}
-                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
               >
                 <Save size={16} />
                 Save Service
@@ -2365,7 +2365,7 @@ return (
                       ...counselingContent,
                       hero: { ...counselingContent.hero, title: e.target.value }
                     })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
                   />
                 </div>
                 <div>
@@ -2377,7 +2377,7 @@ return (
                       ...counselingContent,
                       hero: { ...counselingContent.hero, description: e.target.value }
                     })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
                   ></textarea>
                 </div>
               </div>
@@ -2399,7 +2399,7 @@ return (
                       ...counselingContent,
                       about: { ...counselingContent.about, description1: e.target.value }
                     })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-teal-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-teal-500"
                   ></textarea>
                 </div>
                 <div>
@@ -2411,7 +2411,7 @@ return (
                       ...counselingContent,
                       about: { ...counselingContent.about, description2: e.target.value }
                     })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-teal-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-teal-500"
                   ></textarea>
                 </div>
               </div>
@@ -2443,7 +2443,7 @@ return (
                           newReqs[idx] = e.target.value;
                           setCounselingContent({ ...counselingContent, requirements: newReqs });
                         }}
-                        className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-teal-500"
+                        className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-teal-500"
                       />
                       <button
                         onClick={() => setCounselingContent({ ...counselingContent, requirements: counselingContent.requirements.filter((_: any, i: number) => i !== idx) })}
@@ -2471,7 +2471,7 @@ return (
                 </div>
                 <div className="space-y-4">
                   {counselingContent?.howToBook?.map((step: any, idx: number) => (
-                    <div key={idx} className="p-4 bg-slate-50 rounded-2xl border border-slate-200 relative group">
+                    <div key={idx} className="p-4 bg-slate-50 rounded-lg border border-slate-200 relative group">
                       <button
                         onClick={() => setCounselingContent({ ...counselingContent, howToBook: counselingContent.howToBook.filter((_: any, i: number) => i !== idx) })}
                         className="absolute -top-2 -right-2 w-6 h-6 bg-teal-100 text-teal-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
@@ -2506,38 +2506,38 @@ return (
 
             {/* CTAs */}
             <div className="grid md:grid-cols-2 gap-8">
-              <div className="p-8 bg-teal-900 rounded-[2rem] text-white">
+              <div className="p-8 bg-teal-900 rounded-lg text-white">
                 <h4 className="text-xl font-black mb-4">Book a Session Sidebar</h4>
                 <div className="space-y-4">
                   <input
                     type="text"
                     value={counselingContent?.cta?.title || ''}
                     onChange={(e) => setCounselingContent({ ...counselingContent, cta: { ...counselingContent.cta, title: e.target.value } })}
-                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-sm font-bold text-white outline-none focus:ring-2 focus:ring-teal-500"
+                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-sm font-bold text-white outline-none focus:ring-2 focus:ring-teal-500"
                   />
                   <textarea
                     rows={2}
                     value={counselingContent?.cta?.description || ''}
                     onChange={(e) => setCounselingContent({ ...counselingContent, cta: { ...counselingContent.cta, description: e.target.value } })}
-                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-xs font-medium text-teal-100 outline-none resize-none"
+                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-xs font-medium text-teal-100 outline-none resize-none"
                   ></textarea>
                 </div>
               </div>
 
-              <div className="p-8 bg-white rounded-[2rem] border border-slate-200">
+              <div className="p-8 bg-white rounded-lg border border-slate-200">
                 <h4 className="text-xl font-black text-slate-900 mb-4">Immediate Help Sidebar</h4>
                 <div className="space-y-4">
                   <input
                     type="text"
                     value={counselingContent?.hotline?.title || ''}
                     onChange={(e) => setCounselingContent({ ...counselingContent, hotline: { ...counselingContent.hotline, title: e.target.value } })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-800 outline-none focus:ring-2 focus:ring-teal-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm font-bold text-slate-800 outline-none focus:ring-2 focus:ring-teal-500"
                   />
                   <textarea
                     rows={2}
                     value={counselingContent?.hotline?.description || ''}
                     onChange={(e) => setCounselingContent({ ...counselingContent, hotline: { ...counselingContent.hotline, description: e.target.value } })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs font-medium text-slate-500 outline-none resize-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-xs font-medium text-slate-500 outline-none resize-none"
                   ></textarea>
                 </div>
               </div>
@@ -2551,7 +2551,7 @@ return (
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="bg-white p-10 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100"
+          className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
         >
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
@@ -2561,13 +2561,13 @@ return (
             <div className="flex gap-3">
               <button
                 onClick={() => discardSection('assessment')}
-                className="px-6 py-3 bg-slate-100 text-slate-600 rounded-xl font-black text-sm hover:bg-slate-200 transition-all"
+                className="px-6 py-3 bg-slate-100 text-slate-600 rounded-lg font-black text-sm hover:bg-slate-200 transition-all"
               >
                 Discard
               </button>
               <button
                 onClick={() => handleSave('Assessment Service')}
-                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
               >
                 <Save size={16} />
                 Save Service
@@ -2592,7 +2592,7 @@ return (
                       ...assessmentContent,
                       hero: { ...assessmentContent.hero, title: e.target.value }
                     })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
                   />
                 </div>
                 <div>
@@ -2604,7 +2604,7 @@ return (
                       ...assessmentContent,
                       hero: { ...assessmentContent.hero, description: e.target.value }
                     })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
                   ></textarea>
                 </div>
               </div>
@@ -2626,7 +2626,7 @@ return (
                       ...assessmentContent,
                       about: { ...assessmentContent.about, description1: e.target.value }
                     })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-teal-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-teal-500"
                   ></textarea>
                 </div>
               </div>
@@ -2649,7 +2649,7 @@ return (
                 </div>
                 <div className="space-y-4">
                   {assessmentContent?.tests?.map((test: any, idx: number) => (
-                    <div key={idx} className="p-4 bg-slate-50 rounded-2xl border border-slate-200 relative group">
+                    <div key={idx} className="p-4 bg-slate-50 rounded-lg border border-slate-200 relative group">
                       <button
                         onClick={() => setAssessmentContent({ ...assessmentContent, tests: assessmentContent.tests.filter((_: any, i: number) => i !== idx) })}
                         className="absolute -top-2 -right-2 w-6 h-6 bg-teal-100 text-teal-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
@@ -2739,7 +2739,7 @@ return (
                 </div>
                 <div className="space-y-4">
                   {assessmentContent?.steps?.map((step: any, idx: number) => (
-                    <div key={idx} className="p-4 bg-slate-50 rounded-2xl border border-slate-200 relative group">
+                    <div key={idx} className="p-4 bg-slate-50 rounded-lg border border-slate-200 relative group">
                       <button
                         onClick={() => setAssessmentContent({ ...assessmentContent, steps: assessmentContent.steps.filter((_: any, i: number) => i !== idx) })}
                         className="absolute -top-2 -right-2 w-6 h-6 bg-teal-100 text-teal-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
@@ -2789,7 +2789,7 @@ return (
                 </div>
                 <div className="space-y-4">
                   {assessmentContent?.faqs?.map((faq: any, idx: number) => (
-                    <div key={idx} className="p-4 bg-slate-50 rounded-2xl border border-slate-200 relative group">
+                    <div key={idx} className="p-4 bg-slate-50 rounded-lg border border-slate-200 relative group">
                       <button
                         onClick={() => setAssessmentContent({ ...assessmentContent, faqs: assessmentContent.faqs.filter((_: any, i: number) => i !== idx) })}
                         className="absolute -top-2 -right-2 w-6 h-6 bg-teal-100 text-teal-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
@@ -2823,20 +2823,20 @@ return (
                 </div>
               </div>
 
-              <div className="p-8 bg-teal-900 rounded-[2rem] text-white self-start">
+              <div className="p-8 bg-teal-900 rounded-lg text-white self-start">
                 <h4 className="text-xl font-black mb-4">Start Assessment CTA</h4>
                 <div className="space-y-4">
                   <input
                     type="text"
                     value={assessmentContent?.cta?.title || ''}
                     onChange={(e) => setAssessmentContent({ ...assessmentContent, cta: { ...assessmentContent.cta, title: e.target.value } })}
-                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-sm font-bold text-white outline-none focus:ring-2 focus:ring-teal-500"
+                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-sm font-bold text-white outline-none focus:ring-2 focus:ring-teal-500"
                   />
                   <textarea
                     rows={2}
                     value={assessmentContent?.cta?.description || ''}
                     onChange={(e) => setAssessmentContent({ ...assessmentContent, cta: { ...assessmentContent.cta, description: e.target.value } })}
-                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-xs font-medium text-teal-100 outline-none resize-none"
+                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-xs font-medium text-teal-100 outline-none resize-none"
                   ></textarea>
                 </div>
               </div>
@@ -2850,7 +2850,7 @@ return (
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="bg-white p-10 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100"
+          className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
         >
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
@@ -2860,13 +2860,13 @@ return (
             <div className="flex gap-3">
               <button
                 onClick={() => discardSection('shifting')}
-                className="px-6 py-3 bg-slate-100 text-slate-600 rounded-xl font-black text-sm hover:bg-slate-200 transition-all"
+                className="px-6 py-3 bg-slate-100 text-slate-600 rounded-lg font-black text-sm hover:bg-slate-200 transition-all"
               >
                 Discard
               </button>
               <button
                 onClick={() => handleSave('Shifting Service')}
-                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
               >
                 <Save size={16} />
                 Save Service
@@ -2891,7 +2891,7 @@ return (
                       ...shiftingContent,
                       hero: { ...shiftingContent.hero, title: e.target.value }
                     })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
                   />
                 </div>
                 <div>
@@ -2903,7 +2903,7 @@ return (
                       ...shiftingContent,
                       hero: { ...shiftingContent.hero, description: e.target.value }
                     })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
                   ></textarea>
                 </div>
               </div>
@@ -2925,7 +2925,7 @@ return (
                       ...shiftingContent,
                       about: { ...shiftingContent.about, description: e.target.value }
                     })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-teal-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-teal-500"
                   ></textarea>
                 </div>
                 <div>
@@ -2937,7 +2937,7 @@ return (
                       ...shiftingContent,
                       about: { ...shiftingContent.about, note: e.target.value }
                     })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-teal-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-teal-500"
                   ></textarea>
                 </div>
               </div>
@@ -2960,7 +2960,7 @@ return (
                 </div>
                 <div className="space-y-4">
                   {shiftingContent?.requirements?.map((req: any, idx: number) => (
-                    <div key={idx} className="p-4 bg-slate-50 rounded-2xl border border-slate-200 relative group">
+                    <div key={idx} className="p-4 bg-slate-50 rounded-lg border border-slate-200 relative group">
                       <button
                         onClick={() => setShiftingContent({ ...shiftingContent, requirements: shiftingContent.requirements.filter((_: any, i: number) => i !== idx) })}
                         className="absolute -top-2 -right-2 w-6 h-6 bg-teal-100 text-teal-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
@@ -3007,7 +3007,7 @@ return (
                 </div>
                 <div className="space-y-4">
                   {shiftingContent?.steps?.map((step: any, idx: number) => (
-                    <div key={idx} className="p-4 bg-slate-50 rounded-2xl border border-slate-200 relative group">
+                    <div key={idx} className="p-4 bg-slate-50 rounded-lg border border-slate-200 relative group">
                       <button
                         onClick={() => setShiftingContent({ ...shiftingContent, steps: shiftingContent.steps.filter((_: any, i: number) => i !== idx) })}
                         className="absolute -top-2 -right-2 w-6 h-6 bg-teal-100 text-teal-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
@@ -3042,38 +3042,38 @@ return (
 
             {/* CTAs */}
             <div className="grid md:grid-cols-2 gap-8">
-              <div className="p-8 bg-teal-900 rounded-[2rem] text-white">
+              <div className="p-8 bg-teal-900 rounded-lg text-white">
                 <h4 className="text-xl font-black mb-4">Apply for Shifting Sidebar</h4>
                 <div className="space-y-4">
                   <input
                     type="text"
                     value={shiftingContent?.cta?.title || ''}
                     onChange={(e) => setShiftingContent({ ...shiftingContent, cta: { ...shiftingContent.cta, title: e.target.value } })}
-                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-sm font-bold text-white outline-none focus:ring-2 focus:ring-teal-500"
+                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-sm font-bold text-white outline-none focus:ring-2 focus:ring-teal-500"
                   />
                   <textarea
                     rows={2}
                     value={shiftingContent?.cta?.description || ''}
                     onChange={(e) => setShiftingContent({ ...shiftingContent, cta: { ...shiftingContent.cta, description: e.target.value } })}
-                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-xs font-medium text-teal-100 outline-none resize-none"
+                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-xs font-medium text-teal-100 outline-none resize-none"
                   ></textarea>
                 </div>
               </div>
 
-              <div className="p-8 bg-white rounded-[2rem] border border-slate-200">
+              <div className="p-8 bg-white rounded-lg border border-slate-200">
                 <h4 className="text-xl font-black text-slate-900 mb-4">Career Guidance Sidebar</h4>
                 <div className="space-y-4">
                   <input
                     type="text"
                     value={shiftingContent?.guidance?.title || ''}
                     onChange={(e) => setShiftingContent({ ...shiftingContent, guidance: { ...shiftingContent.guidance, title: e.target.value } })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-800 outline-none focus:ring-2 focus:ring-teal-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm font-bold text-slate-800 outline-none focus:ring-2 focus:ring-teal-500"
                   />
                   <textarea
                     rows={2}
                     value={shiftingContent?.guidance?.description || ''}
                     onChange={(e) => setShiftingContent({ ...shiftingContent, guidance: { ...shiftingContent.guidance, description: e.target.value } })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs font-medium text-slate-500 outline-none resize-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-xs font-medium text-slate-500 outline-none resize-none"
                   ></textarea>
                 </div>
               </div>

@@ -32,8 +32,8 @@ const StaffDashboard = () => {
           { label: "Total Students", val: "2,450", trend: "+12", icon: Users, color: "purple" },
           { label: "Completed Tests", val: "89", trend: "+5", icon: CheckCircle2, color: "rose" }
         ].map((stat, idx) => (
-          <div key={idx} className="bg-white p-6 rounded-[2.5rem] border border-slate-200 shadow-sm">
-            <div className={`w-12 h-12 bg-${stat.color}-50 text-${stat.color}-600 rounded-2xl flex items-center justify-center mb-6`}>
+          <div key={idx} className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
+            <div className={`w-12 h-12 bg-${stat.color}-50 text-${stat.color}-600 rounded-lg flex items-center justify-center mb-6`}>
               <stat.icon size={24} />
             </div>
             <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">{stat.label}</p>
@@ -49,7 +49,7 @@ const StaffDashboard = () => {
 
       <div className="grid lg:grid-cols-12 gap-8">
         {/* Recent Appointments */}
-        <div className="lg:col-span-8 bg-white rounded-[3rem] border border-slate-200 overflow-hidden shadow-sm">
+        <div className="lg:col-span-8 bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
           <div className="p-8 border-b border-slate-100 flex items-center justify-between">
             <h3 className="text-xl font-black tracking-tight">Recent Appointments</h3>
             <button className="text-emerald-600 text-xs font-black uppercase tracking-widest hover:underline">View All</button>
@@ -115,7 +115,7 @@ const StaffDashboard = () => {
 
         {/* Sidebar Info / Notifications */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="bg-emerald-900 rounded-[3rem] p-8 text-white relative overflow-hidden shadow-xl shadow-emerald-900/20 border border-emerald-800">
+          <div className="bg-emerald-900 rounded-lg p-8 text-white relative overflow-hidden shadow-xl shadow-emerald-900/20 border border-emerald-800">
             <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-400/20 rounded-full blur-3xl"></div>
             <h3 className="text-xl font-black mb-8 relative z-10">User Distribution</h3>
             <div className="space-y-6 relative z-10">
@@ -142,14 +142,14 @@ const StaffDashboard = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm">
+          <div className="bg-white rounded-lg p-8 border border-slate-200 shadow-sm">
             <div className="flex items-center justify-between mb-8">
               <h3 className="font-black text-sm uppercase tracking-widest text-slate-400">Quick Filters</h3>
               <Filter size={16} className="text-slate-300" />
             </div>
             <div className="flex flex-wrap gap-2">
               {['All Status', 'Pending', 'High School', 'College', 'Faculty', 'Outside Client', 'Today'].map(tag => (
-                <button key={tag} className="px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold text-slate-500 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-100 transition-all">
+                <button key={tag} className="px-4 py-2 bg-slate-50 border border-slate-100 rounded-lg text-xs font-bold text-slate-500 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-100 transition-all">
                   {tag}
                 </button>
               ))}

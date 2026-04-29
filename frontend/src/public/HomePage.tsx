@@ -9,9 +9,24 @@ import ourServicesImg from '../assets/img/Presentation-GCC.jpg';
 import ourServicesImg2 from '../assets/img/our-services2.png';
 import ourServicesImg3 from '../assets/img/our-services3.png';
 import { cmsApi } from '../lib/api';
+import SplashScreen from '../components/loader/SplashScreen';
 
 
 const HomePage = () => {
+  // Initialize state immediately to prevent "flash" of content
+  const [showSplash, setShowSplash] = useState(() => {
+    return !sessionStorage.getItem('hasShownSplash');
+  });
+
+  useEffect(() => {
+    if (showSplash) {
+      const timer = setTimeout(() => {
+        setShowSplash(false);
+        sessionStorage.setItem('hasShownSplash', 'true');
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [showSplash]);
   const [homeContent, setHomeContent] = useState<any>({
     hero: {
       title: "Take care of your Mental Health",
@@ -79,6 +94,10 @@ const HomePage = () => {
     }, 5000); // Change image every 5 seconds
     return () => clearInterval(timer);
   }, [heroImages.length]);
+
+  if (showSplash) {
+    return <SplashScreen />;
+  }
 
   const features = homeContent.support.features.map((f: any, i: number) => ({
     ...f,

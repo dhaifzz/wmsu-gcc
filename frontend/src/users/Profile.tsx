@@ -6,8 +6,11 @@ import {
   MessageCircle,
   ClipboardCheck,
   RefreshCw,
+  LogOut,
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../auth/AuthProvider';
+import { showAlert } from '../components/modal-notification/sweetalert';
 
 interface ProfileProps {
   user: any;
@@ -15,39 +18,84 @@ interface ProfileProps {
 
 const Profile = ({ user }: ProfileProps) => {
   const theme = useTheme();
+  const { signOut } = useAuth();
+  
+  // Define roles that should see the logout button in the profile page
+  const clientRoles = ['high school student', 'college student', 'faculty', 'outsider', 'highschool', 'college', 'student', 'outsider', 'outside'];
+  const userRole = (user.role || '').toLowerCase();
+  const userType = (user.type || '').toLowerCase();
+  const showLogout = clientRoles.includes(userRole) || clientRoles.includes(userType);
+
+  const handleLogout = async () => {
+    const result = await showAlert.confirm('Logout', 'Are you sure you want to sign out?', 'Logout', 'Stay');
+    if (result.isConfirmed) {
+      await signOut();
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-8"
+      className="space-y-6 md:space-y-8"
     >
-      <div className="bg-white rounded-lg p-10 shadow-sm border border-slate-100 relative overflow-hidden">
-        <div className={`absolute top-0 left-0 w-full h-32 bg-gradient-to-r from-${theme.bg600.replace('bg-', '')} to-${theme.bg900.replace('bg-', '')} opacity-10`}></div>
-        <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
-          <div className="relative group">
-            <div className="w-32 h-32 bg-slate-200 rounded-lg flex items-center justify-center text-slate-500 border-4 border-white shadow-xl overflow-hidden">
-              <UserIcon size={64} />
+      <div className="bg-white rounded-lg p-6 md:p-10 shadow-sm border border-slate-100 relative overflow-hidden">
+        <div className={`absolute top-0 left-0 w-full h-24 md:h-32 bg-gradient-to-r from-${theme.bg600.replace('bg-', '')} to-${theme.bg900.replace('bg-', '')} opacity-10`}></div>
+        
+        <div className="relative z-10 flex flex-col md:flex-row items-center gap-6 md:gap-8">
+          <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8 flex-1 w-full">
+            <div className="relative group">
+              <div className="w-24 h-24 md:w-32 md:h-32 bg-slate-200 rounded-lg flex items-center justify-center text-slate-500 border-4 border-white shadow-xl overflow-hidden">
+                <UserIcon className="w-12 h-12 md:w-16 md:h-16" />
+              </div>
+              <button className={`absolute bottom-0 right-0 p-2 md:p-3 ${theme.bg600} text-white rounded-lg shadow-lg hover:scale-110 transition-all border-2 md:border-4 border-white`}>
+                <Camera size={16} className="md:w-[18px] md:h-[18px]" />
+              </button>
             </div>
-            <button className={`absolute bottom-0 right-0 p-3 ${theme.bg600} text-white rounded-lg shadow-lg hover:scale-110 transition-all border-4 border-white`}>
-              <Camera size={18} />
-            </button>
-          </div>
-          <div className="text-center md:text-left">
-            <h2 className="text-4xl font-black tracking-tight mb-2">{user.name}</h2>
-            <div className="flex flex-wrap justify-center md:justify-start gap-3">
-              <span className={`px-4 py-1.5 ${theme.bg100} ${theme.text700} rounded-full text-xs font-black uppercase tracking-widest`}>{user.educationLevel}</span>
-              <span className="px-4 py-1.5 bg-slate-100 text-slate-600 rounded-full text-xs font-black uppercase tracking-widest">ID: {user.studentId}</span>
+            
+            <div className="text-center md:text-left w-full">
+              <h2 className="text-2xl md:text-4xl font-black tracking-tight mb-2 truncate max-w-full">{user.name}</h2>
+              <div className="flex flex-wrap justify-center md:justify-start gap-2 md:gap-3 mb-6 md:mb-0">
+                <span className={`px-3 md:px-4 py-1 md:py-1.5 ${theme.bg100} ${theme.text700} rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest`}>{user.educationLevel}</span>
+                <span className="px-3 md:px-4 py-1 md:py-1.5 bg-slate-100 text-slate-600 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest">ID: {user.studentId}</span>
+              </div>
+
+              {/* Logout Button for Mobile/Tablet */}
+              {showLogout && (
+                <div className="lg:hidden mt-6 flex justify-center md:justify-start">
+                  <button 
+                    onClick={handleLogout}
+                    className="group flex items-center justify-center gap-2 px-6 py-3 bg-rose-600 text-white rounded-xl font-black text-xs hover:bg-rose-700 transition-all shadow-lg shadow-rose-600/20 active:scale-95 w-full md:w-auto"
+                  >
+                    <LogOut size={18} className="group-hover:-translate-x-0.5 transition-transform" />
+                    <span>Logout Account</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
+
+        {/* Logout Button for Desktop */}
+        {showLogout && (
+          <div className="hidden lg:block absolute top-6 right-6 z-20">
+            <button 
+              onClick={handleLogout}
+              className="group flex items-center gap-2 px-4 py-2 bg-rose-600 text-white rounded-xl font-black text-md hover:bg-rose-700 transition-all shadow-lg shadow-rose-600/20 active:scale-95"
+            >
+              <LogOut size={17} className="group-hover:-translate-x-0.5 transition-transform" />
+              <span>Logout Account</span>
+            </button>
+          </div>
+        )}
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
-          <div className="bg-white rounded-lg p-10 shadow-sm border border-slate-100">
-            <div className="flex items-center justify-between mb-8">
-              <h3 className="text-2xl font-black tracking-tight">{user.type === 'faculty' ? 'Professional Information' : 'Academic Information'}</h3>
-              <button className={`flex items-center gap-2 ${theme.text600} font-bold text-sm hover:underline`}>
+      <div className="grid lg:grid-cols-3 gap-6 md:gap-8">
+        <div className="lg:col-span-2 space-y-6 md:space-y-8">
+          <div className="bg-white rounded-lg p-6 md:p-10 shadow-sm border border-slate-100">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+              <h3 className="text-xl md:text-2xl font-black tracking-tight">{user.type === 'faculty' ? 'Professional Information' : 'Academic Information'}</h3>
+              <button className={`flex items-center gap-2 ${theme.text600} font-bold text-sm hover:underline w-fit`}>
                 <Edit2 size={16} /> Edit Info
               </button>
             </div>
@@ -104,8 +152,8 @@ const Profile = ({ user }: ProfileProps) => {
               )}
 
               <div>
-                <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Official Email</p>
-                <p className="text-lg font-bold text-slate-700">{user.email}</p>
+                <p className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Official Email</p>
+                <p className="text-base md:text-lg font-bold text-slate-700 break-all">{user.email}</p>
               </div>
             </div>
           </div>
