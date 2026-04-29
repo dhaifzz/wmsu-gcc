@@ -1,5 +1,5 @@
 // HIGH SCHOOL & COLLEGE
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   MessageCircle,
   ClipboardCheck,
@@ -17,10 +17,22 @@ import MarqueeText from '../../../components/MarqueeText';
 import Counseling from '../Counseling';
 import Assessment from '../Assessment';
 import Shifting from '../Shifting';
+import Loader from '../../../components/loader/Loader';
 
 const StudentDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [activeService, setActiveService] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate real data fetching
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, []);
+
+
 
   const [user, setUser] = useState({
     name: "Juan Luna",
@@ -89,8 +101,11 @@ const StudentDashboard = () => {
           Switch to {user.type === 'college' ? 'High School' : 'College'} View
         </button>
 
-        <div className="p-6 lg:p-10 max-w-6xl mx-auto">
-          <AnimatePresence mode="wait">
+        <div className="p-6 lg:p-10 max-w-screen-2xl mx-auto">
+          {isLoading ? (
+            <Loader />
+          ) : (
+            <AnimatePresence mode="wait">
             {activeTab === 'overview' && !activeService && (
               <motion.div
                 key="overview"
@@ -110,22 +125,22 @@ const StudentDashboard = () => {
 
                 {/* Stats Row */}
                 <div className="grid md:grid-cols-3 gap-6 mb-10">
-                  <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm transition-all hover:shadow-md">
-                    <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mb-4">
+                  <div className="bg-white p-6 rounded-lg border border-slate-100 shadow-sm transition-all hover:shadow-md">
+                    <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center mb-4">
                       <Calendar size={24} />
                     </div>
                     <p className="text-slate-500 text-xs font-black uppercase tracking-widest mb-1">Appointments</p>
                     <p className="text-xl font-black">0 Pending</p>
                   </div>
-                  <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm transition-all hover:shadow-md">
-                    <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-4">
+                  <div className="bg-white p-6 rounded-lg border border-slate-100 shadow-sm transition-all hover:shadow-md">
+                    <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mb-4">
                       <Clock size={24} />
                     </div>
                     <p className="text-slate-500 text-xs font-black uppercase tracking-widest mb-1">Wait Time</p>
                     <p className="text-xl font-black">Fast Track</p>
                   </div>
-                  <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm transition-all hover:shadow-md">
-                    <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center mb-4">
+                  <div className="bg-white p-6 rounded-lg border border-slate-100 shadow-sm transition-all hover:shadow-md">
+                    <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center mb-4">
                       <GraduationCap size={24} />
                     </div>
                     <p className="text-slate-500 text-xs font-black uppercase tracking-widest mb-1">Status</p>
@@ -153,12 +168,12 @@ const StudentDashboard = () => {
                           key={service.id}
                           layout
                           onClick={() => isAllowed && setActiveService(service.id)}
-                          className={`p-8 rounded-[2.5rem] border transition-all flex flex-col ${isAllowed
+                          className={`p-8 rounded-lg border transition-all flex flex-col ${isAllowed
                             ? 'bg-white border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 group cursor-pointer'
                             : 'bg-slate-50 border-dashed border-slate-200 opacity-60 grayscale'
                             }`}
                         >
-                          <div className={`w-14 h-14 ${isAllowed ? service.color : 'bg-slate-200'} text-white rounded-3xl flex items-center justify-center mb-6 shadow-lg transition-transform ${isAllowed ? 'group-hover:scale-110' : ''}`}>
+                          <div className={`w-14 h-14 ${isAllowed ? service.color : 'bg-slate-200'} text-white rounded-lg flex items-center justify-center mb-6 shadow-lg transition-transform ${isAllowed ? 'group-hover:scale-110' : ''}`}>
                             <service.icon size={28} className={isAllowed ? 'text-white' : 'text-slate-400'} />
                           </div>
                           <h4 className={`text-xl font-black mb-3 ${isAllowed ? 'text-slate-900' : 'text-slate-400'}`}>{service.name}</h4>
@@ -182,7 +197,7 @@ const StudentDashboard = () => {
                 </div>
 
                 {/* Banner */}
-                <div className="bg-emerald-900 rounded-[3rem] p-10 text-white relative overflow-hidden">
+                <div className="bg-emerald-900 rounded-lg p-10 text-white relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2"></div>
                   <div className="relative z-10 grid md:grid-cols-2 gap-10 items-center">
                     <div>
@@ -197,7 +212,7 @@ const StudentDashboard = () => {
                         </div>
                       </div>
                     </div>
-                    <div className="bg-white/10 backdrop-blur-md rounded-[2.5rem] p-8 border border-white/10">
+                    <div className="bg-white/10 backdrop-blur-md rounded-lg p-8 border border-white/10">
                       <p className="text-emerald-300 text-xs font-black uppercase mb-4 tracking-widest">Office Hours</p>
                       <p className="font-bold text-lg leading-relaxed">
                         Visit us at the 2nd Floor for personal consultations and assessments.
@@ -222,6 +237,7 @@ const StudentDashboard = () => {
 
             {activeTab === 'profile' && <Profile key="profile" user={user} />}
           </AnimatePresence>
+          )}
         </div>
       </main>
     </div>

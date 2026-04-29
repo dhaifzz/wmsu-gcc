@@ -16,6 +16,7 @@ const iconMap: Record<string, any> = {
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import assessmentImg from '../../assets/img/assessment-img.png';
+import Loader from '../../components/loader/Loader';
 import { cmsApi } from '../../lib/api';
 
 const AssessmentDetails = () => {
@@ -87,8 +88,10 @@ const AssessmentDetails = () => {
 
   if (isLoading || !content) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-[#f8fafc] p-6 lg:p-10">
+        <div className="max-w-screen-2xl mx-auto">
+          <Loader />
+        </div>
       </div>
     );
   }

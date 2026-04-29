@@ -1,5 +1,6 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from './AuthProvider';
+import Loader from '../components/loader/Loader';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -10,14 +11,7 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
   const { user, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-[#f8fafc]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-emerald-200 border-t-emerald-600"></div>
-          <p className="text-sm font-bold text-slate-400">Loading...</p>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   if (!user) {

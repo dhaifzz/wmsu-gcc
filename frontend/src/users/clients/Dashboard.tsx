@@ -66,7 +66,7 @@ const Dashboard = () => {
   const filteredServices = services.filter(s => s.allowed.includes(activeUser.type));
 
   const UserSelector = () => (
-    <div className="mb-8 p-4 bg-slate-900 rounded-3xl text-white shadow-2xl">
+    <div className="mb-8 p-4 bg-slate-900 rounded-lg text-white shadow-2xl">
       <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 px-2">Mock User Switcher (Debug)</p>
       <div className="grid grid-cols-2 gap-2">
         {(['college', 'highschool', 'returnee', 'transferee'] as UserRole[]).map(role => (
@@ -77,7 +77,7 @@ const Dashboard = () => {
               type: role,
               educationLevel: role === 'college' ? 'College Student' : role === 'highschool' ? 'High School Student' : role === 'returnee' ? 'Returning Student' : 'Transfer Student'
             })}
-            className={`py-2 px-3 rounded-xl text-[10px] font-bold capitalize transition-all ${activeUser.type === role ? 'bg-emerald-600 text-white shadow-lg' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
+            className={`py-2 px-3 rounded-lg text-[10px] font-bold capitalize transition-all ${activeUser.type === role ? 'bg-emerald-600 text-white shadow-lg' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
           >
             {role}
           </button>
@@ -93,7 +93,7 @@ const Dashboard = () => {
       <aside className="w-80 bg-white border-r border-slate-200 flex flex-col p-6 overflow-y-auto">
         {/* Brand */}
         <div className="flex items-center gap-3 mb-10 px-2">
-          <div className="w-10 h-10 bg-emerald-600 rounded-2xl flex items-center justify-center text-white font-black shadow-lg shadow-emerald-600/30">G</div>
+          <div className="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center text-white font-black shadow-lg shadow-emerald-600/30">G</div>
           <span className="font-black text-xl tracking-tighter">GCC Portal</span>
         </div>
 
@@ -102,10 +102,10 @@ const Dashboard = () => {
         {/* Nav Links */}
         <nav className="space-y-2 flex-1">
           <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 px-2">Main Menu</p>
-          <button className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl font-bold transition-all ${activeTab === 'overview' ? 'bg-emerald-50 text-emerald-700 shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`} onClick={() => setActiveTab('overview')}>
+          <button className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-lg font-bold transition-all ${activeTab === 'overview' ? 'bg-emerald-50 text-emerald-700 shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`} onClick={() => setActiveTab('overview')}>
             <LayoutDashboard size={20} /> Dashboard
           </button>
-          <button className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl font-bold transition-all ${activeTab === 'profile' ? 'bg-emerald-50 text-emerald-700 shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`} onClick={() => setActiveTab('profile')}>
+          <button className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-lg font-bold transition-all ${activeTab === 'profile' ? 'bg-emerald-50 text-emerald-700 shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`} onClick={() => setActiveTab('profile')}>
             <User size={20} /> My Profile
           </button>
         </nav>
@@ -113,7 +113,7 @@ const Dashboard = () => {
         {/* User Card */}
         <div className="mt-auto pt-6 border-t border-slate-100">
           <div className="flex items-center gap-3 p-2">
-            <div className="w-12 h-12 bg-slate-200 rounded-2xl flex items-center justify-center text-slate-500">
+            <div className="w-12 h-12 bg-slate-200 rounded-lg flex items-center justify-center text-slate-500">
               <User size={24} />
             </div>
             <div className="flex-1 overflow-hidden relative">
@@ -158,35 +158,35 @@ const Dashboard = () => {
               <input 
                 type="text" 
                 placeholder="Search services..." 
-                className="bg-slate-100 border-none rounded-2xl py-3 pl-12 pr-6 text-sm font-bold w-64 focus:ring-2 focus:ring-emerald-500 transition-all"
+                className="bg-slate-100 border-none rounded-lg py-3 pl-12 pr-6 text-sm font-bold w-64 focus:ring-2 focus:ring-emerald-500 transition-all"
               />
             </div>
-            <button className="w-12 h-12 bg-white border border-slate-200 rounded-2xl flex items-center justify-center text-slate-600 hover:bg-slate-50 relative">
+            <button className="w-12 h-12 bg-white border border-slate-200 rounded-lg flex items-center justify-center text-slate-600 hover:bg-slate-50 relative">
               <Bell size={20} />
               <span className="absolute top-3 right-3 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></span>
             </button>
           </div>
         </header>
 
-        <div className="p-10 max-w-6xl">
+        <div className="p-6 lg:p-10 max-w-screen-2xl mx-auto w-full">
           {/* Stats / Info Row */}
           <div className="grid md:grid-cols-3 gap-6 mb-10">
-            <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-              <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mb-4">
+            <div className="bg-white p-6 rounded-lg border border-slate-100 shadow-sm">
+              <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center mb-4">
                 <Calendar size={24} />
               </div>
               <p className="text-slate-500 text-xs font-black uppercase tracking-widest mb-1">Appointments</p>
               <p className="text-xl font-black">0 Pending</p>
             </div>
-            <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-              <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-4">
+            <div className="bg-white p-6 rounded-lg border border-slate-100 shadow-sm">
+              <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mb-4">
                 <Clock size={24} />
               </div>
               <p className="text-slate-500 text-xs font-black uppercase tracking-widest mb-1">Wait Time</p>
               <p className="text-xl font-black">Fast Track</p>
             </div>
-            <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-              <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center mb-4">
+            <div className="bg-white p-6 rounded-lg border border-slate-100 shadow-sm">
+              <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center mb-4">
                 <GraduationCap size={24} />
               </div>
               <p className="text-slate-500 text-xs font-black uppercase tracking-widest mb-1">Status</p>
@@ -221,9 +221,9 @@ const Dashboard = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
                     transition={{ duration: 0.3 }}
-                    className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group cursor-pointer"
+                    className="bg-white p-8 rounded-lg border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group cursor-pointer"
                   >
-                    <div className={`w-14 h-14 ${service.color} text-white rounded-3xl flex items-center justify-center mb-6 shadow-lg shadow-${service.color.split('-')[1]}-500/20 group-hover:scale-110 transition-transform`}>
+                    <div className={`w-14 h-14 ${service.color} text-white rounded-lg flex items-center justify-center mb-6 shadow-lg shadow-${service.color.split('-')[1]}-500/20 group-hover:scale-110 transition-transform`}>
                       <service.icon size={28} />
                     </div>
                     <h4 className="text-xl font-black mb-3">{service.name}</h4>
@@ -239,8 +239,8 @@ const Dashboard = () => {
 
               {/* Disabled/Excluded Section for HS */}
               {activeUser.type === 'highschool' && (
-                <div className="bg-slate-50 p-8 rounded-[2.5rem] border border-dashed border-slate-200 flex flex-col items-center justify-center text-center opacity-60">
-                   <div className="w-14 h-14 bg-slate-200 text-slate-400 rounded-3xl flex items-center justify-center mb-4">
+                <div className="bg-slate-50 p-8 rounded-lg border border-dashed border-slate-200 flex flex-col items-center justify-center text-center opacity-60">
+                   <div className="w-14 h-14 bg-slate-200 text-slate-400 rounded-lg flex items-center justify-center mb-4">
                     <RefreshCw size={28} />
                   </div>
                   <h4 className="text-lg font-black text-slate-400">Shifting Restricted</h4>
@@ -253,7 +253,7 @@ const Dashboard = () => {
           </div>
 
           {/* Info Card */}
-          <div className="bg-emerald-900 rounded-[3rem] p-10 text-white relative overflow-hidden">
+          <div className="bg-emerald-900 rounded-lg p-10 text-white relative overflow-hidden">
             <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2"></div>
             <div className="relative z-10 grid md:grid-cols-2 gap-10 items-center">
               <div>
@@ -274,7 +274,7 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="hidden md:block">
-                <div className="bg-white/10 backdrop-blur-md rounded-[2.5rem] p-8 border border-white/10">
+                <div className="bg-white/10 backdrop-blur-md rounded-lg p-8 border border-white/10">
                   <p className="text-emerald-300 text-xs font-black uppercase mb-4 tracking-widest">System Update</p>
                   <p className="font-bold text-lg leading-relaxed">
                     The GCC Portal is now optimized for all student types including High School, College, Returnees, and Transferees.

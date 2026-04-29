@@ -50,31 +50,57 @@ const ClientNavbar = ({ activeTab, setActiveTab }: ClientNavbarProps) => {
       </div>
 
       <div className="flex items-center gap-6">
-        <nav className="flex items-center gap-2">
+        {/* Actions - Bell moved before the two nav buttons */}
+        <div className="flex items-center">
+          <button className="w-10 h-10 bg-emerald-800/50 hover:bg-emerald-800 border border-emerald-700/50 rounded-full flex items-center justify-center transition-all relative group">
+            <Bell size={18} className="text-emerald-100 group-hover:text-white transition-colors" />
+            <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-emerald-900"></span>
+          </button>
+        </div>
+
+        <nav className="flex items-center gap-2 bg-emerald-950/30 p-1.5 rounded-full border border-emerald-800/30">
+          {/* Dashboard Button */}
           <button 
             onClick={() => setActiveTab('overview')}
-            className={`px-5 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 transition-all ${activeTab === 'overview' ? 'bg-white text-emerald-900 shadow-sm' : 'text-emerald-100 hover:bg-emerald-800/50'}`}
+            className={`group relative flex items-center transition-all duration-300 ease-out overflow-hidden rounded-full font-bold text-sm ${
+              activeTab === 'overview' 
+                ? 'bg-white text-emerald-900 px-5 py-2.5 shadow-lg' 
+                : 'text-emerald-100 hover:bg-emerald-800/50 px-3 py-2.5'
+            }`}
           >
-            <LayoutDashboard size={18} />
-            <span className="hidden sm:inline">Dashboard</span>
-            {activeTab === 'overview' && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 ml-1"></span>}
+            <div className="flex items-center">
+              <LayoutDashboard size={18} className={activeTab === 'overview' ? 'mr-2' : 'group-hover:mr-2 transition-all'} />
+              <span className={`transition-all duration-300 ease-out overflow-hidden whitespace-nowrap ${
+                activeTab === 'overview' ? 'max-w-xs opacity-100' : 'max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100'
+              }`}>
+                Dashboard
+              </span>
+            </div>
+            {activeTab === 'overview' && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 ml-2 animate-pulse"></span>}
           </button>
+
+          {/* Profile Button */}
           <button 
             onClick={() => setActiveTab('profile')}
-            className={`px-5 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 transition-all ${activeTab === 'profile' ? 'bg-white text-emerald-900 shadow-sm' : 'text-emerald-100 hover:bg-emerald-800/50'}`}
+            className={`group relative flex items-center transition-all duration-300 ease-out overflow-hidden rounded-full font-bold text-sm ${
+              activeTab === 'profile' 
+                ? 'bg-white text-emerald-900 px-5 py-2.5 shadow-lg' 
+                : 'text-emerald-100 hover:bg-emerald-800/50 px-3 py-2.5'
+            }`}
           >
-            <User size={18} />
-            <span className="hidden sm:inline">My Profile</span>
-            {activeTab === 'profile' && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 ml-1"></span>}
+            <div className="flex items-center">
+              <User size={18} className={activeTab === 'profile' ? 'mr-2' : 'group-hover:mr-2 transition-all'} />
+              <span className={`transition-all duration-300 ease-out overflow-hidden whitespace-nowrap ${
+                activeTab === 'profile' ? 'max-w-xs opacity-100' : 'max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100'
+              }`}>
+                My Profile
+              </span>
+            </div>
+            {activeTab === 'profile' && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 ml-2 animate-pulse"></span>}
           </button>
         </nav>
 
-        <div className="flex items-center gap-3">
-          <button className="w-10 h-10 bg-emerald-800 border border-emerald-700 rounded-xl flex items-center justify-center hover:bg-emerald-700 transition-colors relative">
-            <Bell size={18} />
-            <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-emerald-800"></span>
-          </button>
-
+        <div className="flex items-center pl-3 border-l border-emerald-800/50">
           <button 
             onClick={async () => {
               const result = await showAlert.confirm('Logout', 'Are you sure you want to sign out?', 'Logout', 'Stay');
@@ -82,7 +108,7 @@ const ClientNavbar = ({ activeTab, setActiveTab }: ClientNavbarProps) => {
                 await signOut();
               }
             }}
-            className="w-10 h-10 bg-emerald-800 border border-emerald-700 rounded-xl flex items-center justify-center hover:bg-rose-600 hover:border-rose-500 transition-colors"
+            className="w-10 h-10 bg-emerald-800/30 border border-emerald-700/30 rounded-full flex items-center justify-center hover:bg-rose-600/90 hover:border-rose-500 transition-all text-emerald-200 hover:text-white"
             title="Logout"
           >
             <LogOut size={18} />

@@ -4,52 +4,68 @@ import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import shiftingImg from '../../assets/img/shifting-img.png';
 import { cmsApi } from '../../lib/api';
+import Loader from '../../components/loader/Loader';
 
 const ShiftingDetails = () => {
   const [content, setContent] = useState<any>(null);
   const [homeContent, setHomeContent] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchContent = async () => {
-      const [shiftingRes, homeRes] = await Promise.all([
-        cmsApi.getContent('shifting'),
-        cmsApi.getContent('home')
-      ]);
-      if (homeRes.ok) setHomeContent(homeRes.data);
-      
-      if (shiftingRes.ok && shiftingRes.data && Object.keys(shiftingRes.data).length > 0) {
-        setContent(shiftingRes.data);
-      } else {
-        // Fallback default content
-        setContent({
-          hero: { title: "Shifting Examination", description: "Helping you find the right academic path for your future career.", image: null },
-          about: { 
-            description: "The Shifting Exam is a critical requirement for WMSU students who wish to transfer from one academic program to another. This assessment ensures that your aptitudes and interests align with the new course you intend to take.",
-            note: "Applicants must schedule an appointment and complete all required forms before being allowed to take the exam."
-          },
-          requirements: [
-            { title: "Booking Receipt", desc: "Digital or printed copy of your appointment confirmation." },
-            { title: "2x2 Picture", desc: "Formal 2x2 colored picture with name tag (Selfies are not allowed)." },
-            { title: "Downloadable Grades", desc: "A complete copy of all your previous semester's grades." },
-            { title: "Latest COR", desc: "Your most recent Certificate of Registration (COR)." },
-            { title: "Entrance Test Result", desc: "Original or certified copy of your college entrance test result." }
-          ],
-          steps: [
-            { title: "Book Examination", desc: "Register and select a shifting exam date through the portal." },
-            { title: "Get Your Receipt", desc: "Ensure you have your official booking receipt as proof of schedule." },
-            { title: "Visit GCC Office", desc: "Go to the GCC Office in WMSU Main Campus with your requirements." },
-            { title: "Document Submission", desc: "Submit all required documents to the GCC office for verification." },
-            { title: "Take the Exam", desc: "Attend the shifting examination on your scheduled date and time." }
-          ],
-          cta: { title: "Apply for Shifting", description: "Make sure you have met the minimum GPA requirements of your target college before applying." },
-          guidance: { title: "Career Guidance", description: "Not sure which course fits you best? Our counselors also offer career guidance sessions to help you make an informed decision." }
-        });
+      try {
+        const [shiftingRes, homeRes] = await Promise.all([
+          cmsApi.getContent('shifting'),
+          cmsApi.getContent('home')
+        ]);
+        if (homeRes.ok) setHomeContent(homeRes.data);
+        
+        if (shiftingRes.ok && shiftingRes.data && Object.keys(shiftingRes.data).length > 0) {
+          setContent(shiftingRes.data);
+        } else {
+          // Fallback default content
+          setContent({
+            hero: { title: "Shifting Examination", description: "Helping you find the right academic path for your future career.", image: null },
+            about: { 
+              description: "The Shifting Exam is a critical requirement for WMSU students who wish to transfer from one academic program to another. This assessment ensures that your aptitudes and interests align with the new course you intend to take.",
+              note: "Applicants must schedule an appointment and complete all required forms before being allowed to take the exam."
+            },
+            requirements: [
+              { title: "Booking Receipt", desc: "Digital or printed copy of your appointment confirmation." },
+              { title: "2x2 Picture", desc: "Formal 2x2 colored picture with name tag (Selfies are not allowed)." },
+              { title: "Downloadable Grades", desc: "A complete copy of all your previous semester's grades." },
+              { title: "Latest COR", desc: "Your most recent Certificate of Registration (COR)." },
+              { title: "Entrance Test Result", desc: "Original or certified copy of your college entrance test result." }
+            ],
+            steps: [
+              { title: "Book Examination", desc: "Register and select a shifting exam date through the portal." },
+              { title: "Get Your Receipt", desc: "Ensure you have your official booking receipt as proof of schedule." },
+              { title: "Visit GCC Office", desc: "Go to the GCC Office in WMSU Main Campus with your requirements." },
+              { title: "Document Submission", desc: "Submit all required documents to the GCC office for verification." },
+              { title: "Take the Exam", desc: "Attend the shifting examination on your scheduled date and time." }
+            ],
+            cta: { title: "Apply for Shifting", description: "Make sure you have met the minimum GPA requirements of your target college before applying." },
+            guidance: { title: "Career Guidance", description: "Not sure which course fits you best? Our counselors also offer career guidance sessions to help you make an informed decision." }
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching shifting content:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchContent();
   }, []);
 
-  if (!content) return null;
+  if (isLoading || !content) {
+    return (
+      <div className="min-h-screen bg-[#f8fafc] p-6 lg:p-10">
+        <div className="max-w-screen-2xl mx-auto">
+          <Loader />
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-slate-50">
       <Navbar />

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar as CalendarIcon, Clock, ChevronLeft, ChevronRight, Info, ClipboardCheck } from 'lucide-react';
 
@@ -6,6 +6,14 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    const mainContainer = document.querySelector('main');
+    if (mainContainer) {
+      mainContainer.scrollTo(0, 0);
+    }
+  }, []);
 
   const header = { title: "Psychological Assessment", subtitle: "Schedule your testing session" };
   const requirements = { title: "Requirements", content: "Students must complete the Personal Data Form and have their Student ID ready before the assessment." };
@@ -43,7 +51,7 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
       <div className="flex items-center gap-4 mb-10">
         <button 
           onClick={onBack}
-          className="p-3 hover:bg-white rounded-2xl transition-all text-slate-400 hover:text-slate-900 shadow-sm border border-transparent hover:border-slate-100"
+          className="p-3 hover:bg-white rounded-lg transition-all text-slate-400 hover:text-slate-900 shadow-sm border border-transparent hover:border-slate-100"
         >
           <ChevronLeft size={24} />
         </button>
@@ -55,7 +63,7 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
 
       <div className="grid lg:grid-cols-12 gap-8 items-stretch">
         {/* Left Column: Calendar Card */}
-        <div className="lg:col-span-8 bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-sm h-full flex flex-col">
+        <div className="lg:col-span-8 bg-white rounded-lg p-10 border border-slate-100 shadow-sm h-full flex flex-col">
           <div className="flex items-center justify-between mb-10">
             <div>
               <h3 className="text-2xl font-black text-slate-900 text-emerald-950">Select Date</h3>
@@ -67,13 +75,13 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
               <button 
                 onClick={() => changeMonth(-1)}
                 disabled={currentDate.getMonth() === new Date().getMonth() && currentDate.getFullYear() === new Date().getFullYear()}
-                className="p-3 hover:bg-emerald-50 rounded-2xl border border-slate-100 text-slate-400 hover:text-emerald-600 transition-all disabled:opacity-20 disabled:cursor-not-allowed"
+                className="p-3 hover:bg-emerald-50 rounded-lg border border-slate-100 text-slate-400 hover:text-emerald-600 transition-all disabled:opacity-20 disabled:cursor-not-allowed"
               >
                 <ChevronLeft size={20} />
               </button>
               <button 
                 onClick={() => changeMonth(1)}
-                className="p-3 hover:bg-emerald-50 rounded-2xl border border-slate-100 text-slate-400 hover:text-emerald-600 transition-all"
+                className="p-3 hover:bg-emerald-50 rounded-lg border border-slate-100 text-slate-400 hover:text-emerald-600 transition-all"
               >
                 <ChevronRight size={20} />
               </button>
@@ -96,7 +104,7 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
                   onClick={() => !isPastDay(day) && setSelectedDate(day)}
                   disabled={isPastDay(day)}
                   className={`
-                    aspect-square rounded-[1.75rem] flex items-center justify-center font-bold text-lg transition-all
+                    aspect-square rounded-lg flex items-center justify-center font-bold text-lg transition-all
                     ${selectedDate === day 
                       ? 'bg-emerald-600 text-white shadow-xl shadow-emerald-100 scale-110 z-10' 
                       : isPastDay(day)
@@ -112,9 +120,9 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
 
           {/* Assessment Tips Section */}
           <div className="mt-8 grid grid-cols-1 gap-3">
-            <div className="p-4 rounded-3xl bg-slate-50 border border-slate-100/50">
+            <div className="p-4 rounded-lg bg-slate-50 border border-slate-100/50">
               <div className="flex items-center gap-3 mb-2 text-emerald-600">
-                <div className="w-8 h-8 bg-white rounded-xl flex items-center justify-center shadow-sm border border-slate-100">
+                <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm border border-slate-100">
                   <ClipboardCheck size={16} />
                 </div>
                 <span className="text-[12px] font-black uppercase tracking-widest">{requirements.title}</span>
@@ -123,9 +131,9 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
                 {requirements.content}
               </p>
             </div>
-            <div className="p-4 rounded-3xl bg-slate-50 border border-slate-100/50">
+            <div className="p-4 rounded-lg bg-slate-50 border border-slate-100/50">
               <div className="flex items-center gap-3 mb-2 text-emerald-600">
-                <div className="w-8 h-8 bg-white rounded-xl flex items-center justify-center shadow-sm border border-slate-100">
+                <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm border border-slate-100">
                   <Clock size={16} />
                 </div>
                 <span className="text-[12px] font-black uppercase tracking-widest">{duration.title}</span>
@@ -151,9 +159,9 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
         {/* Right Column: Time Slots & Summary Stack */}
         <div className="lg:col-span-4 space-y-6">
           {/* Time Slots Card */}
-          <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
+          <div className="bg-white rounded-lg p-8 border border-slate-100 shadow-sm">
             <div className="flex items-center gap-4 mb-8">
-              <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-[1.25rem] flex items-center justify-center">
+              <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
                 <Clock size={24} />
               </div>
               <h3 className="font-black text-xl text-emerald-950">Select Time</h3>
@@ -165,7 +173,7 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
                   key={time}
                   onClick={() => setSelectedTime(time)}
                   className={`
-                    py-4 px-6 rounded-2xl font-bold text-sm transition-all border text-left flex items-center justify-between group
+                    py-4 px-6 rounded-lg font-bold text-sm transition-all border text-left flex items-center justify-between group
                     ${selectedTime === time 
                       ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg shadow-emerald-100' 
                       : 'bg-white border-slate-100 text-slate-600 hover:border-emerald-200 hover:bg-emerald-50/50'}
@@ -179,16 +187,16 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
           </div>
 
           {/* Booking Summary Card */}
-          <div className="bg-emerald-950 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl shadow-emerald-950/20">
+          <div className="bg-emerald-950 rounded-lg p-8 text-white relative overflow-hidden shadow-2xl shadow-emerald-950/20">
             <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-400/10 rounded-full blur-3xl"></div>
-            <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mb-6 border border-white/10 relative z-10">
+            <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center mb-6 border border-white/10 relative z-10">
               <ClipboardCheck size={24} className="text-emerald-400" />
             </div>
             <h3 className="font-black text-xl mb-8 relative z-10">Summary</h3>
             
             <div className="space-y-6 relative z-10">
-              <div className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/5">
-                <div className="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center shrink-0">
+              <div className="flex items-center gap-4 p-4 bg-white/5 rounded-lg border border-white/5">
+                <div className="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-lg flex items-center justify-center shrink-0">
                   <CalendarIcon size={20} />
                 </div>
                 <div>
@@ -201,8 +209,8 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/5">
-                <div className="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center shrink-0">
+              <div className="flex items-center gap-4 p-4 bg-white/5 rounded-lg border border-white/5">
+                <div className="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-lg flex items-center justify-center shrink-0">
                   <Clock size={20} />
                 </div>
                 <div>
@@ -215,7 +223,7 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
             <button
               disabled={!selectedDate || !selectedTime}
               className={`
-                w-full mt-10 py-5 rounded-[1.5rem] font-black text-sm transition-all
+                w-full mt-10 py-5 rounded-lg font-black text-sm transition-all
                 ${selectedDate && selectedTime 
                   ? 'bg-white text-emerald-900 hover:bg-emerald-50 shadow-xl scale-[1.02] active:scale-[0.98]' 
                   : 'bg-white/5 text-white/20 cursor-not-allowed border border-white/5'}
@@ -226,7 +234,7 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
           </div>
 
           {/* Important Info Card */}
-          <div className="bg-slate-50 rounded-[2.5rem] p-8 border border-slate-200">
+          <div className="bg-slate-50 rounded-lg p-8 border border-slate-200">
             <div className="flex items-center gap-3 mb-4 text-slate-600">
               <Info size={18} />
               <h4 className="font-black text-[10px] uppercase tracking-[0.2em]">{important.title}</h4>

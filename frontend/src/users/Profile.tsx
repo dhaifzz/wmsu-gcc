@@ -1,11 +1,11 @@
 import { motion } from 'framer-motion';
-import { 
-  User as UserIcon, 
-  Camera, 
-  Edit2, 
-  MessageCircle, 
-  ClipboardCheck, 
-  RefreshCw, 
+import {
+  User as UserIcon,
+  Camera,
+  Edit2,
+  MessageCircle,
+  ClipboardCheck,
+  RefreshCw,
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -21,14 +21,14 @@ const Profile = ({ user }: ProfileProps) => {
       animate={{ opacity: 1, y: 0 }}
       className="space-y-8"
     >
-      <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100 relative overflow-hidden">
-        <div className={`absolute top-0 left-0 w-full h-32 bg-gradient-to-r from-${theme.bg600.replace('bg-','')} to-${theme.bg900.replace('bg-','')} opacity-10`}></div>
+      <div className="bg-white rounded-lg p-10 shadow-sm border border-slate-100 relative overflow-hidden">
+        <div className={`absolute top-0 left-0 w-full h-32 bg-gradient-to-r from-${theme.bg600.replace('bg-', '')} to-${theme.bg900.replace('bg-', '')} opacity-10`}></div>
         <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
           <div className="relative group">
-            <div className="w-32 h-32 bg-slate-200 rounded-[2.5rem] flex items-center justify-center text-slate-500 border-4 border-white shadow-xl overflow-hidden">
+            <div className="w-32 h-32 bg-slate-200 rounded-lg flex items-center justify-center text-slate-500 border-4 border-white shadow-xl overflow-hidden">
               <UserIcon size={64} />
             </div>
-            <button className={`absolute bottom-0 right-0 p-3 ${theme.bg600} text-white rounded-2xl shadow-lg hover:scale-110 transition-all border-4 border-white`}>
+            <button className={`absolute bottom-0 right-0 p-3 ${theme.bg600} text-white rounded-lg shadow-lg hover:scale-110 transition-all border-4 border-white`}>
               <Camera size={18} />
             </button>
           </div>
@@ -44,7 +44,7 @@ const Profile = ({ user }: ProfileProps) => {
 
       <div className="grid lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
-          <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100">
+          <div className="bg-white rounded-lg p-10 shadow-sm border border-slate-100">
             <div className="flex items-center justify-between mb-8">
               <h3 className="text-2xl font-black tracking-tight">{user.type === 'faculty' ? 'Professional Information' : 'Academic Information'}</h3>
               <button className={`flex items-center gap-2 ${theme.text600} font-bold text-sm hover:underline`}>
@@ -68,7 +68,7 @@ const Profile = ({ user }: ProfileProps) => {
                   </div>
                 </>
               )}
-              
+
               {user.type === 'highschool' && (
                 <>
                   <div>
@@ -112,14 +112,14 @@ const Profile = ({ user }: ProfileProps) => {
         </div>
 
         <div className="space-y-8">
-          <div className={`${theme.bg900} rounded-[3rem] p-8 text-white shadow-xl relative overflow-hidden group`}>
+          <div className={`${theme.bg900} rounded-lg p-8 text-white shadow-xl relative overflow-hidden group`}>
             <div className="absolute -left-10 -top-10 w-32 h-32 bg-emerald-500/20 rounded-full blur-2xl opacity-40"></div>
             <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-emerald-600/20 rounded-full blur-3xl opacity-30"></div>
 
             <h3 className="text-xl font-black mb-6 relative z-10">Activity Summary</h3>
             <div className="space-y-6 relative z-10">
               <div className="flex items-center gap-4">
-                <div className={`w-10 h-10 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center ${theme.text400}`}>
+                <div className={`w-10 h-10 rounded-lg bg-white/10 border border-white/10 flex items-center justify-center ${theme.text400}`}>
                   <MessageCircle size={20} />
                 </div>
                 <div>
@@ -130,7 +130,7 @@ const Profile = ({ user }: ProfileProps) => {
 
               {user.type !== 'faculty' && (
                 <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center ${theme.text400}`}>
+                  <div className={`w-10 h-10 rounded-lg bg-white/10 border border-white/10 flex items-center justify-center ${theme.text400}`}>
                     <ClipboardCheck size={20} />
                   </div>
                   <div>
@@ -142,7 +142,7 @@ const Profile = ({ user }: ProfileProps) => {
 
               {user.type === 'college' && (
                 <div className="flex items-center gap-4 animate-in fade-in slide-in-from-top-2">
-                  <div className={`w-10 h-10 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center ${theme.text400}`}>
+                  <div className={`w-10 h-10 rounded-lg bg-white/10 border border-white/10 flex items-center justify-center ${theme.text400}`}>
                     <RefreshCw size={20} />
                   </div>
                   <div>
