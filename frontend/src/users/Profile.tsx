@@ -9,7 +9,7 @@ import {
   LogOut,
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
-import { useAuth } from '../auth/AuthProvider';
+import { useAuth } from '../auth/AuthContext';
 import { showAlert } from '../components/modal-notification/sweetalert';
 
 interface ProfileProps {
