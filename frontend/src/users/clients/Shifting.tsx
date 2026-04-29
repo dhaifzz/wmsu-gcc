@@ -16,7 +16,6 @@ import {
   ChevronDown,
   ClipboardCheck,
   Clock,
-  Calendar as CalendarIcon,
 } from 'lucide-react';
 import MarqueeText from '../../components/MarqueeText';
 import { useAuth } from '../../auth/AuthContext';
@@ -47,7 +46,21 @@ interface ShiftingProps {
   user: DashboardUser;
 }
 
+type CmsCourse = {
+  name?: unknown;
+  course_name?: unknown;
+};
 
+type CmsCollege = {
+  courses?: unknown[];
+};
+
+type CmsAcademicPayload = {
+  colleges?: unknown[];
+  data?: CmsAcademicPayload;
+  content?: CmsAcademicPayload;
+  system?: CmsAcademicPayload;
+};
 
 const toTitleCase = (value?: string | null) =>
   (value || '')
@@ -151,20 +164,34 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
         }
         
         if (academicData) {
-          const payloadObject = typeof academicData === 'object' && academicData !== null ? academicData : {};
-          const source = 'data' in payloadObject ? (payloadObject as any).data : ('content' in payloadObject ? (payloadObject as any).content : ('system' in payloadObject ? (payloadObject as any).system : payloadObject));
+          const payloadObject = typeof academicData === 'object' && academicData !== null ? academicData as CmsAcademicPayload : {};
+          const source = 'data' in payloadObject && typeof payloadObject.data === 'object' && payloadObject.data !== null
+            ? payloadObject.data
+            : 'content' in payloadObject && typeof payloadObject.content === 'object' && payloadObject.content !== null
+              ? payloadObject.content
+              : 'system' in payloadObject && typeof payloadObject.system === 'object' && payloadObject.system !== null
+                ? payloadObject.system
+                : payloadObject;
           
           const rawColleges = Array.isArray(source?.colleges) ? source.colleges : [];
           const allCourses: string[] = [];
           
-          rawColleges.forEach((col: any) => {
-            if (col && Array.isArray(col.courses)) {
-              col.courses.forEach((course: any) => {
-                if (course && typeof course === 'object') {
-                  const name = typeof course.name === 'string' ? course.name : (typeof course.course_name === 'string' ? course.course_name : '');
-                  if (name.trim()) allCourses.push(name.trim());
-                }
-              });
+          rawColleges.forEach((col) => {
+            if (col && typeof col === 'object') {
+              const college = col as CmsCollege;
+              if (Array.isArray(college.courses)) {
+                college.courses.forEach((course: unknown) => {
+                  if (course && typeof course === 'object') {
+                    const courseObj = course as CmsCourse;
+                    const name = typeof courseObj.name === 'string'
+                      ? courseObj.name
+                      : typeof courseObj.course_name === 'string'
+                        ? courseObj.course_name
+                        : '';
+                    if (name.trim()) allCourses.push(name.trim());
+                  }
+                });
+              }
             }
           });
           
