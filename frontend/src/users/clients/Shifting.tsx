@@ -637,8 +637,6 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
             </button>
           </div>
 
-          </div>
-
           <div className="bg-emerald-50 rounded-lg p-8 border border-emerald-100">
             <div className="flex items-center gap-3 mb-4 text-emerald-700">
               <AlertCircle size={18} />
