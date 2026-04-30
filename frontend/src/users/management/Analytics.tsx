@@ -50,7 +50,14 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
   }
 
   const currentData: AnalyticsDashboardResponse = data || {
-    stats: { totalAppointments: 0, approvalRate: '0.0', avgReviewTime: '0 Hours', pendingCount: 0 },
+    stats: {
+      totalAppointments: 0,
+      todaysBookings: 0,
+      approvalRate: '0.0',
+      avgReviewTime: '0 Hours',
+      pendingCount: 0,
+      completedTests: 0
+    },
     distribution: [],
     topCourses: [],
     topStaff: [],
