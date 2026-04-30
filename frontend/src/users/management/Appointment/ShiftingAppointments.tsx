@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { RefreshCw, Search, Filter, Calendar as CalendarIcon, MoreHorizontal, ArrowRight, ClipboardCheck, CheckCircle2, X, Edit2 } from 'lucide-react';
 import ShiftingEvaluationModal from '../../../components/management-modals/ShiftingEvaluationModal';
@@ -34,7 +34,7 @@ const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' 
 
   const status = getStatus();
 
-  const fetchAppointments = async () => {
+  const fetchAppointments = useCallback(async () => {
     if (!accessToken) return;
     try {
       setLoading(true);
@@ -49,11 +49,12 @@ const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' 
     } finally {
       setLoading(false);
     }
-  };
+  }, [accessToken]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchAppointments();
-  }, [accessToken]);
+  }, [fetchAppointments]);
 
   const handleEvaluate = (app: ShiftingAppointmentItem) => {
     setSelectedAppointment(app);

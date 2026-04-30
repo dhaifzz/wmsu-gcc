@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { ClipboardCheck, Search, Filter, Calendar as CalendarIcon, MoreHorizontal, FileText, CheckCircle2, X } from 'lucide-react';
 import AssessmentEvaluationModal from '../../../components/management-modals/AssessmentEvaluationModal';
@@ -15,7 +15,7 @@ const AssessmentAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director
   const [selectedAppointment, setSelectedAppointment] = useState<ManagementAppointmentItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const fetchAppointments = async () => {
+  const fetchAppointments = useCallback(async () => {
     if (!accessToken) return;
     try {
       setLoading(true);
@@ -30,11 +30,12 @@ const AssessmentAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director
     } finally {
       setLoading(false);
     }
-  };
+  }, [accessToken]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchAppointments();
-  }, [accessToken]);
+  }, [fetchAppointments]);
 
   const handleEvaluate = (app: ManagementAppointmentItem) => {
     setSelectedAppointment(app);
