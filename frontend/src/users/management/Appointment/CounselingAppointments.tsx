@@ -14,6 +14,8 @@ const CounselingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director
   const [loading, setLoading] = useState(true);
   const [selectedAppointment, setSelectedAppointment] = useState<ManagementAppointmentItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isProcessingBatch, setIsProcessingBatch] = useState(false);
 
   const fetchAppointments = async () => {
     if (!accessToken) return;
@@ -41,6 +43,35 @@ const CounselingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director
     setIsModalOpen(true);
   };
 
+  const handleBatchAction = async (action: 'approve' | 'decline') => {
+    if (!accessToken || appointments.length === 0) return;
+    if (!window.confirm(`Are you sure you want to ${action} all pending counseling requests?`)) return;
+    
+    setIsProcessingBatch(true);
+    try {
+      const promises = appointments.map(app => 
+        appointmentApi.directorEvaluateCounselingAppointment(app.id, { action }, accessToken)
+      );
+      await Promise.all(promises);
+      await fetchAppointments();
+    } catch (err) {
+      console.error(`Error during batch ${action}:`, err);
+    } finally {
+      setIsProcessingBatch(false);
+    }
+  };
+
+  const filteredAppointments = appointments.filter(app => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      app.student.toLowerCase().includes(q) ||
+      (app.studentId && app.studentId.toLowerCase().includes(q)) ||
+      (app.course && app.course.toLowerCase().includes(q)) ||
+      (app.level && app.level.toLowerCase().includes(q))
+    );
+  });
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -62,11 +93,19 @@ const CounselingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director
         <div className="flex flex-col sm:flex-row items-center gap-3">
           {role === 'director' && (
             <div className="flex items-center gap-2 mr-2">
-              <button className={`px-4 py-2.5 ${theme.bg50} ${theme.hoverBg600} ${theme.text600} hover:text-white rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border ${theme.border200} ${theme.hoverBorder600} flex items-center gap-2 shadow-sm`}>
+              <button 
+                onClick={() => handleBatchAction('approve')}
+                disabled={isProcessingBatch || appointments.length === 0}
+                className={`px-4 py-2.5 ${theme.bg50} ${theme.hoverBg600} ${theme.text600} hover:text-white rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border ${theme.border200} ${theme.hoverBorder600} flex items-center gap-2 shadow-sm disabled:opacity-50`}
+              >
                 <CheckCircle2 size={14} />
                 Accept All
               </button>
-              <button className="px-4 py-2.5 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border border-rose-200 hover:border-rose-600 flex items-center gap-2 shadow-sm">
+              <button 
+                onClick={() => handleBatchAction('decline')}
+                disabled={isProcessingBatch || appointments.length === 0}
+                className="px-4 py-2.5 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border border-rose-200 hover:border-rose-600 flex items-center gap-2 shadow-sm disabled:opacity-50"
+              >
                 <X size={14} />
                 Decline All
               </button>
@@ -77,6 +116,8 @@ const CounselingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director
             <input
               type="text"
               placeholder="Search appointments..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="bg-white border border-slate-200 rounded-lg py-2.5 pl-10 pr-4 text-xs font-bold w-64 focus:ring-2 focus:ring-blue-500 transition-all outline-none"
             />
           </div>
@@ -109,13 +150,13 @@ const CounselingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director
                     Loading appointments...
                   </td>
                 </tr>
-              ) : appointments.length === 0 ? (
+              ) : filteredAppointments.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-8 py-8 text-center text-slate-500 font-bold text-sm">
-                    No appointments found.
+                    {appointments.length === 0 ? "No appointments found." : "No appointments match your search."}
                   </td>
                 </tr>
-              ) : appointments.map((app) => (
+              ) : filteredAppointments.map((app) => (
                 <tr key={app.id} className="group hover:bg-slate-50/50 transition-colors">
                   <td className="px-8 py-6">
                     <p className="font-bold text-sm text-slate-900">{app.student}</p>

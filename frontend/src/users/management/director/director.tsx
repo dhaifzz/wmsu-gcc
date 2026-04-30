@@ -24,9 +24,13 @@ const DirectorDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const director = {
+    ...authUser,
     name: authUser ? `${authUser.firstName} ${authUser.lastName}` : "Director",
-    role: "Center Director",
+    role: authUser?.role || "Center Director",
     email: authUser?.email || "",
+    department: authUser?.department || "",
+    studentId: authUser?.employeeId || authUser?.schoolId || "",
+    educationLevel: authUser?.educationLevel || "Staff",
   };
 
   const navLinks = [
