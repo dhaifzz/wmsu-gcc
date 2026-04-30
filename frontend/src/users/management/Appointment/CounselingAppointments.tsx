@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { MessageCircle, Search, Filter, Calendar as CalendarIcon, MoreHorizontal, ClipboardCheck, CheckCircle2, X } from 'lucide-react';
 import CounselingEvaluationModal from '../../../components/management-modals/CounselingEvaluationModal';
@@ -17,7 +17,7 @@ const CounselingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director
   const [searchQuery, setSearchQuery] = useState('');
   const [isProcessingBatch, setIsProcessingBatch] = useState(false);
 
-  const fetchAppointments = async () => {
+  const fetchAppointments = useCallback(async () => {
     if (!accessToken) return;
     try {
       setLoading(true);
@@ -32,11 +32,12 @@ const CounselingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director
     } finally {
       setLoading(false);
     }
-  };
+  }, [accessToken]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchAppointments();
-  }, [accessToken]);
+  }, [fetchAppointments]);
 
   const handleEvaluate = (app: ManagementAppointmentItem) => {
     setSelectedAppointment(app);
