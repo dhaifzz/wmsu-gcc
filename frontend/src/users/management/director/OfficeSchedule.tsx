@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { 
-  Calendar as CalendarIcon, 
-  ChevronLeft, 
-  ChevronRight, 
+import {
+  Calendar as CalendarIcon,
+  ChevronLeft,
+  ChevronRight,
   AlertCircle,
   Sun,
   Sunrise,
@@ -27,7 +27,7 @@ interface OfficeConfig {
 const OfficeSchedule = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-  
+
   // Default deadline to 2 months from now
   const getDefaultDeadline = () => {
     const date = new Date();
@@ -47,7 +47,7 @@ const OfficeSchedule = () => {
     const key = formatDate(date);
     const config = officeSchedule[key];
     if (config) return config;
-    
+
     // Default config for weekdays
     return {
       status: 'open' as OfficeStatus,
@@ -61,11 +61,11 @@ const OfficeSchedule = () => {
     if (!selectedDate) return;
     const dateKey = formatDate(selectedDate);
     const existing = getOfficeConfig(selectedDate);
-    
+
     setOfficeSchedule({
       ...officeSchedule,
-      [dateKey]: { 
-        status, 
+      [dateKey]: {
+        status,
         note: note !== undefined ? note : (existing.note || ""),
         startTime: startTime !== undefined ? startTime : (existing.startTime || "08:00"),
         endTime: endTime !== undefined ? endTime : (existing.endTime || "17:00")
@@ -101,7 +101,7 @@ const OfficeSchedule = () => {
       const weekend = date.getDay() === 0 || date.getDay() === 6;
       const isPastDeadline = dateKey > maxAvailableDate;
       const isPastDate = dateKey < todayStr;
-      
+
       const config = getOfficeConfig(date);
       const statusInfo = getStatusConfig(config.status);
       const StatusIcon = statusInfo.icon;
@@ -111,20 +111,18 @@ const OfficeSchedule = () => {
           key={d}
           onClick={() => !weekend && !isPastDate && setSelectedDate(date)}
           disabled={weekend || isPastDate}
-          className={`h-24 md:h-32 border border-slate-100 p-3 text-left transition-all relative overflow-hidden ${
-            weekend || isPastDate
-              ? 'bg-slate-50 cursor-not-allowed opacity-40' 
+          className={`h-24 md:h-32 border border-slate-100 p-3 text-left transition-all relative overflow-hidden ${weekend || isPastDate
+              ? 'bg-slate-50 cursor-not-allowed opacity-40'
               : isPastDeadline
                 ? 'bg-slate-100/50 grayscale opacity-60'
-                : isSelected 
-                  ? 'ring-2 ring-emerald-500 ring-inset bg-emerald-50/30 z-10' 
+                : isSelected
+                  ? 'ring-2 ring-emerald-500 ring-inset bg-emerald-50/30 z-10'
                   : 'bg-white hover:bg-slate-50'
-          }`}
+            }`}
         >
           <div className="flex justify-between items-start mb-1">
-            <span className={`text-sm font-black ${
-              weekend || isPastDate ? 'text-slate-300' : isPastDeadline ? 'text-slate-400' : isSelected ? 'text-emerald-700' : isToday ? 'text-emerald-600 underline decoration-2 underline-offset-4' : 'text-slate-600'
-            }`}>
+            <span className={`text-sm font-black ${weekend || isPastDate ? 'text-slate-300' : isPastDeadline ? 'text-slate-400' : isSelected ? 'text-emerald-700' : isToday ? 'text-emerald-600 underline decoration-2 underline-offset-4' : 'text-slate-600'
+              }`}>
               {d}
             </span>
             {!weekend && !isPastDate && (
@@ -140,12 +138,12 @@ const OfficeSchedule = () => {
               </div>
             )}
           </div>
-          
+
           <div className="space-y-1 mt-auto">
             {isPastDeadline ? (
-               <div className="text-[8px] font-black uppercase tracking-tight text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-sm inline-block">
+              <div className="text-[8px] font-black uppercase tracking-tight text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-sm inline-block">
                 No Booking
-               </div>
+              </div>
             ) : !weekend && (
               <div className={`text-[9px] font-black uppercase tracking-tight ${statusInfo.bg} ${statusInfo.text} px-1.5 py-0.5 rounded-sm inline-block`}>
                 {statusInfo.label}
@@ -210,8 +208,8 @@ const OfficeSchedule = () => {
 
         <div className="xl:col-span-4 space-y-6">
           <div className="flex items-center justify-between bg-emerald-900 p-4 rounded-lg text-white shadow-2xl shadow-emerald-900/20 w-full">
-            <button 
-              onClick={() => changeMonth(-1)} 
+            <button
+              onClick={() => changeMonth(-1)}
               disabled={currentDate.getFullYear() <= new Date().getFullYear() && currentDate.getMonth() <= new Date().getMonth()}
               className="p-2 hover:bg-emerald-800 rounded-lg transition-all disabled:opacity-30"
             >
@@ -221,7 +219,7 @@ const OfficeSchedule = () => {
               <span className="text-sm font-black uppercase tracking-widest">{currentDate.toLocaleString('default', { month: 'long' })}</span>
               <span className="text-[10px] font-bold opacity-60 tracking-[0.3em]">{currentDate.getFullYear()}</span>
             </div>
-            <button 
+            <button
               onClick={() => changeMonth(1)}
               disabled={currentDate.getFullYear() >= 2040 && currentDate.getMonth() >= 11}
               className="p-2 hover:bg-emerald-800 rounded-lg transition-all disabled:opacity-30"
@@ -231,28 +229,28 @@ const OfficeSchedule = () => {
           </div>
           {/* Global Booking Deadline Card */}
           <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-xl shadow-slate-200/50 relative overflow-hidden">
-             <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full -mr-16 -mt-16 z-0"></div>
-             <div className="relative z-10">
-               <div className="flex items-center gap-4 mb-5">
-                 <div className="w-12 h-12 bg-emerald-900 text-white rounded-xl flex items-center justify-center shadow-lg">
-                   <CalendarIcon size={24} />
-                 </div>
-                 <div>
-                   <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-0.5">Booking Window</p>
-                   <h4 className="text-lg font-black text-slate-900">Global Deadline</h4>
-                 </div>
-               </div>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full -mr-16 -mt-16 z-0"></div>
+            <div className="relative z-10">
+              <div className="flex items-center gap-4 mb-5">
+                <div className="w-12 h-12 bg-emerald-900 text-white rounded-xl flex items-center justify-center shadow-lg">
+                  <CalendarIcon size={24} />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-0.5">Booking Window</p>
+                  <h4 className="text-lg font-black text-slate-900">Global Deadline</h4>
+                </div>
+              </div>
 
-               <div className="bg-slate-50 border border-slate-100 p-4 rounded-xl flex items-center justify-between">
-                 <div className="flex flex-col">
-                   <span className="text-[9px] font-black uppercase tracking-widest text-emerald-600 mb-1">Accepting until</span>
-                   <span className="text-sm font-black text-slate-700">
-                     {new Date(maxAvailableDate).toLocaleDateString('default', { month: 'long', day: 'numeric', year: 'numeric' })}
-                   </span>
-                 </div>
-                 <div className="relative">
-                   <input 
-                    type="date" 
+              <div className="bg-slate-50 border border-slate-100 p-4 rounded-xl flex items-center justify-between">
+                <div className="flex flex-col">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-emerald-600 mb-1">Accepting until</span>
+                  <span className="text-sm font-black text-slate-700">
+                    {new Date(maxAvailableDate).toLocaleDateString('default', { month: 'long', day: 'numeric', year: 'numeric' })}
+                  </span>
+                </div>
+                <div className="relative">
+                  <input
+                    type="date"
                     value={maxAvailableDate}
                     min={todayStr}
                     onChange={(e) => setMaxAvailableDate(e.target.value)}
@@ -261,12 +259,12 @@ const OfficeSchedule = () => {
                   <div className="w-10 h-10 bg-white border border-slate-200 rounded-lg flex items-center justify-center shadow-sm text-emerald-700 pointer-events-none">
                     <CalendarCheck size={20} />
                   </div>
-                 </div>
-               </div>
-               <p className="mt-4 text-[9px] font-bold text-slate-400 uppercase tracking-wider leading-relaxed">
-                 All booking slots beyond this date will be automatically disabled globally.
-               </p>
-             </div>
+                </div>
+              </div>
+              <p className="mt-4 text-[9px] font-bold text-slate-400 uppercase tracking-wider leading-relaxed">
+                All booking slots beyond this date will be automatically disabled globally.
+              </p>
+            </div>
           </div>
 
           <AnimatePresence mode="wait">
@@ -316,33 +314,33 @@ const OfficeSchedule = () => {
                   {/* Time Adjustments */}
                   {(officeSchedule[formatDate(selectedDate)]?.status !== 'closed' && officeSchedule[formatDate(selectedDate)]?.status !== 'holiday') && (
                     <div className="space-y-4 pt-4 border-t border-slate-100">
-                       <h5 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2"><Clock size={14} className="text-emerald-600" /> Custom Office Hours</h5>
-                       <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-1">
-                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Start Time</label>
-                            <input 
-                              type="time" 
-                              value={officeSchedule[formatDate(selectedDate)]?.startTime || "08:00"}
-                              onChange={(e) => setOfficeStatus(officeSchedule[formatDate(selectedDate)]?.status || 'open', undefined, e.target.value)}
-                              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-slate-700 focus:ring-2 focus:ring-emerald-500"
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">End Time</label>
-                            <input 
-                              type="time" 
-                              value={officeSchedule[formatDate(selectedDate)]?.endTime || "17:00"}
-                              onChange={(e) => setOfficeStatus(officeSchedule[formatDate(selectedDate)]?.status || 'open', undefined, undefined, e.target.value)}
-                              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-slate-700 focus:ring-2 focus:ring-emerald-500"
-                            />
-                          </div>
-                       </div>
+                      <h5 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2"><Clock size={14} className="text-emerald-600" /> Custom Office Hours</h5>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Start Time</label>
+                          <input
+                            type="time"
+                            value={officeSchedule[formatDate(selectedDate)]?.startTime || "08:00"}
+                            onChange={(e) => setOfficeStatus(officeSchedule[formatDate(selectedDate)]?.status || 'open', undefined, e.target.value)}
+                            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-slate-700 focus:ring-2 focus:ring-emerald-500"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">End Time</label>
+                          <input
+                            type="time"
+                            value={officeSchedule[formatDate(selectedDate)]?.endTime || "17:00"}
+                            onChange={(e) => setOfficeStatus(officeSchedule[formatDate(selectedDate)]?.status || 'open', undefined, undefined, e.target.value)}
+                            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-slate-700 focus:ring-2 focus:ring-emerald-500"
+                          />
+                        </div>
+                      </div>
                     </div>
                   )}
 
                   <div className="space-y-4">
                     <h5 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2"><Info size={14} className="text-emerald-600" /> Administrative Note</h5>
-                    <textarea 
+                    <textarea
                       placeholder="e.g. Center-wide training session..."
                       className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-emerald-500 h-24 resize-none"
                       value={officeSchedule[formatDate(selectedDate)]?.note || ""}
@@ -352,11 +350,11 @@ const OfficeSchedule = () => {
                 </div>
 
                 <div className="mt-12 pt-4 relative z-10">
-                   <div className="bg-slate-900 p-5 rounded-2xl flex gap-4 mb-6 shadow-xl">
-                     <AlertCircle size={20} className="text-emerald-400 shrink-0" />
-                     <p className="text-[9px] font-bold text-white/80 uppercase leading-relaxed tracking-wider">Updates reflect globally for all users and staff members instantly.</p>
-                   </div>
-                   <button className="w-full py-5 bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.3em] hover:bg-emerald-500 transition-all shadow-xl shadow-emerald-600/30">Confirm Changes</button>
+                  <div className="bg-slate-900 p-5 rounded-2xl flex gap-4 mb-6 shadow-xl">
+                    <AlertCircle size={20} className="text-emerald-400 shrink-0" />
+                    <p className="text-[9px] font-bold text-white/80 uppercase leading-relaxed tracking-wider">Updates reflect globally for all users and staff members instantly.</p>
+                  </div>
+                  <button className="w-full py-5 bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.3em] hover:bg-emerald-500 transition-all shadow-xl shadow-emerald-600/30">Confirm Changes</button>
                 </div>
               </motion.div>
             ) : (

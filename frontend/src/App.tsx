@@ -89,9 +89,9 @@ function AppContent() {
         </ProtectedRoute>
       } />
       <Route path="/director" element={
-        <ProtectedRoute allowedRoles={['Director', 'SuperAdmin']}>
+        // <ProtectedRoute allowedRoles={['Director', 'SuperAdmin']}>
           <DirectorDashboard />
-        </ProtectedRoute>
+        // </ProtectedRoute>
       } />
       <Route path="/superadmin" element={
         // <ProtectedRoute allowedRoles={['SuperAdmin']}>

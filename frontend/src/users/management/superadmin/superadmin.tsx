@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { 
-  BarChart3, 
-  MessageCircle, 
-  ClipboardCheck, 
-  RefreshCw, 
-  Clock, 
-  User, 
+import {
+  BarChart3,
+  MessageCircle,
+  ClipboardCheck,
+  RefreshCw,
+  Clock,
+  User,
   LayoutDashboard,
   Users,
   FileEdit
@@ -23,7 +23,7 @@ import CMS from './SuperCMS';
 import UserManagement from './SuperAccountManagement';
 import Overview from './SuperDashboard';
 import Availability from '../staff/Availability';
-import OfficeSchedule from '../staff/OfficeSchedule';
+import OfficeSchedule from '../director/OfficeSchedule';
 import { useAuth } from '../../../auth/AuthContext';
 import { ThemeProvider } from '../../../contexts/ThemeContext';
 import { Building2, Calendar as CalendarIcon } from 'lucide-react';
@@ -55,7 +55,7 @@ const SuperAdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-[#f1f5f9] flex font-sans text-slate-900">
-      <ManagementSidebar 
+      <ManagementSidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         userName={superAdmin.name}
@@ -67,74 +67,74 @@ const SuperAdminDashboard = () => {
       />
 
       <main className="flex-1 relative h-screen overflow-y-auto">
-        <ManagementNavbar 
+        <ManagementNavbar
           userName={superAdmin.name}
           onMenuClick={() => setIsSidebarOpen(true)}
         />
 
         <div className="p-6 lg:p-10 max-w-7xl mx-auto">
           <ThemeProvider scheme="teal">
-          <AnimatePresence mode="wait">
-            {activeTab === 'overview' && (
-              <Overview 
-                key="overview" 
-                userName={superAdmin.name} 
-                onNavigate={(tab) => setActiveTab(tab)} 
-              />
-            )}
+            <AnimatePresence mode="wait">
+              {activeTab === 'overview' && (
+                <Overview
+                  key="overview"
+                  userName={superAdmin.name}
+                  onNavigate={(tab) => setActiveTab(tab)}
+                />
+              )}
 
-            {activeTab === 'analytics' && (
-              <Analytics key="analytics" role="admin" />
-            )}
+              {activeTab === 'analytics' && (
+                <Analytics key="analytics" role="admin" />
+              )}
 
-            {activeTab === 'counseling' && (
-              <CounselingAppointments key="counseling-list" role="director" />
-            )}
+              {activeTab === 'counseling' && (
+                <CounselingAppointments key="counseling-list" role="director" />
+              )}
 
-            {activeTab === 'assessment' && (
-              <AssessmentAppointments key="assessment-list" role="director" />
-            )}
+              {activeTab === 'assessment' && (
+                <AssessmentAppointments key="assessment-list" role="director" />
+              )}
 
-            {activeTab === 'shifting' && (
-              <ShiftingAppointments key="shifting-list" role="director" />
-            )}
+              {activeTab === 'shifting' && (
+                <ShiftingAppointments key="shifting-list" role="director" />
+              )}
 
-            {activeTab === 'cms' && (
-              <CMS key="cms-module" />
-            )}
+              {activeTab === 'cms' && (
+                <CMS key="cms-module" />
+              )}
 
-            {activeTab === 'accounts' && (
-              <UserManagement key="accounts-module" />
-            )}
+              {activeTab === 'accounts' && (
+                <UserManagement key="accounts-module" />
+              )}
 
-            {activeTab === 'history' && (
-              <History key="history-list" />
-            )}
+              {activeTab === 'history' && (
+                <History key="history-list" />
+              )}
 
-            { activeTab === 'availability' && (
-              <Availability key="availability-mgmt" />
-            )}
+              {activeTab === 'availability' && (
+                <Availability key="availability-mgmt" />
+              )}
 
-            { activeTab === 'office-schedule' && (
-              <OfficeSchedule key="office-mgmt" />
-            )}
+              {activeTab === 'office-schedule' && (
+                <OfficeSchedule key="office-mgmt" />
+              )}
 
-            {activeTab === 'profile' && (
-              <Profile key="profile" user={{ ...superAdmin, type: 'director' } as any} />
-            )}
+              {activeTab === 'profile' && (
+                <Profile key="profile" user={{ ...superAdmin, type: 'director' } as any} />
+              )}
 
-            {/* Fallback for other tabs */}
-            {!['overview', 'analytics', 'counseling', 'assessment', 'shifting', 'cms', 'accounts', 'history', 'availability', 'office-schedule', 'profile'].includes(activeTab) && (
-              <motion.div
-                key="coming-soon"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex items-center justify-center min-h-[400px] text-slate-400 font-medium italic"
-              >
-                Module "{activeTab}" is currently under development.
-              </motion.div>
-            )}
-          </AnimatePresence>
+              {/* Fallback for other tabs */}
+              {!['overview', 'analytics', 'counseling', 'assessment', 'shifting', 'cms', 'accounts', 'history', 'availability', 'office-schedule', 'profile'].includes(activeTab) && (
+                <motion.div
+                  key="coming-soon"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex items-center justify-center min-h-[400px] text-slate-400 font-medium italic"
+                >
+                  Module "{activeTab}" is currently under development.
+                </motion.div>
+              )}
+            </AnimatePresence>
           </ThemeProvider>
         </div>
       </main>

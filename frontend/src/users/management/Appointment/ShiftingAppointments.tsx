@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { RefreshCw, Search, Filter, Calendar as CalendarIcon, MoreHorizontal, ArrowRight, ClipboardCheck, CheckCircle2, X, Edit2 } from 'lucide-react';
+import { RefreshCw, Search, Filter, Calendar as CalendarIcon, MoreHorizontal, ArrowRight, Clock, ClipboardCheck, CheckCircle2, X, Edit2 } from 'lucide-react';
 import ShiftingEvaluationModal from '../../../components/management-modals/ShiftingEvaluationModal';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { appointmentApi } from '../../../lib/api';
@@ -15,9 +15,12 @@ const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' 
   const [selectedAppointment, setSelectedAppointment] = useState<ShiftingAppointmentItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const today = new Date().toISOString().split('T')[0];
+  const [activeSubTab, setActiveSubTab] = useState<'period' | 'exam-date' | 'exam-time'>('period');
   const [submissionPeriod, setSubmissionPeriod] = useState({
     start: today,
     end: new Date(new Date().setDate(new Date().getDate() + 30)).toISOString().split('T')[0],
+    examDate: new Date(new Date().setDate(new Date().getDate() + 35)).toISOString().split('T')[0],
+    examTime: "09:00 AM",
     isEditing: false
   });
 
@@ -59,6 +62,12 @@ const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' 
   const handleEvaluate = (app: ShiftingAppointmentItem) => {
     setSelectedAppointment(app);
     setIsModalOpen(true);
+  };
+
+  const getTabIcon = (tab: string) => {
+    if (tab === 'period') return <CalendarIcon size={20} />;
+    if (tab === 'exam-date') return <ClipboardCheck size={20} />;
+    return <Clock size={20} />;
   };
 
   return (
@@ -106,67 +115,126 @@ const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' 
         </div>
       </div>
       
-      {/* Submission Period Management */}
-      <div className={`p-6 rounded-lg border ${submissionPeriod.isEditing ? 'bg-white border-slate-200' : `${status.bg} border-transparent`} transition-all duration-500 min-h-[140px] flex items-center`}>
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 w-full">
-          <div className="flex items-center gap-4">
-            <div className={`w-12 h-12 ${status.color} rounded-lg flex items-center justify-center text-white shadow-lg`}>
-              <CalendarIcon size={24} />
-            </div>
-            <div>
-              <div className="flex items-center gap-3">
-                <h4 className="text-lg font-black text-slate-800">Submission Period</h4>
-                <span className={`px-3 py-1 ${status.bg} ${status.text} rounded-full text-[10px] font-black uppercase tracking-widest border border-current/20 animate-pulse`}>
-                  {status.label}
-                </span>
-              </div>
-              <p className="text-slate-500 text-xs font-medium mt-0.5">
-                {submissionPeriod.isEditing 
-                  ? 'Set the start and end dates for student shifting applications.' 
-                  : `Applications are accepted from ${new Date(submissionPeriod.start).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} to ${new Date(submissionPeriod.end).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}.`}
-              </p>
-            </div>
-          </div>
+      {/* Submission & Exam Management Tabs */}
+      <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden transition-all duration-500">
+        <div className="flex items-center bg-slate-50 border-b border-slate-100 p-1">
+          {[
+            { id: 'period', label: 'Submission Period' },
+            { id: 'exam-date', label: 'Date of Exam' },
+            { id: 'exam-time', label: 'Time of Exam' }
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveSubTab(tab.id as any)}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${
+                activeSubTab === tab.id 
+                ? 'bg-white text-rose-600 shadow-sm' 
+                : 'text-slate-400 hover:text-slate-600'
+              }`}
+            >
+              {getTabIcon(tab.id)}
+              {tab.label}
+            </button>
+          ))}
+        </div>
 
-          <div className="flex items-center gap-4">
-            {submissionPeriod.isEditing ? (
-              <div className="flex flex-col sm:flex-row items-end gap-3 animate-in fade-in slide-in-from-right-4">
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Start Date</label>
-                  <input 
-                    type="date" 
-                    min={today}
-                    value={submissionPeriod.start}
-                    onChange={(e) => setSubmissionPeriod({ ...submissionPeriod, start: e.target.value })}
-                    className="bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm font-bold outline-none focus:ring-2 focus:ring-rose-500 transition-all"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-black uppercase text-slate-400 ml-1">End Date</label>
-                  <input 
-                    type="date" 
-                    min={submissionPeriod.start}
-                    value={submissionPeriod.end}
-                    onChange={(e) => setSubmissionPeriod({ ...submissionPeriod, end: e.target.value })}
-                    className="bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm font-bold outline-none focus:ring-2 focus:ring-rose-500 transition-all"
-                  />
-                </div>
-                <button 
-                  onClick={() => setSubmissionPeriod({ ...submissionPeriod, isEditing: false })}
-                  className={`px-6 py-2.5 ${theme.bg600} text-white rounded-lg text-xs font-black uppercase tracking-widest shadow-lg ${theme.hoverBg700} transition-all h-[42px]`}
-                >
-                  Save Period
-                </button>
+        <div className="p-8 flex items-center">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 w-full">
+            <div className="flex items-center gap-5">
+              <div className={`w-14 h-14 ${activeSubTab === 'period' ? status.color : 'bg-rose-600'} rounded-2xl flex items-center justify-center text-white shadow-lg`}>
+                {getTabIcon(activeSubTab)}
               </div>
-            ) : (
-              <button 
-                onClick={() => setSubmissionPeriod({ ...submissionPeriod, isEditing: true })}
-                className="px-6 py-3 bg-white text-slate-700 border border-slate-200 rounded-lg text-xs font-black uppercase tracking-widest hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm"
-              >
-                <Edit2 size={14} />
-                Manage Period
-              </button>
-            )}
+              <div>
+                <div className="flex items-center gap-3">
+                  <h4 className="text-xl font-black text-slate-800">
+                    {activeSubTab === 'period' ? 'Application Window' : activeSubTab === 'exam-date' ? 'Examination Day' : 'Exam Schedule'}
+                  </h4>
+                  {activeSubTab === 'period' && (
+                    <span className={`px-3 py-1 ${status.bg} ${status.text} rounded-full text-[10px] font-black uppercase tracking-widest border border-current/20 animate-pulse`}>
+                      {status.label}
+                    </span>
+                  )}
+                </div>
+                <p className="text-slate-500 text-sm font-medium mt-1">
+                  {activeSubTab === 'period' 
+                    ? `Student applications are accepted until ${new Date(submissionPeriod.end).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}.`
+                    : activeSubTab === 'exam-date'
+                    ? `The entrance exam is scheduled for ${new Date(submissionPeriod.examDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}.`
+                    : `The shifting examination will begin promptly at ${submissionPeriod.examTime}.`}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 bg-slate-50/80 p-4 rounded-2xl border border-slate-100">
+              {submissionPeriod.isEditing ? (
+                <div className="flex flex-col sm:flex-row items-end gap-3 animate-in fade-in slide-in-from-right-4">
+                  {activeSubTab === 'period' && (
+                    <>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-[9px] font-black uppercase text-slate-400 ml-1">Start Date</label>
+                        <input 
+                          type="date" 
+                          min={today}
+                          value={submissionPeriod.start}
+                          onChange={(e) => setSubmissionPeriod({ ...submissionPeriod, start: e.target.value })}
+                          className="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold outline-none focus:ring-2 focus:ring-rose-500 transition-all"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-[9px] font-black uppercase text-slate-400 ml-1">End Date</label>
+                        <input 
+                          type="date" 
+                          min={submissionPeriod.start}
+                          value={submissionPeriod.end}
+                          onChange={(e) => setSubmissionPeriod({ ...submissionPeriod, end: e.target.value })}
+                          className="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold outline-none focus:ring-2 focus:ring-rose-500 transition-all"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {activeSubTab === 'exam-date' && (
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[9px] font-black uppercase text-slate-400 ml-1">Exam Date</label>
+                      <input 
+                        type="date" 
+                        min={submissionPeriod.end}
+                        value={submissionPeriod.examDate}
+                        onChange={(e) => setSubmissionPeriod({ ...submissionPeriod, examDate: e.target.value })}
+                        className="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold outline-none focus:ring-2 focus:ring-rose-500 transition-all"
+                      />
+                    </div>
+                  )}
+
+                  {activeSubTab === 'exam-time' && (
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[9px] font-black uppercase text-slate-400 ml-1">Exam Time</label>
+                      <input 
+                        type="time" 
+                        value={submissionPeriod.examTime}
+                        onChange={(e) => setSubmissionPeriod({ ...submissionPeriod, examTime: e.target.value })}
+                        className="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold outline-none focus:ring-2 focus:ring-rose-500 transition-all w-48"
+                      />
+                    </div>
+                  )}
+
+                  <button 
+                    onClick={() => setSubmissionPeriod({ ...submissionPeriod, isEditing: false })}
+                    className="px-6 py-3 bg-rose-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-rose-600/20 hover:bg-rose-700 transition-all"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              ) : (
+                <button 
+                  onClick={() => setSubmissionPeriod({ ...submissionPeriod, isEditing: true })}
+                  className="px-8 py-3 bg-white text-slate-900 border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all flex items-center gap-3 shadow-sm"
+                >
+                  <Edit2 size={14} className="text-rose-600" />
+                  Edit Configuration
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>

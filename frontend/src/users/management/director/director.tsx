@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { 
-  Clock, 
+import {
+  Clock,
   MessageCircle,
   ClipboardCheck,
   RefreshCw,
   User,
-  BarChart3
+  BarChart3,
+  Building2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ManagementSidebar from '../../../components/ManagementSidebar';
@@ -16,6 +17,7 @@ import CounselingAppointments from '../Appointment/CounselingAppointments';
 import AssessmentAppointments from '../Appointment/AssessmentAppointments';
 import ShiftingAppointments from '../Appointment/ShiftingAppointments';
 import History from '../History';
+import OfficeSchedule from './OfficeSchedule';
 import { useAuth } from '../../../auth/AuthContext';
 
 const DirectorDashboard = () => {
@@ -38,13 +40,14 @@ const DirectorDashboard = () => {
     { id: 'counseling', label: 'Counseling', icon: MessageCircle },
     { id: 'assessment', label: 'Assessment', icon: ClipboardCheck },
     { id: 'shifting', label: 'Shifting', icon: RefreshCw },
+    { id: 'office-schedule', label: 'Office Schedule', icon: Building2 },
     { id: 'history', label: 'History', icon: Clock },
     { id: 'profile', label: 'My Profile', icon: User },
   ];
 
   return (
     <div className="min-h-screen bg-[#f1f5f9] flex font-sans text-slate-900">
-      <ManagementSidebar 
+      <ManagementSidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         userName={director.name}
@@ -55,7 +58,7 @@ const DirectorDashboard = () => {
       />
 
       <main className="flex-1 relative h-screen overflow-y-auto">
-        <ManagementNavbar 
+        <ManagementNavbar
           userName={director.name}
           onMenuClick={() => setIsSidebarOpen(true)}
         />
@@ -78,6 +81,10 @@ const DirectorDashboard = () => {
               <ShiftingAppointments key="shifting-list" role="director" />
             )}
 
+            {activeTab === 'office-schedule' && (
+              <OfficeSchedule key="office-mgmt" />
+            )}
+
             {activeTab === 'history' && (
               <History key="history-list" />
             )}
@@ -87,7 +94,7 @@ const DirectorDashboard = () => {
             )}
 
             {/* Fallback for other tabs */}
-            {!['analytics', 'counseling', 'assessment', 'shifting', 'history', 'profile'].includes(activeTab) && (
+            {!['analytics', 'counseling', 'assessment', 'shifting', 'history', 'office-schedule', 'profile'].includes(activeTab) && (
               <motion.div
                 key="coming-soon"
                 initial={{ opacity: 0 }}
