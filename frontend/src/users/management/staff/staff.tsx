@@ -11,7 +11,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import ManagementSidebar from '../../../components/ManagementSidebar';
 import ManagementNavbar from '../../../components/ManagementNavbar';
-import Profile from '../../Profile';
+import ManagementProfile from '../../ManagementProfile';
 import StaffOverview from './StaffOverview';
 import Availability from './Availability';
 import CounselingAppointments from '../Appointment/CounselingAppointments';
@@ -88,7 +88,7 @@ const StaffDashboardLayout = () => {
 
 
             {activeTab === 'profile' && (
-              <Profile key="profile" user={{ ...staff, type: 'staff' } as any} />
+              <ManagementProfile key="profile" user={{ ...staff, type: 'staff' } as any} />
             )}
 
             {/* Fallback for other tabs */}

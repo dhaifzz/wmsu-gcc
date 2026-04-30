@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ClientNavbar from '../../../components/ClientNavbar';
-import Profile from '../../Profile';
+import ClientProfile from '../../ClientProfile';
 import Counseling from '../Counseling';
 import Loader from '../../../components/loader/Loader';
 import { useAuth } from '../../../auth/AuthContext';
@@ -172,7 +172,7 @@ const OutsideClientDashboard = () => {
               <Counseling key="counseling" onBack={() => setActiveService(null)} />
             )}
 
-            {activeTab === 'profile' && <Profile key="profile" user={user} />}
+            {activeTab === 'profile' && <ClientProfile key="profile" user={user} />}
             </AnimatePresence>
           )}
         </div>

@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ClientNavbar from '../../../../components/ClientNavbar';
-import Profile from '../../../Profile';
+import ClientProfile from '../../../ClientProfile';
 import MarqueeText from '../../../../components/MarqueeText';
 import Counseling from '../../Counseling';
 import Assessment from '../../Assessment';
@@ -230,7 +230,7 @@ const CollegeDashboard = () => {
               <Shifting key="shifting" onBack={() => setActiveService(null)} user={user} />
             )}
 
-            {activeTab === 'profile' && <Profile key="profile" user={user} />}
+            {activeTab === 'profile' && <ClientProfile key="profile" user={user} />}
           </AnimatePresence>
           )}
         </div>

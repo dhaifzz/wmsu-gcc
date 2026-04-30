@@ -2,7 +2,28 @@ import { motion } from 'framer-motion';
 import wmsuLogo from '../../assets/logos/WMSU.png';
 import gccLogo from '../../assets/logos/GCC.png';
 
+import { useEffect, useState } from 'react';
+
+// SplashScreen shows only on the first visit to the HomePage.
+// It self-manages visibility using a sessionStorage flag to avoid
+// flashing on subsequent navigations.
 const SplashScreen = () => {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const hasShownSplash = sessionStorage.getItem('hasShownSplashHome');
+    if (!hasShownSplash) {
+      setVisible(true);
+      const t = setTimeout(() => {
+        setVisible(false);
+        sessionStorage.setItem('hasShownSplashHome', 'true');
+      }, 2000);
+      return () => clearTimeout(t);
+    }
+  }, []);
+
+  if (!visible) return null;
+
   return (
     <div className="fixed inset-0 bg-white flex flex-col items-center justify-center z-[9999]">
       <div className="flex-1 flex flex-col items-center justify-center gap-6">

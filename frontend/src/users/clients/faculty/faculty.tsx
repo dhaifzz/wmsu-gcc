@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ClientNavbar from '../../../components/ClientNavbar';
-import Profile from '../../Profile';
+import ClientProfile from '../../ClientProfile';
 import MarqueeText from '../../../components/MarqueeText';
 import Counseling from '../Counseling';
 import Loader from '../../../components/loader/Loader';
@@ -176,7 +176,7 @@ const FacultyDashboard = () => {
               <Counseling key="counseling" onBack={() => setActiveService(null)} />
             )}
 
-            {activeTab === 'profile' && <Profile key="profile" user={user} />}
+            {activeTab === 'profile' && <ClientProfile key="profile" user={user} />}
             </AnimatePresence>
           )}
         </div>

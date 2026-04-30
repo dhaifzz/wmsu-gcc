@@ -45,7 +45,7 @@ const Footer = () => {
 
         const footerRes = await cmsApi.getContent('footer');
         const contactRes = await cmsApi.getContent('contact');
-        
+
         if (footerRes.ok && contactRes.ok) {
           setFooterInfo({
             description: footerRes.data.description || footerInfo.description,

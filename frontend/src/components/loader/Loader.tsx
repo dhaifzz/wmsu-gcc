@@ -15,11 +15,12 @@ const Loader = ({ type = 'dashboard' }: LoaderProps) => {
 
   if (type !== 'dashboard') {
     return (
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="w-full bg-slate-50"
+        // Avoid a white full-page overlay during loading by using a transparent background
+        className="w-full min-h-screen bg-transparent"
       >
         {/* Hero Skeleton - Solid Dark Emerald */}
         <div className={`relative h-[450px] ${darkEmerald} flex items-center justify-center pt-32 pb-32`}>
@@ -33,10 +34,10 @@ const Loader = ({ type = 'dashboard' }: LoaderProps) => {
         {/* Content Section Skeleton */}
         <div className="container mx-auto px-6 -mt-16 relative z-20 pb-24">
           <div className="grid lg:grid-cols-3 gap-10">
-            
+
             {/* Main Content */}
             <div className={`${type === 'legal' ? 'lg:col-span-3 max-w-4xl mx-auto' : 'lg:col-span-2'} space-y-8 w-full`}>
-              
+
               {/* Type Specific Section 1 */}
               <div className={`bg-white p-10 ${type === 'legal' ? 'rounded-[2.5rem] md:p-16' : 'rounded-lg'} shadow-xl shadow-slate-200 border border-slate-100 space-y-6`}>
                 <div className={`h-8 w-48 ${slate300} rounded-lg animate-pulse`}></div>
@@ -45,7 +46,7 @@ const Loader = ({ type = 'dashboard' }: LoaderProps) => {
                   <div className={`h-4 w-full ${slate100} rounded-lg animate-pulse`}></div>
                   <div className={`h-4 w-3/4 ${slate100} rounded-lg animate-pulse`}></div>
                 </div>
-                
+
                 {/* Specific Grid for Shifting/Assessment */}
                 {(type === 'shifting' || type === 'assessment') && (
                   <div className="grid md:grid-cols-2 gap-6 pt-6">
@@ -57,7 +58,7 @@ const Loader = ({ type = 'dashboard' }: LoaderProps) => {
                 {/* Legal extra sections inside the same card */}
                 {type === 'legal' && (
                   <div className="space-y-12 pt-12">
-                     {[1, 2, 3].map((i) => (
+                    {[1, 2, 3].map((i) => (
                       <div key={i} className="space-y-4">
                         <div className={`h-8 w-48 ${slate300} rounded-lg animate-pulse`}></div>
                         <div className="space-y-2">
@@ -137,7 +138,7 @@ const Loader = ({ type = 'dashboard' }: LoaderProps) => {
   }
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -195,7 +196,7 @@ const Loader = ({ type = 'dashboard' }: LoaderProps) => {
             <div className="h-10 w-64 bg-slate-300 rounded-lg animate-pulse"></div>
             <div className="h-16 w-full bg-slate-300 rounded-lg animate-pulse"></div>
             <div className="flex gap-4">
-               <div className="h-6 w-40 bg-slate-400 rounded-lg animate-pulse"></div>
+              <div className="h-6 w-40 bg-slate-400 rounded-lg animate-pulse"></div>
             </div>
           </div>
           <div className="hidden md:block">

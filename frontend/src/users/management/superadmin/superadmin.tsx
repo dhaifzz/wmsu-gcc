@@ -13,7 +13,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import ManagementSidebar from '../../../components/ManagementSidebar';
 import ManagementNavbar from '../../../components/ManagementNavbar';
-import Profile from '../../Profile';
+import ManagementProfile from '../../ManagementProfile';
 import Analytics from '../Analytics';
 import CounselingAppointments from '../Appointment/CounselingAppointments';
 import AssessmentAppointments from '../Appointment/AssessmentAppointments';
@@ -120,7 +120,7 @@ const SuperAdminDashboard = () => {
               )}
 
               {activeTab === 'profile' && (
-                <Profile key="profile" user={{ ...superAdmin, type: 'director' } as any} />
+                <ManagementProfile key="profile" user={{ ...superAdmin, type: 'director' } as any} />
               )}
 
               {/* Fallback for other tabs */}

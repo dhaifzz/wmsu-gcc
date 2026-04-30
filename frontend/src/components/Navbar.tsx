@@ -19,7 +19,7 @@ const Navbar = () => {
       setIsScrolled(window.scrollY > 20);
     };
     window.addEventListener('scroll', handleScroll);
-    
+
     // Fetch logos from CMS
     const fetchLogos = async () => {
       try {

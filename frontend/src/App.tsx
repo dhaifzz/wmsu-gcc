@@ -90,12 +90,12 @@ function AppContent() {
       } />
       <Route path="/director" element={
         // <ProtectedRoute allowedRoles={['Director', 'SuperAdmin']}>
-          <DirectorDashboard />
+        <DirectorDashboard />
         // </ProtectedRoute>
       } />
       <Route path="/superadmin" element={
         // <ProtectedRoute allowedRoles={['SuperAdmin']}>
-          <SuperAdminDashboard />
+        <SuperAdminDashboard />
         // </ProtectedRoute>
       } />
 

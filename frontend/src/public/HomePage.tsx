@@ -13,20 +13,7 @@ import SplashScreen from '../components/loader/SplashScreen';
 
 
 const HomePage = () => {
-  // Initialize state immediately to prevent "flash" of content
-  const [showSplash, setShowSplash] = useState(() => {
-    return !sessionStorage.getItem('hasShownSplash');
-  });
-
-  useEffect(() => {
-    if (showSplash) {
-      const timer = setTimeout(() => {
-        setShowSplash(false);
-        sessionStorage.setItem('hasShownSplash', 'true');
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [showSplash]);
+  // SplashScreen handles first-visit display internally; do not manage here
   const [homeContent, setHomeContent] = useState<any>({
     hero: {
       title: "Take care of your Mental Health",
@@ -95,9 +82,8 @@ const HomePage = () => {
     return () => clearInterval(timer);
   }, [heroImages.length]);
 
-  if (showSplash) {
-    return <SplashScreen />;
-  }
+  // Always render SplashScreen; it will be hidden after the first visit
+  // by its own internal logic.
 
   const features = homeContent.support.features.map((f: any, i: number) => ({
     ...f,
@@ -112,6 +98,7 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
+      <SplashScreen />
       <Navbar />
 
       {/* Hero Section */}
