@@ -1,12 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { RefreshCw, Search, Filter, Calendar as CalendarIcon, MoreHorizontal, ArrowRight, ClipboardCheck, CheckCircle2, X, Edit2 } from 'lucide-react';
 import ShiftingEvaluationModal from '../../../components/management-modals/ShiftingEvaluationModal';
 import { useTheme } from '../../../contexts/ThemeContext';
+import { appointmentApi } from '../../../lib/api';
+import type { ShiftingAppointmentItem } from '../../../lib/api';
+import { useAuth } from '../../../auth/AuthContext';
 
 const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }) => {
+  const { accessToken } = useAuth();
   const theme = useTheme();
-  const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
+  const [appointments, setAppointments] = useState<ShiftingAppointmentItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedAppointment, setSelectedAppointment] = useState<ShiftingAppointmentItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const today = new Date().toISOString().split('T')[0];
   const [submissionPeriod, setSubmissionPeriod] = useState({
@@ -28,15 +34,31 @@ const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' 
 
   const status = getStatus();
 
-  const handleEvaluate = (app: any) => {
+  const fetchAppointments = async () => {
+    if (!accessToken) return;
+    try {
+      setLoading(true);
+      const res = await appointmentApi.getShiftingManagementAppointments(accessToken);
+      if (res.ok) {
+        setAppointments(res.data.appointments);
+      } else {
+        console.error('Error fetching shifting management appointments:', res.error);
+      }
+    } catch (error) {
+      console.error('Failed to fetch:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAppointments();
+  }, [accessToken]);
+
+  const handleEvaluate = (app: ShiftingAppointmentItem) => {
     setSelectedAppointment(app);
     setIsModalOpen(true);
   };
-  const appointments = [
-    { id: 1, student: "Juan Luna", level: "College", course: "BSCS", studentId: "2021-00456", time: "08:00 AM - 09:00 AM", date: "May 24, 2024", status: role === 'director' ? "Evaluated" : "Pending", evaluatedBy: "Elena Rodriguez", currentCourse: "BSCS", targetCourse: "BSIT" },
-    { id: 2, student: "Ibarra, Crisostomo", level: "College", course: "BS Psych", studentId: "2021-00999", time: "09:00 AM - 10:00 AM", date: "May 24, 2024", status: role === 'director' ? "Evaluated" : "Pending", evaluatedBy: "Elena Rodriguez", currentCourse: "BS Crim", targetCourse: "BS Psych" },
-    { id: 3, student: "Jaena, Graciano", level: "College", studentId: "2021-00888", time: "11:00 AM", date: "May 25, 2024", currentCourse: "BS Eng", targetCourse: "BS MassComm", status: "Approved" },
-  ];
 
   return (
     <motion.div
@@ -166,7 +188,19 @@ const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' 
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {appointments.map((app) => (
+              {loading ? (
+                <tr>
+                  <td colSpan={6} className="px-8 py-8 text-center text-slate-500 font-bold text-sm">
+                    Loading applications...
+                  </td>
+                </tr>
+              ) : appointments.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-8 py-8 text-center text-slate-500 font-bold text-sm">
+                    No applications found.
+                  </td>
+                </tr>
+              ) : appointments.map((app) => (
                 <tr key={app.id} className="group hover:bg-slate-50/50 transition-colors">
                   <td className="px-8 py-6">
                     <p className="font-bold text-sm text-slate-900">{app.student}</p>
@@ -241,6 +275,10 @@ const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' 
         onClose={() => setIsModalOpen(false)}
         appointment={selectedAppointment}
         role={role}
+        onSuccess={() => {
+          setIsModalOpen(false);
+          fetchAppointments();
+        }}
       />
     </motion.div>
   );

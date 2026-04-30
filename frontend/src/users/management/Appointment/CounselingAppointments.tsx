@@ -1,24 +1,45 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { MessageCircle, Search, Filter, Calendar as CalendarIcon, MoreHorizontal, ClipboardCheck, CheckCircle2, X } from 'lucide-react';
 import CounselingEvaluationModal from '../../../components/management-modals/CounselingEvaluationModal';
 import { useTheme } from '../../../contexts/ThemeContext';
+import { appointmentApi } from '../../../lib/api';
+import type { ManagementAppointmentItem } from '../../../lib/api';
+import { useAuth } from '../../../auth/AuthContext';
 
 const CounselingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }) => {
+  const { accessToken } = useAuth();
   const theme = useTheme();
-  const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
+  const [appointments, setAppointments] = useState<ManagementAppointmentItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedAppointment, setSelectedAppointment] = useState<ManagementAppointmentItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleEvaluate = (app: any) => {
+  const fetchAppointments = async () => {
+    if (!accessToken) return;
+    try {
+      setLoading(true);
+      const res = await appointmentApi.getManagementAppointments(accessToken);
+      if (res.ok) {
+        setAppointments(res.data.appointments);
+      } else {
+        console.error('Failed to fetch appointments:', res.data);
+      }
+    } catch (err) {
+      console.error('Error fetching appointments:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAppointments();
+  }, [accessToken]);
+
+  const handleEvaluate = (app: ManagementAppointmentItem) => {
     setSelectedAppointment(app);
     setIsModalOpen(true);
   };
-  const appointments = [
-    { id: 1, student: "Juan Luna", level: "College", course: "BSCS", studentId: "2021-00456", time: "08:00 AM - 09:00 AM", date: "May 24, 2024", status: role === 'director' ? "Evaluated" : "Pending", evaluatedBy: "Elena Rodriguez" },
-    { id: 2, student: "Maria Clara", level: "High School", grade: "12", track: "Academic", studentId: "2021-00789", time: "09:00 AM - 10:00 AM", date: "May 24, 2024", status: "Approved", evaluatedBy: "Elena Rodriguez" },
-    { id: 3, student: "Dr. Jose Rizal", level: "Faculty", department: "College of Science", studentId: "FAC-99123", time: "10:00 AM - 11:00 AM", date: "May 24, 2024", status: role === 'director' ? "Evaluated" : "Pending", evaluatedBy: "Roberto Gomez" },
-    { id: 4, student: "Mabini, Apolinario", level: "Outside Client", occupation: "Freelance Lawyer", studentId: "EXT-88555", time: "11:00 AM - 12:00 PM", date: "May 25, 2024", status: role === 'director' ? "Evaluated" : "Pending", evaluatedBy: "Elena Rodriguez" },
-  ];
 
   return (
     <motion.div
@@ -82,7 +103,19 @@ const CounselingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {appointments.map((app) => (
+              {loading ? (
+                <tr>
+                  <td colSpan={5} className="px-8 py-8 text-center text-slate-500 font-bold text-sm">
+                    Loading appointments...
+                  </td>
+                </tr>
+              ) : appointments.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-8 py-8 text-center text-slate-500 font-bold text-sm">
+                    No appointments found.
+                  </td>
+                </tr>
+              ) : appointments.map((app) => (
                 <tr key={app.id} className="group hover:bg-slate-50/50 transition-colors">
                   <td className="px-8 py-6">
                     <p className="font-bold text-sm text-slate-900">{app.student}</p>
@@ -108,10 +141,7 @@ const CounselingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director
                           {app.level}
                         </span>
                         <span className="text-[10px] font-bold text-slate-500 ml-1">
-                          {app.level === 'College' ? app.course :
-                            app.level === 'High School' ? (['11', '12'].includes(app.grade || '') ? `${app.track} (G${app.grade})` : `Grade ${app.grade}`) :
-                              app.level === 'Faculty' ? app.department :
-                                app.occupation}
+                          {app.course || app.level}
                         </span>
                       </div>
                     </td>
@@ -154,7 +184,10 @@ const CounselingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director
 
       <CounselingEvaluationModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          fetchAppointments();
+        }}
         appointment={selectedAppointment}
         role={role}
       />

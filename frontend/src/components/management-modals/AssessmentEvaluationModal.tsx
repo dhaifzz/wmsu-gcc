@@ -1,18 +1,102 @@
+import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X, CheckCircle2, CalendarClock, AlertCircle,
   User, BookOpen, Clock, Calendar, ClipboardCheck, FileText
 } from 'lucide-react';
+import { useAuth } from '../../auth/AuthContext';
+import { appointmentApi } from '../../lib/api';
+import { showToast } from '../modal-notification/toast';
 
 interface AssessmentEvaluationModalProps {
   isOpen: boolean;
   onClose: () => void;
   appointment: any;
   role?: 'staff' | 'director' | 'admin';
+  onSuccess?: () => void;
 }
 
-const AssessmentEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff' }: AssessmentEvaluationModalProps) => {
+const AssessmentEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff', onSuccess }: AssessmentEvaluationModalProps) => {
+  const { accessToken } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [forwardToDirector, setForwardToDirector] = useState(true);
+  const [reschedMode, setReschedMode] = useState<boolean>(false);
+  const [reschedType, setReschedType] = useState<'staff_picked' | 'user_picked'>('staff_picked');
+  const [newDate, setNewDate] = useState('');
+  const [newTimeSlot, setNewTimeSlot] = useState('');
+
+  if (!appointment) return null;
+
+  const handleEvaluate = async () => {
+    if (!accessToken) return;
+    setLoading(true);
+    try {
+      const res = await appointmentApi.evaluateAssessmentAppointment(
+        appointment.id,
+        { action: 'evaluate', forwardToDirector },
+        accessToken
+      );
+      if (res.ok) {
+        showToast.success('Evaluation completed.');
+        if (onSuccess) onSuccess();
+      } else {
+        showToast.error(res.error || 'Failed to evaluate.');
+      }
+    } catch (error) {
+      showToast.error('An error occurred.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReschedule = async () => {
+    if (!accessToken) return;
+    if (reschedType === 'staff_picked' && (!newDate || !newTimeSlot)) {
+      showToast.error('Please select new date and time.');
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await appointmentApi.evaluateAssessmentAppointment(
+        appointment.id,
+        { action: 'reschedule', reschedType, newDate, newTimeSlot },
+        accessToken
+      );
+      if (res.ok) {
+        showToast.success('Reschedule requested.');
+        if (onSuccess) onSuccess();
+      } else {
+        showToast.error(res.error || 'Failed to reschedule.');
+      }
+    } catch (error) {
+      showToast.error('An error occurred.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDirectorEvaluate = async (action: 'approve' | 'decline') => {
+    if (!accessToken) return;
+    setLoading(true);
+    try {
+      const res = await appointmentApi.directorEvaluateAssessmentAppointment(
+        appointment.id,
+        { action },
+        accessToken
+      );
+      if (res.ok) {
+        showToast.success(`Appointment ${action}d successfully.`);
+        if (onSuccess) onSuccess();
+      } else {
+        showToast.error(res.error || `Failed to ${action}.`);
+      }
+    } catch (error) {
+      showToast.error('An error occurred.');
+    } finally {
+      setLoading(false);
+    }
+  };
   if (!appointment) return null;
 
   const modalContent = (
@@ -134,32 +218,134 @@ const AssessmentEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff
               </div>
 
               {/* Action Buttons */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-2">
-                <button className="group flex sm:flex-col items-center gap-3 p-4 sm:p-6 bg-teal-50 hover:bg-teal-600 rounded-[1.5rem] sm:rounded-[2rem] border border-teal-100 hover:border-teal-600 transition-all shadow-sm hover:shadow-teal-200">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white group-hover:bg-teal-500 rounded-2xl flex items-center justify-center text-teal-600 group-hover:text-white transition-all shadow-sm shrink-0">
-                    <CheckCircle2 size={24} />
-                  </div>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-teal-700 group-hover:text-white">
-                    {role === 'director' ? 'Accept' : 'Evaluate'}
-                  </span>
-                </button>
+              {!reschedMode ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-2">
+                    {role === 'director' ? (
+                      <>
+                        <button
+                          onClick={() => handleDirectorEvaluate('approve')}
+                          disabled={loading}
+                          className="group flex sm:flex-col items-center gap-3 p-4 sm:p-6 bg-teal-50 hover:bg-teal-600 rounded-[1.5rem] sm:rounded-[2rem] border border-teal-100 hover:border-teal-600 transition-all shadow-sm hover:shadow-teal-200 disabled:opacity-50"
+                        >
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white group-hover:bg-teal-500 rounded-2xl flex items-center justify-center text-teal-600 group-hover:text-white transition-all shadow-sm shrink-0">
+                            <CheckCircle2 size={24} />
+                          </div>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-teal-700 group-hover:text-white">Accept</span>
+                        </button>
 
-                {role === 'director' ? (
-                  <button className="group flex sm:flex-col items-center gap-3 p-4 sm:p-6 bg-rose-50 hover:bg-rose-500 rounded-[1.5rem] sm:rounded-[2rem] border border-rose-100 hover:border-rose-500 transition-all shadow-sm hover:shadow-rose-200">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white group-hover:bg-rose-400 rounded-2xl flex items-center justify-center text-rose-600 group-hover:text-white transition-all shadow-sm shrink-0">
-                      <X size={24} />
+                        <button
+                          onClick={() => handleDirectorEvaluate('decline')}
+                          disabled={loading}
+                          className="group flex sm:flex-col items-center gap-3 p-4 sm:p-6 bg-rose-50 hover:bg-rose-500 rounded-[1.5rem] sm:rounded-[2rem] border border-rose-100 hover:border-rose-500 transition-all shadow-sm hover:shadow-rose-200 disabled:opacity-50"
+                        >
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white group-hover:bg-rose-400 rounded-2xl flex items-center justify-center text-rose-600 group-hover:text-white transition-all shadow-sm shrink-0">
+                            <X size={24} />
+                          </div>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-rose-700 group-hover:text-white">Decline</span>
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={handleEvaluate}
+                          disabled={loading}
+                          className="group flex sm:flex-col items-center gap-3 p-4 sm:p-6 bg-teal-50 hover:bg-teal-600 rounded-[1.5rem] sm:rounded-[2rem] border border-teal-100 hover:border-teal-600 transition-all shadow-sm hover:shadow-teal-200 disabled:opacity-50"
+                        >
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white group-hover:bg-teal-500 rounded-2xl flex items-center justify-center text-teal-600 group-hover:text-white transition-all shadow-sm shrink-0">
+                            <CheckCircle2 size={24} />
+                          </div>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-teal-700 group-hover:text-white">Evaluate</span>
+                        </button>
+
+                        <button
+                          onClick={() => setReschedMode(true)}
+                          disabled={loading}
+                          className="group flex sm:flex-col items-center gap-3 p-4 sm:p-6 bg-amber-50 hover:bg-amber-500 rounded-[1.5rem] sm:rounded-[2rem] border border-amber-100 hover:border-amber-500 transition-all shadow-sm hover:shadow-amber-200 disabled:opacity-50"
+                        >
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white group-hover:bg-amber-400 rounded-2xl flex items-center justify-center text-amber-600 group-hover:text-white transition-all shadow-sm shrink-0">
+                            <CalendarClock size={24} />
+                          </div>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-amber-700 group-hover:text-white">Reschedule</span>
+                        </button>
+                      </>
+                    )}
+                  </div>
+                  {role !== 'director' && (
+                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                      <div>
+                        <p className="text-sm font-bold text-slate-900">Forward to Director</p>
+                        <p className="text-[10px] text-slate-500 font-medium">Require director approval before notifying the student</p>
+                      </div>
+                      <button
+                        onClick={() => setForwardToDirector(!forwardToDirector)}
+                        className={`w-12 h-6 rounded-full transition-colors relative ${forwardToDirector ? 'bg-teal-500' : 'bg-slate-300'}`}
+                      >
+                        <div className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-transform ${forwardToDirector ? 'left-7' : 'left-1'}`}></div>
+                      </button>
                     </div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-rose-700 group-hover:text-white">Decline</span>
-                  </button>
-                ) : (
-                  <button className="group flex sm:flex-col items-center gap-3 p-4 sm:p-6 bg-amber-50 hover:bg-amber-500 rounded-[1.5rem] sm:rounded-[2rem] border border-amber-100 hover:border-amber-500 transition-all shadow-sm hover:shadow-amber-200">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white group-hover:bg-amber-400 rounded-2xl flex items-center justify-center text-amber-600 group-hover:text-white transition-all shadow-sm shrink-0">
-                      <CalendarClock size={24} />
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-black text-slate-900">Reschedule Options</h3>
+                    <button onClick={() => setReschedMode(false)} className="text-xs font-bold text-slate-400 hover:text-slate-600">Back</button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      onClick={() => setReschedType('staff_picked')}
+                      className={`p-3 rounded-xl border text-left transition-all ${reschedType === 'staff_picked' ? 'bg-amber-50 border-amber-500 text-amber-700' : 'bg-white border-slate-200 text-slate-600'}`}
+                    >
+                      <p className="text-xs font-bold">Staff Picks Time</p>
+                    </button>
+                    <button
+                      onClick={() => setReschedType('user_picked')}
+                      className={`p-3 rounded-xl border text-left transition-all ${reschedType === 'user_picked' ? 'bg-amber-50 border-amber-500 text-amber-700' : 'bg-white border-slate-200 text-slate-600'}`}
+                    >
+                      <p className="text-xs font-bold">Student Picks Time</p>
+                    </button>
+                  </div>
+
+                  {reschedType === 'staff_picked' && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest block mb-1">New Date</label>
+                        <input
+                          type="date"
+                          value={newDate}
+                          onChange={(e) => setNewDate(e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold focus:ring-2 focus:ring-amber-500 outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest block mb-1">New Time Slot</label>
+                        <select
+                          value={newTimeSlot}
+                          onChange={(e) => setNewTimeSlot(e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold focus:ring-2 focus:ring-amber-500 outline-none"
+                        >
+                          <option value="">Select Time</option>
+                          <option value="08:00 AM - 09:00 AM">08:00 AM - 09:00 AM</option>
+                          <option value="09:00 AM - 10:00 AM">09:00 AM - 10:00 AM</option>
+                          <option value="10:00 AM - 11:00 AM">10:00 AM - 11:00 AM</option>
+                          <option value="01:00 PM - 02:00 PM">01:00 PM - 02:00 PM</option>
+                          <option value="02:00 PM - 03:00 PM">02:00 PM - 03:00 PM</option>
+                          <option value="03:00 PM - 04:00 PM">03:00 PM - 04:00 PM</option>
+                        </select>
+                      </div>
                     </div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-amber-700 group-hover:text-white">Reschedule</span>
+                  )}
+
+                  <button
+                    onClick={handleReschedule}
+                    disabled={loading}
+                    className="w-full py-4 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-colors disabled:opacity-50"
+                  >
+                    Confirm Reschedule
                   </button>
-                )}
-              </div>
+                </div>
+              )}
 
               <div className="flex items-start gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
                 <AlertCircle size={16} className="text-slate-400 mt-0.5 shrink-0" />

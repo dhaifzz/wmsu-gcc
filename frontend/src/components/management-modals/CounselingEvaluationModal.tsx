@@ -1,9 +1,13 @@
+import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X, CheckCircle2, CalendarClock, AlertCircle,
   User, BookOpen, Clock, Calendar, MessageCircle, ClipboardCheck
 } from 'lucide-react';
+import { useAuth } from '../../auth/AuthContext';
+import { appointmentApi } from '../../lib/api';
+import { showToast } from '../modal-notification/toast';
 
 interface CounselingEvaluationModalProps {
   isOpen: boolean;
@@ -13,7 +17,85 @@ interface CounselingEvaluationModalProps {
 }
 
 const CounselingEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff' }: CounselingEvaluationModalProps) => {
+  const { accessToken } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [forwardToDirector, setForwardToDirector] = useState(true);
+  const [reschedMode, setReschedMode] = useState<boolean>(false);
+  const [reschedType, setReschedType] = useState<'staff_picked' | 'user_picked'>('user_picked');
+  const [newDate, setNewDate] = useState('');
+  const [newTimeSlot, setNewTimeSlot] = useState('');
+
   if (!appointment) return null;
+
+  const handleEvaluate = async () => {
+    if (!accessToken) return;
+    setLoading(true);
+    try {
+      const res = await appointmentApi.evaluateCounselingAppointment(
+        appointment.id,
+        { action: 'evaluate', forwardToDirector },
+        accessToken
+      );
+      if (res.ok) {
+        showToast.success('Evaluation completed.');
+        onClose();
+      } else {
+        showToast.error(res.data.error || 'Failed to evaluate appointment.');
+      }
+    } catch (err) {
+      showToast.error('An error occurred.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReschedule = async () => {
+    if (!accessToken) return;
+    if (reschedType === 'staff_picked' && (!newDate || !newTimeSlot)) {
+      showToast.error('Please select new date and time.');
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await appointmentApi.evaluateCounselingAppointment(
+        appointment.id,
+        { action: 'reschedule', reschedType, newDate, newTimeSlot },
+        accessToken
+      );
+      if (res.ok) {
+        showToast.success('Reschedule requested.');
+        onClose();
+      } else {
+        showToast.error(res.data.error || 'Failed to reschedule.');
+      }
+    } catch (err) {
+      showToast.error('An error occurred.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDirectorEvaluate = async (action: 'approve' | 'decline') => {
+    if (!accessToken) return;
+    setLoading(true);
+    try {
+      const res = await appointmentApi.directorEvaluateCounselingAppointment(
+        appointment.id,
+        { action },
+        accessToken
+      );
+      if (res.ok) {
+        showToast.success(`Appointment ${action}d successfully.`);
+        onClose();
+      } else {
+        showToast.error(res.data.error || 'Action failed.');
+      }
+    } catch (err) {
+      showToast.error('An error occurred.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const modalContent = (
     <AnimatePresence>
@@ -124,29 +206,82 @@ const CounselingEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff
 
               {/* Action Buttons */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-2">
-                <button className="group flex sm:flex-col items-center gap-3 p-4 sm:p-6 bg-teal-50 hover:bg-teal-600 rounded-[1.5rem] sm:rounded-[2rem] border border-teal-100 hover:border-teal-600 transition-all shadow-sm hover:shadow-teal-200">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white group-hover:bg-teal-500 rounded-2xl flex items-center justify-center text-teal-600 group-hover:text-white transition-all shadow-sm shrink-0">
-                    <CheckCircle2 size={24} />
-                  </div>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-teal-700 group-hover:text-white">
-                    {role === 'director' ? 'Accept' : 'Evaluate'}
-                  </span>
-                </button>
-
                 {role === 'director' ? (
-                  <button className="group flex sm:flex-col items-center gap-3 p-4 sm:p-6 bg-rose-50 hover:bg-rose-500 rounded-[1.5rem] sm:rounded-[2rem] border border-rose-100 hover:border-rose-500 transition-all shadow-sm hover:shadow-rose-200">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white group-hover:bg-rose-400 rounded-2xl flex items-center justify-center text-rose-600 group-hover:text-white transition-all shadow-sm shrink-0">
-                      <X size={24} />
-                    </div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-rose-700 group-hover:text-white">Decline</span>
-                  </button>
+                  <>
+                    <button onClick={() => handleDirectorEvaluate('approve')} disabled={loading} className="group flex sm:flex-col items-center gap-3 p-4 sm:p-6 bg-teal-50 hover:bg-teal-600 rounded-[1.5rem] sm:rounded-[2rem] border border-teal-100 hover:border-teal-600 transition-all shadow-sm hover:shadow-teal-200">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white group-hover:bg-teal-500 rounded-2xl flex items-center justify-center text-teal-600 group-hover:text-white transition-all shadow-sm shrink-0">
+                        <CheckCircle2 size={24} />
+                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-teal-700 group-hover:text-white">Accept</span>
+                    </button>
+                    <button onClick={() => handleDirectorEvaluate('decline')} disabled={loading} className="group flex sm:flex-col items-center gap-3 p-4 sm:p-6 bg-rose-50 hover:bg-rose-500 rounded-[1.5rem] sm:rounded-[2rem] border border-rose-100 hover:border-rose-500 transition-all shadow-sm hover:shadow-rose-200">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white group-hover:bg-rose-400 rounded-2xl flex items-center justify-center text-rose-600 group-hover:text-white transition-all shadow-sm shrink-0">
+                        <X size={24} />
+                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-rose-700 group-hover:text-white">Decline</span>
+                    </button>
+                  </>
                 ) : (
-                  <button className="group flex sm:flex-col items-center gap-3 p-4 sm:p-6 bg-amber-50 hover:bg-amber-500 rounded-[1.5rem] sm:rounded-[2rem] border border-amber-100 hover:border-amber-500 transition-all shadow-sm hover:shadow-amber-200">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white group-hover:bg-amber-400 rounded-2xl flex items-center justify-center text-amber-600 group-hover:text-white transition-all shadow-sm shrink-0">
-                      <CalendarClock size={24} />
-                    </div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-amber-700 group-hover:text-white">Reschedule</span>
-                  </button>
+                  <>
+                    {!reschedMode ? (
+                      <>
+                        <div className="flex flex-col gap-2">
+                          <button onClick={handleEvaluate} disabled={loading} className="group flex sm:flex-col items-center gap-3 p-4 sm:p-6 bg-teal-50 hover:bg-teal-600 rounded-[1.5rem] sm:rounded-[2rem] border border-teal-100 hover:border-teal-600 transition-all shadow-sm hover:shadow-teal-200">
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white group-hover:bg-teal-500 rounded-2xl flex items-center justify-center text-teal-600 group-hover:text-white transition-all shadow-sm shrink-0">
+                              <CheckCircle2 size={24} />
+                            </div>
+                            <span className="text-[10px] font-black uppercase tracking-widest text-teal-700 group-hover:text-white">Evaluate</span>
+                          </button>
+                          <label className="flex items-center gap-2 cursor-pointer mt-2 pl-2">
+                            <input type="checkbox" checked={forwardToDirector} onChange={(e) => setForwardToDirector(e.target.checked)} className="rounded text-teal-600" />
+                            <span className="text-xs font-bold text-slate-700">Forward to Director</span>
+                          </label>
+                        </div>
+                        <button onClick={() => setReschedMode(true)} disabled={loading} className="group flex sm:flex-col items-center gap-3 p-4 sm:p-6 bg-amber-50 hover:bg-amber-500 rounded-[1.5rem] sm:rounded-[2rem] border border-amber-100 hover:border-amber-500 transition-all shadow-sm hover:shadow-amber-200">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white group-hover:bg-amber-400 rounded-2xl flex items-center justify-center text-amber-600 group-hover:text-white transition-all shadow-sm shrink-0">
+                            <CalendarClock size={24} />
+                          </div>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-amber-700 group-hover:text-white">Reschedule</span>
+                        </button>
+                      </>
+                    ) : (
+                      <div className="col-span-1 sm:col-span-2 bg-amber-50 rounded-[2rem] p-5 border border-amber-100">
+                        <div className="flex justify-between items-center mb-4">
+                          <h4 className="text-xs font-black uppercase text-amber-700 tracking-widest">Reschedule Options</h4>
+                          <button onClick={() => setReschedMode(false)} className="text-amber-500 hover:text-amber-700"><X size={16}/></button>
+                        </div>
+                        <div className="space-y-4">
+                          <select 
+                            value={reschedType} 
+                            onChange={(e) => setReschedType(e.target.value as 'staff_picked' | 'user_picked')}
+                            className="w-full bg-white border border-amber-200 rounded-xl p-3 text-sm font-bold focus:ring-amber-500 outline-none"
+                          >
+                            <option value="user_picked">Let Student Pick New Time</option>
+                            <option value="staff_picked">Staff Picks New Time</option>
+                          </select>
+
+                          {reschedType === 'staff_picked' && (
+                            <div className="grid grid-cols-2 gap-4">
+                              <input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} className="w-full bg-white border border-amber-200 rounded-xl p-3 text-sm font-bold focus:ring-amber-500 outline-none" />
+                              <select value={newTimeSlot} onChange={(e) => setNewTimeSlot(e.target.value)} className="w-full bg-white border border-amber-200 rounded-xl p-3 text-sm font-bold focus:ring-amber-500 outline-none">
+                                <option value="">Select Time</option>
+                                <option value="08:00 AM - 09:00 AM">08:00 AM - 09:00 AM</option>
+                                <option value="09:00 AM - 10:00 AM">09:00 AM - 10:00 AM</option>
+                                <option value="10:00 AM - 11:00 AM">10:00 AM - 11:00 AM</option>
+                                <option value="01:00 PM - 02:00 PM">01:00 PM - 02:00 PM</option>
+                                <option value="02:00 PM - 03:00 PM">02:00 PM - 03:00 PM</option>
+                                <option value="03:00 PM - 04:00 PM">03:00 PM - 04:00 PM</option>
+                              </select>
+                            </div>
+                          )}
+
+                          <button onClick={handleReschedule} disabled={loading} className="w-full p-3 bg-amber-500 hover:bg-amber-600 text-white font-black uppercase tracking-widest text-[10px] rounded-xl transition-all">
+                            Confirm Reschedule
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
 

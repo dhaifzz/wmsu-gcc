@@ -10,6 +10,7 @@ interface ApiResponse<T = unknown> {
   ok: boolean;
   status: number;
   data: T;
+  error?: string;
 }
 
 export async function api<T = unknown>(
@@ -38,6 +39,7 @@ export async function api<T = unknown>(
     ok: response.ok,
     status: response.status,
     data,
+    error: !response.ok && data?.error ? data.error : undefined,
   };
 }
 
@@ -221,6 +223,50 @@ export interface AppointmentHistoryResponse {
   history: HistoryItem[];
 }
 
+export interface ManagementAppointmentItem {
+  id: string;
+  student: string;
+  level: string;
+  course: string;
+  studentId: string;
+  time: string;
+  date: string;
+  status: string;
+  test?: string; // Add test for assessment
+  evaluatedBy: string | null;
+}
+
+export interface ManagementAppointmentsResponse {
+  appointments: ManagementAppointmentItem[];
+}
+
+export interface ShiftingAppointmentItem extends Omit<ManagementAppointmentItem, 'test'> {
+  currentCourse: string;
+  targetCourse: string;
+  documents: {
+    picture: string;
+    grades: string;
+    latestCor: string;
+    entranceResult: string;
+  };
+}
+
+export interface ShiftingManagementAppointmentsResponse {
+  appointments: ShiftingAppointmentItem[];
+}
+
+export interface EvaluateCounselingPayload {
+  action: 'evaluate' | 'reschedule';
+  forwardToDirector?: boolean;
+  reschedType?: 'staff_picked' | 'user_picked';
+  newDate?: string;
+  newTimeSlot?: string;
+}
+
+export interface DirectorEvaluateCounselingPayload {
+  action: 'approve' | 'decline';
+}
+
 export const appointmentApi = {
   getCounselingAvailability: (year: number, month: number) =>
     api<CounselingAvailabilityResponse>(`/api/appointments/counseling/availability?year=${year}&month=${month}`),
@@ -256,7 +302,58 @@ export const appointmentApi = {
     api<ShiftingSubmissionStatusResponse>('/api/appointments/shifting/submission-status'),
 
   getAppointmentHistory: (token: string) =>
-    api<AppointmentHistoryResponse>('/api/appointments/history', { token })
+    api<AppointmentHistoryResponse>('/api/appointments/history', { token }),
+
+  getManagementAppointments: (token: string) =>
+    api<ManagementAppointmentsResponse>('/api/appointments/counseling/management', { token }),
+
+  evaluateCounselingAppointment: (id: string, payload: EvaluateCounselingPayload, token: string) =>
+    api<any>(`/api/appointments/counseling/${id}/evaluate`, {
+      method: 'PUT',
+      body: payload as unknown as Record<string, unknown>,
+      token
+    }),
+
+  directorEvaluateCounselingAppointment: (id: string, payload: DirectorEvaluateCounselingPayload, token: string) =>
+    api<any>(`/api/appointments/counseling/${id}/director-evaluate`, {
+      method: 'PUT',
+      body: payload as unknown as Record<string, unknown>,
+      token
+    }),
+
+  getAssessmentManagementAppointments: (token: string) =>
+    api<ManagementAppointmentsResponse>('/api/appointments/assessment/management', { token }),
+
+  evaluateAssessmentAppointment: (id: string, payload: EvaluateCounselingPayload, token: string) =>
+    api<any>(`/api/appointments/assessment/${id}/evaluate`, {
+      method: 'PUT',
+      body: payload as unknown as Record<string, unknown>,
+      token
+    }),
+
+  directorEvaluateAssessmentAppointment: (id: string, payload: DirectorEvaluateCounselingPayload, token: string) =>
+    api<any>(`/api/appointments/assessment/${id}/director-evaluate`, {
+      method: 'PUT',
+      body: payload as unknown as Record<string, unknown>,
+      token
+    }),
+
+  getShiftingManagementAppointments: (token: string) =>
+    api<ShiftingManagementAppointmentsResponse>('/api/appointments/shifting/management', { token }),
+
+  evaluateShiftingAppointment: (id: string, payload: EvaluateCounselingPayload, token: string) =>
+    api<any>(`/api/appointments/shifting/${id}/evaluate`, {
+      method: 'PUT',
+      body: payload as unknown as Record<string, unknown>,
+      token
+    }),
+
+  directorEvaluateShiftingAppointment: (id: string, payload: DirectorEvaluateCounselingPayload, token: string) =>
+    api<any>(`/api/appointments/shifting/${id}/director-evaluate`, {
+      method: 'PUT',
+      body: payload as unknown as Record<string, unknown>,
+      token
+    })
 };
 
 // ------------------------------------------
