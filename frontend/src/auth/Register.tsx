@@ -120,6 +120,34 @@ const normalizeAcademicData = (payload: unknown) => {
   };
 };
 
+const validateAndNormalizePhone = (phone: string): { normalized: string; error: string | null } => {
+  const cleanPhone = phone.replace(/\s/g, '');
+  
+  // Rule 5: Reject strings with letters or symbols (except leading +)
+  if (!/^\+?\d+$/.test(cleanPhone)) {
+    return { normalized: '', error: 'Phone number must contain only digits.' };
+  }
+
+  let normalized = cleanPhone;
+  
+  // Rule 2 & 3: Convert/Validate prefixes and lengths
+  if (cleanPhone.startsWith('+639')) {
+    if (cleanPhone.length !== 13) return { normalized: '', error: 'Invalid length for +639 format (expected 13 characters).' };
+    normalized = cleanPhone;
+  } else if (cleanPhone.startsWith('639')) {
+    if (cleanPhone.length !== 12) return { normalized: '', error: 'Invalid length for 639 format (expected 12 characters).' };
+    normalized = '+' + cleanPhone;
+  } else if (cleanPhone.startsWith('09')) {
+    if (cleanPhone.length !== 11) return { normalized: '', error: 'Invalid length for 09 format (expected 11 characters).' };
+    normalized = '+63' + cleanPhone.substring(1);
+  } else {
+    // Rule 4: Reject incorrect prefixes
+    return { normalized: '', error: 'Phone number must start with 09, 639, or +639.' };
+  }
+
+  return { normalized, error: null };
+};
+
 export default function Register() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
@@ -148,6 +176,7 @@ export default function Register() {
   const [birthdate, setBirthdate] = useState('');
   const [occupation, setOccupation] = useState('');
   const [courseSearch, setCourseSearch] = useState('');
+  const [collegeSearch, setCollegeSearch] = useState('');
   const [occSearch, setOccSearch] = useState('');
   const [citySearch, setCitySearch] = useState('');
 
@@ -236,11 +265,25 @@ export default function Register() {
   }, [selectedCollege, colleges, courseSearch]);
 
   const toggleDropdown = (key: string) => {
-    setIsDropdownOpen(prev => ({ ...prev, [key]: !prev[key] }));
+    setIsDropdownOpen(prev => {
+      const newState = !prev[key as keyof typeof isDropdownOpen];
+      if (newState) {
+        // Reset search when opening
+        if (key === 'college') setCollegeSearch('');
+        if (key === 'course') setCourseSearch('');
+        if (key === 'occupation') setOccSearch('');
+        if (key === 'city') setCitySearch('');
+        if (key === 'barangay') setBarangaySearch('');
+      }
+      return { ...prev, [key]: newState };
+    });
   };
 
   const closeDropdowns = () => {
     setIsDropdownOpen({ sex: false, gradeLevel: false, occupation: false, course: false, college: false, city: false, barangay: false });
+    setCollegeSearch('');
+    setCourseSearch('');
+    setOccSearch('');
   };
 
 
@@ -288,8 +331,15 @@ export default function Register() {
     if (!firstName.trim()) { showToast.error('First name is required.'); return; }
     if (!lastName.trim()) { showToast.error('Last name is required.'); return; }
     if (!contactNumber.trim()) { showToast.error('Contact number is required.'); return; }
-    const phoneRegex = /^(09\d{9}|\+639\d{9})$/;
-    if (!phoneRegex.test(contactNumber.replace(/\s/g, ''))) { showToast.error('Enter a valid PH number (09xxxxxxxxx or +639xxxxxxxxx).'); return; }
+    
+    const { normalized, error } = validateAndNormalizePhone(contactNumber);
+    if (error) {
+      showToast.error(error);
+      return;
+    }
+    
+    // Update to normalized format
+    setContactNumber(normalized);
     if (!city.trim()) { showToast.error('City is required.'); return; }
     if (!barangay.trim()) { showToast.error('Barangay is required.'); return; }
     if (!street.trim()) { showToast.error('Street / House No. is required.'); return; }
@@ -592,7 +642,11 @@ export default function Register() {
                             type="text"
                             placeholder="First Name"
                             value={firstName}
-                            onChange={(e) => setFirstName(e.target.value)}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              const capitalized = val.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                              setFirstName(capitalized);
+                            }}
                             required
                             className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
                           />
@@ -604,7 +658,11 @@ export default function Register() {
                             type="text"
                             placeholder="Middle Name (optional)"
                             value={middleInitial}
-                            onChange={(e) => setMiddleInitial(e.target.value)}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              const capitalized = val.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                              setMiddleInitial(capitalized);
+                            }}
                             className="w-full rounded-lg bg-gray-100 py-4 px-4 text-center text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
                           />
                         </div>
@@ -619,7 +677,11 @@ export default function Register() {
                           type="text"
                           placeholder="Last Name"
                           value={lastName}
-                          onChange={(e) => setLastName(e.target.value)}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            const capitalized = val.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                            setLastName(capitalized);
+                          }}
                           required
                           className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
                         />
@@ -630,14 +692,17 @@ export default function Register() {
                         <div className="absolute left-4 text-gray-700">
                           <Phone className="h-5 w-5" />
                         </div>
-                        <input
-                          type="text"
-                          placeholder="Contact Number"
-                          value={contactNumber}
-                          onChange={(e) => setContactNumber(e.target.value)}
-                          required
-                          className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
-                        />
+                          <input
+                            type="text"
+                            placeholder="Contact Number"
+                            value={contactNumber}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/[^\d+]/g, '');
+                              if (val.length <= 13) setContactNumber(val);
+                            }}
+                            required
+                            className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
+                          />
                       </div>
 
                       {/* Address Grid: City and Barangay */}
@@ -1036,20 +1101,43 @@ export default function Register() {
                                   className="absolute z-50 bottom-full left-0 right-0 mb-2 bg-white border border-slate-100 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[300px]"
                                 >
                                   <div className="overflow-y-auto custom-scrollbar">
-                                    {colleges.map((col) => (
-                                      <button
-                                        key={col.name}
-                                        type="button"
-                                        onClick={() => {
-                                          setSelectedCollege(col.name);
-                                          setCourse('');
-                                          toggleDropdown('college');
-                                        }}
-                                        className={`w-full px-6 py-4 text-left text-sm font-bold transition-colors border-b border-slate-50 last:border-0 ${selectedCollege === col.name ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-emerald-50/50'}`}
-                                      >
-                                        {col.name}
-                                      </button>
-                                    ))}
+                                    {/* Search Input for College */}
+                                    <div className="p-3 border-b border-slate-50">
+                                      <div className="relative flex items-center">
+                                        <Search className="absolute left-3 h-4 w-4 text-slate-400" />
+                                        <input
+                                          type="text"
+                                          placeholder="Search college..."
+                                          value={collegeSearch}
+                                          onChange={(e) => setCollegeSearch(e.target.value)}
+                                          className="w-full bg-slate-50 border-none rounded-xl py-2 pl-9 pr-4 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none"
+                                          autoFocus
+                                        />
+                                      </div>
+                                    </div>
+
+                                    {colleges
+                                      .filter(col => col.name.toLowerCase().includes(collegeSearch.toLowerCase()))
+                                      .map((col) => (
+                                        <button
+                                          key={col.name}
+                                          type="button"
+                                          onClick={() => {
+                                            setSelectedCollege(col.name);
+                                            setCourse('');
+                                            toggleDropdown('college');
+                                            setCollegeSearch('');
+                                          }}
+                                          className={`w-full px-6 py-4 text-left text-sm font-bold transition-colors border-b border-slate-50 last:border-0 ${selectedCollege === col.name ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-emerald-50/50'}`}
+                                        >
+                                          {col.name}
+                                        </button>
+                                      ))}
+                                    {colleges.filter(col => col.name.toLowerCase().includes(collegeSearch.toLowerCase())).length === 0 && (
+                                      <div className="p-4 text-center">
+                                        <p className="text-xs font-bold text-slate-400">No results found</p>
+                                      </div>
+                                    )}
                                   </div>
                                 </motion.div>
                               )}
