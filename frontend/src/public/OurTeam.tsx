@@ -93,33 +93,33 @@ const OurTeam = () => {
   }, []);
 
   const DirectorCard = ({ member }: { member: any }) => (
-    <div className="max-w-4xl w-full mx-auto bg-white p-8 md:p-12 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col md:flex-row items-center gap-10 overflow-hidden relative group">
-      <div className="w-48 h-48 md:w-64 md:h-64 rounded-full overflow-hidden border-8 border-white shadow-xl shrink-0 relative z-10 bg-slate-100">
+    <div className="max-w-4xl w-full mx-auto bg-white p-6 md:p-12 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col md:flex-row items-center gap-6 md:gap-10 overflow-hidden relative group">
+      <div className="w-40 h-40 md:w-64 md:h-64 rounded-full overflow-hidden border-4 md:border-8 border-white shadow-xl shrink-0 relative z-10 bg-slate-100">
         {member.profileImage ? (
           <img src={member.profileImage} alt={member.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-slate-300">
-            <User size={96} strokeWidth={1} />
+            <User className="w-20 h-20 md:w-24 md:h-24" strokeWidth={1} />
           </div>
         )}
       </div>
 
-        <div className="flex-1 text-center md:text-left relative z-10 space-y-4 min-w-0">
+        <div className="flex-1 text-center md:text-left relative z-10 space-y-4 min-w-0 w-full">
           <div className="space-y-1">
             <MarqueeText 
               text={member.name} 
-              className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight" 
+              className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight" 
             />
             <MarqueeText 
               text={member.degree} 
-              className="text-lg font-black text-emerald-600 uppercase tracking-widest" 
+              className="text-base md:text-lg font-black text-emerald-600 uppercase tracking-widest" 
             />
           </div>
           
           <div className="h-1.5 w-24 bg-emerald-500 rounded-full mx-auto md:mx-0"></div>
           
           <div className="flex items-center justify-center md:justify-start gap-4 pt-2">
-            <div className="flex items-center gap-2 text-slate-500 bg-slate-50 px-4 py-2.5 rounded-2xl border border-slate-100 max-w-full">
+            <div className="flex items-center gap-2 text-white bg-emerald-600 px-4 py-2.5 rounded-2xl shadow-lg shadow-emerald-900/20 max-w-full overflow-hidden">
               <Building2 size={18} className="shrink-0" />
               <MarqueeText text={member.dept} className="text-sm font-bold" />
             </div>
@@ -129,31 +129,31 @@ const OurTeam = () => {
   );
 
   const MemberCard = ({ member, showDegree = true }: { member: any; showDegree?: boolean }) => (
-    <div className="bg-white p-5 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 hover:shadow-2xl transition-all group overflow-hidden flex flex-col items-center text-center w-full sm:w-[280px]">
-      <div className="w-full aspect-square mb-6 rounded-full overflow-hidden bg-slate-100 relative border-4 border-white shadow-inner">
+    <div className="bg-white p-4 md:p-5 rounded-[1.5rem] md:rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 hover:shadow-2xl transition-all group overflow-hidden flex flex-col items-center text-center w-full">
+      <div className="w-full aspect-square mb-4 md:mb-6 rounded-full overflow-hidden bg-slate-100 relative border-4 border-white shadow-inner">
         {member.profileImage ? (
           <img src={member.profileImage} alt={member.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-slate-300 bg-gradient-to-br from-slate-50 to-slate-100">
-            <User size={64} strokeWidth={1} />
+            <User className="w-10 h-10 md:w-16 md:h-16" strokeWidth={1} />
           </div>
         )}
       </div>
 
       <MarqueeText 
         text={member.name} 
-        className="text-lg font-black text-slate-900 mb-1 leading-tight w-full" 
+        className="text-sm md:text-lg font-black text-slate-900 mb-1 leading-tight w-full" 
       />
       {showDegree && (
         <MarqueeText 
           text={member.degree} 
-          className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-4 w-full" 
+          className="text-[8px] md:text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-3 md:mb-4 w-full" 
         />
       )}
 
-      <div className={`flex items-center gap-2 text-slate-500 bg-slate-50/50 px-3 py-2 rounded-xl w-full justify-center mt-auto border border-slate-100 overflow-hidden ${!showDegree ? 'mt-4' : ''}`}>
-        <Building2 size={12} className="shrink-0" />
-        <MarqueeText text={member.dept} className="text-[10px] font-bold" />
+      <div className={`flex items-center gap-1 md:gap-2 text-white bg-emerald-600 px-2 md:px-3 py-1.5 md:py-2 rounded-lg md:rounded-xl w-full justify-center mt-auto shadow-lg shadow-emerald-900/20 overflow-hidden ${!showDegree ? 'mt-4' : ''}`}>
+        <Building2 size={10} className="shrink-0" />
+        <MarqueeText text={member.dept} className="text-[8px] md:text-[10px] font-bold" />
       </div>
     </div>
   );
@@ -168,48 +168,48 @@ const OurTeam = () => {
         <div className="absolute bottom-0 left-1/4 w-64 h-64 bg-emerald-400/10 rounded-full blur-[80px]"></div>
 
         <div className="container mx-auto px-6 relative z-10 text-center">
-          <h1 className="text-5xl md:text-6xl font-black text-white mb-6 tracking-tight">{teamContent.hero.title}</h1>
-          <p className="text-xl text-emerald-100 max-w-2xl mx-auto font-medium">
+          <h1 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight">{teamContent.hero.title}</h1>
+          <p className="text-lg md:text-xl text-emerald-100 max-w-2xl mx-auto font-medium px-4">
             {teamContent.hero.description}
           </p>
         </div>
       </div>
 
       {/* Tabs Section */}
-      <div className="container mx-auto px-6 -mt-10 relative z-20 pb-24">
-        <div className="flex flex-col sm:flex-row justify-center gap-4 mb-16">
+      <div className="container mx-auto px-4 md:px-6 -mt-10 relative z-20 pb-24">
+        <div className="flex flex-row justify-center gap-2 md:gap-4 mb-16 max-w-2xl mx-auto">
           <button
             onClick={() => setActiveTab('main')}
-            className={`px-8 py-5 rounded-lg font-black transition-all flex items-center justify-center gap-3 shadow-xl ${activeTab === 'main'
+            className={`w-full px-2 md:px-8 py-4 md:py-5 rounded-xl font-black text-[10px] sm:text-sm md:text-base transition-all flex items-center justify-center gap-1.5 md:gap-3 shadow-xl ${activeTab === 'main'
               ? 'bg-white text-emerald-700 scale-105 border-2 border-emerald-500'
               : 'bg-emerald-800 text-emerald-100 border-2 border-transparent hover:bg-emerald-700'
               }`}
           >
-            <Building2 size={24} />
+            <Building2 className="w-4 h-4 md:w-6 md:h-6" />
             Main Campus
           </button>
           <button
             onClick={() => setActiveTab('esu')}
-            className={`px-8 py-5 rounded-lg font-black transition-all flex items-center justify-center gap-3 shadow-xl ${activeTab === 'esu'
+            className={`w-full px-2 md:px-8 py-4 md:py-5 rounded-xl font-black text-[10px] sm:text-sm md:text-base transition-all flex items-center justify-center gap-1.5 md:gap-3 shadow-xl ${activeTab === 'esu'
               ? 'bg-white text-emerald-700 scale-105 border-2 border-emerald-500'
               : 'bg-emerald-800 text-emerald-100 border-2 border-transparent hover:bg-emerald-700'
               }`}
           >
-            <MapPin size={24} />
+            <MapPin className="w-4 h-4 md:w-6 md:h-6" />
             ESU Campuses
           </button>
         </div>
 
         {activeTab === 'main' ? (
-          <div className="space-y-24">
+          <div className="space-y-16 md:space-y-24">
             {/* Director */}
             {teamContent.mainCampus.director?.length > 0 && (
-              <div className="mb-32">
-                <div className="flex flex-col items-center gap-3 mb-16 text-center">
+              <div className="mb-16 md:mb-32">
+                <div className="flex flex-col items-center gap-3 mb-12 md:mb-16 text-center">
                   <div className="h-1.5 w-24 bg-emerald-500 rounded-full"></div>
-                  <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">Our Director</h2>
+                  <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">Our Director</h2>
                 </div>
-                <div className="px-6">
+                <div className="px-0 md:px-6">
                   {teamContent.mainCampus.director.map((m: any, i: number) => <DirectorCard key={i} member={m} />)}
                 </div>
               </div>
@@ -217,45 +217,61 @@ const OurTeam = () => {
 
             {/* Guidance Counselors */}
             <div>
-              <div className="flex flex-col items-center gap-3 mb-12 text-center">
+              <div className="flex flex-col items-center gap-3 mb-8 md:mb-12 text-center">
                 <div className="h-1.5 w-16 bg-emerald-500 rounded-full"></div>
-                <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">Guidance Counselors</h2>
+                <h2 className="text-2xl md:text-4xl font-black text-slate-900 tracking-tight">Guidance Counselors</h2>
               </div>
-              <div className="flex flex-wrap justify-center gap-8">
-                {teamContent.mainCampus.counselors.map((m: any, i: number) => <MemberCard key={i} member={m} />)}
+              <div className="flex flex-wrap justify-center gap-4 md:gap-10">
+                {teamContent.mainCampus.counselors.map((m: any, i: number) => (
+                  <div key={i} className="flex-none w-[calc(50%-1rem)] sm:w-[240px] md:w-[260px] lg:w-[280px]">
+                    <MemberCard member={m} />
+                  </div>
+                ))}
               </div>
             </div>
 
             {/* Guidance Staff */}
             <div>
-              <div className="flex flex-col items-center gap-3 mb-12 text-center">
+              <div className="flex flex-col items-center gap-3 mb-8 md:mb-12 text-center">
                 <div className="h-1.5 w-16 bg-emerald-500 rounded-full"></div>
-                <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">Guidance Staff</h2>
+                <h2 className="text-2xl md:text-4xl font-black text-slate-900 tracking-tight">Guidance Staff</h2>
               </div>
-              <div className="flex flex-wrap justify-center gap-8">
-                {teamContent.mainCampus.staff.map((m: any, i: number) => <MemberCard key={i} member={m} />)}
+              <div className="flex flex-wrap justify-center gap-4 md:gap-10">
+                {teamContent.mainCampus.staff.map((m: any, i: number) => (
+                  <div key={i} className="flex-none w-[calc(50%-1rem)] sm:w-[240px] md:w-[260px] lg:w-[280px]">
+                    <MemberCard member={m} />
+                  </div>
+                ))}
               </div>
             </div>
 
             {/* Guidance Coordinators */}
             <div>
-              <div className="flex flex-col items-center gap-3 mb-12 text-center">
+              <div className="flex flex-col items-center gap-3 mb-8 md:mb-12 text-center">
                 <div className="h-1.5 w-16 bg-emerald-500 rounded-full"></div>
-                <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">Guidance Coordinators</h2>
+                <h2 className="text-2xl md:text-4xl font-black text-slate-900 tracking-tight">Guidance Coordinators</h2>
               </div>
-              <div className="flex flex-wrap justify-center gap-8">
-                {teamContent.mainCampus.coordinators.map((m: any, i: number) => <MemberCard key={i} member={m} />)}
+              <div className="flex flex-wrap justify-center gap-4 md:gap-10">
+                {teamContent.mainCampus.coordinators.map((m: any, i: number) => (
+                  <div key={i} className="flex-none w-[calc(50%-1rem)] sm:w-[240px] md:w-[260px] lg:w-[280px]">
+                    <MemberCard member={m} />
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         ) : (
           <div>
-            <div className="flex flex-col items-center gap-3 mb-12 text-center">
+            <div className="flex flex-col items-center gap-3 mb-8 md:mb-12 text-center">
               <div className="h-1.5 w-16 bg-emerald-500 rounded-full"></div>
-              <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">Guidance Coordinators (ESU Campuses)</h2>
+              <h2 className="text-2xl md:text-4xl font-black text-slate-900 tracking-tight">Guidance Coordinators (ESU)</h2>
             </div>
-            <div className="flex flex-wrap justify-center gap-10">
-              {teamContent.esuCampus.map((m: any, i: number) => <MemberCard key={i} member={m} showDegree={false} />)}
+            <div className="flex flex-wrap justify-center gap-4 md:gap-10">
+              {teamContent.esuCampus.map((m: any, i: number) => (
+                <div key={i} className="flex-none w-[calc(50%-1rem)] sm:w-[240px] md:w-[260px] lg:w-[280px]">
+                  <MemberCard member={m} showDegree={false} />
+                </div>
+              ))}
             </div>
           </div>
         )}
