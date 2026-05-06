@@ -1,8 +1,6 @@
 import { motion } from 'framer-motion';
 import {
   User as UserIcon,
-  Camera,
-  Edit2,
   MessageCircle,
   ClipboardCheck,
   RefreshCw,
@@ -30,19 +28,46 @@ interface ProfileProps {
     track?: string;
     department?: string;
     status?: string;
+    sex?: string;
     [key: string]: any;
   };
 }
 
 const ClientProfile = ({ user }: ProfileProps) => {
   const theme = useTheme();
-  const { signOut } = useAuth();
+  const { user: authUser, signOut } = useAuth();
   
   const handleLogout = async () => {
     const result = await showAlert.confirm('Logout', 'Are you sure you want to sign out?', 'Logout', 'Stay');
     if (result.isConfirmed) {
       await signOut();
     }
+  };
+
+  // Merge the prop user with the real authUser data for accurate display
+  const displayUser = {
+    ...user,
+    name: authUser ? `${authUser.firstName} ${authUser.lastName}` : user.name,
+    email: authUser?.email || user.email,
+    educationLevel: authUser?.educationLevel || user.educationLevel,
+    studentId: authUser?.schoolId?.toString() || authUser?.lrn?.toString() || authUser?.employeeId?.toString() || authUser?.id?.substring(0, 8).toUpperCase() || user.studentId,
+    college: authUser?.collegeName || user.college,
+    course: authUser?.courseName || user.course,
+    school: authUser?.school || user.school,
+    gradeLevel: authUser?.gradeLevel?.toString() || user.gradeLevel,
+    track: authUser?.track || user.track,
+    department: authUser?.department || user.department,
+    status: authUser?.occupation || user.status,
+    contactNumber: authUser?.contactNumber || "N/A",
+    sex: authUser?.sex || user.sex || "Prefer not to say"
+  };
+
+  // Determine avatar styling based on sex
+  const getAvatarStyles = () => {
+    const sex = displayUser.sex.toLowerCase();
+    if (sex === 'male') return 'bg-blue-100 text-blue-500';
+    if (sex === 'female') return 'bg-pink-100 text-pink-500';
+    return 'bg-slate-200 text-slate-500';
   };
 
   return (
@@ -57,22 +82,19 @@ const ClientProfile = ({ user }: ProfileProps) => {
         <div className="relative z-10 flex flex-col md:flex-row items-center gap-6 md:gap-8">
           <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8 flex-1 w-full">
             <div className="relative group">
-              <div className="w-24 h-24 md:w-32 md:h-32 bg-slate-200 rounded-2xl flex items-center justify-center text-slate-500 border-4 border-white shadow-xl overflow-hidden">
+              <div className={`w-24 h-24 md:w-32 md:h-32 rounded-2xl flex items-center justify-center border-4 border-white shadow-xl overflow-hidden ${getAvatarStyles()}`}>
                 <UserIcon className="w-12 h-12 md:w-16 md:h-16" />
               </div>
-              <button className={`absolute bottom-0 right-0 p-2 md:p-3 ${theme.bg600} text-white rounded-xl shadow-lg hover:scale-110 transition-all border-2 md:border-4 border-white`}>
-                <Camera size={16} className="md:w-[18px] md:h-[18px]" />
-              </button>
             </div>
             
             <div className="text-center md:text-left w-full">
-              <h2 className="text-2xl md:text-4xl font-black tracking-tight mb-3 truncate max-w-full text-slate-900">{user.name}</h2>
+              <h2 className="text-2xl md:text-4xl font-black tracking-tight mb-3 truncate max-w-full text-slate-900">{displayUser.name}</h2>
               <div className="flex flex-wrap justify-center md:justify-start gap-2 md:gap-3">
                 <span className={`px-3 md:px-4 py-1.5 ${theme.bg100} ${theme.text700} rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest border ${theme.border200}`}>
-                  {user.educationLevel}
+                  {displayUser.educationLevel}
                 </span>
                 <span className="px-3 md:px-4 py-1.5 bg-slate-100 text-slate-600 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest border border-slate-200">
-                  ID: {user.studentId}
+                  ID: {displayUser.studentId}
                 </span>
               </div>
             </div>
@@ -94,15 +116,12 @@ const ClientProfile = ({ user }: ProfileProps) => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
               <h3 className="text-xl md:text-2xl font-black tracking-tight text-slate-900 flex items-center gap-3">
                 <GraduationCap className={theme.text600} size={24} />
-                {user.type === 'faculty' ? 'Professional Status' : 'Academic Profile'}
+                {displayUser.type === 'faculty' ? 'Professional Status' : displayUser.type === 'outside' ? 'Client Profile' : 'Academic Profile'}
               </h3>
-              <button className={`flex items-center gap-2 ${theme.text600} font-black text-[10px] uppercase tracking-widest bg-slate-50 px-4 py-2 rounded-lg border border-slate-100 hover:bg-white hover:shadow-md transition-all`}>
-                <Edit2 size={16} /> Edit Profile
-              </button>
             </div>
 
             <div className="grid md:grid-cols-2 gap-8">
-              {user.type === 'college' && (
+              {displayUser.type === 'college' && (
                 <>
                   <div className="space-y-1">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Affiliation</p>
@@ -110,33 +129,33 @@ const ClientProfile = ({ user }: ProfileProps) => {
                   </div>
                   <div className="space-y-1">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">College / Department</p>
-                    <p className="text-lg font-bold text-slate-700">{user.college}</p>
+                    <p className="text-lg font-bold text-slate-700">{displayUser.college}</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Major Program</p>
-                    <p className="text-lg font-bold text-slate-700">{user.course}</p>
+                    <p className="text-lg font-bold text-slate-700">{displayUser.course}</p>
                   </div>
                 </>
               )}
 
-              {user.type === 'highschool' && (
+              {displayUser.type === 'highschool' && (
                 <>
                   <div className="space-y-1">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Educational Center</p>
-                    <p className="text-lg font-bold text-slate-700">{user.school || "WMSU Integrated Laboratory School"}</p>
+                    <p className="text-lg font-bold text-slate-700">{displayUser.school || "WMSU Integrated Laboratory School"}</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Year Level</p>
-                    <p className="text-lg font-bold text-slate-700 uppercase tracking-tight">Grade {user.gradeLevel}</p>
+                    <p className="text-lg font-bold text-slate-700 uppercase tracking-tight">Grade {displayUser.gradeLevel}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Specialization</p>
-                    <p className="text-lg font-bold text-slate-700">{user.track}</p>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Specialization / Track</p>
+                    <p className="text-lg font-bold text-slate-700">{displayUser.track}</p>
                   </div>
                 </>
               )}
 
-              {user.type === 'faculty' && (
+              {displayUser.type === 'faculty' && (
                 <>
                   <div className="space-y-1">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">University</p>
@@ -144,11 +163,28 @@ const ClientProfile = ({ user }: ProfileProps) => {
                   </div>
                   <div className="space-y-1">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Department</p>
-                    <p className="text-lg font-bold text-slate-700">{user.department}</p>
+                    <p className="text-lg font-bold text-slate-700">{displayUser.department}</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Employment</p>
-                    <p className="text-lg font-bold text-slate-700 uppercase tracking-tight">{user.status || "Permanent Faculty"}</p>
+                    <p className="text-lg font-bold text-slate-700 uppercase tracking-tight">{displayUser.status || "Permanent Faculty"}</p>
+                  </div>
+                </>
+              )}
+
+              {displayUser.type === 'outside' && (
+                <>
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Client Type</p>
+                    <p className="text-lg font-bold text-slate-700">External Client</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Occupation</p>
+                    <p className="text-lg font-bold text-slate-700">{displayUser.status || "N/A"}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Contact Number</p>
+                    <p className="text-lg font-bold text-slate-700">{displayUser.contactNumber}</p>
                   </div>
                 </>
               )}
@@ -157,7 +193,7 @@ const ClientProfile = ({ user }: ProfileProps) => {
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Official Contact</p>
                 <div className="flex items-center gap-3">
                    <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400"><Mail size={16} /></div>
-                   <p className="text-base font-bold text-slate-700 break-all">{user.email}</p>
+                   <p className="text-base font-bold text-slate-700 break-all">{displayUser.email}</p>
                 </div>
               </div>
             </div>
@@ -185,7 +221,7 @@ const ClientProfile = ({ user }: ProfileProps) => {
                 </div>
               </div>
 
-              {user.type !== 'faculty' && (
+              {displayUser.type !== 'faculty' && (
                 <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5 hover:bg-white/10 transition-all group/item">
                   <div className={`w-10 h-10 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center text-emerald-400`}>
                     <ClipboardCheck size={20} />
@@ -197,7 +233,7 @@ const ClientProfile = ({ user }: ProfileProps) => {
                 </div>
               )}
 
-              {user.type === 'college' && (
+              {displayUser.type === 'college' && (
                 <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5 hover:bg-white/10 transition-all group/item">
                   <div className={`w-10 h-10 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center text-emerald-400`}>
                     <RefreshCw size={20} />

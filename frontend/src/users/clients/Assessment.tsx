@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar as CalendarIcon, Clock, ChevronLeft, ChevronRight, Info, ClipboardCheck } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, ChevronLeft, ChevronRight, Info, ClipboardCheck, CheckCircle2 } from 'lucide-react';
 import { io } from 'socket.io-client';
 import { appointmentApi, API_URL } from '../../lib/api';
 import { useAuth } from '../../auth/AuthContext';
@@ -31,6 +31,7 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
   const [occupiedSlots, setOccupiedSlots] = useState<Record<string, string[]>>({});
   const [loadingAvailability, setLoadingAvailability] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [submittedInfo, setSubmittedInfo] = useState<{ submittedAt: string; scheduledTime: string; status: string } | null>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -46,6 +47,26 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
     return null;
   }, [user?.role]);
 
+  useEffect(() => {
+    const loadLatest = async () => {
+      if (!accessToken || !assessmentType) return;
+      const result = await appointmentApi.getLatestAppointmentByType(assessmentType, accessToken);
+      if (result.ok && result.data.appointment) {
+        const appt = result.data.appointment;
+        const status = appt.appointment_statuses?.status_name || '';
+        const isFinished = status === 'Completed' || status === 'Cancelled' || status === 'Rejected';
+        
+        if (!isFinished) {
+          setSubmittedInfo({
+            submittedAt: appt.created_at,
+            scheduledTime: appt.scheduled_time,
+            status: status || 'Pending'
+          });
+        }
+      }
+    };
+    void loadLatest();
+  }, [accessToken, assessmentType]);
   const header = { title: "Psychological Assessment", subtitle: "Schedule your testing session" };
   const requirements = { title: "Requirements", content: "Students must complete the Personal Data Form and have their Student ID ready before the assessment." };
   const duration = { title: "Test Duration", content: "The assessment typically takes between 30 to 45 minutes to complete." };
@@ -167,6 +188,11 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
       showToast.success(`${assessmentType} appointment submitted. Staff will review your request.`);
       setSelectedTime(null);
       setSelectedDate(null);
+      setSubmittedInfo({
+        submittedAt: result.data.appointment.created_at,
+        scheduledTime: result.data.appointment.scheduled_time,
+        status: 'Pending'
+      });
       await fetchMonthAvailability(currentDate);
     } catch {
       showToast.error('Unable to connect to booking service.');
@@ -175,6 +201,59 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
     }
   };
 
+  if (submittedInfo) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -20 }}
+        className="w-full max-w-3xl mx-auto"
+      >
+        <div className="flex items-center gap-4 mb-10">
+          <button 
+            onClick={onBack}
+            className="p-3 hover:bg-white rounded-lg transition-all text-slate-400 hover:text-slate-900 shadow-sm border border-transparent hover:border-slate-100"
+          >
+            <ChevronLeft size={24} />
+          </button>
+          <div>
+            <h2 className="text-4xl font-black tracking-tight text-slate-900">Active Progress</h2>
+            <p className="text-slate-500 font-medium text-sm">You already have an ongoing assessment appointment.</p>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden relative">
+          <div className="bg-emerald-600 p-8 text-white text-center">
+            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle2 size={32} className="text-white" />
+            </div>
+            <h3 className="text-2xl font-black mb-2">Appointment Request Active</h3>
+            <p className="text-emerald-100 text-sm font-medium">Your request for {assessmentType} has been successfully submitted and is currently <span className="font-black uppercase">{submittedInfo.status}</span>.</p>
+          </div>
+
+          <div className="p-8 space-y-8">
+            <div>
+              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 border-b border-slate-100 pb-2">Appointment Details</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Scheduled Date & Time</p>
+                  <p className="font-bold text-slate-900 text-sm">{new Date(submittedInfo.scheduledTime).toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Date Requested</p>
+                  <p className="font-bold text-slate-900 text-sm">{new Date(submittedInfo.submittedAt).toLocaleDateString()}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-slate-50 rounded-lg p-6 flex flex-col items-center gap-4 border border-slate-100 text-center">
+                <p className="text-sm text-slate-500 font-medium">If you need to make changes to this appointment, please contact the GCC office directly or wait for staff feedback.</p>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div

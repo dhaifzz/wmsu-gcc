@@ -205,6 +205,17 @@ export interface LatestShiftingAppointmentResponse {
   } | null;
 }
 
+export interface LatestAppointmentResponse {
+  appointment: {
+    id: string;
+    scheduled_time: string;
+    created_at: string;
+    appointment_statuses: {
+      status_name: string;
+    } | null;
+  } | null;
+}
+
 export interface ShiftingSubmissionStatusResponse {
   isOpen: boolean;
   status: string;
@@ -312,6 +323,9 @@ export const appointmentApi = {
 
   getLatestShiftingAppointment: (token: string) =>
     api<LatestShiftingAppointmentResponse>('/api/appointments/shifting/latest', { token }),
+
+  getLatestAppointmentByType: (type: string, token: string) =>
+    api<LatestAppointmentResponse>(`/api/appointments/latest?type=${encodeURIComponent(type)}`, { token }),
 
   getShiftingSubmissionStatus: () =>
     api<ShiftingSubmissionStatusResponse>('/api/appointments/shifting/submission-status'),
