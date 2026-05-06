@@ -14,7 +14,14 @@ import { useAuth } from '../../../auth/AuthContext';
 const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }) => {
   const { accessToken } = useAuth();
   const theme = useTheme();
-  const today = new Date().toISOString().split('T')[0];
+  const getTodayStr = () => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+  const today = getTodayStr();
 
   // Appointments
   const [appointments, setAppointments] = useState<ShiftingAppointmentItem[]>([]);
@@ -25,8 +32,22 @@ const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' 
   // Saved config (displayed on the summary card)
   const [submissionPeriod, setSubmissionPeriod] = useState({
     start:    today,
-    end:      new Date(new Date().setDate(new Date().getDate() + 30)).toISOString().split('T')[0],
-    examDate: new Date(new Date().setDate(new Date().getDate() + 35)).toISOString().split('T')[0],
+    end:      (() => {
+                const d = new Date();
+                d.setDate(d.getDate() + 30);
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+              })(),
+    examDate: (() => {
+                const d = new Date();
+                d.setDate(d.getDate() + 35);
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+              })(),
     examTime: '09:00',
   });
 
@@ -336,7 +357,13 @@ const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' 
                   <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Date of Exam</p>
                   <div className="flex flex-col gap-1.5 max-w-xs">
                     <label className="text-[10px] font-black uppercase text-slate-400">Exam Date</label>
-                    <input type="date" min={draft.end ? new Date(new Date(draft.end).getTime() + 86400000).toISOString().split('T')[0] : today} value={draft.examDate}
+                    <input type="date" min={draft.end ? (() => {
+                      const d = new Date(new Date(draft.end).getTime() + 86400000);
+                      const year = d.getFullYear();
+                      const month = String(d.getMonth() + 1).padStart(2, '0');
+                      const day = String(d.getDate()).padStart(2, '0');
+                      return `${year}-${month}-${day}`;
+                    })() : today} value={draft.examDate}
                       onChange={e => setDraft(d => ({ ...d, examDate: e.target.value }))}
                       className={`bg-slate-50 border rounded-xl px-4 py-2.5 text-xs font-bold outline-none focus:ring-2 transition-all ${overlapError ? 'border-rose-400 focus:ring-rose-400' : 'border-slate-200 focus:ring-rose-500'}`} />
                   </div>

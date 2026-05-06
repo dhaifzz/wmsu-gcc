@@ -232,7 +232,10 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
   const isTodayOfficeOpen = useMemo(() => {
     if (loadingSchedule) return true; // Assume open while loading
     const today = new Date();
-    const dateKey = today.toISOString().split('T')[0];
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const dateKey = `${year}-${month}-${day}`;
     const isWeekend = today.getDay() === 0 || today.getDay() === 6;
     if (isWeekend) return false;
 

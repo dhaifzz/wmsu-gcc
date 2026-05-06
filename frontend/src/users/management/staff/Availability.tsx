@@ -26,7 +26,12 @@ const Availability = () => {
   const afternoonSlots = ["01:00 PM - 02:00 PM", "02:00 PM - 03:00 PM", "03:00 PM - 04:00 PM", "04:00 PM - 05:00 PM"];
   const fullDaySlots = [...morningSlots, ...afternoonSlots];
 
-  const formatDate = (date: Date) => date.toISOString().split('T')[0];
+  const formatDate = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
   const isWeekend = (date: Date) => date.getDay() === 0 || date.getDay() === 6;
 
   const getSlotsForDate = (date: Date) => {
