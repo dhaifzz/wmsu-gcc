@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../../../auth/AuthContext';
+import { cmsApi } from '../../../lib/api';
 import {
   Calendar as CalendarIcon,
   ChevronLeft,
@@ -25,8 +27,57 @@ interface OfficeConfig {
 }
 
 const OfficeSchedule = () => {
+  const { accessToken } = useAuth();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchOfficeSchedule();
+  }, []);
+
+  const fetchOfficeSchedule = async () => {
+    try {
+      setLoading(true);
+      const res = await cmsApi.getContent('office-schedule');
+      if (res.data && Object.keys(res.data).length > 0) {
+        if (res.data.maxAvailableDate) {
+          setMaxAvailableDate(res.data.maxAvailableDate);
+        }
+        if (res.data.officeSchedule) {
+          setOfficeSchedule(res.data.officeSchedule);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch office schedule:', err);
+      setError('Failed to load schedule configuration');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveChanges = async () => {
+    try {
+      setSaving(true);
+      setError(null);
+      setSuccessMessage(null);
+      const res = await cmsApi.updateContent('office-schedule', { maxAvailableDate, officeSchedule }, accessToken || undefined);
+      if (res.ok) {
+         setSuccessMessage('Office schedule updated successfully');
+         setTimeout(() => setSuccessMessage(null), 3000);
+      } else {
+         setError(res.error || 'Failed to save changes');
+      }
+    } catch (err) {
+      console.error('Error saving:', err);
+      setError('An unexpected error occurred');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   // Default deadline to 2 months from now
   const getDefaultDeadline = () => {
@@ -167,6 +218,14 @@ const OfficeSchedule = () => {
       setCurrentDate(nextDate);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -350,11 +409,27 @@ const OfficeSchedule = () => {
                 </div>
 
                 <div className="mt-12 pt-4 relative z-10">
+                  {error && (
+                    <div className="bg-rose-50 text-rose-600 p-4 rounded-xl text-sm font-medium mb-4">
+                      {error}
+                    </div>
+                  )}
+                  {successMessage && (
+                    <div className="bg-emerald-50 text-emerald-600 p-4 rounded-xl text-sm font-medium mb-4">
+                      {successMessage}
+                    </div>
+                  )}
                   <div className="bg-slate-900 p-5 rounded-2xl flex gap-4 mb-6 shadow-xl">
                     <AlertCircle size={20} className="text-emerald-400 shrink-0" />
                     <p className="text-[9px] font-bold text-white/80 uppercase leading-relaxed tracking-wider">Updates reflect globally for all users and staff members instantly.</p>
                   </div>
-                  <button className="w-full py-5 bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.3em] hover:bg-emerald-500 transition-all shadow-xl shadow-emerald-600/30">Confirm Changes</button>
+                  <button 
+                    onClick={handleSaveChanges}
+                    disabled={saving}
+                    className="w-full py-5 bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.3em] hover:bg-emerald-500 transition-all shadow-xl shadow-emerald-600/30 disabled:opacity-50"
+                  >
+                    {saving ? 'Saving...' : 'Confirm Changes'}
+                  </button>
                 </div>
               </motion.div>
             ) : (
