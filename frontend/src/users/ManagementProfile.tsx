@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   User as UserIcon,
@@ -10,6 +11,8 @@ import {
   UserCheck
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../auth/AuthContext';
+import { analyticsApi } from '../lib/api';
 
 interface ProfileProps {
   user: {
@@ -25,6 +28,24 @@ interface ProfileProps {
 
 const ManagementProfile = ({ user }: ProfileProps) => {
   const theme = useTheme();
+  const { accessToken } = useAuth();
+  const [stats, setStats] = useState<{ totalManaged: number; responseRate: number } | null>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (!accessToken) return;
+      try {
+        const res = await analyticsApi.getMyStats(accessToken);
+        if (res.ok) setStats(res.data);
+      } catch (err) {
+        console.error('Failed to fetch profile stats:', err);
+      } finally {
+        setStatsLoading(false);
+      }
+    };
+    fetchStats();
+  }, [accessToken]);
 
   return (
     <motion.div
@@ -126,7 +147,11 @@ const ManagementProfile = ({ user }: ProfileProps) => {
               <div className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-all cursor-default group/item">
                 <p className="text-[10px] font-black text-emerald-400/60 uppercase tracking-[0.2em] mb-2">Total Managed</p>
                 <div className="flex items-end justify-between">
-                   <p className="text-3xl font-black">0</p>
+                   {statsLoading ? (
+                     <div className="h-9 w-16 bg-white/10 rounded-lg animate-pulse"></div>
+                   ) : (
+                     <p className="text-3xl font-black">{stats?.totalManaged ?? 0}</p>
+                   )}
                    <span className="text-[10px] font-bold text-white/30 uppercase group-hover/item:text-white/60 transition-colors">Appointments</span>
                 </div>
               </div>
@@ -134,8 +159,12 @@ const ManagementProfile = ({ user }: ProfileProps) => {
               <div className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-all cursor-default group/item">
                 <p className="text-[10px] font-black text-emerald-400/60 uppercase tracking-[0.2em] mb-2">Performance</p>
                 <div className="flex items-end justify-between">
-                   <p className="text-3xl font-black">100%</p>
-                   <span className="text-[10px] font-bold text-white/30 uppercase group-hover/item:text-white/60 transition-colors">Response Rate</span>
+                   {statsLoading ? (
+                     <div className="h-9 w-16 bg-white/10 rounded-lg animate-pulse"></div>
+                   ) : (
+                     <p className="text-3xl font-black">{stats?.responseRate ?? 0}%</p>
+                   )}
+                   <span className="text-[10px] font-bold text-white/30 uppercase group-hover/item:text-white/60 transition-colors">Approval Rate</span>
                 </div>
               </div>
             </div>
@@ -151,3 +180,5 @@ const ManagementProfile = ({ user }: ProfileProps) => {
 };
 
 export default ManagementProfile;
+
+

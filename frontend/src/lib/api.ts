@@ -410,7 +410,15 @@ export interface AnalyticsDashboardResponse {
   }>;
 }
 
+export interface MyStatsResponse {
+  totalManaged: number;
+  responseRate: number;
+}
+
 export const analyticsApi = {
   getAnalyticsDashboardData: (token: string) =>
     api<AnalyticsDashboardResponse>('/api/analytics', { token }),
+
+  getMyStats: (token: string) =>
+    api<MyStatsResponse>('/api/analytics/my-stats', { token }),
 };
