@@ -235,12 +235,14 @@ const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' 
           <div className="flex items-center gap-3">
             {configSuccess && <span className="text-xs font-bold text-emerald-600">{configSuccess}</span>}
             {configError   && <span className="text-xs font-bold text-rose-600">{configError}</span>}
-            <button
-              onClick={openConfigModal}
-              className="px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm text-slate-700"
-            >
-              <Settings2 size={14} className="text-rose-600" /> Configure
-            </button>
+            {role === 'director' && (
+              <button
+                onClick={openConfigModal}
+                className="px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm text-slate-700"
+              >
+                <Settings2 size={14} className="text-rose-600" /> Configure
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -289,13 +291,13 @@ const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
                       <label className="text-[10px] font-black uppercase text-slate-400">Start Date</label>
-                      <input type="date" min={today} value={draft.start}
+                      <input type="date" min={today} max={draft.end} value={draft.start}
                         onChange={e => setDraft(d => ({ ...d, start: e.target.value }))}
                         className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold outline-none focus:ring-2 focus:ring-rose-500 transition-all" />
                     </div>
                     <div className="flex flex-col gap-1.5">
                       <label className="text-[10px] font-black uppercase text-slate-400">End Date</label>
-                      <input type="date" min={draft.start} value={draft.end}
+                      <input type="date" min={draft.start} max={draft.examDate} value={draft.end}
                         onChange={e => setDraft(d => ({ ...d, end: e.target.value }))}
                         className={`bg-slate-50 border rounded-xl px-4 py-2.5 text-xs font-bold outline-none focus:ring-2 transition-all ${overlapError ? 'border-rose-400 focus:ring-rose-400' : 'border-slate-200 focus:ring-rose-500'}`} />
                     </div>
@@ -313,7 +315,7 @@ const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' 
                   <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Date of Exam</p>
                   <div className="flex flex-col gap-1.5 max-w-xs">
                     <label className="text-[10px] font-black uppercase text-slate-400">Exam Date</label>
-                    <input type="date" min={draft.end ? new Date(new Date(draft.end).getTime() + 86400000).toISOString().split('T')[0] : undefined} value={draft.examDate}
+                    <input type="date" min={draft.end ? new Date(new Date(draft.end).getTime() + 86400000).toISOString().split('T')[0] : today} value={draft.examDate}
                       onChange={e => setDraft(d => ({ ...d, examDate: e.target.value }))}
                       className={`bg-slate-50 border rounded-xl px-4 py-2.5 text-xs font-bold outline-none focus:ring-2 transition-all ${overlapError ? 'border-rose-400 focus:ring-rose-400' : 'border-slate-200 focus:ring-rose-500'}`} />
                   </div>
