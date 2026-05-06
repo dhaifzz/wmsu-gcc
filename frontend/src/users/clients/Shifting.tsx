@@ -89,6 +89,7 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmissionOpen, setIsSubmissionOpen] = useState(false);
+  const [submissionDates, setSubmissionDates] = useState<{ start: string | null; end: string | null; exam: string | null }>({ start: null, end: null, exam: null });
   const [submittedInfo, setSubmittedInfo] = useState<{ submittedAt: string; currentCourse?: string; targetCourse?: string } | null>(null);
   const [uploadedDocs, setUploadedDocs] = useState<Record<string, File | null>>({
     picture: null,
@@ -141,6 +142,11 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
       const result = await appointmentApi.getShiftingSubmissionStatus();
       if (result.ok) {
         setIsSubmissionOpen(!!result.data.isOpen);
+        setSubmissionDates({
+          start: result.data.startDate || null,
+          end: result.data.endDate || null,
+          exam: result.data.examDate || null
+        });
       }
     };
     
@@ -277,9 +283,27 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
 
   const handleSubmit = async () => {
     if (!canSubmit) {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      const todayStr = `${year}-${month}-${day}`;
+
       let message = 'Please complete all required fields and upload all documents.';
-      if (!isSubmissionOpen) message = 'Shifting submission is currently closed.';
-      else if (!isTodayOfficeOpen) message = 'Office is currently closed for applications. Please check the office schedule.';
+      
+      if (!isSubmissionOpen) {
+        if (submissionDates.exam && todayStr >= submissionDates.exam) {
+          message = 'The shifting exam period has concluded. Submissions are no longer accepted.';
+        } else if (submissionDates.end && todayStr > submissionDates.end) {
+          message = 'The shifting application deadline has passed.';
+        } else if (submissionDates.start && todayStr < submissionDates.start) {
+          message = `Shifting applications will open on ${new Date(submissionDates.start).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}.`;
+        } else {
+          message = 'Shifting submission is currently closed.';
+        }
+      } else if (!isTodayOfficeOpen) {
+        message = closureReason || 'The office is currently closed. Please submit during office hours.';
+      }
       
       showToast.warning(message);
       return;

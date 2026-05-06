@@ -219,6 +219,9 @@ export interface LatestAppointmentResponse {
 export interface ShiftingSubmissionStatusResponse {
   isOpen: boolean;
   status: string;
+  startDate?: string;
+  endDate?: string;
+  examDate?: string;
 }
 
 export interface ShiftingConfigResponse {
