@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   RefreshCw, Search, Filter, Calendar as CalendarIcon, MoreHorizontal,
@@ -135,7 +135,7 @@ const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' 
   const status = getStatus();
 
   // ── Fetch appointments ───────────────────────────────────────────────────
-  const fetchAppointments = useCallback(async () => {
+  const fetchAppointments = async () => {
     if (!accessToken) return;
     try {
       setLoading(true);
@@ -147,9 +147,30 @@ const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' 
     } finally {
       setLoading(false);
     }
-  }, [accessToken]);
+  };
 
-  useEffect(() => { fetchAppointments(); }, [fetchAppointments]);
+  useEffect(() => {
+    if (!accessToken) return;
+    let mounted = true;
+
+    const loadAppointments = async () => {
+      try {
+        setLoading(true);
+        const res = await appointmentApi.getShiftingManagementAppointments(accessToken);
+        if (!mounted) return;
+        if (res.ok) setAppointments(res.data.appointments);
+        else console.error('Error fetching shifting appointments:', res.error);
+      } catch (error) {
+        if (!mounted) return;
+        console.error('Failed to fetch:', error);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    void loadAppointments();
+    return () => { mounted = false; };
+  }, [accessToken]);
 
   const handleEvaluate = (app: ShiftingAppointmentItem) => {
     setSelectedAppointment(app);
