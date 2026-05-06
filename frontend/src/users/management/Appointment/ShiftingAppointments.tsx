@@ -12,6 +12,10 @@ const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' 
   const theme = useTheme();
   const [appointments, setAppointments] = useState<ShiftingAppointmentItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [configLoading, setConfigLoading] = useState(true);
+  const [configSaving, setConfigSaving] = useState(false);
+  const [configError, setConfigError] = useState<string | null>(null);
+  const [configSuccess, setConfigSuccess] = useState<string | null>(null);
   const [selectedAppointment, setSelectedAppointment] = useState<ShiftingAppointmentItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const today = new Date().toISOString().split('T')[0];
@@ -20,9 +24,60 @@ const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' 
     start: today,
     end: new Date(new Date().setDate(new Date().getDate() + 30)).toISOString().split('T')[0],
     examDate: new Date(new Date().setDate(new Date().getDate() + 35)).toISOString().split('T')[0],
-    examTime: "09:00 AM",
+    examTime: '09:00',
     isEditing: false
   });
+
+  // Fetch shifting config from backend on mount
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        setConfigLoading(true);
+        const res = await appointmentApi.getShiftingConfig();
+        if (res.ok && res.data) {
+          setSubmissionPeriod(prev => ({
+            ...prev,
+            start: res.data.startDate || prev.start,
+            end: res.data.endDate || prev.end,
+            examDate: res.data.examDate || prev.examDate,
+            examTime: res.data.examTime || prev.examTime,
+          }));
+        }
+      } catch (err) {
+        console.error('Failed to load shifting config:', err);
+      } finally {
+        setConfigLoading(false);
+      }
+    };
+    fetchConfig();
+  }, []);
+
+  const handleSaveConfig = async () => {
+    if (!accessToken) return;
+    try {
+      setConfigSaving(true);
+      setConfigError(null);
+      setConfigSuccess(null);
+      const res = await appointmentApi.updateShiftingConfig({
+        startDate: submissionPeriod.start,
+        endDate: submissionPeriod.end,
+        examDate: submissionPeriod.examDate,
+        examTime: submissionPeriod.examTime,
+      }, accessToken);
+      if (res.ok) {
+        setConfigSuccess('Configuration saved successfully.');
+        setSubmissionPeriod(prev => ({ ...prev, isEditing: false }));
+        setTimeout(() => setConfigSuccess(null), 3000);
+      } else {
+        setConfigError(res.error || 'Failed to save configuration.');
+      }
+    } catch (err) {
+      console.error('Error saving config:', err);
+      setConfigError('An unexpected error occurred.');
+    } finally {
+      setConfigSaving(false);
+    }
+  };
 
   const getStatus = () => {
     const now = new Date();
@@ -116,7 +171,7 @@ const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' 
       </div>
       
       {/* Submission & Exam Management Tabs */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden transition-all duration-500">
+      <div className={`bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden transition-all duration-500 ${configLoading ? 'opacity-60 pointer-events-none' : ''}`}>
         <div className="flex items-center bg-slate-50 border-b border-slate-100 p-1">
           {[
             { id: 'period', label: 'Submission Period' },
@@ -166,6 +221,12 @@ const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' 
             </div>
 
             <div className="flex items-center gap-4 bg-slate-50/80 p-4 rounded-2xl border border-slate-100">
+              {configSuccess && (
+                <span className="text-xs font-bold text-emerald-600 mr-auto">{configSuccess}</span>
+              )}
+              {configError && (
+                <span className="text-xs font-bold text-rose-600 mr-auto">{configError}</span>
+              )}
               {submissionPeriod.isEditing ? (
                 <div className="flex flex-col sm:flex-row items-end gap-3 animate-in fade-in slide-in-from-right-4">
                   {activeSubTab === 'period' && (
@@ -219,10 +280,11 @@ const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' 
                   )}
 
                   <button 
-                    onClick={() => setSubmissionPeriod({ ...submissionPeriod, isEditing: false })}
-                    className="px-6 py-3 bg-rose-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-rose-600/20 hover:bg-rose-700 transition-all"
+                    onClick={handleSaveConfig}
+                    disabled={configSaving}
+                    className="px-6 py-3 bg-rose-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-rose-600/20 hover:bg-rose-700 transition-all disabled:opacity-50"
                   >
-                    Save Changes
+                    {configSaving ? 'Saving...' : 'Save Changes'}
                   </button>
                 </div>
               ) : (

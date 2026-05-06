@@ -210,6 +210,21 @@ export interface ShiftingSubmissionStatusResponse {
   status: string;
 }
 
+export interface ShiftingConfigResponse {
+  status: string;
+  startDate: string;
+  endDate: string;
+  examDate: string;
+  examTime: string;
+}
+
+export interface UpdateShiftingConfigPayload {
+  startDate: string;
+  endDate: string;
+  examDate: string;
+  examTime: string;
+}
+
 export interface HistoryItem {
   id: string;
   student: string;
@@ -300,6 +315,16 @@ export const appointmentApi = {
 
   getShiftingSubmissionStatus: () =>
     api<ShiftingSubmissionStatusResponse>('/api/appointments/shifting/submission-status'),
+
+  getShiftingConfig: () =>
+    api<ShiftingConfigResponse>('/api/appointments/shifting/config'),
+
+  updateShiftingConfig: (payload: UpdateShiftingConfigPayload, token: string) =>
+    api<{ message: string }>('/api/appointments/shifting/config', {
+      method: 'PUT',
+      body: payload as unknown as Record<string, unknown>,
+      token
+    }),
 
   getAppointmentHistory: (token: string) =>
     api<AppointmentHistoryResponse>('/api/appointments/history', { token }),
