@@ -2,11 +2,23 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar as CalendarIcon, Clock, ChevronLeft, ChevronRight, Info, MessageCircle, CheckCircle2 } from 'lucide-react';
 import { io } from 'socket.io-client';
-import { appointmentApi, API_URL } from '../../lib/api';
+import { appointmentApi, cmsApi, API_URL } from '../../lib/api';
 import { useAuth } from '../../auth/AuthContext';
 import { showToast } from '../../components/modal-notification/toast';
 
-const timeSlots = ['08:00 AM - 09:00 AM', '09:00 AM - 10:00 AM', '10:00 AM - 11:00 AM', '01:00 PM - 02:00 PM', '02:00 PM - 03:00 PM', '03:00 PM - 04:00 PM'];
+type OfficeStatus = 'open' | 'morning_only' | 'afternoon_only' | 'closed' | 'holiday';
+
+interface OfficeConfig {
+  status: OfficeStatus;
+  note?: string;
+  startTime?: string;
+  endTime?: string;
+}
+
+const morningSlots = ['08:00 AM - 09:00 AM', '09:00 AM - 10:00 AM', '10:00 AM - 11:00 AM'];
+const afternoonSlots = ['01:00 PM - 02:00 PM', '02:00 PM - 03:00 PM', '03:00 PM - 04:00 PM'];
+
+const timeSlots = [...morningSlots, ...afternoonSlots];
 
 const hourToTimeSlot: Record<number, string> = {
   8: '08:00 AM - 09:00 AM',
@@ -32,6 +44,28 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
   const [loadingAvailability, setLoadingAvailability] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submittedInfo, setSubmittedInfo] = useState<{ submittedAt: string; scheduledTime: string; status: string } | null>(null);
+  const [maxAvailableDate, setMaxAvailableDate] = useState<string | null>(null);
+  const [officeSchedule, setOfficeSchedule] = useState<{ [key: string]: OfficeConfig }>({});
+  const [loadingSchedule, setLoadingSchedule] = useState(true);
+
+  useEffect(() => {
+    fetchSchedule();
+  }, []);
+
+  const fetchSchedule = async () => {
+    try {
+      setLoadingSchedule(true);
+      const res = await cmsApi.getContent('office-schedule');
+      if (res.data) {
+        if (res.data.maxAvailableDate) setMaxAvailableDate(res.data.maxAvailableDate);
+        if (res.data.officeSchedule) setOfficeSchedule(res.data.officeSchedule);
+      }
+    } catch (err) {
+      console.error('Failed to fetch schedule:', err);
+    } finally {
+      setLoadingSchedule(false);
+    }
+  };
 
   useEffect(() => {
     const loadLatest = async () => {
@@ -75,7 +109,23 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const dateToCheck = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
-    return dateToCheck < today;
+    const dateKey = toDateKey(currentDate.getFullYear(), currentDate.getMonth(), day);
+    
+    // Weekend check
+    const isWeekend = dateToCheck.getDay() === 0 || dateToCheck.getDay() === 6;
+    if (isWeekend) return true;
+
+    // Past date check
+    if (dateToCheck < today) return true;
+
+    // Global deadline check
+    if (maxAvailableDate && dateKey > maxAvailableDate) return true;
+
+    // Office schedule status check
+    const config = officeSchedule[dateKey];
+    if (config?.status === 'closed' || config?.status === 'holiday') return true;
+
+    return false;
   };
 
   const changeMonth = (offset: number) => {
@@ -290,14 +340,15 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
             <div className="flex gap-2">
               <button 
                 onClick={() => changeMonth(-1)}
-                disabled={currentDate.getMonth() === new Date().getMonth() && currentDate.getFullYear() === new Date().getFullYear()}
+                disabled={loadingSchedule || (currentDate.getMonth() === new Date().getMonth() && currentDate.getFullYear() === new Date().getFullYear())}
                 className="p-3 hover:bg-slate-50 rounded-lg border border-slate-100 text-slate-400 hover:text-emerald-600 transition-all disabled:opacity-20 disabled:cursor-not-allowed"
               >
                 <ChevronLeft size={20} />
               </button>
               <button 
                 onClick={() => changeMonth(1)}
-                className="p-3 hover:bg-slate-50 rounded-lg border border-slate-100 text-slate-400 hover:text-emerald-600 transition-all"
+                disabled={loadingSchedule}
+                className="p-3 hover:bg-slate-50 rounded-lg border border-slate-100 text-slate-400 hover:text-emerald-600 transition-all disabled:opacity-20 disabled:cursor-not-allowed"
               >
                 <ChevronRight size={20} />
               </button>
@@ -322,7 +373,7 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
                     setSelectedDate(day);
                     setSelectedTime(null);
                   }}
-                  disabled={isPastDay(day)}
+                  disabled={isPastDay(day) || loadingSchedule}
                   className={`
                     aspect-square rounded-lg flex items-center justify-center font-bold text-lg transition-all
                     ${selectedDate === day 
@@ -388,26 +439,36 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
             </div>
 
             <div className="grid grid-cols-1 gap-3 max-h-[300px] overflow-y-auto pr-2 scrollbar-hide">
-              {timeSlots.map(time => (
-                <button
-                  key={time}
-                  onClick={() => setSelectedTime(time)}
-                  disabled={!selectedDate || selectedDayOccupied.includes(time)}
-                  className={`
-                    py-4 px-6 rounded-lg font-bold text-sm transition-all border text-left flex items-center justify-between group
-                    ${selectedTime === time 
-                      ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-100' 
-                      : selectedDayOccupied.includes(time)
-                        ? 'bg-slate-50 border-slate-100 text-slate-300 cursor-not-allowed'
-                        : !selectedDate
-                          ? 'bg-white border-slate-100 text-slate-300 cursor-not-allowed'
-                          : 'bg-white border-slate-100 text-slate-600 hover:border-blue-200 hover:bg-blue-50/50'}
-                  `}
-                >
-                  {time}
-                  <div className={`w-2 h-2 rounded-full transition-all ${selectedTime === time ? 'bg-white' : 'bg-transparent group-hover:bg-blue-400'}`}></div>
-                </button>
-              ))}
+              {(() => {
+                const dateKey = selectedDateKey;
+                const config = dateKey ? officeSchedule[dateKey] : null;
+                const status = config?.status || 'open';
+                
+                let visibleSlots = timeSlots;
+                if (status === 'morning_only') visibleSlots = morningSlots;
+                if (status === 'afternoon_only') visibleSlots = afternoonSlots;
+
+                return visibleSlots.map(time => (
+                  <button
+                    key={time}
+                    onClick={() => setSelectedTime(time)}
+                    disabled={!selectedDate || selectedDayOccupied.includes(time)}
+                    className={`
+                      py-4 px-6 rounded-lg font-bold text-sm transition-all border text-left flex items-center justify-between group
+                      ${selectedTime === time 
+                        ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-100' 
+                        : selectedDayOccupied.includes(time)
+                          ? 'bg-slate-50 border-slate-100 text-slate-300 cursor-not-allowed'
+                          : !selectedDate
+                            ? 'bg-white border-slate-100 text-slate-300 cursor-not-allowed'
+                            : 'bg-white border-slate-100 text-slate-600 hover:border-blue-200 hover:bg-blue-50/50'}
+                    `}
+                  >
+                    {time}
+                    <div className={`w-2 h-2 rounded-full transition-all ${selectedTime === time ? 'bg-white' : 'bg-transparent group-hover:bg-blue-400'}`}></div>
+                  </button>
+                ));
+              })()}
             </div>
           </div>
 

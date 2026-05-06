@@ -87,6 +87,9 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
     latestCor: null,
     entranceResult: null
   });
+  const [maxAvailableDate, setMaxAvailableDate] = useState<string | null>(null);
+  const [officeSchedule, setOfficeSchedule] = useState<Record<string, { status: string }>>({});
+  const [loadingSchedule, setLoadingSchedule] = useState(true);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -131,7 +134,24 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
         setIsSubmissionOpen(!!result.data.isOpen);
       }
     };
+    
+    const fetchSchedule = async () => {
+      try {
+        setLoadingSchedule(true);
+        const res = await cmsApi.getContent('office-schedule');
+        if (res.data) {
+          if (res.data.maxAvailableDate) setMaxAvailableDate(res.data.maxAvailableDate);
+          if (res.data.officeSchedule) setOfficeSchedule(res.data.officeSchedule);
+        }
+      } catch (err) {
+        console.error('Failed to fetch schedule:', err);
+      } finally {
+        setLoadingSchedule(false);
+      }
+    };
+
     void loadSubmissionStatus();
+    void fetchSchedule();
   }, []);
 
   useEffect(() => {
@@ -209,8 +229,23 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
     [uploadedDocs]
   );
 
+  const isTodayOfficeOpen = useMemo(() => {
+    if (loadingSchedule) return true; // Assume open while loading
+    const today = new Date();
+    const dateKey = today.toISOString().split('T')[0];
+    const isWeekend = today.getDay() === 0 || today.getDay() === 6;
+    if (isWeekend) return false;
+
+    if (maxAvailableDate && dateKey > maxAvailableDate) return false;
+
+    const config = officeSchedule[dateKey];
+    if (config?.status === 'closed' || config?.status === 'holiday') return false;
+
+    return true;
+  }, [officeSchedule, maxAvailableDate, loadingSchedule]);
+
   const allDocsUploaded = uploadedCount === documents.length;
-  const canSubmit = isSubmissionOpen && !!formData.targetCourse.trim() && !!formData.reason.trim() && allDocsUploaded && !isSubmitting;
+  const canSubmit = isSubmissionOpen && isTodayOfficeOpen && !!formData.targetCourse.trim() && !!formData.reason.trim() && allDocsUploaded && !isSubmitting;
 
   const handleFileUpload = (key: string, file: File | null) => {
     setUploadedDocs((prev) => ({ ...prev, [key]: file }));
@@ -218,11 +253,11 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
 
   const handleSubmit = async () => {
     if (!canSubmit) {
-      showToast.warning(
-        isSubmissionOpen
-          ? 'Please complete all required fields and upload all documents.'
-          : 'Shifting submission is currently closed.'
-      );
+      let message = 'Please complete all required fields and upload all documents.';
+      if (!isSubmissionOpen) message = 'Shifting submission is currently closed.';
+      else if (!isTodayOfficeOpen) message = 'Office is currently closed for applications. Please check the office schedule.';
+      
+      showToast.warning(message);
       return;
     }
     if (!accessToken) {
@@ -638,14 +673,14 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
                   </p>
                 </div>
               </div>
-              <div className={`flex items-start gap-4 ${isSubmissionOpen ? '' : 'opacity-70'}`}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isSubmissionOpen ? 'bg-emerald-500' : 'bg-amber-500'}`}>
-                  {isSubmissionOpen ? <CheckCircle2 size={16} /> : <AlertCircle size={14} />}
+              <div className={`flex items-start gap-4 ${isSubmissionOpen && isTodayOfficeOpen ? '' : 'opacity-70'}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isSubmissionOpen && isTodayOfficeOpen ? 'bg-emerald-500' : 'bg-amber-500'}`}>
+                  {isSubmissionOpen && isTodayOfficeOpen ? <CheckCircle2 size={16} /> : <AlertCircle size={14} />}
                 </div>
                 <div>
                   <p className="font-bold text-sm">Submission Window</p>
-                  <p className={`text-[10px] font-medium uppercase tracking-widest ${isSubmissionOpen ? 'text-emerald-300' : 'text-amber-300'}`}>
-                    {isSubmissionOpen ? 'Open' : 'Closed'}
+                  <p className={`text-[10px] font-medium uppercase tracking-widest ${isSubmissionOpen && isTodayOfficeOpen ? 'text-emerald-300' : 'text-amber-300'}`}>
+                    {!isSubmissionOpen ? 'Closed' : !isTodayOfficeOpen ? 'Office Closed' : 'Open'}
                   </p>
                 </div>
               </div>
