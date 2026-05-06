@@ -39,6 +39,25 @@ const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' 
   const [configError, setConfigError]     = useState<string | null>(null);
   const [configSuccess, setConfigSuccess] = useState<string | null>(null);
 
+  // ── Overlap validation ────────────────────────────────────────────────
+  const getOverlapError = (): string | null => {
+    if (!draft.start || !draft.end || !draft.examDate) return null;
+    const endDate  = new Date(draft.end);
+    const examDate = new Date(draft.examDate);
+    endDate.setHours(0, 0, 0, 0);
+    examDate.setHours(0, 0, 0, 0);
+    if (examDate <= endDate) {
+      return 'The exam date must be after the submission period end date. Please adjust your dates to avoid overlap.';
+    }
+    const startDate = new Date(draft.start);
+    startDate.setHours(0, 0, 0, 0);
+    if (examDate >= startDate && examDate <= endDate) {
+      return 'The exam date falls within the submission period. Please choose a date after the submission window.';
+    }
+    return null;
+  };
+  const overlapError = getOverlapError();
+
   // ── Fetch config on mount ────────────────────────────────────────────────
   useEffect(() => {
     const fetchConfig = async () => {
@@ -68,6 +87,10 @@ const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' 
   // ── Save config ──────────────────────────────────────────────────────────
   const handleSaveConfig = async () => {
     if (!accessToken) return;
+    if (overlapError) {
+      setConfigError(overlapError);
+      return;
+    }
     try {
       setConfigSaving(true);
       setConfigError(null);
@@ -274,9 +297,15 @@ const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' 
                       <label className="text-[10px] font-black uppercase text-slate-400">End Date</label>
                       <input type="date" min={draft.start} value={draft.end}
                         onChange={e => setDraft(d => ({ ...d, end: e.target.value }))}
-                        className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold outline-none focus:ring-2 focus:ring-rose-500 transition-all" />
+                        className={`bg-slate-50 border rounded-xl px-4 py-2.5 text-xs font-bold outline-none focus:ring-2 transition-all ${overlapError ? 'border-rose-400 focus:ring-rose-400' : 'border-slate-200 focus:ring-rose-500'}`} />
                     </div>
                   </div>
+                  {overlapError && (
+                    <div className="flex items-start gap-2 mt-2 p-3 bg-rose-50 border border-rose-200 rounded-xl">
+                      <X size={14} className="text-rose-500 mt-0.5 shrink-0" />
+                      <p className="text-[11px] font-bold text-rose-600">{overlapError}</p>
+                    </div>
+                  )}
                 </div>
               )}
               {configStep === 1 && (
@@ -284,10 +313,16 @@ const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' 
                   <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Date of Exam</p>
                   <div className="flex flex-col gap-1.5 max-w-xs">
                     <label className="text-[10px] font-black uppercase text-slate-400">Exam Date</label>
-                    <input type="date" value={draft.examDate}
+                    <input type="date" min={draft.end ? new Date(new Date(draft.end).getTime() + 86400000).toISOString().split('T')[0] : undefined} value={draft.examDate}
                       onChange={e => setDraft(d => ({ ...d, examDate: e.target.value }))}
-                      className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold outline-none focus:ring-2 focus:ring-rose-500 transition-all" />
+                      className={`bg-slate-50 border rounded-xl px-4 py-2.5 text-xs font-bold outline-none focus:ring-2 transition-all ${overlapError ? 'border-rose-400 focus:ring-rose-400' : 'border-slate-200 focus:ring-rose-500'}`} />
                   </div>
+                  {overlapError && (
+                    <div className="flex items-start gap-2 mt-3 p-3 bg-rose-50 border border-rose-200 rounded-xl">
+                      <X size={14} className="text-rose-500 mt-0.5 shrink-0" />
+                      <p className="text-[11px] font-bold text-rose-600">{overlapError}</p>
+                    </div>
+                  )}
                 </div>
               )}
               {configStep === 2 && (
@@ -324,8 +359,8 @@ const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' 
                 )}
                 <button
                   onClick={handleSaveConfig}
-                  disabled={configSaving}
-                  className="px-6 py-2.5 bg-rose-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-rose-600/20 hover:bg-rose-700 transition-all disabled:opacity-50"
+                  disabled={configSaving || !!overlapError}
+                  className={`px-6 py-2.5 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg transition-all disabled:opacity-50 ${overlapError ? 'bg-slate-400 cursor-not-allowed shadow-none' : 'bg-rose-600 shadow-rose-600/20 hover:bg-rose-700'}`}
                 >
                   {configSaving ? 'Saving...' : 'Save Changes'}
                 </button>
