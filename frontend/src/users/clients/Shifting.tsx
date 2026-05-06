@@ -24,6 +24,15 @@ import { appointmentApi, cmsApi } from '../../lib/api';
 
 type DocumentIconName = 'ImageIcon' | 'FileText' | 'ClipboardCheck' | 'Clock' | 'User' | 'AlertCircle';
 
+type OfficeStatus = 'open' | 'morning_only' | 'afternoon_only' | 'closed' | 'holiday';
+
+interface OfficeConfig {
+  status: OfficeStatus;
+  note?: string;
+  startTime?: string;
+  endTime?: string;
+}
+
 const ICON_MAP: Record<DocumentIconName, React.ComponentType<{ size?: number; className?: string }>> = {
   ImageIcon: ImageIcon,
   FileText: FileText,
@@ -88,7 +97,7 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
     entranceResult: null
   });
   const [maxAvailableDate, setMaxAvailableDate] = useState<string | null>(null);
-  const [officeSchedule, setOfficeSchedule] = useState<Record<string, { status: string }>>({});
+  const [officeSchedule, setOfficeSchedule] = useState<Record<string, OfficeConfig>>({});
   const [loadingSchedule, setLoadingSchedule] = useState(true);
 
   useEffect(() => {
@@ -246,6 +255,18 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
 
     return true;
   }, [officeSchedule, maxAvailableDate, loadingSchedule]);
+
+  const closureReason = useMemo(() => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const dateKey = `${year}-${month}-${day}`;
+    const config = officeSchedule[dateKey];
+    if (config?.status === 'closed') return config.note || 'Office Closed';
+    if (config?.status === 'holiday') return config.note || 'Holiday Closure';
+    return null;
+  }, [officeSchedule]);
 
   const allDocsUploaded = uploadedCount === documents.length;
   const canSubmit = isSubmissionOpen && isTodayOfficeOpen && !!formData.targetCourse.trim() && !!formData.reason.trim() && allDocsUploaded && !isSubmitting;
@@ -683,7 +704,7 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
                 <div>
                   <p className="font-bold text-sm">Submission Window</p>
                   <p className={`text-[10px] font-medium uppercase tracking-widest ${isSubmissionOpen && isTodayOfficeOpen ? 'text-emerald-300' : 'text-amber-300'}`}>
-                    {!isSubmissionOpen ? 'Closed' : !isTodayOfficeOpen ? 'Office Closed' : 'Open'}
+                    {!isSubmissionOpen ? 'Deadline Passed' : !isTodayOfficeOpen ? (closureReason || 'Office Closed') : 'Open for Applications'}
                   </p>
                 </div>
               </div>

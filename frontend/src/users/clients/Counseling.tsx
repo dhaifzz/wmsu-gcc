@@ -128,6 +128,23 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
     return false;
   };
 
+  const getDateStatus = (day: number) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dateToCheck = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+    const dateKey = toDateKey(currentDate.getFullYear(), currentDate.getMonth(), day);
+    const config = officeSchedule[dateKey];
+
+    if (dateToCheck.getDay() === 0 || dateToCheck.getDay() === 6) return 'Weekend';
+    if (dateToCheck < today) return 'Past';
+    if (maxAvailableDate && dateKey > maxAvailableDate) return 'Deadline';
+    if (config?.status === 'closed') return 'Closed';
+    if (config?.status === 'holiday') return 'Holiday';
+    if (config?.status === 'morning_only') return 'AM Only';
+    if (config?.status === 'afternoon_only') return 'PM Only';
+    return null;
+  };
+
   const changeMonth = (offset: number) => {
     const nextDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + offset, 1);
     const today = new Date();
@@ -369,21 +386,34 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
                 <button
                   key={day}
                   onClick={() => {
-                    if (isPastDay(day)) return;
+                    if (isPastDay(day)) {
+                      const status = getDateStatus(day);
+                      if (status) showToast.info(status);
+                      return;
+                    }
                     setSelectedDate(day);
                     setSelectedTime(null);
                   }}
-                  disabled={isPastDay(day) || loadingSchedule}
+                  disabled={loadingSchedule}
                   className={`
-                    aspect-square rounded-lg flex items-center justify-center font-bold text-lg transition-all
+                    aspect-square rounded-lg flex flex-col items-center justify-center transition-all relative
                     ${selectedDate === day 
                       ? 'bg-emerald-600 text-white shadow-xl shadow-emerald-100 scale-110 z-10' 
                       : isPastDay(day)
-                        ? 'text-slate-200 cursor-not-allowed opacity-50'
+                        ? 'bg-slate-50 text-slate-300 cursor-not-allowed opacity-60'
                         : 'hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 hover:scale-105'}
                   `}
                 >
-                  {day}
+                  <span className={`text-base font-black ${selectedDate === day ? 'text-white' : ''}`}>{day}</span>
+                  {getDateStatus(day) && (
+                    <span className={`text-[7px] font-black uppercase tracking-tighter mt-0.5 truncate w-full px-1 text-center ${
+                      selectedDate === day ? 'text-white/80' : 
+                      getDateStatus(day) === 'Holiday' || getDateStatus(day) === 'Closed' ? 'text-rose-500' :
+                      'text-slate-400'
+                    }`}>
+                      {getDateStatus(day)}
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
