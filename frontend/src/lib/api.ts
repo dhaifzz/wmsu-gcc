@@ -393,6 +393,8 @@ export interface AnalyticsDashboardResponse {
     avgReviewTime: string;
     pendingCount: number;
     completedTests: number;
+    totalUsers: number;
+    activeStaff: number;
   };
   distribution: Array<{ label: string; count: number; percent: number }>;
   topCourses: Array<{ course: string; count: number; trend: string }>;

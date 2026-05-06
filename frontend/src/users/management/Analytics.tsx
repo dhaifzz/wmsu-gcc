@@ -56,7 +56,9 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
       approvalRate: '0.0',
       avgReviewTime: '0 Hours',
       pendingCount: 0,
-      completedTests: 0
+      completedTests: 0,
+      totalUsers: 0,
+      activeStaff: 0
     },
     distribution: [],
     topCourses: [],
@@ -157,7 +159,9 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
               <div>
                 <p className="text-xs font-bold text-slate-900 mb-1">Performance Insight</p>
                 <p className="text-[11px] text-slate-500 leading-relaxed">
-                  Counseling sessions have increased by <strong>15%</strong> this month. Ensure that staff availability is optimized for the upcoming peak period.
+                  {distribution.length > 0
+                    ? <>The top service this period is <strong>{distribution[0]?.label}</strong> at <strong>{distribution[0]?.percent}%</strong> of all appointments. Overall approval rate stands at <strong>{currentData.stats.approvalRate}%</strong>.</>
+                    : 'No appointment data available yet for this period.'}
                 </p>
               </div>
             </div>
@@ -234,10 +238,10 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { label: "Total Users", value: "3,412", trend: "+24", icon: Users, color: "blue" },
-              { label: "Active Staff", value: "45", trend: "0", icon: UserCheck, color: "teal" },
-              { label: "Database Load", value: "42%", trend: "-5%", icon: Database, color: "amber" },
-              { label: "System Uptime", value: "99.9%", trend: "Stable", icon: Server, color: "purple" }
+              { label: "Total Users", value: currentData.stats.totalUsers?.toString() ?? '0', trend: "", icon: Users, color: "blue" },
+              { label: "Active Staff", value: currentData.stats.activeStaff?.toString() ?? '0', trend: "", icon: UserCheck, color: "teal" },
+              { label: "Today's Bookings", value: currentData.stats.todaysBookings.toString(), trend: "", icon: Database, color: "amber" },
+              { label: "Completed Tests", value: currentData.stats.completedTests.toString(), trend: "", icon: Server, color: "purple" }
             ].map((stat, idx) => (
               <div key={idx} className={`bg-white p-6 rounded-lg border border-slate-200 shadow-sm group ${theme.hoverBg50} hover:${theme.border200} transition-all`}>
                 <div className={`w-12 h-12 bg-${stat.color}-50 text-${stat.color}-600 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
