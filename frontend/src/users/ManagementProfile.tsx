@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   User as UserIcon,
-  Camera,
   Edit2,
   Briefcase,
   Calendar,
@@ -28,7 +27,7 @@ interface ProfileProps {
 
 const ManagementProfile = ({ user }: ProfileProps) => {
   const theme = useTheme();
-  const { accessToken } = useAuth();
+  const { accessToken, user: authUser } = useAuth();
   const [stats, setStats] = useState<{ totalManaged: number; responseRate: number } | null>(null);
   const [statsLoading, setStatsLoading] = useState(true);
 
@@ -47,6 +46,14 @@ const ManagementProfile = ({ user }: ProfileProps) => {
     fetchStats();
   }, [accessToken]);
 
+  // Determine avatar styling based on sex
+  const getAvatarStyles = () => {
+    const sex = (authUser?.sex || '').toLowerCase();
+    if (sex === 'male') return 'bg-blue-100 text-blue-500';
+    if (sex === 'female') return 'bg-pink-100 text-pink-500';
+    return 'bg-slate-200 text-slate-500';
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -59,12 +66,9 @@ const ManagementProfile = ({ user }: ProfileProps) => {
         <div className="relative z-10 flex flex-col md:flex-row items-center gap-6 md:gap-8">
           <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8 flex-1 w-full">
             <div className="relative group">
-              <div className="w-24 h-24 md:w-32 md:h-32 bg-slate-200 rounded-2xl flex items-center justify-center text-slate-500 border-4 border-white shadow-xl overflow-hidden">
-                <UserIcon className="w-12 h-12 md:w-16 md:h-16 text-slate-400" />
+              <div className={`w-24 h-24 md:w-32 md:h-32 rounded-2xl flex items-center justify-center border-4 border-white shadow-xl overflow-hidden ${getAvatarStyles()}`}>
+                <UserIcon className="w-12 h-12 md:w-16 md:h-16" />
               </div>
-              <button className={`absolute bottom-0 right-0 p-2 md:p-3 ${theme.bg600} text-white rounded-xl shadow-lg hover:scale-110 transition-all border-2 md:border-4 border-white`}>
-                <Camera size={16} className="md:w-[18px] md:h-[18px]" />
-              </button>
             </div>
             
             <div className="text-center md:text-left w-full">

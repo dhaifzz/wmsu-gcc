@@ -12,6 +12,7 @@ import {
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../auth/AuthContext';
 import { showAlert } from '../components/modal-notification/sweetalert';
+import { useNavigate } from 'react-router-dom';
 
 interface ProfileProps {
   user: {
@@ -36,11 +37,13 @@ interface ProfileProps {
 const ClientProfile = ({ user }: ProfileProps) => {
   const theme = useTheme();
   const { user: authUser, signOut } = useAuth();
+  const navigate = useNavigate();
   
   const handleLogout = async () => {
     const result = await showAlert.confirm('Logout', 'Are you sure you want to sign out?', 'Logout', 'Stay');
     if (result.isConfirmed) {
       await signOut();
+      navigate('/');
     }
   };
 

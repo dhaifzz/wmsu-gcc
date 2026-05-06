@@ -5,15 +5,14 @@ import {
   MessageCircle,
   ClipboardCheck,
   RefreshCw,
-  User,
-  Calendar as CalendarIcon
+  User
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ManagementSidebar from '../../../components/ManagementSidebar';
 import ManagementNavbar from '../../../components/ManagementNavbar';
 import ManagementProfile from '../../ManagementProfile';
 import StaffOverview from './StaffOverview';
-import Availability from './Availability';
+
 import CounselingAppointments from '../Appointment/CounselingAppointments';
 import AssessmentAppointments from '../Appointment/AssessmentAppointments';
 import ShiftingAppointments from '../Appointment/ShiftingAppointments';
@@ -38,8 +37,6 @@ const StaffDashboardLayout = () => {
     { id: 'assessment', label: 'Assessment', icon: ClipboardCheck },
     { id: 'shifting', label: 'Shifting', icon: RefreshCw },
     { id: 'history', label: 'History', icon: Clock },
-    { id: 'availability', label: 'My Availability', icon: CalendarIcon },
-    { id: 'profile', label: 'My Profile', icon: User },
   ];
 
   return (
@@ -82,17 +79,13 @@ const StaffDashboardLayout = () => {
               <History key="history-list" />
             )}
 
-            {activeTab === 'availability' && (
-              <Availability key="availability-mgmt" />
-            )}
-
 
             {activeTab === 'profile' && (
               <ManagementProfile key="profile" user={{ ...staff, type: 'staff' } as any} />
             )}
 
             {/* Fallback for other tabs */}
-            {!['dashboard', 'counseling', 'assessment', 'shifting', 'history', 'availability', 'profile'].includes(activeTab) && (
+            {!['dashboard', 'counseling', 'assessment', 'shifting', 'history', 'profile'].includes(activeTab) && (
               <motion.div
                 key="coming-soon"
                 initial={{ opacity: 0 }}

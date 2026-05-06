@@ -12,6 +12,7 @@ import MarqueeText from './MarqueeText';
 import { useAuth } from '../auth/AuthContext';
 import { showAlert } from './modal-notification/sweetalert';
 import { cmsApi } from '../lib/api';
+import { useNavigate } from 'react-router-dom';
 
 interface NavLink {
   id: string;
@@ -32,6 +33,7 @@ interface ManagementSidebarProps {
 
 const ManagementSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen, onClose, links, colorScheme = 'emerald' }: ManagementSidebarProps) => {
   const { signOut } = useAuth();
+  const navigate = useNavigate();
   const [time, setTime] = useState(new Date());
   const [logos, setLogos] = useState({
     wmsuLogo: WMSULogoAsset,
@@ -118,7 +120,6 @@ const ManagementSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen
 
   const defaultLinks: NavLink[] = [
     { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'profile', label: 'My Profile', icon: User },
   ];
 
   const displayLinks = links || defaultLinks;
@@ -176,9 +177,12 @@ const ManagementSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen
           ))}
         </nav>
 
-        {/* User Card */}
+        {/* User Card — clicking opens profile */}
         <div className={`mt-auto pt-6 border-t ${c.userCardBorder}`}>
-          <div className={`${c.userCardBg} rounded-[2rem] p-4 flex items-center gap-3 border`}>
+          <button
+            onClick={() => { setActiveTab('profile'); onClose?.(); }}
+            className={`w-full ${c.userCardBg} rounded-[2rem] p-4 flex items-center gap-3 border hover:opacity-80 transition-opacity text-left`}
+          >
             <div className={`w-12 h-12 ${c.userAvatar} flex items-center justify-center border`}>
               <User size={24} className={c.userAvatarIcon} />
             </div>
@@ -194,10 +198,12 @@ const ManagementSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen
               />
             </div>
             <button 
-              onClick={async () => {
+              onClick={async (e) => {
+                e.stopPropagation();
                 const result = await showAlert.confirm('Logout', 'Are you sure you want to sign out?', 'Logout', 'Stay');
                 if (result.isConfirmed) {
                   await signOut();
+                  navigate('/');
                 }
               }}
               className={`p-2 ${c.logoutIcon} transition-colors`}
@@ -205,7 +211,7 @@ const ManagementSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen
             >
               <LogOut size={18} />
             </button>
-          </div>
+          </button>
         </div>
       </aside>
     </>
