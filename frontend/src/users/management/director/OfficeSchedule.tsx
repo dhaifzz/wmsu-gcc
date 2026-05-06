@@ -43,7 +43,7 @@ const OfficeSchedule = () => {
     try {
       setLoading(true);
       const res = await cmsApi.getContent('office-schedule');
-      if (res.data && Object.keys(res.data).length > 0) {
+      if (res.ok && res.data && Object.keys(res.data).length > 0) {
         if (res.data.maxAvailableDate) {
           setMaxAvailableDate(res.data.maxAvailableDate);
         }

@@ -4,8 +4,7 @@ import {
   LayoutDashboard,
   MessageCircle,
   ClipboardCheck,
-  RefreshCw,
-  User
+  RefreshCw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ManagementSidebar from '../../../components/ManagementSidebar';

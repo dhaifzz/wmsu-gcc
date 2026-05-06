@@ -56,7 +56,7 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
     try {
       setLoadingSchedule(true);
       const res = await cmsApi.getContent('office-schedule');
-      if (res.data) {
+      if (res.ok && res.data) {
         if (res.data.maxAvailableDate) setMaxAvailableDate(res.data.maxAvailableDate);
         if (res.data.officeSchedule) setOfficeSchedule(res.data.officeSchedule);
       }
