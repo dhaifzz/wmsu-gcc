@@ -92,7 +92,7 @@ const CounselingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director
           </p>
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-3">
-          {role === 'director' && (
+          {role === 'director' && appointments.length > 0 && (
             <div className="flex items-center gap-2 mr-2">
               <button 
                 onClick={() => handleBatchAction('approve')}

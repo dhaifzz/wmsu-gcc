@@ -62,7 +62,7 @@ const AssessmentAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director
           </p>
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-3">
-          {role === 'director' && (
+          {role === 'director' && appointments.length > 0 && (
             <div className="flex items-center gap-2 mr-2">
               <button className={`px-4 py-2.5 ${theme.bg50} ${theme.hoverBg600} ${theme.text600} hover:text-white rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border ${theme.border200} ${theme.hoverBorder600} flex items-center gap-2 shadow-sm`}>
                 <CheckCircle2 size={14} />
