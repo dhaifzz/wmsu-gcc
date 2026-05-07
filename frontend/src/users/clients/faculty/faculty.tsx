@@ -81,7 +81,7 @@ const FacultyDashboard = () => {
                     <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600">Faculty Portal</span>
                   </div>
-                  <h3 className="text-4xl font-black tracking-tight">Good day, {user.name.split('. ')[1].split(' ')[0]}!</h3>
+                  <h3 className="text-4xl font-black tracking-tight">Good day, {user.name.includes('. ') ? user.name.split('. ')[1]?.split(' ')[0] : user.name.split(' ')[0]}!</h3>
                   <p className="text-slate-500 text-sm font-medium mt-1">Here's what's happening with your portal today.</p>
                 </div>
 

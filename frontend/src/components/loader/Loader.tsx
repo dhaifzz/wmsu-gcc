@@ -10,7 +10,6 @@ const Loader = ({ type = 'dashboard' }: LoaderProps) => {
   const lineEmerald = "bg-emerald-800";
   const lightEmerald = "bg-emerald-700";
   const slate100 = "bg-slate-100";
-  const slate200 = "bg-slate-200";
   const slate300 = "bg-slate-300";
 
   // Public/Hero-style Loaders (Legal, Public Shifting, Public Assessment)

@@ -77,15 +77,14 @@ export const showToast = {
 export function ToastProvider() {
   return (
     <Toaster
-      position="top-right"
+      position="top-center"
       toastOptions={{
         style: {
-          maxWidth: '400px',
+          maxWidth: '500px',
         },
       }}
       containerStyle={{
-        top: 20,
-        right: 20,
+        top: 40,
       }}
     />
   );

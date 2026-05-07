@@ -13,6 +13,8 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../auth/AuthContext';
 import { showAlert } from '../components/modal-notification/sweetalert';
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { appointmentApi } from '../lib/api';
 
 interface ProfileProps {
   user: {
@@ -36,7 +38,7 @@ interface ProfileProps {
 
 const ClientProfile = ({ user }: ProfileProps) => {
   const theme = useTheme();
-  const { user: authUser, signOut } = useAuth();
+  const { user: authUser, signOut, accessToken } = useAuth();
   const navigate = useNavigate();
   
   const handleLogout = async () => {
@@ -46,6 +48,61 @@ const ClientProfile = ({ user }: ProfileProps) => {
       navigate('/');
     }
   };
+
+  const [activity, setActivity] = useState({
+    consultations: { count: 0, status: 'No Sessions' },
+    assessments: { count: 0, status: 'No Progress' },
+    shifting: { count: 0, status: 'No Request' }
+  });
+
+  useEffect(() => {
+    const fetchActivity = async () => {
+      if (!accessToken) return;
+      const result = await appointmentApi.getAppointmentHistory(accessToken);
+      if (result.ok && result.data.history) {
+        const history = result.data.history;
+        
+        // Consultations
+        const completedConsultations = history.filter(item => 
+          item.type === 'Counseling' && item.status === 'Completed'
+        ).length;
+        const activeConsultations = history.filter(item => 
+          item.type === 'Counseling' && !['Completed', 'Cancelled', 'Rejected'].includes(item.status)
+        ).length;
+
+        // Assessments
+        const completedAssessments = history.filter(item => 
+          item.type.includes('Assessment') && item.status === 'Completed'
+        ).length;
+        const activeAssessments = history.filter(item => 
+          item.type.includes('Assessment') && !['Completed', 'Cancelled', 'Rejected'].includes(item.status)
+        ).length;
+
+        // Shifting
+        const shiftingRequests = history.filter(item => item.type === 'Shifting');
+        const activeShifting = shiftingRequests.filter(item => 
+          !['Completed', 'Cancelled', 'Rejected'].includes(item.status)
+        ).length;
+
+        setActivity({
+          consultations: { 
+            count: completedConsultations, 
+            status: activeConsultations > 0 ? `${activeConsultations} Active Session${activeConsultations > 1 ? 's' : ''}` : `${completedConsultations} Session${completedConsultations !== 1 ? 's' : ''} Completed`
+          },
+          assessments: { 
+            count: activeAssessments, 
+            status: activeAssessments > 0 ? `${activeAssessments} Active Progress` : `${completedAssessments} Completed`
+          },
+          shifting: { 
+            count: activeShifting, 
+            status: activeShifting > 0 ? 'Active Request' : shiftingRequests.length > 0 ? 'Request Finished' : 'No Active Request'
+          }
+        });
+      }
+    };
+
+    void fetchActivity();
+  }, [accessToken]);
 
   // Merge the prop user with the real authUser data for accurate display
   const displayUser = {
@@ -220,7 +277,7 @@ const ClientProfile = ({ user }: ProfileProps) => {
                 </div>
                 <div>
                   <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Consultations</p>
-                  <p className="font-bold text-sm">0 Sessions Completed</p>
+                  <p className="font-bold text-sm">{activity.consultations.status}</p>
                 </div>
               </div>
 
@@ -231,7 +288,7 @@ const ClientProfile = ({ user }: ProfileProps) => {
                   </div>
                   <div>
                     <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Assessments</p>
-                    <p className="font-bold text-sm">1 Active Progress</p>
+                    <p className="font-bold text-sm">{activity.assessments.status}</p>
                   </div>
                 </div>
               )}
@@ -243,7 +300,7 @@ const ClientProfile = ({ user }: ProfileProps) => {
                   </div>
                   <div>
                     <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Shifting Request</p>
-                    <p className="font-bold text-sm">No Active Request</p>
+                    <p className="font-bold text-sm">{activity.shifting.status}</p>
                   </div>
                 </div>
               )}
