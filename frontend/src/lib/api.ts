@@ -1,4 +1,8 @@
-export const API_URL = import.meta.env.VITE_API_URL || 'https://gcc-backend-9t7w.onrender.com';
+const isLocal = typeof window !== 'undefined' && 
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+export const API_URL = import.meta.env.VITE_API_URL || 
+  (isLocal ? 'http://localhost:5001' : 'https://gcc-backend-9t7w.onrender.com');
 
 interface ApiOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
@@ -27,20 +31,30 @@ export async function api<T = unknown>(
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    method,
-    headers,
-    body: body ? JSON.stringify(body) : undefined,
-  });
+  try {
+    const response = await fetch(`${API_URL}${endpoint}`, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : undefined,
+    });
 
-  const data = await response.json();
+    const data = await response.json();
 
-  return {
-    ok: response.ok,
-    status: response.status,
-    data,
-    error: !response.ok && data?.error ? data.error : undefined,
-  };
+    return {
+      ok: response.ok,
+      status: response.status,
+      data,
+      error: !response.ok && data?.error ? data.error : undefined,
+    };
+  } catch (err: any) {
+    console.error(`API Error (${endpoint}):`, err);
+    return {
+      ok: false,
+      status: 500,
+      data: null as unknown as T,
+      error: 'Unable to connect to the server. Please check your internet connection or try again later.',
+    };
+  }
 }
 
 // ------------------------------------------
