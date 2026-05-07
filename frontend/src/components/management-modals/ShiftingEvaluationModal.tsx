@@ -3,11 +3,13 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X, CheckCircle2, AlertCircle,
-  User, BookOpen, Clock, Calendar, RefreshCw, ClipboardCheck
+  User, BookOpen, Clock, Calendar, RefreshCw, ClipboardCheck, FileText,
+  Eye, Download
 } from 'lucide-react';
 import { useAuth } from '../../auth/AuthContext';
 import { appointmentApi } from '../../lib/api';
 import { showToast } from '../modal-notification/toast';
+import { supabase } from '../../lib/supabaseClient';
 
 interface ShiftingEvaluationModalProps {
   isOpen: boolean;
@@ -17,12 +19,111 @@ interface ShiftingEvaluationModalProps {
   onSuccess?: () => void;
 }
 
+const PreviewModal = ({ isOpen, onClose, url, title }: { isOpen: boolean; onClose: () => void; url: string; title: string }) => {
+  if (!isOpen) return null;
+
+  const isPDF = url.toLowerCase().includes('.pdf');
+
+  return createPortal(
+    <AnimatePresence>
+      <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 sm:p-10">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+          className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
+        />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          className="relative w-full max-w-5xl h-full max-h-[90vh] bg-white rounded-[2rem] overflow-hidden flex flex-col shadow-2xl"
+        >
+          <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100 bg-white shrink-0">
+            <div>
+              <h3 className="text-xl font-black text-slate-900">{title}</h3>
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1">Document Preview</p>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-3 bg-slate-100 hover:bg-rose-500 rounded-2xl text-slate-400 hover:text-white transition-all group"
+            >
+              <X size={20} />
+            </button>
+          </div>
+          <div className="flex-1 bg-slate-50 overflow-hidden relative">
+            {isPDF ? (
+              <iframe
+                src={`${url}#toolbar=0`}
+                className="w-full h-full border-none"
+                title={title}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center p-8">
+                <img
+                  src={url}
+                  alt={title}
+                  className="max-w-full max-h-full object-contain rounded-xl shadow-lg"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = 'https://via.placeholder.com/800x600?text=Failed+to+load+image';
+                  }}
+                />
+              </div>
+            )}
+          </div>
+          <div className="px-8 py-4 bg-white border-t border-slate-100 flex justify-end shrink-0">
+            <a
+              href={url}
+              download
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/20"
+            >
+              <Download size={14} /> Download Original
+            </a>
+          </div>
+        </motion.div>
+      </div>
+    </AnimatePresence>,
+    document.body
+  );
+};
+
 const ShiftingEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff', onSuccess }: ShiftingEvaluationModalProps) => {
   const { accessToken } = useAuth();
   const [loading, setLoading] = useState(false);
   const [forwardToDirector, setForwardToDirector] = useState(true);
+  const [previewData, setPreviewData] = useState<{ url: string; title: string } | null>(null);
 
   if (!appointment) return null;
+
+  const getDocUrl = (path: string) => {
+    if (!path) return '';
+    const { data } = supabase.storage.from('shifting-documents').getPublicUrl(path);
+    return data.publicUrl;
+  };
+
+  const handlePreview = (path: string, label: string) => {
+    const url = getDocUrl(path);
+    if (url) {
+      setPreviewData({ url, title: label });
+    }
+  };
+
+  const handleDownload = (path: string, label: string) => {
+    const url = getDocUrl(path);
+    if (url) {
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${appointment.student}_${label.replace(/\s+/g, '_')}`;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
 
   const handleEvaluate = async () => {
     if (!accessToken) return;
@@ -69,10 +170,10 @@ const ShiftingEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff',
   };
 
   const requiredDocs = [
-    { name: "2x2 Picture (with name tag)", value: appointment?.documents?.picture || 'Not uploaded', status: appointment?.documents?.picture ? "Uploaded" : "Missing" },
-    { name: "All Downloadable Grades", value: appointment?.documents?.grades || 'Not uploaded', status: appointment?.documents?.grades ? "Uploaded" : "Missing" },
-    { name: "Latest COR", value: appointment?.documents?.latestCor || 'Not uploaded', status: appointment?.documents?.latestCor ? "Uploaded" : "Missing" },
-    { name: "College Entrance Test Result", value: appointment?.documents?.entranceResult || 'Not uploaded', status: appointment?.documents?.entranceResult ? "Uploaded" : "Missing" }
+    { label: "2x2 Picture", name: "2x2 Picture (with name tag)", value: appointment?.documents?.picture || '', status: appointment?.documents?.picture ? "Uploaded" : "Missing" },
+    { label: "Grades", name: "All Downloadable Grades", value: appointment?.documents?.grades || '', status: appointment?.documents?.grades ? "Uploaded" : "Missing" },
+    { label: "Latest COR", name: "Latest COR", value: appointment?.documents?.latestCor || '', status: appointment?.documents?.latestCor ? "Uploaded" : "Missing" },
+    { label: "Entrance Result", name: "College Entrance Test Result", value: appointment?.documents?.entranceResult || '', status: appointment?.documents?.entranceResult ? "Uploaded" : "Missing" }
   ];
 
   const modalContent = (
@@ -190,7 +291,7 @@ const ShiftingEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff',
                   </div>
                   <span className="text-[10px] font-black uppercase tracking-widest text-rose-600">Transition Info</span>
                 </div>
-                <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8 px-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8 px-2">
                   <div>
                     <p className="text-[9px] font-black uppercase text-rose-400 mb-1">Current Course</p>
                     <p className="font-bold text-rose-900">{appointment.currentCourse}</p>
@@ -201,26 +302,54 @@ const ShiftingEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff',
                     <p className="font-bold text-rose-900">{appointment.targetCourse}</p>
                   </div>
                 </div>
+                {appointment.reason && (
+                  <div className="mt-6 pt-4 border-t border-rose-200/50">
+                    <p className="text-[9px] font-black uppercase text-rose-400 mb-1">Reason for Shifting</p>
+                    <p className="text-xs font-bold text-rose-900 leading-relaxed italic">"{appointment.reason}"</p>
+                  </div>
+                )}
               </div>
 
-              {/* Document Checklist */}
               <div className="space-y-4">
                 <h3 className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-2">Required Documents Check</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {requiredDocs.map((doc, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div key={idx} className="group relative flex items-center justify-between p-4 bg-slate-50 hover:bg-white rounded-2xl border border-slate-100 hover:border-teal-200 transition-all duration-300">
                       <div className="flex items-center gap-3 overflow-hidden">
-                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white shrink-0 ${doc.status === 'Uploaded' ? 'bg-teal-500' : 'bg-rose-400'}`}>
-                          {doc.status === 'Uploaded' ? <CheckCircle2 size={12} /> : <X size={12} />}
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center border shadow-sm transition-colors ${doc.status === 'Uploaded' ? 'bg-teal-50 text-teal-600 border-teal-100' : 'bg-slate-100 text-slate-400 border-slate-200'}`}>
+                          <FileText size={18} />
                         </div>
                         <div className="flex flex-col truncate">
-                          <span className="text-[11px] font-bold text-slate-600 truncate">{doc.name}</span>
-                          <span className="text-[10px] font-medium text-slate-400 truncate mt-0.5" title={doc.value}>{doc.value}</span>
+                          <span className="text-[11px] font-bold text-slate-600 truncate">{doc.label}</span>
+                          <span className="text-[10px] font-medium text-slate-400 truncate mt-0.5" title={doc.value || 'Not uploaded'}>
+                            {doc.value || 'Missing file'}
+                          </span>
                         </div>
                       </div>
-                      <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-lg border shrink-0 ${doc.status === 'Uploaded' ? 'text-teal-600 bg-teal-50 border-teal-100' : 'text-rose-600 bg-rose-50 border-rose-100'}`}>
-                        {doc.status}
-                      </span>
+                      
+                      <div className="flex items-center gap-2 shrink-0">
+                        {doc.status === 'Uploaded' && (
+                          <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => handlePreview(doc.value, doc.label)}
+                              className="p-2 bg-white hover:bg-teal-500 text-slate-400 hover:text-white rounded-lg border border-slate-200 hover:border-teal-500 transition-all shadow-sm"
+                              title="Preview"
+                            >
+                              <Eye size={14} />
+                            </button>
+                            <button
+                              onClick={() => handleDownload(doc.value, doc.label)}
+                              className="p-2 bg-white hover:bg-slate-900 text-slate-400 hover:text-white rounded-lg border border-slate-200 hover:border-slate-900 transition-all shadow-sm"
+                              title="Download"
+                            >
+                              <Download size={14} />
+                            </button>
+                          </div>
+                        )}
+                        <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-lg border transition-colors ${doc.status === 'Uploaded' ? 'text-teal-600 bg-teal-50 border-teal-100' : 'text-rose-600 bg-rose-50 border-rose-100'}`}>
+                          {doc.status}
+                        </span>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -292,6 +421,12 @@ const ShiftingEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff',
               </div>
             </div>
           </motion.div>
+          <PreviewModal
+            isOpen={!!previewData}
+            onClose={() => setPreviewData(null)}
+            url={previewData?.url || ''}
+            title={previewData?.title || ''}
+          />
         </div>
       )}
     </AnimatePresence>

@@ -22,6 +22,7 @@ import { useAuth } from '../../auth/AuthContext';
 import { showToast } from '../../components/modal-notification/toast';
 import { appointmentApi, cmsApi } from '../../lib/api';
 import Loader from '../../components/loader/Loader';
+import { supabase } from '../../lib/supabaseClient';
 
 type DocumentIconName = 'ImageIcon' | 'FileText' | 'ClipboardCheck' | 'Clock' | 'User' | 'AlertCircle';
 
@@ -326,14 +327,39 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
 
     setIsSubmitting(true);
     try {
+      // 1. Upload documents to Supabase Storage
+      const uploadResults: Record<string, string> = {};
+      const documentKeys = ['picture', 'grades', 'latestCor', 'entranceResult'];
+      
+      for (const key of documentKeys) {
+        const file = uploadedDocs[key];
+        if (file) {
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+          const filePath = `${authUser?.id}/${key}_${fileName}`;
+          
+          const { error: uploadError } = await supabase.storage
+            .from('shifting-documents')
+            .upload(filePath, file);
+            
+          if (uploadError) {
+            console.error(`Error uploading ${key}:`, uploadError);
+            throw new Error(`Failed to upload ${key}. Please try again.`);
+          }
+          
+          uploadResults[key] = filePath;
+        }
+      }
+
+      // 2. Submit appointment with the storage paths
       const result = await appointmentApi.createShiftingAppointment({
         currentCourse: profileData.currentCourse,
         targetCourse: formData.targetCourse,
         reason: formData.reason,
-        pictureName: uploadedDocs.picture?.name || '',
-        gradesName: uploadedDocs.grades?.name || '',
-        latestCorName: uploadedDocs.latestCor?.name || '',
-        entranceResultName: uploadedDocs.entranceResult?.name || ''
+        pictureName: uploadResults.picture || '',
+        gradesName: uploadResults.grades || '',
+        latestCorName: uploadResults.latestCor || '',
+        entranceResultName: uploadResults.entranceResult || ''
       }, accessToken);
 
       if (!result.ok) {
