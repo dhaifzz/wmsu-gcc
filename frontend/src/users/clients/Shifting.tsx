@@ -21,6 +21,7 @@ import MarqueeText from '../../components/MarqueeText';
 import { useAuth } from '../../auth/AuthContext';
 import { showToast } from '../../components/modal-notification/toast';
 import { appointmentApi, cmsApi } from '../../lib/api';
+import Loader from '../../components/loader/Loader';
 
 type DocumentIconName = 'ImageIcon' | 'FileText' | 'ClipboardCheck' | 'Clock' | 'User' | 'AlertCircle';
 
@@ -99,7 +100,9 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
   });
   const [maxAvailableDate, setMaxAvailableDate] = useState<string | null>(null);
   const [officeSchedule, setOfficeSchedule] = useState<Record<string, OfficeConfig>>({});
+  const [loading, setLoading] = useState(true);
   const [loadingSchedule, setLoadingSchedule] = useState(true);
+  const [courses, setCourses] = useState<string[]>([]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -112,13 +115,14 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
   const header = { title: "Shifting Examination", subtitle: "Helping you find the right academic path for your future career." };
   const profileInfo = { title: "Student Information", subtitle: "Profile details are pre-filled to reduce repeat typing." };
   const academic = { title: "Academic Guidelines", subtitle: "Complete your shifting details and upload all required files." };
-  const [courses, setCourses] = useState<string[]>([]);
+  
   const documents = [
     { key: "picture", label: "2x2 Picture", note: "Formal 2x2 colored picture with name tag (Selfies are not allowed).", iconName: "ImageIcon", accept: ".jpg,.jpeg,.png" },
     { key: "grades", label: "Downloadable Grades", note: "A complete copy of all your previous semester's grades.", iconName: "FileText", accept: ".pdf,.jpg,.jpeg,.png" },
     { key: "latestCor", label: "Latest COR", note: "Your most recent Certificate of Registration (COR).", iconName: "FileText", accept: ".pdf,.jpg,.jpeg,.png" },
     { key: "entranceResult", label: "Entrance Test Result", note: "Original or certified copy of your college entrance test result.", iconName: "ClipboardCheck", accept: ".pdf,.jpg,.jpeg,.png" }
   ];
+  
   const profileData = useMemo(() => {
     const firstName = toTitleCase(authUser?.firstName);
     const lastName = toTitleCase(authUser?.lastName);
@@ -138,50 +142,57 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
   const instructions = `Make sure you have met the minimum GPA requirements of your target college before applying. You are currently enrolled in ${profileData.currentCourse || 'your current program'}.`;
 
   useEffect(() => {
-    const loadSubmissionStatus = async () => {
-      const result = await appointmentApi.getShiftingSubmissionStatus();
-      if (result.ok) {
-        setIsSubmissionOpen(!!result.data.isOpen);
-        setSubmissionDates({
-          start: result.data.startDate || null,
-          end: result.data.endDate || null,
-          exam: result.data.examDate || null
-        });
-      }
-    };
-    
-    const fetchSchedule = async () => {
-      try {
-        setLoadingSchedule(true);
-        const res = await cmsApi.getContent('office-schedule');
-        if (res.ok && res.data) {
-          if (res.data.maxAvailableDate) setMaxAvailableDate(res.data.maxAvailableDate);
-          if (res.data.officeSchedule) setOfficeSchedule(res.data.officeSchedule);
+    const initialize = async () => {
+      setLoading(true);
+      
+      const loadSubmissionStatus = async () => {
+        const result = await appointmentApi.getShiftingSubmissionStatus();
+        if (result.ok) {
+          setIsSubmissionOpen(!!result.data.isOpen);
+          setSubmissionDates({
+            start: result.data.startDate || null,
+            end: result.data.endDate || null,
+            exam: result.data.examDate || null
+          });
         }
-      } catch (err) {
-        console.error('Failed to fetch schedule:', err);
-      } finally {
-        setLoadingSchedule(false);
-      }
+      };
+      
+      const fetchSchedule = async () => {
+        try {
+          setLoadingSchedule(true);
+          const res = await cmsApi.getContent('office-schedule');
+          if (res.data) {
+            if (res.data.maxAvailableDate) setMaxAvailableDate(res.data.maxAvailableDate);
+            if (res.data.officeSchedule) setOfficeSchedule(res.data.officeSchedule);
+          }
+        } catch (err) {
+          console.error('Failed to fetch schedule:', err);
+        } finally {
+          setLoadingSchedule(false);
+        }
+      };
+
+      const loadLatest = async () => {
+        if (!accessToken) return;
+        const result = await appointmentApi.getLatestShiftingAppointment(accessToken);
+        if (result.ok && result.data.appointment) {
+          setSubmittedInfo({
+            submittedAt: result.data.appointment.created_at,
+            currentCourse: result.data.appointment.currentCourse,
+            targetCourse: result.data.appointment.targetCourse
+          });
+        }
+      };
+
+      await Promise.all([
+        loadSubmissionStatus(),
+        fetchSchedule(),
+        loadLatest()
+      ]);
+      setLoading(false);
     };
 
-    void loadSubmissionStatus();
-    void fetchSchedule();
-  }, []);
-
-  useEffect(() => {
-    const loadLatest = async () => {
-      if (!accessToken) return;
-      const result = await appointmentApi.getLatestShiftingAppointment(accessToken);
-      if (result.ok && result.data.appointment) {
-        setSubmittedInfo({
-          submittedAt: result.data.appointment.created_at,
-          currentCourse: result.data.appointment.currentCourse,
-          targetCourse: result.data.appointment.targetCourse
-        });
-      }
-    };
-    void loadLatest();
+    void initialize();
   }, [accessToken]);
 
   useEffect(() => {
@@ -349,6 +360,10 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
     }
   };
 
+  if (loading) {
+    return <Loader type="shifting-client" />;
+  }
+
   if (submittedInfo) {
     return (
       <motion.div
@@ -456,26 +471,26 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
       className="w-full"
     >
       {/* Header */}
-      <div className="flex items-center gap-4 mb-10">
+      <div className="flex items-center gap-4 mb-6 lg:mb-10">
         <button 
           onClick={onBack}
-          className="p-3 hover:bg-white rounded-lg transition-all text-slate-400 hover:text-slate-900 shadow-sm border border-transparent hover:border-slate-100"
+          className="p-2 lg:p-3 hover:bg-white rounded-lg transition-all text-slate-400 hover:text-slate-900 shadow-sm border border-transparent hover:border-slate-100"
         >
-          <ChevronLeft size={24} />
+          <ChevronLeft size={20} className="lg:w-6 lg:h-6" />
         </button>
         <div>
-          <h2 className="text-4xl font-black tracking-tight text-slate-900">{header.title}</h2>
-          <p className="text-slate-500 font-medium text-sm">{header.subtitle}</p>
+          <h2 className="text-2xl lg:text-4xl font-black tracking-tight text-slate-900">{header.title}</h2>
+          <p className="text-slate-500 font-medium text-xs lg:text-sm">{header.subtitle}</p>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-12 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
         {/* Main Form Card */}
-        <div className="lg:col-span-8 space-y-8">
-          <div className="bg-white rounded-lg p-10 border border-slate-100 shadow-sm">
-            <div className="flex items-center gap-4 mb-10">
-              <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
-                <User size={24} />
+        <div className="lg:col-span-8 space-y-6 lg:space-y-8">
+          <div className="bg-white rounded-2xl p-6 lg:p-10 border border-slate-100 shadow-sm">
+            <div className="flex items-center gap-4 mb-8 lg:mb-10">
+              <div className="w-10 h-10 lg:w-12 lg:h-12 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
+                <User size={20} className="lg:w-6 lg:h-6" />
               </div>
               <div>
                 <h3 className="text-2xl font-black text-slate-900">{profileInfo.title}</h3>
@@ -513,14 +528,14 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg p-10 border border-slate-100 shadow-sm">
-            <div className="flex items-center gap-4 mb-10">
-              <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
-                <BookOpen size={24} />
+          <div className="bg-white rounded-2xl p-6 lg:p-10 border border-slate-100 shadow-sm">
+            <div className="flex items-center gap-4 mb-8 lg:mb-10">
+              <div className="w-10 h-10 lg:w-12 lg:h-12 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
+                <BookOpen size={20} className="lg:w-6 lg:h-6" />
               </div>
               <div>
-                <h3 className="text-2xl font-black text-slate-900">{academic.title}</h3>
-                <p className="text-slate-400 text-sm font-medium">{academic.subtitle}</p>
+                <h3 className="text-xl lg:text-2xl font-black text-slate-900">{academic.title}</h3>
+                <p className="text-slate-400 text-xs lg:text-sm font-medium">{academic.subtitle}</p>
               </div>
             </div>
 
@@ -611,17 +626,17 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg p-10 border border-slate-100 shadow-sm">
-            <div className="flex items-center gap-4 mb-10">
-              <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
-                <Upload size={24} />
+          <div className="bg-white rounded-2xl p-6 lg:p-10 border border-slate-100 shadow-sm">
+            <div className="flex items-center gap-4 mb-8 lg:mb-10">
+              <div className="w-10 h-10 lg:w-12 lg:h-12 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
+                <Upload size={20} className="lg:w-6 lg:h-6" />
               </div>
               <div className="flex-1 flex justify-between items-center w-full">
                 <div>
-                  <h3 className="text-2xl font-black text-slate-900">Required Documents</h3>
-                  <p className="text-slate-400 text-sm font-medium">Upload high-quality scans of your documents.</p>
+                  <h3 className="text-xl lg:text-2xl font-black text-slate-900">Required Documents</h3>
+                  <p className="text-slate-400 text-xs lg:text-sm font-medium">Upload high-quality scans.</p>
                 </div>
-                <div className="hidden sm:block text-[10px] font-black uppercase tracking-widest bg-emerald-50 text-emerald-600 px-4 py-2 rounded-lg">
+                <div className="hidden sm:block text-[9px] lg:text-[10px] font-black uppercase tracking-widest bg-emerald-50 text-emerald-600 px-3 lg:px-4 py-1.5 lg:py-2 rounded-lg">
                   Step {docStep + 1} of {documents.length}
                 </div>
               </div>
@@ -674,18 +689,18 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
               </AnimatePresence>
             </div>
 
-            <div className="flex justify-between mt-8 pt-6 border-t border-slate-100">
+            <div className="flex justify-between mt-6 lg:mt-8 pt-6 border-t border-slate-100">
               <button
                 onClick={() => setDocStep(Math.max(0, docStep - 1))}
                 disabled={docStep === 0}
-                className="px-6 py-3 rounded-lg font-bold text-[10px] uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 text-slate-500"
+                className="px-4 lg:px-6 py-2.5 lg:py-3 rounded-lg font-bold text-[9px] lg:text-[10px] uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 text-slate-500"
               >
-                Previous
+                Prev
               </button>
               <button
                 onClick={() => setDocStep(Math.min(documents.length - 1, docStep + 1))}
                 disabled={docStep === documents.length - 1}
-                className="px-6 py-3 rounded-lg font-bold text-[10px] uppercase tracking-widest transition-all bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-4 lg:px-6 py-2.5 lg:py-3 rounded-lg font-bold text-[9px] lg:text-[10px] uppercase tracking-widest transition-all bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 Next <ArrowRight size={14} />
               </button>

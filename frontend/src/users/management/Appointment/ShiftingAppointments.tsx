@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { createPortal } from 'react-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   RefreshCw, Search, Filter, Calendar as CalendarIcon, MoreHorizontal,
   ArrowRight, Clock, ClipboardCheck, CheckCircle2, X, Settings2,
@@ -10,6 +11,7 @@ import { useTheme } from '../../../contexts/ThemeContext';
 import { appointmentApi } from '../../../lib/api';
 import type { ShiftingAppointmentItem } from '../../../lib/api';
 import { useAuth } from '../../../auth/AuthContext';
+import Loader from '../../../components/loader/Loader';
 
 const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }) => {
   const { accessToken } = useAuth();
@@ -206,6 +208,10 @@ const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' 
   ];
 
   // ────────────────────────────────────────────────────────────────────────
+  if (loading || configLoading) {
+    return <Loader type="management-table" />;
+  }
+
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
 
@@ -290,40 +296,50 @@ const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' 
       </div>
 
       {/* Stepper Config Modal */}
-      {isConfigModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"
-          >
-            {/* Modal Header */}
-            <div className="flex items-center justify-between px-8 pt-8 pb-4">
-              <div>
-                <h4 className="text-xl font-black text-slate-900">Configure Shifting Schedule</h4>
-                <p className="text-xs text-slate-500 mt-0.5">Set the values you need — all steps are optional.</p>
-              </div>
-              <button onClick={() => setIsConfigModalOpen(false)} className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-                <X size={18} className="text-slate-500" />
-              </button>
-            </div>
-
-            {/* Step Pills */}
-            <div className="flex items-center gap-1 px-8 pb-6">
-              {STEPS.map((step, i) => (
-                <div key={step.label} className="flex items-center gap-1">
-                  <button
-                    onClick={() => setConfigStep(i)}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
-                      configStep === i ? 'bg-rose-600 text-white shadow' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
-                    }`}
-                  >
-                    {step.icon} {step.label}
+      {createPortal(
+        <AnimatePresence>
+          {isConfigModalOpen && (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setIsConfigModalOpen(false)}
+                className="absolute inset-0 bg-black/70"
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden z-10"
+              >
+                {/* Modal Header */}
+                <div className="flex items-center justify-between px-8 pt-8 pb-4">
+                  <div>
+                    <h4 className="text-xl font-black text-slate-900">Configure Shifting Schedule</h4>
+                    <p className="text-xs text-slate-500 mt-0.5">Set the values you need — all steps are optional.</p>
+                  </div>
+                  <button onClick={() => setIsConfigModalOpen(false)} className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+                    <X size={18} className="text-slate-500" />
                   </button>
-                  {i < STEPS.length - 1 && <ChevronRight size={13} className="text-slate-300 shrink-0" />}
                 </div>
-              ))}
-            </div>
+
+                {/* Step Pills */}
+                <div className="flex items-center gap-1 px-8 pb-6">
+                  {STEPS.map((step, i) => (
+                    <div key={step.label} className="flex items-center gap-1">
+                      <button
+                        onClick={() => setConfigStep(i)}
+                        className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                          configStep === i ? 'bg-rose-600 text-white shadow' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
+                        }`}
+                      >
+                        {step.icon} {step.label}
+                      </button>
+                      {i < STEPS.length - 1 && <ChevronRight size={13} className="text-slate-300 shrink-0" />}
+                    </div>
+                  ))}
+                </div>
 
             {/* Step Content */}
             <div className="px-8 pb-8 min-h-[140px]">
@@ -357,13 +373,7 @@ const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' 
                   <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Date of Exam</p>
                   <div className="flex flex-col gap-1.5 max-w-xs">
                     <label className="text-[10px] font-black uppercase text-slate-400">Exam Date</label>
-                    <input type="date" min={draft.end ? (() => {
-                      const d = new Date(new Date(draft.end).getTime() + 86400000);
-                      const year = d.getFullYear();
-                      const month = String(d.getMonth() + 1).padStart(2, '0');
-                      const day = String(d.getDate()).padStart(2, '0');
-                      return `${year}-${month}-${day}`;
-                    })() : today} value={draft.examDate}
+                    <input type="date" min={draft.end ? new Date(new Date(draft.end).getTime() + 86400000).toISOString().split('T')[0] : today} value={draft.examDate}
                       onChange={e => setDraft(d => ({ ...d, examDate: e.target.value }))}
                       className={`bg-slate-50 border rounded-xl px-4 py-2.5 text-xs font-bold outline-none focus:ring-2 transition-all ${overlapError ? 'border-rose-400 focus:ring-rose-400' : 'border-slate-200 focus:ring-rose-500'}`} />
                   </div>
@@ -389,35 +399,38 @@ const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' 
               {configError && <p className="mt-4 text-xs font-bold text-rose-600">{configError}</p>}
             </div>
 
-            {/* Modal Footer */}
-            <div className="flex items-center justify-between px-8 py-5 border-t border-slate-100 bg-slate-50">
-              <button
-                onClick={() => setConfigStep(s => Math.max(0, s - 1))}
-                disabled={configStep === 0}
-                className="flex items-center gap-2 px-4 py-2.5 border border-slate-200 bg-white rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-100 transition-all disabled:opacity-40"
-              >
-                <ChevronLeft size={14} /> Previous
-              </button>
-              <div className="flex items-center gap-3">
-                {configStep < 2 && (
+                {/* Modal Footer */}
+                <div className="flex items-center justify-between px-8 py-5 border-t border-slate-100 bg-slate-50">
                   <button
-                    onClick={() => setConfigStep(s => s + 1)}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-slate-800 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 transition-all"
+                    onClick={() => setConfigStep(s => Math.max(0, s - 1))}
+                    disabled={configStep === 0}
+                    className="flex items-center gap-2 px-4 py-2.5 border border-slate-200 bg-white rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-100 transition-all disabled:opacity-40"
                   >
-                    Next <ChevronRight size={14} />
+                    <ChevronLeft size={14} /> Previous
                   </button>
-                )}
-                <button
-                  onClick={handleSaveConfig}
-                  disabled={configSaving || !!overlapError}
-                  className={`px-6 py-2.5 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg transition-all disabled:opacity-50 ${overlapError ? 'bg-slate-400 cursor-not-allowed shadow-none' : 'bg-rose-600 shadow-rose-600/20 hover:bg-rose-700'}`}
-                >
-                  {configSaving ? 'Saving...' : 'Save Changes'}
-                </button>
-              </div>
+                  <div className="flex items-center gap-3">
+                    {configStep < 2 && (
+                      <button
+                        onClick={() => setConfigStep(s => s + 1)}
+                        className="flex items-center gap-2 px-5 py-2.5 bg-slate-800 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 transition-all"
+                      >
+                        Next <ChevronRight size={14} />
+                      </button>
+                    )}
+                    <button
+                      onClick={handleSaveConfig}
+                      disabled={configSaving || !!overlapError}
+                      className={`px-6 py-2.5 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg transition-all disabled:opacity-50 ${overlapError ? 'bg-slate-400 cursor-not-allowed shadow-none' : 'bg-rose-600 shadow-rose-600/20 hover:bg-rose-700'}`}
+                    >
+                      {configSaving ? 'Saving...' : 'Save Changes'}
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
             </div>
-          </motion.div>
-        </div>
+          )}
+        </AnimatePresence>,
+        document.body
       )}
 
       {/* Appointments Table */}

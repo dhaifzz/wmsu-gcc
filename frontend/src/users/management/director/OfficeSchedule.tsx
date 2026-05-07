@@ -16,6 +16,7 @@ import {
   CalendarCheck
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Loader from '../../../components/loader/Loader';
 
 type OfficeStatus = 'open' | 'morning_only' | 'afternoon_only' | 'closed' | 'holiday';
 
@@ -228,11 +229,7 @@ const OfficeSchedule = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
-      </div>
-    );
+    return <Loader type="management-schedule" />;
   }
 
   return (

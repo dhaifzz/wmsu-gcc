@@ -6,6 +6,7 @@ import { useTheme } from '../../../contexts/ThemeContext';
 import { appointmentApi } from '../../../lib/api';
 import type { ManagementAppointmentItem } from '../../../lib/api';
 import { useAuth } from '../../../auth/AuthContext';
+import Loader from '../../../components/loader/Loader';
 
 const AssessmentAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }) => {
   const { accessToken } = useAuth();
@@ -42,6 +43,9 @@ const AssessmentAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director
     setIsModalOpen(true);
   };
 
+  if (loading) {
+    return <Loader type="management-table" />;
+  }
 
   return (
     <motion.div

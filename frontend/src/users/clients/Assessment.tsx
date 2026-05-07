@@ -47,14 +47,17 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
   const [maxAvailableDate, setMaxAvailableDate] = useState<string | null>(null);
   const [officeSchedule, setOfficeSchedule] = useState<{ [key: string]: OfficeConfig }>({});
   const [loadingSchedule, setLoadingSchedule] = useState(true);
+
+  const assessmentType = useMemo<'Assessment (DAS-Y)' | 'Assessment (DAS-21)' | null>(() => {
+    if (user?.role === 'High School Student') return 'Assessment (DAS-Y)';
+    if (user?.role === 'College Student') return 'Assessment (DAS-21)';
+    return null;
+  }, [user?.role]);
+
   useEffect(() => {
-    window.scrollTo(0, 0);
-    const mainContainer = document.querySelector('main');
-    if (mainContainer) {
-      mainContainer.scrollTo(0, 0);
-    }
     fetchSchedule();
-  }, []);
+    loadLatest();
+  }, [accessToken, assessmentType]);
 
   const fetchSchedule = async () => {
     try {
@@ -71,32 +74,25 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
     }
   };
 
-  const assessmentType = useMemo<'Assessment (DAS-Y)' | 'Assessment (DAS-21)' | null>(() => {
-    if (user?.role === 'High School Student') return 'Assessment (DAS-Y)';
-    if (user?.role === 'College Student') return 'Assessment (DAS-21)';
-    return null;
-  }, [user?.role]);
 
-  useEffect(() => {
-    const loadLatest = async () => {
-      if (!accessToken || !assessmentType) return;
-      const result = await appointmentApi.getLatestAppointmentByType(assessmentType, accessToken);
-      if (result.ok && result.data.appointment) {
-        const appt = result.data.appointment;
-        const status = appt.appointment_statuses?.status_name || '';
-        const isFinished = status === 'Completed' || status === 'Cancelled' || status === 'Rejected';
-        
-        if (!isFinished) {
-          setSubmittedInfo({
-            submittedAt: appt.created_at,
-            scheduledTime: appt.scheduled_time,
-            status: status || 'Pending'
-          });
-        }
+
+  const loadLatest = async () => {
+    if (!accessToken || !assessmentType) return;
+    const result = await appointmentApi.getLatestAppointmentByType(assessmentType, accessToken);
+    if (result.ok && result.data.appointment) {
+      const appt = result.data.appointment;
+      const status = appt.appointment_statuses?.status_name || '';
+      const isFinished = status === 'Completed' || status === 'Cancelled' || status === 'Rejected';
+      
+      if (!isFinished) {
+        setSubmittedInfo({
+          submittedAt: appt.created_at,
+          scheduledTime: appt.scheduled_time,
+          status: status || 'Pending'
+        });
       }
-    };
-    void loadLatest();
-  }, [accessToken, assessmentType]);
+    }
+  };
   const header = { title: "Psychological Assessment", subtitle: "Schedule your testing session" };
   const requirements = { title: "Requirements", content: "Students must complete the Personal Data Form and have their Student ID ready before the assessment." };
   const duration = { title: "Test Duration", content: "The assessment typically takes between 30 to 45 minutes to complete." };
@@ -264,6 +260,7 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
     }
   };
 
+
   if (submittedInfo) {
     return (
       <motion.div
@@ -326,22 +323,22 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
       className="w-full relative"
     >
       {/* Header */}
-      <div className="flex items-center gap-4 mb-10">
+      <div className="flex items-center gap-4 mb-6 lg:mb-10">
         <button 
           onClick={onBack}
-          className="p-3 hover:bg-white rounded-lg transition-all text-slate-400 hover:text-slate-900 shadow-sm border border-transparent hover:border-slate-100"
+          className="p-2 lg:p-3 hover:bg-white rounded-lg transition-all text-slate-400 hover:text-slate-900 shadow-sm border border-transparent hover:border-slate-100"
         >
-          <ChevronLeft size={24} />
+          <ChevronLeft size={20} className="lg:w-6 lg:h-6" />
         </button>
         <div>
-          <h2 className="text-4xl font-black tracking-tight text-slate-900">{header.title}</h2>
-          <p className="text-slate-500 font-medium text-sm">{header.subtitle}</p>
+          <h2 className="text-2xl lg:text-4xl font-black tracking-tight text-slate-900">{header.title}</h2>
+          <p className="text-slate-500 font-medium text-[10px] lg:text-sm">{header.subtitle}</p>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-12 gap-8 items-stretch">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
         {/* Left Column: Calendar Card */}
-        <div className="lg:col-span-8 bg-white rounded-lg p-10 border border-slate-100 shadow-sm h-full flex flex-col">
+        <div className="lg:col-span-8 bg-white rounded-2xl p-6 lg:p-10 border border-slate-100 shadow-sm h-full flex flex-col">
           <div className="flex items-center justify-between mb-10">
             <div>
               <h3 className="text-2xl font-black text-slate-900 text-emerald-950">Select Date</h3>
@@ -368,9 +365,9 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
           </div>
 
           <div className="flex-1 flex flex-col justify-between py-2">
-            <div className="grid grid-cols-7 gap-y-6 gap-x-2">
+            <div className="grid grid-cols-7 gap-y-4 lg:gap-y-6 gap-x-1 lg:gap-x-2">
               {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(day => (
-                <div key={day} className="text-center text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">
+                <div key={day} className="text-center text-[8px] lg:text-[10px] font-black uppercase tracking-[0.1em] lg:tracking-[0.2em] text-slate-300">
                   {day.slice(0, 3)}
                 </div>
               ))}
@@ -391,9 +388,9 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
                   }}
                   disabled={loadingSchedule}
                   className={`
-                    aspect-square rounded-lg flex flex-col items-center justify-center transition-all relative
+                    aspect-square rounded-lg flex items-center justify-center font-bold text-base lg:text-lg transition-all
                     ${selectedDate === day 
-                      ? 'bg-emerald-600 text-white shadow-xl shadow-emerald-100 scale-110 z-10' 
+                      ? 'bg-emerald-600 text-white shadow-xl shadow-emerald-100 scale-105 lg:scale-110 z-10' 
                       : isPastDay(day)
                         ? 'bg-slate-50 text-slate-300 cursor-not-allowed opacity-60'
                         : 'hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 hover:scale-105'}
@@ -455,12 +452,12 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
         {/* Right Column: Time Slots & Summary Stack */}
         <div className="lg:col-span-4 space-y-6">
           {/* Time Slots Card */}
-          <div className="bg-white rounded-lg p-8 border border-slate-100 shadow-sm">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
-                <Clock size={24} />
+          <div className="bg-white rounded-2xl p-6 lg:p-8 border border-slate-100 shadow-sm">
+            <div className="flex items-center gap-4 mb-6 lg:mb-8">
+              <div className="w-10 h-10 lg:w-12 lg:h-12 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
+                <Clock size={20} className="lg:w-6 lg:h-6" />
               </div>
-              <h3 className="font-black text-xl text-emerald-950">Select Time</h3>
+              <h3 className="font-black text-lg lg:text-xl text-emerald-950">Select Time</h3>
             </div>
 
             <div className="grid grid-cols-1 gap-3 max-h-[300px] overflow-y-auto pr-2 scrollbar-hide">

@@ -11,6 +11,7 @@ import {
 import { motion } from 'framer-motion';
 import { useAuth } from '../../../auth/AuthContext';
 import { analyticsApi, type AnalyticsDashboardResponse } from '../../../lib/api';
+import Loader from '../../../components/loader/Loader';
 
 const StaffDashboard = () => {
   const { accessToken } = useAuth();
@@ -37,9 +38,7 @@ const StaffDashboard = () => {
   const appointments = dashboardData?.pendingAppointmentsList || [];
 
   if (loading) {
-    return <div className="p-8 flex items-center justify-center min-h-[400px]">
-      <div className="w-8 h-8 border-4 border-slate-200 border-t-emerald-500 rounded-full animate-spin"></div>
-    </div>;
+    return <Loader type="dashboard" />;
   }
 
   return (

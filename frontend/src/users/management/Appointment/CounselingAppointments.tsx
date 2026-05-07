@@ -6,6 +6,7 @@ import { useTheme } from '../../../contexts/ThemeContext';
 import { appointmentApi } from '../../../lib/api';
 import type { ManagementAppointmentItem } from '../../../lib/api';
 import { useAuth } from '../../../auth/AuthContext';
+import Loader from '../../../components/loader/Loader';
 
 const CounselingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }) => {
   const { accessToken } = useAuth();
@@ -72,6 +73,10 @@ const CounselingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director
       (app.level && app.level.toLowerCase().includes(q))
     );
   });
+
+  if (loading) {
+    return <Loader type="management-table" />;
+  }
 
   return (
     <motion.div

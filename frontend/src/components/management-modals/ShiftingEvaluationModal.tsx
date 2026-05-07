@@ -84,7 +84,7 @@ const ShiftingEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff',
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-slate-900/60"
+            className="absolute inset-0 bg-black/70"
           />
 
           <motion.div

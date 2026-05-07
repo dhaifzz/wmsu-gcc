@@ -42,7 +42,6 @@ const DirectorDashboard = () => {
     { id: 'shifting', label: 'Shifting', icon: RefreshCw },
     { id: 'office-schedule', label: 'Office Schedule', icon: Building2 },
     { id: 'history', label: 'History', icon: Clock },
-    { id: 'profile', label: 'My Profile', icon: User },
   ];
 
   return (

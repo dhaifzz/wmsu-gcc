@@ -34,7 +34,7 @@ const ClientNavbar = ({ activeTab, setActiveTab }: ClientNavbarProps) => {
   }, []);
 
   return (
-    <header className="bg-emerald-900 text-white sticky top-0 z-30 px-6 lg:px-10 py-4 flex items-center justify-between shadow-xl">
+    <header className="bg-emerald-900 text-white sticky top-0 z-30 px-6 lg:px-10 py-4 flex items-center justify-between shadow-xl print:hidden">
       <div className="flex items-center gap-3">
         <div className="flex items-center -space-x-1.5">
           <img src={logos.wmsuLogo} alt="WMSU Logo" className="w-11 h-11 object-contain z-10" />
