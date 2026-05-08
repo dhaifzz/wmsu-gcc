@@ -77,7 +77,7 @@ export const showToast = {
 export function ToastProvider() {
   return (
     <Toaster
-      position="top-center"
+      position="top-right"
       toastOptions={{
         style: {
           maxWidth: '500px',
