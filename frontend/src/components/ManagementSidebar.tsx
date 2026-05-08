@@ -116,8 +116,6 @@ const ManagementSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen
 
         {/* Nav Links */}
         <nav className="space-y-2 flex-1 overflow-y-auto pr-1 custom-scrollbar">
-          <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${c.navLabel} mb-4 px-4`}>Navigation</p>
-
           {displayLinks.map((link) => (
             <button
               key={link.id}
