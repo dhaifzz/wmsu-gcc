@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   LayoutDashboard,
   User,
-  LogOut,
-  Clock as ClockIcon
+  LogOut
 } from 'lucide-react';
 
 import WMSULogoAsset from '../assets/logos/WMSU.png';
@@ -34,7 +33,6 @@ interface ManagementSidebarProps {
 const ManagementSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen, onClose, links, colorScheme = 'emerald' }: ManagementSidebarProps) => {
   const { signOut } = useAuth();
   const navigate = useNavigate();
-  const [time, setTime] = useState(new Date());
   const [logos, setLogos] = useState({
     wmsuLogo: WMSULogoAsset,
     gccLogo: GCCLogoAsset
@@ -42,10 +40,6 @@ const ManagementSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen
 
   const c = colorScheme === 'teal' ? {
     aside: 'bg-teal-950 border-teal-800',
-    clockBg: 'bg-teal-900/60 border-teal-800/50',
-    clockLabel: 'text-teal-400',
-    clockAmpm: 'text-teal-400',
-    clockDate: 'text-teal-300/60',
     navLabel: 'text-teal-400/40',
     activeBtn: 'bg-teal-400 text-teal-950 shadow-xl shadow-teal-950/40',
     activeIcon: 'text-teal-900',
@@ -61,10 +55,6 @@ const ManagementSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen
     overlay: 'bg-teal-950/40',
   } : {
     aside: 'bg-emerald-900 border-emerald-800',
-    clockBg: 'bg-emerald-950/40 border-white/5',
-    clockLabel: 'text-emerald-400',
-    clockAmpm: 'text-emerald-500',
-    clockDate: 'text-emerald-200/60',
     navLabel: 'text-emerald-400/40',
     activeBtn: 'bg-white text-emerald-900 shadow-xl shadow-emerald-950/20',
     activeIcon: 'text-emerald-700',
@@ -81,8 +71,6 @@ const ManagementSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen
   };
 
   useEffect(() => {
-    const timer = setInterval(() => setTime(new Date()), 1000);
-
     const fetchLogos = async () => {
       try {
         const res = await cmsApi.getContent('logos');
@@ -97,26 +85,7 @@ const ManagementSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen
       }
     };
     fetchLogos();
-
-    return () => clearInterval(timer);
   }, []);
-
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: '2-digit',
-      year: 'numeric'
-    });
-  };
-
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: true
-    });
-  };
 
   const defaultLinks: NavLink[] = [
     { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
@@ -142,21 +111,6 @@ const ManagementSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen
           <div>
             <h1 className="font-black text-xl tracking-tighter leading-none">WMSU GCC</h1>
             <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest mt-1">Portal System</p>
-          </div>
-        </div>
-
-        {/* Live Date/Time "Countdown" Style */}
-        <div className={`${c.clockBg} rounded-3xl p-5 mb-8 border relative overflow-hidden group`}>
-          <div className="absolute top-0 right-0 p-2 text-emerald-500/20 group-hover:text-emerald-500/40 transition-colors">
-            <ClockIcon size={48} />
-          </div>
-          <div className="relative z-10">
-            <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${c.clockLabel} mb-2`}>System Time</p>
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-black tabular-nums">{formatTime(time).split(' ')[0]}</span>
-              <span className={`text-xs font-black uppercase ${c.clockAmpm}`}>{formatTime(time).split(' ')[1]}</span>
-            </div>
-            <p className={`text-xs font-bold ${c.clockDate} mt-1`}>{formatDate(time)}</p>
           </div>
         </div>
 
