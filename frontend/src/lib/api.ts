@@ -478,7 +478,25 @@ export interface CreateAdminUserPayload {
   email: string;
   password: string;
   firstName: string;
+  middleName?: string;
   lastName: string;
+  contactNumber: string;
+  city: string;
+  barangay: string;
+  street: string;
+  sex: string;
+  birthdate: string;
+  isWMSU: boolean;
+  isFaculty: boolean;
+  occupation: string;
+  educationLevel: string;
+  school: string;
+  course: string;
+  gradeLevel: string;
+  track: string;
+  schoolId: string;
+  lrn: string;
+  employeeId: string;
   role: string;
 }
 

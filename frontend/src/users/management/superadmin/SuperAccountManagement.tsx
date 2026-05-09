@@ -7,11 +7,11 @@ import {
   Search,
   UserX,
   X,
-  Eye,
-  EyeOff,
   Loader2,
   AlertCircle,
   RefreshCw,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { showAlert } from '../../../components/modal-notification/sweetalert';
 import toast from 'react-hot-toast';
@@ -119,7 +119,7 @@ const UserManagement = () => {
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-lg border border-slate-100 shadow-xl shadow-slate-200/40">
-          <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Total Admin</p>
+          <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Total Users</p>
           {loading ? (
             <div className="flex items-center gap-2 text-slate-400">
               <Loader2 size={18} className="animate-spin" />
@@ -278,164 +278,367 @@ interface CreateAccountModalProps {
   onCreated: () => void;
 }
 
-const AVAILABLE_ROLES = ['Staff', 'Director', 'Admin', 'Super Admin'];
+import phAddresses from '../../../ph_addresses.json';
+import { cmsApi } from '../../../lib/api';
+import { 
+  Lock, 
+  Phone, 
+  ChevronDown, 
+  ArrowLeft
+} from 'lucide-react';
+
+const AVAILABLE_ROLES = ['College Student', 'High School Student', 'Faculty', 'Outsider', 'Staff', 'Director', 'Admin'];
 
 const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => {
   const { accessToken } = useAuth();
-  const [form, setForm] = useState({
-    email: '',
-    password: '',
-    firstName: '',
-    lastName: '',
-    role: 'Staff',
-  });
-  const [showPassword, setShowPassword] = useState(false);
+  const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
+  
+  // Form State
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [middleInitial, setMiddleInitial] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [contactNumber, setContactNumber] = useState('');
+  const [city, setCity] = useState('');
+  const [barangay, setBarangay] = useState('');
+  const [street, setStreet] = useState('');
+  const [sex, setSex] = useState('');
+  const [birthdate, setBirthdate] = useState('');
+  const [role, setRole] = useState('Staff');
+  const [isWMSU, setIsWMSU] = useState(true);
+  const [occupation, setOccupation] = useState('');
+  const [educationLevel, setEducationLevel] = useState('');
+  const [school, setSchool] = useState('');
+  const [course, setCourse] = useState('');
+  const [gradeLevel, setGradeLevel] = useState('');
+  const [track, setTrack] = useState('');
+  const [schoolId, setSchoolId] = useState('');
+  const [lrn, setLrn] = useState('');
+  const [employeeId, setEmployeeId] = useState('');
 
-  const isValid = form.email.trim() && form.password.trim() && form.firstName.trim() && form.lastName.trim() && form.role;
+  // UI State
+  const [showPassword, setShowPassword] = useState(false);
+  const [colleges, setColleges] = useState<any[]>([]);
+  const [occupations, setOccupations] = useState<string[]>([]);
+  const [isDropdownOpen, setIsDropdownOpen] = useState<any>({});
+
+  const isFaculty = role === 'Faculty';
+  const isStudent = role.includes('Student');
+  const shouldShowEducationStep = isStudent;
+
+  // Fetch Academic Data
+  useEffect(() => {
+    const fetchData = async () => {
+      const academicRes = await cmsApi.getAcademicData();
+      if (academicRes.ok && academicRes.data) {
+        // Simple normalization for the modal
+        const source = (academicRes.data as any).data || (academicRes.data as any).content || academicRes.data;
+        setColleges(Array.isArray(source.colleges) ? source.colleges : []);
+        setOccupations(Array.isArray(source.occupations) ? source.occupations.map((o: any) => typeof o === 'string' ? o : o.occupation_name) : []);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // Validation Helpers (Matching Register.tsx)
+  const validatePhone = (phone: string) => {
+    const clean = phone.replace(/\s/g, '');
+    if (!/^\+?\d+$/.test(clean)) return { error: 'Digits only.' };
+    if (clean.startsWith('+639') && clean.length === 13) return { normalized: clean };
+    if (clean.startsWith('639') && clean.length === 12) return { normalized: '+' + clean };
+    if (clean.startsWith('09') && clean.length === 11) return { normalized: '+63' + clean.substring(1) };
+    return { error: 'Start with 09, 639, or +639.' };
+  };
+
+  const handleNext = () => {
+    if (step === 1) {
+      if (!email.includes('@')) return toast.error('Valid email required.');
+      if (password.length < 8) return toast.error('Password min 8 chars.');
+      if (password !== confirmPassword) return toast.error('Passwords mismatch.');
+      setStep(2);
+    } else if (step === 2) {
+      if (!firstName || !lastName) return toast.error('Names required.');
+      const { normalized, error } = validatePhone(contactNumber);
+      if (error) return toast.error(error);
+      setContactNumber(normalized!);
+      if (!city || !barangay) return toast.error('Address required.');
+      setStep(3);
+    } else if (step === 3) {
+      if (!sex || !birthdate) return toast.error('Sex and Birthdate required.');
+      if (shouldShowEducationStep) setStep(4);
+      else handleSubmit();
+    }
+  };
 
   const handleSubmit = async () => {
-    if (!isValid || !accessToken) return;
+    if (!accessToken) return;
     setSubmitting(true);
     try {
-      const res = await adminApi.createUser(form, accessToken);
+      const payload = {
+        email, password, firstName, middleName: middleInitial, lastName,
+        contactNumber, city, barangay, street, sex, birthdate,
+        isWMSU, isFaculty, occupation: occupation || (isFaculty ? 'Faculty' : (isStudent ? 'Student' : 'Staff')),
+        educationLevel: educationLevel || (role === 'College Student' ? 'College' : (role === 'High School Student' ? 'High School' : '')),
+        school: isWMSU ? 'Western Mindanao State University' : school,
+        course, gradeLevel, track, schoolId, lrn, employeeId, role
+      };
+      const res = await adminApi.createUser(payload, accessToken);
       if (res.ok) {
-        toast.success((res.data as any)?.message || 'Account created successfully!');
+        toast.success('Account created successfully!');
         onCreated();
       } else {
-        toast.error(res.error || (res.data as any)?.error || 'Failed to create account.');
+        toast.error(res.error || 'Failed to create account.');
       }
     } catch {
-      toast.error('An error occurred while creating the account.');
+      toast.error('An error occurred.');
     } finally {
       setSubmitting(false);
     }
   };
 
+  const ALL_CITIES = Object.keys(phAddresses).sort();
+
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 overflow-y-auto"
       onClick={onClose}
     >
       <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"
+        initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100">
+        <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
           <div>
-            <h3 className="text-xl font-black text-slate-900">Create New Account</h3>
-            <p className="text-xs font-bold text-slate-400 mt-1">A confirmation email will be sent to the user.</p>
-          </div>
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-lg transition-all">
-            <X size={20} className="text-slate-400" />
-          </button>
-        </div>
-
-        {/* Form */}
-        <div className="px-8 py-6 space-y-5">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">First Name *</label>
-              <input
-                value={form.firstName}
-                onChange={e => setForm(f => ({ ...f, firstName: e.target.value }))}
-                placeholder="Juan"
-                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all placeholder:text-slate-300"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Last Name *</label>
-              <input
-                value={form.lastName}
-                onChange={e => setForm(f => ({ ...f, lastName: e.target.value }))}
-                placeholder="Dela Cruz"
-                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all placeholder:text-slate-300"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Email Address *</label>
-            <input
-              type="email"
-              value={form.email}
-              onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-              placeholder="user@wmsu.edu.ph"
-              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all placeholder:text-slate-300"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Password *</label>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={form.password}
-                onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-                placeholder="Minimum 6 characters"
-                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 pr-12 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all placeholder:text-slate-300"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(v => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 transition-colors"
-              >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Role *</label>
-            <div className="grid grid-cols-2 gap-2">
-              {AVAILABLE_ROLES.map(role => (
-                <button
-                  key={role}
-                  onClick={() => setForm(f => ({ ...f, role }))}
-                  className={`px-4 py-3 rounded-lg text-sm font-black border transition-all ${
-                    form.role === role
-                      ? 'bg-teal-600 text-white border-teal-600 shadow-lg shadow-teal-200'
-                      : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-teal-300 hover:bg-teal-50'
-                  }`}
-                >
-                  {role}
-                </button>
+            <h3 className="text-xl font-black text-slate-900">Create Account</h3>
+            <div className="flex items-center gap-2 mt-1">
+              {[1, 2, 3, (shouldShowEducationStep ? 4 : null)].filter(Boolean).map((s: any) => (
+                <div key={s} className={`h-1.5 w-8 rounded-full transition-all ${step >= s ? 'bg-teal-600' : 'bg-slate-200'}`} />
               ))}
             </div>
           </div>
+          <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-lg transition-all"><X size={20} className="text-slate-400" /></button>
+        </div>
+
+        {/* Form Body */}
+        <div className="px-8 py-8 max-h-[70vh] overflow-y-auto custom-scrollbar">
+          {step === 1 && (
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Select Account Role</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {AVAILABLE_ROLES.map(r => (
+                    <button key={r} onClick={() => {
+                      setRole(r);
+                      setIsWMSU(r !== 'Outsider');
+                    }} className={`px-3 py-3 rounded-xl text-[11px] font-black border transition-all ${role === r ? 'bg-teal-600 text-white border-teal-600 shadow-lg shadow-teal-100' : 'bg-white text-slate-600 border-slate-200 hover:border-teal-300'}`}>
+                      {r}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Email Address</label>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="user@example.com" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 pl-12 pr-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Password</label>
+                    <div className="relative">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                      <input type={showPassword ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 pl-12 pr-12 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none" />
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-teal-600 transition-colors">
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Confirm Password</label>
+                    <div className="relative">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                      <input type={showPassword ? 'text' : 'password'} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="••••••••" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 pl-12 pr-12 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">First Name</label>
+                  <input value={firstName} onChange={e => setFirstName(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Middle Name</label>
+                  <input value={middleInitial} onChange={e => setMiddleInitial(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Last Name</label>
+                  <input value={lastName} onChange={e => setLastName(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Contact Number</label>
+                <div className="relative">
+                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                  <input value={contactNumber} onChange={e => setContactNumber(e.target.value)} placeholder="09xxxxxxxxx" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 pl-12 pr-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2 relative">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">City</label>
+                  <button onClick={() => setIsDropdownOpen({ city: !isDropdownOpen.city })} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold text-left flex justify-between items-center">
+                    {city || 'Select City'} <ChevronDown size={16} />
+                  </button>
+                  {isDropdownOpen.city && (
+                    <div className="absolute top-full left-0 right-0 z-10 mt-2 bg-white border border-slate-100 rounded-xl shadow-xl max-h-48 overflow-y-auto">
+                      {ALL_CITIES.map(c => <button key={c} onClick={() => { setCity(c); setBarangay(''); setIsDropdownOpen({}); }} className="w-full px-4 py-3 text-left text-sm font-bold hover:bg-slate-50 border-b border-slate-50">{c}</button>)}
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-2 relative">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Barangay</label>
+                  <button disabled={!city} onClick={() => setIsDropdownOpen({ brgy: !isDropdownOpen.brgy })} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold text-left flex justify-between items-center disabled:opacity-50">
+                    {barangay || 'Select Barangay'} <ChevronDown size={16} />
+                  </button>
+                  {isDropdownOpen.brgy && city && (
+                    <div className="absolute top-full left-0 right-0 z-10 mt-2 bg-white border border-slate-100 rounded-xl shadow-xl max-h-48 overflow-y-auto">
+                      {(phAddresses[city as keyof typeof phAddresses] || []).map((b: string) => <button key={b} onClick={() => { setBarangay(b); setIsDropdownOpen({}); }} className="w-full px-4 py-3 text-left text-sm font-bold hover:bg-slate-50 border-b border-slate-50">{b}</button>)}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Street / House No.</label>
+                <input value={street} onChange={e => setStreet(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none" />
+              </div>
+            </div>
+          )}
+
+          {step === 3 && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Sex</label>
+                  <div className="flex gap-2">
+                    {['Male', 'Female'].map(s => (
+                      <button key={s} onClick={() => setSex(s)} className={`flex-1 py-4 rounded-xl text-sm font-black border transition-all ${sex === s ? 'bg-teal-600 text-white border-teal-600 shadow-lg shadow-teal-100' : 'bg-white text-slate-600 border-slate-200 hover:border-teal-300'}`}>{s}</button>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Birthdate</label>
+                  <input type="date" value={birthdate} onChange={e => setBirthdate(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none" />
+                </div>
+              </div>
+              {!isStudent && (
+                <div className="space-y-2 relative">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Occupation</label>
+                  <button onClick={() => setIsDropdownOpen({ occ: !isDropdownOpen.occ })} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold text-left flex justify-between items-center">
+                    {occupation || 'Select Occupation'} <ChevronDown size={16} />
+                  </button>
+                  {isDropdownOpen.occ && (
+                    <div className="absolute top-full left-0 right-0 z-10 mt-2 bg-white border border-slate-100 rounded-xl shadow-xl max-h-48 overflow-y-auto">
+                      {occupations.map(o => <button key={o} onClick={() => { setOccupation(o); setIsDropdownOpen({}); }} className="w-full px-4 py-3 text-left text-sm font-bold hover:bg-slate-50 border-b border-slate-50">{o}</button>)}
+                    </div>
+                  )}
+                </div>
+              )}
+              {isFaculty && (
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Employee ID</label>
+                  <input value={employeeId} onChange={e => setEmployeeId(e.target.value)} placeholder="6 digits" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none" />
+                </div>
+              )}
+            </div>
+          )}
+
+          {step === 4 && isStudent && (
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">School Name</label>
+                <input disabled={isWMSU} value={isWMSU ? 'Western Mindanao State University' : school} onChange={e => setSchool(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none disabled:opacity-50" />
+              </div>
+              
+              {role === 'College Student' && (
+                <div className="space-y-4">
+                  <div className="space-y-2 relative">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Course</label>
+                    <button onClick={() => setIsDropdownOpen({ course: !isDropdownOpen.course })} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold text-left flex justify-between items-center">
+                      {course || 'Select Course'} <ChevronDown size={16} />
+                    </button>
+                    {isDropdownOpen.course && (
+                      <div className="absolute top-full left-0 right-0 z-10 mt-2 bg-white border border-slate-100 rounded-xl shadow-xl max-h-48 overflow-y-auto">
+                        {colleges.flatMap(c => c.courses || []).map((crs: any) => (
+                          <button key={crs.name} onClick={() => { setCourse(crs.name); setEducationLevel('College'); setIsDropdownOpen({}); }} className="w-full px-4 py-3 text-left text-sm font-bold hover:bg-slate-50 border-b border-slate-50">{crs.name}</button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  {isWMSU && (
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">School ID</label>
+                      <input value={schoolId} onChange={e => setSchoolId(e.target.value)} placeholder="9 digits" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none" />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {role === 'High School Student' && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Grade Level</label>
+                      <select value={gradeLevel} onChange={e => {
+                        setGradeLevel(e.target.value);
+                        setEducationLevel('High School');
+                      }} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none">
+                        <option value="">Select</option>
+                        {[7,8,9,10,11,12].map(g => <option key={g} value={g}>Grade {g}</option>)}
+                      </select>
+                    </div>
+                    {['11', '12'].includes(gradeLevel) && (
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Track</label>
+                        <input value={track} onChange={e => setTrack(e.target.value)} placeholder="STEM, ABM, etc." className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none" />
+                      </div>
+                    )}
+                  </div>
+                  {isWMSU && (
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">LRN</label>
+                      <input value={lrn} onChange={e => setLrn(e.target.value)} placeholder="12 digits" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none" />
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Footer */}
-        <div className="px-8 py-6 border-t border-slate-100 flex gap-3">
-          <button
-            onClick={onClose}
-            className="flex-1 py-3.5 bg-slate-100 text-slate-700 font-black rounded-lg hover:bg-slate-200 transition-all"
-          >
-            Cancel
-          </button>
-          <button
-            disabled={!isValid || submitting}
-            onClick={handleSubmit}
-            className="flex-1 py-3.5 bg-teal-600 text-white font-black rounded-lg hover:bg-teal-700 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-teal-200 flex items-center justify-center gap-2"
-          >
-            {submitting ? (
-              <>
-                <Loader2 size={16} className="animate-spin" />
-                Creating…
-              </>
-            ) : (
-              <>
-                <UserPlus size={16} />
-                Create Account
-              </>
-            )}
+        <div className="px-8 py-6 border-t border-slate-100 flex gap-3 bg-slate-50/50">
+          {step > 1 && (
+            <button onClick={() => setStep(step - 1)} className="px-6 py-4 bg-white border border-slate-200 text-slate-600 font-black rounded-xl hover:bg-slate-100 transition-all flex items-center gap-2">
+              <ArrowLeft size={16} /> Back
+            </button>
+          )}
+          <button onClick={onClose} className="px-6 py-4 text-slate-500 font-bold hover:bg-slate-200 rounded-xl transition-all">Cancel</button>
+          <button disabled={submitting} onClick={handleNext} className="flex-1 py-4 bg-teal-600 text-white font-black rounded-xl hover:bg-teal-700 transition-all shadow-lg shadow-teal-200 flex items-center justify-center gap-2 disabled:opacity-50">
+            {submitting ? <Loader2 size={18} className="animate-spin" /> : (step === (shouldShowEducationStep ? 4 : 3) ? 'Create Account' : 'Next Step')}
           </button>
         </div>
       </motion.div>
