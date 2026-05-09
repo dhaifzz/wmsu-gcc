@@ -455,3 +455,47 @@ export const analyticsApi = {
   getMyStats: (token: string) =>
     api<MyStatsResponse>('/api/analytics/my-stats', { token }),
 };
+
+// ------------------------------------------
+// Admin User Management API helpers
+// ------------------------------------------
+
+export interface AdminUser {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+  status: string; // 'Active' | 'Pending'
+  createdAt: string;
+}
+
+export interface AdminUsersResponse {
+  users: AdminUser[];
+}
+
+export interface CreateAdminUserPayload {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+}
+
+export const adminApi = {
+  getUsers: (token: string) =>
+    api<AdminUsersResponse>('/api/admin/users', { token }),
+
+  createUser: (payload: CreateAdminUserPayload, token: string) =>
+    api<{ message: string }>('/api/admin/users/create', {
+      method: 'POST',
+      body: payload as unknown as Record<string, unknown>,
+      token,
+    }),
+
+  deleteUser: (id: string, token: string) =>
+    api<{ message: string }>(`/api/admin/users/${id}`, {
+      method: 'DELETE',
+      token,
+    }),
+};
