@@ -22,12 +22,38 @@ import { showAlert } from '../../../components/modal-notification/sweetalert';
 import toast from 'react-hot-toast';
 import Shifting from '../../clients/Shifting';
 import { useAuth } from '../../../auth/AuthContext';
-import { analyticsApi, appointmentApi, type AnalyticsDashboardResponse } from '../../../lib/api';
+import { analyticsApi, appointmentApi, cmsApi, type AnalyticsDashboardResponse } from '../../../lib/api';
 
 interface OverviewProps {
   userName: string;
   onNavigate: (tab: string) => void;
 }
+
+// ── Office schedule types (matching Counseling / Assessment) ──────────────────
+type OfficeStatus = 'open' | 'morning_only' | 'afternoon_only' | 'closed' | 'holiday';
+
+interface OfficeConfig {
+  status: OfficeStatus;
+  note?: string;
+  startTime?: string;
+  endTime?: string;
+}
+
+const toDateKey = (year: number, monthIndex: number, day: number) => {
+  const mm = String(monthIndex + 1).padStart(2, '0');
+  const dd = String(day).padStart(2, '0');
+  return `${year}-${mm}-${dd}`;
+};
+
+const morningSlots = [
+  '08:00 AM – 09:00 AM', '09:00 AM – 10:00 AM',
+  '10:00 AM – 11:00 AM',
+];
+const afternoonSlots = [
+  '01:00 PM – 02:00 PM', '02:00 PM – 03:00 PM',
+  '03:00 PM – 04:00 PM', '04:00 PM – 05:00 PM',
+];
+const allTimeSlots = [...morningSlots, ...afternoonSlots];
 
 // ── Booking sub-view ──────────────────────────────────────────────────────────
 const BookingPanel = ({ onBack }: { onBack: () => void }) => {
@@ -36,6 +62,29 @@ const BookingPanel = ({ onBack }: { onBack: () => void }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+
+  // ── Office schedule state ──────────────────────────────────────────────────
+  const [officeSchedule, setOfficeSchedule] = useState<{ [key: string]: OfficeConfig }>({});
+  const [maxAvailableDate, setMaxAvailableDate] = useState<string | null>(null);
+  const [loadingSchedule, setLoadingSchedule] = useState(true);
+
+  useEffect(() => {
+    const fetchSchedule = async () => {
+      try {
+        setLoadingSchedule(true);
+        const res = await cmsApi.getContent('office-schedule');
+        if (res.ok && res.data) {
+          if (res.data.maxAvailableDate) setMaxAvailableDate(res.data.maxAvailableDate);
+          if (res.data.officeSchedule) setOfficeSchedule(res.data.officeSchedule);
+        }
+      } catch (err) {
+        console.error('Failed to fetch office schedule:', err);
+      } finally {
+        setLoadingSchedule(false);
+      }
+    };
+    fetchSchedule();
+  }, []);
 
   // Placeholder admin user object for Shifting component
   const adminAsUser = {
@@ -55,10 +104,52 @@ const BookingPanel = ({ onBack }: { onBack: () => void }) => {
   const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
-  const isPast = (day: number) => {
+  // ── Date availability logic (mirrors Counseling.tsx / Assessment.tsx) ──────
+  const isDisabledDay = (day: number) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    return new Date(currentDate.getFullYear(), currentDate.getMonth(), day) < today;
+    const dateToCheck = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+    const dateKey = toDateKey(currentDate.getFullYear(), currentDate.getMonth(), day);
+
+    // Weekend check
+    if (dateToCheck.getDay() === 0 || dateToCheck.getDay() === 6) return true;
+    // Past date check
+    if (dateToCheck < today) return true;
+    // Global deadline check
+    if (maxAvailableDate && dateKey > maxAvailableDate) return true;
+    // Office schedule status check
+    const config = officeSchedule[dateKey];
+    if (config?.status === 'closed' || config?.status === 'holiday') return true;
+
+    return false;
+  };
+
+  const getDateStatus = (day: number): string | null => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dateToCheck = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+    const dateKey = toDateKey(currentDate.getFullYear(), currentDate.getMonth(), day);
+    const config = officeSchedule[dateKey];
+
+    if (dateToCheck.getDay() === 0 || dateToCheck.getDay() === 6) return 'Weekend';
+    if (dateToCheck < today) return 'Past';
+    if (maxAvailableDate && dateKey > maxAvailableDate) return 'Deadline';
+    if (config?.status === 'closed') return 'Closed';
+    if (config?.status === 'holiday') return 'Holiday';
+    if (config?.status === 'morning_only') return 'AM Only';
+    if (config?.status === 'afternoon_only') return 'PM Only';
+    return null;
+  };
+
+  // ── Visible time slots based on selected day's office status ───────────────
+  const getVisibleTimeSlots = () => {
+    if (!selectedDay) return allTimeSlots;
+    const dateKey = toDateKey(currentDate.getFullYear(), currentDate.getMonth(), selectedDay);
+    const config = officeSchedule[dateKey];
+    const status = config?.status || 'open';
+    if (status === 'morning_only') return morningSlots;
+    if (status === 'afternoon_only') return afternoonSlots;
+    return allTimeSlots;
   };
 
   const changeMonth = (offset: number) => {
@@ -69,13 +160,6 @@ const BookingPanel = ({ onBack }: { onBack: () => void }) => {
     setSelectedDay(null);
     setSelectedTime(null);
   };
-
-  const timeSlots = [
-    '08:00 AM – 09:00 AM', '09:00 AM – 10:00 AM',
-    '10:00 AM – 11:00 AM', '11:00 AM – 12:00 PM',
-    '01:00 PM – 02:00 PM', '02:00 PM – 03:00 PM',
-    '03:00 PM – 04:00 PM', '04:00 PM – 05:00 PM',
-  ];
 
   const handleConfirm = async () => {
     const result = await showAlert.confirm(
@@ -99,6 +183,8 @@ const BookingPanel = ({ onBack }: { onBack: () => void }) => {
       />
     );
   }
+
+  const visibleSlots = getVisibleTimeSlots();
 
   return (
     <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }}>
@@ -149,13 +235,21 @@ const BookingPanel = ({ onBack }: { onBack: () => void }) => {
           {/* Calendar */}
           <div className="bg-white rounded-lg p-8 border border-slate-100 shadow-sm">
             <div className="flex items-center justify-between mb-6">
-              <button onClick={() => changeMonth(-1)} className="p-2 rounded-lg hover:bg-slate-50">
+              <button
+                onClick={() => changeMonth(-1)}
+                disabled={loadingSchedule || (currentDate.getMonth() === new Date().getMonth() && currentDate.getFullYear() === new Date().getFullYear())}
+                className="p-2 rounded-lg hover:bg-slate-50 disabled:opacity-20 disabled:cursor-not-allowed"
+              >
                 <ChevronLeft size={20} />
               </button>
               <h4 className="text-lg font-black text-slate-900">
                 {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
               </h4>
-              <button onClick={() => changeMonth(1)} className="p-2 rounded-lg hover:bg-slate-50">
+              <button
+                onClick={() => changeMonth(1)}
+                disabled={loadingSchedule}
+                className="p-2 rounded-lg hover:bg-slate-50 disabled:opacity-20 disabled:cursor-not-allowed"
+              >
                 <ChevronRight size={20} />
               </button>
             </div>
@@ -167,19 +261,39 @@ const BookingPanel = ({ onBack }: { onBack: () => void }) => {
             </div>
             <div className="grid grid-cols-7 gap-1">
               {Array.from({ length: firstDay }).map((_, i) => <div key={`blank-${i}`} />)}
-              {days.map(day => (
-                <button
-                  key={day}
-                  disabled={isPast(day)}
-                  onClick={() => setSelectedDay(day)}
-                  className={`h-10 w-full rounded-lg text-sm font-bold transition-all 
-                    ${isPast(day) ? 'text-slate-200 cursor-not-allowed' : ''}
-                    ${selectedDay === day ? 'bg-teal-600 text-white shadow-lg' : !isPast(day) ? 'hover:bg-teal-50 text-slate-700' : ''}
-                  `}
-                >
-                  {day}
-                </button>
-              ))}
+              {days.map(day => {
+                const disabled = isDisabledDay(day);
+                const status = getDateStatus(day);
+                return (
+                  <button
+                    key={day}
+                    disabled={disabled || loadingSchedule}
+                    onClick={() => {
+                      if (disabled) {
+                        if (status) toast(status, { icon: 'ℹ️' });
+                        return;
+                      }
+                      setSelectedDay(day);
+                      setSelectedTime(null);
+                    }}
+                    className={`h-12 w-full rounded-lg text-sm font-bold transition-all flex flex-col items-center justify-center
+                      ${disabled ? 'text-slate-200 cursor-not-allowed opacity-50' : ''}
+                      ${selectedDay === day ? 'bg-teal-600 text-white shadow-lg' : !disabled ? 'hover:bg-teal-50 text-slate-700' : ''}
+                    `}
+                  >
+                    <span>{day}</span>
+                    {status && (
+                      <span className={`text-[7px] font-black uppercase leading-none mt-0.5
+                        ${selectedDay === day ? 'text-white/80' :
+                          status === 'Holiday' || status === 'Closed' ? 'text-rose-500' :
+                          'text-slate-400'}
+                      `}>
+                        {status}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -192,7 +306,7 @@ const BookingPanel = ({ onBack }: { onBack: () => void }) => {
             </h4>
             {selectedDay ? (
               <div className="grid grid-cols-1 gap-3 flex-1 overflow-y-auto">
-                {timeSlots.map(slot => (
+                {visibleSlots.map(slot => (
                   <button
                     key={slot}
                     onClick={() => setSelectedTime(slot)}
