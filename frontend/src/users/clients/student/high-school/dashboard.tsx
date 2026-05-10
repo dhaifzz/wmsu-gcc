@@ -6,7 +6,9 @@ import {
   Calendar,
   Clock,
   GraduationCap,
-  MapPin
+  MapPin,
+  ArrowRight,
+  RefreshCw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ClientNavbar from '../../../../components/ClientNavbar';
@@ -16,7 +18,10 @@ import Counseling from '../../Counseling';
 import Loader from '../../../../components/loader/Loader';
 import Assessment from '../../Assessment';
 import { useAuth } from '../../../../auth/AuthContext';
-import { appointmentApi } from '../../../../lib/api';
+import { appointmentApi, cmsApi } from '../../../../lib/api';
+import assessmentImg from '../../../../assets/img/assessment-img.png';
+import counselingImg from '../../../../assets/img/counseling-img.png';
+import shiftingImg from '../../../../assets/img/shifting-img.png';
 
 const HighSchoolDashboard = () => {
   const { user: authUser, accessToken } = useAuth();
@@ -24,6 +29,21 @@ const HighSchoolDashboard = () => {
   const [activeService, setActiveService] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [pendingCount, setPendingCount] = useState(0);
+  const [cmsFeatures, setCmsFeatures] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchCms = async () => {
+      try {
+        const result = await cmsApi.getContent('home');
+        if (result.ok && result.data?.support?.features) {
+          setCmsFeatures(result.data.support.features);
+        }
+      } catch (err) {
+        console.error("Failed to fetch CMS content", err);
+      }
+    };
+    fetchCms();
+  }, []);
 
   useEffect(() => {
     const fetchPendingCount = async () => {
@@ -64,22 +84,7 @@ const HighSchoolDashboard = () => {
     joinedDate: "N/A"
   };
 
-  const services = [
-    {
-      id: 'counseling',
-      name: 'Counseling',
-      icon: MessageCircle,
-      color: 'bg-blue-500',
-      desc: 'Professional one-on-one psychological support and guidance.'
-    },
-    {
-      id: 'assessment',
-      name: 'Assessment',
-      icon: ClipboardCheck,
-      color: 'bg-emerald-500',
-      desc: 'Standardized testing for mental health and personality.'
-    }
-  ];
+
 
   return (
     <div className="min-h-screen bg-[#f8fafc] flex flex-col font-sans text-slate-900">
@@ -149,25 +154,84 @@ const HighSchoolDashboard = () => {
                   </div>
 
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {services.map((service) => (
-                      <motion.div
-                        key={service.id}
-                        layout
-                        onClick={() => setActiveService(service.id)}
-                        className="p-8 rounded-lg border bg-white border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 group cursor-pointer transition-all flex flex-col"
-                      >
-                        <div className={`w-14 h-14 ${service.color} text-white rounded-lg flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform`}>
-                          <service.icon size={28} className="text-white" />
+                    {cmsFeatures.length > 0 ? cmsFeatures.map((feature: any, index: number) => {
+                      const serviceId = index === 0 ? 'counseling' : index === 1 ? 'assessment' : 'shifting';
+                      // High School students cannot access shifting
+                      const isDisabled = serviceId === 'shifting';
+                      const imageSource = feature.image || (index === 0 ? counselingImg : index === 1 ? assessmentImg : shiftingImg);
+
+                      const theme = index === 0 ? {
+                        iconBg: 'bg-blue-500',
+                        iconColor: 'text-white',
+                        titleHover: 'group-hover:text-slate-900',
+                        actionText: 'Book Appointment',
+                        actionColor: 'text-slate-700',
+                        circleBg: 'bg-blue-50',
+                        circleHover: 'group-hover:bg-blue-100',
+                        borderHover: 'hover:border-blue-200'
+                      } : index === 1 ? {
+                        iconBg: 'bg-emerald-500',
+                        iconColor: 'text-white',
+                        titleHover: 'group-hover:text-slate-900',
+                        actionText: 'Book Appointment',
+                        actionColor: 'text-slate-700',
+                        circleBg: 'bg-emerald-50',
+                        circleHover: 'group-hover:bg-emerald-100',
+                        borderHover: 'hover:border-emerald-200'
+                      } : {
+                        iconBg: 'bg-rose-500',
+                        iconColor: 'text-white',
+                        titleHover: 'group-hover:text-slate-900',
+                        actionText: 'Apply for Shifting',
+                        actionColor: 'text-slate-700',
+                        circleBg: 'bg-rose-50',
+                        circleHover: 'group-hover:bg-rose-100',
+                        borderHover: 'hover:border-rose-200'
+                      };
+
+                      return (
+                        <div
+                          key={index}
+                          onClick={() => !isDisabled && setActiveService(serviceId)}
+                          className={`rounded-xl border overflow-hidden bg-white shadow-sm transition-all flex flex-col ${isDisabled ? 'border-slate-200 opacity-80 cursor-not-allowed' : `border-slate-100 hover:shadow-xl ${theme.borderHover} hover:-translate-y-1 cursor-pointer group`}`}
+                        >
+                          {/* Image Banner */}
+                          <div className="h-40 w-full relative overflow-hidden bg-slate-100">
+                             <img src={imageSource} alt={feature.title} className={`w-full h-full object-cover transition-transform duration-700 ${isDisabled ? 'grayscale opacity-70' : 'group-hover:scale-110'}`} />
+                          </div>
+                          
+                          {/* Content */}
+                          <div className="p-6 flex-1 flex flex-col">
+                             <div className="flex items-center gap-3 mb-3">
+                               <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 shadow-sm ${isDisabled ? 'bg-slate-100 text-slate-400' : `${theme.iconBg} ${theme.iconColor}`}`}>
+                                  {index === 0 ? <MessageCircle size={20} /> : index === 1 ? <ClipboardCheck size={20} /> : <RefreshCw size={20} />}
+                               </div>
+                               <h4 className={`text-xl font-black ${isDisabled ? 'text-slate-500' : `text-slate-900 ${theme.titleHover} transition-colors`}`}>{feature.title}</h4>
+                             </div>
+                             <p className={`text-sm font-medium leading-relaxed mb-6 line-clamp-3 ${isDisabled ? 'text-slate-400' : 'text-slate-500'}`}>
+                                {feature.description}
+                             </p>
+                             
+                             {isDisabled ? (
+                                <div className="mt-auto pt-4 border-t border-slate-100">
+                                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 bg-slate-100 rounded-lg px-3 py-2 inline-block">
+                                    Unavailable for you
+                                  </p>
+                                </div>
+                             ) : (
+                                <div className={`mt-auto pt-4 border-t border-slate-50 flex items-center justify-between font-black text-sm ${theme.actionColor}`}>
+                                   <span>{theme.actionText}</span>
+                                   <div className={`w-8 h-8 rounded-full ${theme.circleBg} flex items-center justify-center ${theme.circleHover} transition-colors`}>
+                                     <ArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
+                                   </div>
+                                </div>
+                             )}
+                          </div>
                         </div>
-                        <h4 className="text-xl font-black mb-3 text-slate-900">{service.name}</h4>
-                        <p className="text-sm leading-relaxed mb-6 font-medium text-slate-500">
-                          {service.desc}
-                        </p>
-                        <div className="mt-auto flex items-center gap-2 text-emerald-600 font-black text-sm">
-                          Book Now <ChevronRight size={16} />
-                        </div>
-                      </motion.div>
-                    ))}
+                      );
+                    }) : (
+                      <div className="col-span-3 text-center text-slate-500">Loading services...</div>
+                    )}
                   </div>
                 </div>
 

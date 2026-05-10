@@ -412,12 +412,12 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden relative print:shadow-none print:border-slate-300">
-          <div className="bg-emerald-600 p-8 text-white text-center print:bg-emerald-100 print:text-emerald-900">
-            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 print:bg-emerald-200">
-              <CheckCircle2 size={32} className="text-white print:text-emerald-600" />
+          <div className="bg-rose-600 p-8 text-white text-center print:bg-rose-100 print:text-rose-900">
+            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 print:bg-rose-200">
+              <CheckCircle2 size={32} className="text-white print:text-rose-600" />
             </div>
             <h3 className="text-2xl font-black mb-2">Application Submitted!</h3>
-            <p className="text-emerald-100 text-sm font-medium print:text-emerald-800">Your shifting application has been successfully submitted and is pending staff review.</p>
+            <p className="text-rose-100 text-sm font-medium print:text-rose-800">Your shifting application has been successfully submitted and is pending staff review.</p>
           </div>
 
           <div className="p-8 space-y-8">
@@ -450,11 +450,11 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
                   <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">From</p>
                   <p className="font-black text-slate-700">{submittedInfo.currentCourse || profileData.currentCourse}</p>
                 </div>
-                <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
                   <ArrowRight size={16} />
                 </div>
                 <div className="flex-1 text-center md:text-right">
-                  <p className="text-[10px] uppercase tracking-wider text-emerald-600 font-bold mb-1">To</p>
+                  <p className="text-[10px] uppercase tracking-wider text-rose-600 font-bold mb-1">To</p>
                   <p className="font-black text-slate-900">{submittedInfo.targetCourse || 'N/A'}</p>
                 </div>
               </div>
@@ -515,7 +515,7 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
         <div className="lg:col-span-8 space-y-6 lg:space-y-8">
           <div className="bg-white rounded-2xl p-6 lg:p-10 border border-slate-100 shadow-sm">
             <div className="flex items-center gap-4 mb-8 lg:mb-10">
-              <div className="w-10 h-10 lg:w-12 lg:h-12 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 lg:w-12 lg:h-12 bg-rose-50 text-rose-600 rounded-lg flex items-center justify-center">
                 <User size={20} className="lg:w-6 lg:h-6" />
               </div>
               <div>
@@ -556,7 +556,7 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
 
           <div className="bg-white rounded-2xl p-6 lg:p-10 border border-slate-100 shadow-sm">
             <div className="flex items-center gap-4 mb-8 lg:mb-10">
-              <div className="w-10 h-10 lg:w-12 lg:h-12 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 lg:w-12 lg:h-12 bg-rose-50 text-rose-600 rounded-lg flex items-center justify-center">
                 <BookOpen size={20} className="lg:w-6 lg:h-6" />
               </div>
               <div>
@@ -578,17 +578,17 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
                 </div>
               </div>
 
-              <div className="hidden md:flex mt-4 w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 items-center justify-center border border-emerald-100 shadow-sm shrink-0">
+              <div className="hidden md:flex mt-4 w-10 h-10 rounded-full bg-rose-50 text-rose-600 items-center justify-center border border-rose-100 shadow-sm shrink-0">
                 <ArrowRight size={20} />
               </div>
 
               <div className="flex-1 w-full space-y-2 relative">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 ml-4">Course to Shift</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-rose-600 ml-4">Course to Shift</label>
                 <div className="relative">
                   <button
                     disabled={!isSubmissionOpen}
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="w-full bg-white border-2 border-emerald-100 rounded-lg px-6 py-4 font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all flex items-center justify-between gap-3 text-left"
+                    className="w-full bg-white border-2 border-rose-100 rounded-lg px-6 py-4 font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 transition-all flex items-center justify-between gap-3 text-left"
                   >
                     <div className="flex-1 overflow-hidden">
                       {formData.targetCourse ? (
@@ -601,7 +601,7 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
                         <span className="text-slate-300 text-sm font-bold">Select target course</span>
                       )}
                     </div>
-                    <ChevronDown size={20} className={`text-emerald-500 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown size={20} className={`text-rose-500 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
                   </button>
 
                   <AnimatePresence>
@@ -610,7 +610,7 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 10 }}
-                        className="absolute z-50 top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-lg shadow-2xl shadow-emerald-900/10 overflow-hidden max-h-[250px] overflow-y-auto scrollbar-hide"
+                        className="absolute z-50 top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-lg shadow-2xl shadow-rose-900/10 overflow-hidden max-h-[250px] overflow-y-auto scrollbar-hide"
                       >
                         {courses.filter(c => c !== profileData.currentCourse).map(course => (
                           <button
@@ -621,8 +621,8 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
                             }}
                             className={`w-full px-6 py-4 text-left text-sm font-bold transition-colors border-b border-slate-50 last:border-0
                               ${formData.targetCourse === course 
-                                ? 'bg-emerald-50 text-emerald-700' 
-                                : 'text-slate-600 hover:bg-emerald-50/50 hover:text-emerald-600'
+                                ? 'bg-rose-50 text-rose-700' 
+                                : 'text-slate-600 hover:bg-rose-50/50 hover:text-rose-600'
                               }
                             `}
                           >
@@ -647,14 +647,14 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
                 onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
                 disabled={!isSubmissionOpen}
                 placeholder="Type your reason for shifting here..."
-                className="w-full bg-slate-50 border border-slate-100 rounded-lg px-6 py-4 font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all placeholder:text-slate-300 resize-none"
+                className="w-full bg-slate-50 border border-slate-100 rounded-lg px-6 py-4 font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 transition-all placeholder:text-slate-300 resize-none"
               />
             </div>
           </div>
 
           <div className="bg-white rounded-2xl p-6 lg:p-10 border border-slate-100 shadow-sm">
             <div className="flex items-center gap-4 mb-8 lg:mb-10">
-              <div className="w-10 h-10 lg:w-12 lg:h-12 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 lg:w-12 lg:h-12 bg-rose-50 text-rose-600 rounded-lg flex items-center justify-center">
                 <Upload size={20} className="lg:w-6 lg:h-6" />
               </div>
               <div className="flex-1 flex justify-between items-center w-full">
@@ -662,7 +662,7 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
                   <h3 className="text-xl lg:text-2xl font-black text-slate-900">Required Documents</h3>
                   <p className="text-slate-400 text-xs lg:text-sm font-medium">Upload high-quality scans.</p>
                 </div>
-                <div className="hidden sm:block text-[9px] lg:text-[10px] font-black uppercase tracking-widest bg-emerald-50 text-emerald-600 px-3 lg:px-4 py-1.5 lg:py-2 rounded-lg">
+                <div className="hidden sm:block text-[9px] lg:text-[10px] font-black uppercase tracking-widest bg-rose-50 text-rose-600 px-3 lg:px-4 py-1.5 lg:py-2 rounded-lg">
                   Step {docStep + 1} of {documents.length}
                 </div>
               </div>
@@ -677,8 +677,8 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
                   exit={{ opacity: 0, x: -20 }}
                   className="flex justify-center w-full"
                 >
-                    <div className="aspect-square w-[280px] p-8 rounded-lg bg-slate-50 border border-slate-100 hover:border-emerald-200 transition-all group flex flex-col items-center justify-center text-center shadow-sm shrink-0">
-                      <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center text-slate-400 group-hover:text-emerald-600 transition-colors shadow-sm mb-6 shrink-0">
+                    <div className="aspect-square w-[280px] p-8 rounded-lg bg-slate-50 border border-slate-100 hover:border-rose-200 transition-all group flex flex-col items-center justify-center text-center shadow-sm shrink-0">
+                      <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center text-slate-400 group-hover:text-rose-600 transition-colors shadow-sm mb-6 shrink-0">
                         {(() => {
                           const Icon = ICON_MAP[documents[docStep].iconName as DocumentIconName] || FileText;
                           return <Icon size={28} />;
@@ -698,15 +698,15 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
                         />
                         <span className={`w-full py-3.5 mt-auto rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-sm border cursor-pointer ${
                           uploadedDocs[documents[docStep].key]
-                            ? 'bg-emerald-600 text-white border-emerald-600'
-                            : 'bg-white border-slate-200 text-slate-500 hover:bg-emerald-600 hover:text-white hover:border-emerald-600'
+                            ? 'bg-rose-600 text-white border-rose-600'
+                            : 'bg-white border-slate-200 text-slate-500 hover:bg-rose-600 hover:text-white hover:border-rose-600'
                         }`}>
                           {uploadedDocs[documents[docStep].key] ? <CheckCircle2 size={14} /> : <Upload size={14} />}
                           {uploadedDocs[documents[docStep].key] ? 'Uploaded' : 'Upload'}
                         </span>
                       </label>
                       {uploadedDocs[documents[docStep].key] && (
-                        <p className="mt-2 text-[10px] font-bold text-emerald-700 truncate w-full">
+                        <p className="mt-2 text-[10px] font-bold text-rose-700 truncate w-full">
                           {uploadedDocs[documents[docStep].key]?.name}
                         </p>
                       )}
@@ -726,7 +726,7 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
               <button
                 onClick={() => setDocStep(Math.min(documents.length - 1, docStep + 1))}
                 disabled={docStep === documents.length - 1}
-                className="px-4 lg:px-6 py-2.5 lg:py-3 rounded-lg font-bold text-[9px] lg:text-[10px] uppercase tracking-widest transition-all bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-4 lg:px-6 py-2.5 lg:py-3 rounded-lg font-bold text-[9px] lg:text-[10px] uppercase tracking-widest transition-all bg-rose-600 text-white hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 Next <ArrowRight size={14} />
               </button>
@@ -738,37 +738,37 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
         {/* Right Column: Progress & Tips */}
         <div className="lg:col-span-4 space-y-6 sticky top-24">
           <div className="bg-slate-900 rounded-lg p-8 text-white relative overflow-hidden shadow-2xl shadow-slate-900/20">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl"></div>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/10 rounded-full blur-3xl"></div>
             <h3 className="font-black text-xl mb-8 relative z-10">Application Status</h3>
             
             <div className="space-y-6 relative z-10 mb-10">
               <div className="flex items-start gap-4">
-                <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center shrink-0">
                   <CheckCircle2 size={16} />
                 </div>
                 <div>
                   <p className="font-bold text-sm">Identity Verified</p>
-                  <p className="text-[10px] text-emerald-400 font-black uppercase tracking-widest">Automatic</p>
+                  <p className="text-[10px] text-rose-400 font-black uppercase tracking-widest">Automatic</p>
                 </div>
               </div>
               <div className={`flex items-start gap-4 ${allDocsUploaded ? '' : 'opacity-30'}`}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${allDocsUploaded ? 'bg-emerald-500' : 'bg-white/20'}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${allDocsUploaded ? 'bg-rose-500' : 'bg-white/20'}`}>
                   {allDocsUploaded ? <CheckCircle2 size={16} /> : <div className="w-2 h-2 bg-white rounded-full"></div>}
                 </div>
                 <div>
                   <p className={`font-bold text-sm ${allDocsUploaded ? '' : 'text-white/50'}`}>Documents</p>
-                  <p className={`text-[10px] font-medium uppercase tracking-widest ${allDocsUploaded ? 'text-emerald-300' : 'text-white/20'}`}>
+                  <p className={`text-[10px] font-medium uppercase tracking-widest ${allDocsUploaded ? 'text-rose-300' : 'text-white/20'}`}>
                     {uploadedCount}/{documents.length} Uploaded
                   </p>
                 </div>
               </div>
               <div className={`flex items-start gap-4 ${isSubmissionOpen && isTodayOfficeOpen ? '' : 'opacity-70'}`}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isSubmissionOpen && isTodayOfficeOpen ? 'bg-emerald-500' : 'bg-amber-500'}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isSubmissionOpen && isTodayOfficeOpen ? 'bg-rose-500' : 'bg-amber-500'}`}>
                   {isSubmissionOpen && isTodayOfficeOpen ? <CheckCircle2 size={16} /> : <AlertCircle size={14} />}
                 </div>
                 <div>
                   <p className="font-bold text-sm">Submission Window</p>
-                  <p className={`text-[10px] font-medium uppercase tracking-widest ${isSubmissionOpen && isTodayOfficeOpen ? 'text-emerald-300' : 'text-amber-300'}`}>
+                  <p className={`text-[10px] font-medium uppercase tracking-widest ${isSubmissionOpen && isTodayOfficeOpen ? 'text-rose-300' : 'text-amber-300'}`}>
                     {!isSubmissionOpen ? 'Deadline Passed' : !isTodayOfficeOpen ? (closureReason || 'Office Closed') : 'Open for Applications'}
                   </p>
                 </div>
@@ -778,9 +778,9 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
             <button
               onClick={handleSubmit}
               disabled={!canSubmit}
-              className={`w-full py-5 rounded-lg font-black text-sm transition-all shadow-xl shadow-emerald-950/40 ${
+              className={`w-full py-5 rounded-lg font-black text-sm transition-all shadow-xl shadow-rose-950/40 ${
                 canSubmit
-                  ? 'bg-emerald-600 text-white hover:bg-emerald-500'
+                  ? 'bg-rose-600 text-white hover:bg-rose-500'
                   : 'bg-white/10 text-white/40 cursor-not-allowed border border-white/10'
               }`}
             >
@@ -788,12 +788,12 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
             </button>
           </div>
 
-          <div className="bg-emerald-50 rounded-lg p-8 border border-emerald-100">
-            <div className="flex items-center gap-3 mb-4 text-emerald-700">
+          <div className="bg-rose-50 rounded-lg p-8 border border-rose-100">
+            <div className="flex items-center gap-3 mb-4 text-rose-700">
               <AlertCircle size={18} />
               <h4 className="font-black text-xs uppercase tracking-widest">Instructions</h4>
             </div>
-            <p className="text-xs text-emerald-700/70 leading-relaxed font-medium">
+            <p className="text-xs text-rose-700/70 leading-relaxed font-medium">
               {instructions.split(profileData.currentCourse).map((part: string, i: number, arr: string[]) => (
                 <span key={i}>
                   {part}

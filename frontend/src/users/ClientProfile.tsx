@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   User as UserIcon,
   MessageCircle,
@@ -7,7 +7,11 @@ import {
   LogOut,
   GraduationCap,
   Mail,
-  Award
+  Award,
+  X,
+  Calendar,
+  Clock,
+  ChevronRight
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../auth/AuthContext';
@@ -54,11 +58,14 @@ const ClientProfile = ({ user }: ProfileProps) => {
     assessments: { count: 0, status: 'No Progress' },
     shifting: { count: 0, status: 'No Request' }
   });
+  const [rawHistory, setRawHistory] = useState<any[]>([]);
+  const [historyModal, setHistoryModal] = useState<null | 'counseling' | 'assessment' | 'shifting'>(null);
 
   useEffect(() => {
     const fetchActivity = async () => {
       if (!accessToken) return;
       const result = await appointmentApi.getAppointmentHistory(accessToken);
+      if (result.ok && result.data.history) setRawHistory(result.data.history);
       if (result.ok && result.data.history) {
         const history = result.data.history;
         
@@ -131,6 +138,7 @@ const ClientProfile = ({ user }: ProfileProps) => {
   };
 
   return (
+    <>
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -262,8 +270,8 @@ const ClientProfile = ({ user }: ProfileProps) => {
 
         <div className="space-y-8">
           <div className={`${theme.bg900} rounded-lg p-8 text-white shadow-xl relative overflow-hidden group border border-current/10`}>
-            <div className="absolute -left-10 -top-10 w-32 h-32 bg-white/10 rounded-full blur-2xl opacity-40"></div>
-            <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/5 rounded-full blur-3xl opacity-30"></div>
+            <div className="absolute -left-10 -top-10 w-32 h-32 bg-white/10 rounded-full opacity-40"></div>
+            <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/5 rounded-full opacity-30"></div>
 
             <h3 className="text-xl font-black mb-8 relative z-10 flex items-center gap-3">
               <Award className="text-emerald-400" size={20} />
@@ -271,38 +279,41 @@ const ClientProfile = ({ user }: ProfileProps) => {
             </h3>
             
             <div className="space-y-6 relative z-10">
-              <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5 hover:bg-white/10 transition-all group/item">
-                <div className={`w-10 h-10 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center text-emerald-400`}>
+              <button onClick={() => setHistoryModal('counseling')} className="w-full flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5 hover:bg-white/10 transition-all text-left">
+                <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center text-emerald-400 shrink-0">
                   <MessageCircle size={20} />
                 </div>
-                <div>
+                <div className="flex-1 min-w-0">
                   <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Consultations</p>
                   <p className="font-bold text-sm">{activity.consultations.status}</p>
                 </div>
-              </div>
+                <ChevronRight size={16} className="text-white/30 shrink-0" />
+              </button>
 
               {displayUser.type !== 'faculty' && (
-                <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5 hover:bg-white/10 transition-all group/item">
-                  <div className={`w-10 h-10 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center text-emerald-400`}>
+                <button onClick={() => setHistoryModal('assessment')} className="w-full flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5 hover:bg-white/10 transition-all text-left">
+                  <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center text-emerald-400 shrink-0">
                     <ClipboardCheck size={20} />
                   </div>
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Assessments</p>
                     <p className="font-bold text-sm">{activity.assessments.status}</p>
                   </div>
-                </div>
+                  <ChevronRight size={16} className="text-white/30 shrink-0" />
+                </button>
               )}
 
               {displayUser.type === 'college' && (
-                <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5 hover:bg-white/10 transition-all group/item">
-                  <div className={`w-10 h-10 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center text-emerald-400`}>
+                <button onClick={() => setHistoryModal('shifting')} className="w-full flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5 hover:bg-white/10 transition-all text-left">
+                  <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center text-emerald-400 shrink-0">
                     <RefreshCw size={20} />
                   </div>
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Shifting Request</p>
                     <p className="font-bold text-sm">{activity.shifting.status}</p>
                   </div>
-                </div>
+                  <ChevronRight size={16} className="text-white/30 shrink-0" />
+                </button>
               )}
             </div>
             
@@ -313,6 +324,135 @@ const ClientProfile = ({ user }: ProfileProps) => {
         </div>
       </div>
     </motion.div>
+
+    {/* History Modal */}
+    <AnimatePresence>
+      {historyModal && (() => {
+        const isShifting = historyModal === 'shifting';
+        const filtered = rawHistory.filter(item =>
+          historyModal === 'counseling'
+            ? item.type === 'Counseling'
+            : historyModal === 'assessment'
+            ? item.type?.includes('Assessment')
+            : item.type === 'Shifting'
+        );
+        const active = filtered.find(item => !['Completed', 'Cancelled', 'Rejected'].includes(item.status));
+        const modalTitle = historyModal === 'counseling' ? 'Counseling History' : historyModal === 'assessment' ? 'Assessment History' : 'Shifting Requests';
+        const ModalIcon = historyModal === 'counseling' ? MessageCircle : historyModal === 'assessment' ? ClipboardCheck : RefreshCw;
+
+        const statusColor = (s: string) => {
+          if (s === 'Completed') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+          if (s === 'Cancelled' || s === 'Rejected') return 'bg-rose-50 text-rose-700 border-rose-200';
+          return 'bg-blue-50 text-blue-700 border-blue-200';
+        };
+
+        const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' }) : '—';
+
+        return (
+          <motion.div
+            key="modal-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70"
+            onClick={() => setHistoryModal(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden"
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="flex items-center gap-4 p-6 border-b border-slate-100">
+                <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
+                  historyModal === 'counseling' ? 'bg-blue-500' : historyModal === 'assessment' ? 'bg-emerald-500' : 'bg-rose-500'
+                } text-white shadow-sm`}>
+                  <ModalIcon size={20} />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-black text-slate-900">{modalTitle}</h3>
+                  <p className="text-xs text-slate-400 font-medium">{filtered.length} record{filtered.length !== 1 ? 's' : ''} found</p>
+                </div>
+                <button onClick={() => setHistoryModal(null)} className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors text-slate-500">
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Active Banner */}
+              {active && (
+                <div className={`mx-6 mt-4 px-4 py-3 rounded-xl border flex items-start gap-3 ${
+                  historyModal === 'counseling' ? 'bg-blue-50 border-blue-200' : historyModal === 'assessment' ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'
+                }`}>
+                  <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
+                    historyModal === 'counseling' ? 'bg-blue-500' : historyModal === 'assessment' ? 'bg-emerald-500' : 'bg-rose-500'
+                  }`}></div>
+                  <div>
+                    <p className={`text-xs font-black uppercase tracking-widest mb-0.5 ${
+                      historyModal === 'counseling' ? 'text-blue-600' : historyModal === 'assessment' ? 'text-emerald-600' : 'text-rose-600'
+                    }`}>Current Active {isShifting ? 'Request' : 'Appointment'}</p>
+                    <p className="text-sm font-bold text-slate-700">
+                      {isShifting ? `${active.currentCourse || '—'} → ${active.targetCourse || '—'}` : `${formatDate(active.date || active.scheduled_date || active.scheduledDate)} • ${active.time || active.scheduled_time || active.timeSlot || '—'}`}
+                    </p>
+                    <p className="text-xs text-slate-500 mt-0.5">Status: <span className="font-black">{active.status}</span></p>
+                  </div>
+                </div>
+              )}
+
+              {/* History List */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-3">
+                {filtered.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4 text-slate-400">
+                      <ModalIcon size={26} />
+                    </div>
+                    <p className="font-black text-slate-500 text-sm">No {isShifting ? 'shifting requests' : 'appointments'} yet</p>
+                    <p className="text-xs text-slate-400 mt-1">Your history will appear here once you book.</p>
+                  </div>
+                ) : (
+                  filtered.map((item: any, i: number) => {
+                    const isActive = !['Completed', 'Cancelled', 'Rejected'].includes(item.status);
+                    return (
+                      <div key={i} className={`rounded-xl border p-4 flex flex-col gap-2 ${
+                        isActive ? 'border-slate-200 bg-slate-50' : 'border-slate-100 bg-white'
+                      }`}>
+                        <div className="flex items-center justify-between gap-2">
+                          <span className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg border ${statusColor(item.status)}`}>
+                            {item.status}
+                          </span>
+                          <span className="text-[10px] text-slate-400 font-medium">{item.type}</span>
+                        </div>
+                        {isShifting ? (
+                          <div className="text-sm text-slate-600 font-medium">
+                            <span className="font-black text-slate-800">{item.currentCourse || '—'}</span>
+                            <span className="mx-2 text-slate-400">→</span>
+                            <span className="font-black text-slate-800">{item.targetCourse || '—'}</span>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-2 text-sm text-slate-600">
+                              <Calendar size={14} className="text-slate-400 shrink-0" />
+                              <span className="font-bold">{formatDate(item.date || item.scheduled_date || item.scheduledDate)}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-slate-600">
+                              <Clock size={14} className="text-slate-400 shrink-0" />
+                              <span className="font-bold">{item.time || item.scheduled_time || item.timeSlot || '—'}</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        );
+      })()}
+    </AnimatePresence>
+    </>
   );
 };
 

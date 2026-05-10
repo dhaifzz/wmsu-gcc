@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar as CalendarIcon, Clock, ChevronLeft, ChevronRight, Info, MessageCircle, CheckCircle2 } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, ChevronLeft, ChevronRight, Info, MessageCircle, CheckCircle2, FileText } from 'lucide-react';
+import Loader from '../../components/loader/Loader';
 import { io } from 'socket.io-client';
 import { appointmentApi, cmsApi, API_URL } from '../../lib/api';
 import { useAuth } from '../../auth/AuthContext';
@@ -36,7 +37,7 @@ const toDateKey = (year: number, monthIndex: number, day: number) => {
 };
 
 const Counseling = ({ onBack }: { onBack: () => void }) => {
-  const { accessToken } = useAuth();
+  const { accessToken, user } = useAuth();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
@@ -47,10 +48,24 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
   const [maxAvailableDate, setMaxAvailableDate] = useState<string | null>(null);
   const [officeSchedule, setOfficeSchedule] = useState<{ [key: string]: OfficeConfig }>({});
   const [loadingSchedule, setLoadingSchedule] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchSchedule();
-    loadLatest();
+    window.scrollTo(0, 0);
+    const mainContainer = document.querySelector('main');
+    if (mainContainer) {
+      mainContainer.scrollTo(0, 0);
+    }
+
+    const initialize = async () => {
+      setLoading(true);
+      await Promise.all([
+        fetchSchedule(),
+        loadLatest()
+      ]);
+      setLoading(false);
+    };
+    initialize();
   }, [accessToken]);
 
   const fetchSchedule = async () => {
@@ -267,6 +282,9 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
     }
   };
 
+  if (loading) {
+    return <Loader type="counseling-client" />;
+  }
 
   if (submittedInfo) {
     return (
@@ -276,47 +294,87 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
         exit={{ opacity: 0, x: -20 }}
         className="w-full max-w-3xl mx-auto"
       >
-        <div className="flex items-center gap-4 mb-10">
+        <div className="flex items-center gap-4 mb-10 print:mb-6">
           <button 
             onClick={onBack}
-            className="p-3 hover:bg-white rounded-lg transition-all text-slate-400 hover:text-slate-900 shadow-sm border border-transparent hover:border-slate-100"
+            className="p-3 hover:bg-white rounded-lg transition-all text-slate-400 hover:text-slate-900 shadow-sm border border-transparent hover:border-slate-100 print:hidden"
           >
             <ChevronLeft size={24} />
           </button>
           <div>
-            <h2 className="text-4xl font-black tracking-tight text-slate-900">Active Progress</h2>
-            <p className="text-slate-500 font-medium text-sm">You already have an ongoing counseling appointment.</p>
+            <h2 className="text-4xl font-black tracking-tight text-slate-900">Application Receipt</h2>
+            <p className="text-slate-500 font-medium text-sm">Please keep this for your records.</p>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden relative">
-          <div className="bg-blue-600 p-8 text-white text-center">
-            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle2 size={32} className="text-white" />
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden relative print:shadow-none print:border-slate-300">
+          <div className="bg-blue-600 p-8 text-white text-center print:bg-blue-100 print:text-blue-900">
+            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 print:bg-blue-200">
+              <CheckCircle2 size={32} className="text-white print:text-blue-600" />
             </div>
-            <h3 className="text-2xl font-black mb-2">Appointment Request Active</h3>
-            <p className="text-blue-100 text-sm font-medium">Your request has been successfully submitted and is currently <span className="font-black uppercase">{submittedInfo.status}</span>.</p>
+            <h3 className="text-2xl font-black mb-2">Counseling Scheduled!</h3>
+            <p className="text-blue-100 text-sm font-medium print:text-blue-800">Your counseling appointment has been successfully scheduled and is currently <span className="font-black uppercase">{submittedInfo.status}</span>.</p>
           </div>
 
           <div className="p-8 space-y-8">
             <div>
-              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 border-b border-slate-100 pb-2">Appointment Details</h4>
-              <div className="grid grid-cols-2 gap-4">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 border-b border-slate-100 pb-2">Student Information</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Scheduled Date & Time</p>
-                  <p className="font-bold text-slate-900 text-sm">{new Date(submittedInfo.scheduledTime).toLocaleString()}</p>
+                  <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Name</p>
+                  <p className="font-bold text-slate-900 text-sm">{user?.firstName} {user?.lastName}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Date Requested</p>
-                  <p className="font-bold text-slate-900 text-sm">{new Date(submittedInfo.submittedAt).toLocaleDateString()}</p>
+                  <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Student ID</p>
+                  <p className="font-bold text-slate-900 text-sm">{user?.schoolId || 'N/A'}</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-slate-50 rounded-lg p-6 flex flex-col items-center gap-4 border border-slate-100 text-center">
-                <p className="text-sm text-slate-500 font-medium">If you need to make changes to this appointment, please contact the GCC office directly or wait for staff feedback.</p>
+            <div>
+              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 border-b border-slate-100 pb-2">Appointment Details</h4>
+              <div className="bg-slate-50 rounded-lg p-6 border border-slate-100 print:bg-white print:border-slate-300">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Type</p>
+                    <p className="font-black text-slate-900">Counseling Session</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Scheduled Date & Time</p>
+                    <p className="font-black text-slate-900">
+                      {new Date(submittedInfo.scheduledTime).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' })}
+                      <br />
+                      <span className="text-blue-600">{hourToTimeSlot[new Date(submittedInfo.scheduledTime).getUTCHours()] || 'Scheduled'}</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 border-b border-slate-100 pb-2">Submission Details</h4>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Date Requested</p>
+                  <p className="font-bold text-slate-900 text-sm">{new Date(submittedInfo.submittedAt).toLocaleDateString()}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Status</p>
+                  <span className="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest print:bg-white print:border print:border-amber-300">{submittedInfo.status}</span>
+                </div>
+              </div>
             </div>
           </div>
+        </div>
+
+        <div className="mt-8 flex justify-center print:hidden">
+          <button
+            onClick={() => window.print()}
+            className="bg-slate-900 text-white px-8 py-4 rounded-xl font-black text-sm hover:bg-slate-800 transition-colors shadow-xl shadow-slate-900/20 flex items-center gap-3"
+          >
+            <FileText size={18} />
+            Print Receipt
+          </button>
         </div>
       </motion.div>
     );
