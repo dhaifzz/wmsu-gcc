@@ -483,15 +483,27 @@ const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => 
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">First Name</label>
-                  <input value={firstName} onChange={e => setFirstName(e.target.value)} maxLength={50} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none" />
+                  <input value={firstName} onChange={e => {
+                    const val = e.target.value.replace(/[^a-zA-Z\s.-]/g, '');
+                    const capitalized = val.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                    setFirstName(capitalized);
+                  }} maxLength={50} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Middle Name</label>
-                  <input value={middleInitial} onChange={e => setMiddleInitial(e.target.value)} maxLength={50} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none" />
+                  <input value={middleInitial} onChange={e => {
+                    const val = e.target.value.replace(/[^a-zA-Z\s.-]/g, '');
+                    const capitalized = val.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                    setMiddleInitial(capitalized);
+                  }} maxLength={50} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Last Name</label>
-                  <input value={lastName} onChange={e => setLastName(e.target.value)} maxLength={50} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none" />
+                  <input value={lastName} onChange={e => {
+                    const val = e.target.value.replace(/[^a-zA-Z\s.-]/g, '');
+                    const capitalized = val.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                    setLastName(capitalized);
+                  }} maxLength={50} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none" />
                 </div>
               </div>
               <div className="space-y-2">

@@ -650,7 +650,7 @@ export default function Register() {
                             placeholder="First Name"
                             value={firstName}
                             onChange={(e) => {
-                              const val = e.target.value;
+                              const val = e.target.value.replace(/[^a-zA-Z\s.-]/g, '');
                               const capitalized = val.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
                               setFirstName(capitalized);
                             }}
@@ -666,7 +666,7 @@ export default function Register() {
                             placeholder="Middle Name (optional)"
                             value={middleInitial}
                             onChange={(e) => {
-                              const val = e.target.value;
+                              const val = e.target.value.replace(/[^a-zA-Z\s.-]/g, '');
                               const capitalized = val.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
                               setMiddleInitial(capitalized);
                             }}
@@ -685,7 +685,7 @@ export default function Register() {
                           placeholder="Last Name"
                           value={lastName}
                           onChange={(e) => {
-                            const val = e.target.value;
+                            const val = e.target.value.replace(/[^a-zA-Z\s.-]/g, '');
                             const capitalized = val.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
                             setLastName(capitalized);
                           }}
@@ -850,7 +850,7 @@ export default function Register() {
                           type="text"
                           placeholder="Street / House No."
                           value={street}
-                          onChange={(e) => setStreet(e.target.value)}
+                          onChange={(e) => setStreet(e.target.value.replace(/[^a-zA-Z0-9\s.,#-]/g, ''))}
                           required
                           className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
                         />
@@ -1045,7 +1045,7 @@ export default function Register() {
                               type="text"
                               placeholder="School Name"
                               value={school}
-                              onChange={(e) => setSchool(e.target.value)}
+                              onChange={(e) => setSchool(e.target.value.replace(/[^a-zA-Z\s.-]/g, ''))}
                               required
                               className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
                             />
