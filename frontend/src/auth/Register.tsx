@@ -651,7 +651,7 @@ export default function Register() {
                             value={firstName}
                             onChange={(e) => {
                               const val = e.target.value.replace(/[^a-zA-Z\s.-]/g, '');
-                              const capitalized = val.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                              const capitalized = val.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
                               setFirstName(capitalized);
                             }}
                             required
@@ -667,7 +667,7 @@ export default function Register() {
                             value={middleInitial}
                             onChange={(e) => {
                               const val = e.target.value.replace(/[^a-zA-Z\s.-]/g, '');
-                              const capitalized = val.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                              const capitalized = val.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
                               setMiddleInitial(capitalized);
                             }}
                             className="w-full rounded-lg bg-gray-100 py-4 px-4 text-center text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
@@ -686,7 +686,7 @@ export default function Register() {
                           value={lastName}
                           onChange={(e) => {
                             const val = e.target.value.replace(/[^a-zA-Z\s.-]/g, '');
-                            const capitalized = val.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                            const capitalized = val.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
                             setLastName(capitalized);
                           }}
                           required
@@ -1045,7 +1045,11 @@ export default function Register() {
                               type="text"
                               placeholder="School Name"
                               value={school}
-                              onChange={(e) => setSchool(e.target.value.replace(/[^a-zA-Z\s.-]/g, ''))}
+                              onChange={(e) => {
+                                const val = e.target.value.replace(/[^a-zA-Z\s.-]/g, '');
+                                const capitalized = val.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+                                setSchool(capitalized);
+                              }}
                               required
                               className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
                             />
