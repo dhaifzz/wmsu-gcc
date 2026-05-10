@@ -18,7 +18,7 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../../../auth/AuthContext';
 import { adminApi, type AdminUser } from '../../../lib/api';
 
-const UserManagement = () => {
+const AccountManagement = () => {
   const { accessToken } = useAuth();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,7 +34,9 @@ const UserManagement = () => {
     try {
       const res = await adminApi.getUsers(accessToken);
       if (res.ok && res.data?.users) {
-        setUsers(res.data.users);
+        // Backend already filters out Admins for Directors, but we keep it here for extra safety
+        const filtered = res.data.users.filter(u => !u.role.toLowerCase().includes('admin'));
+        setUsers(filtered);
       } else {
         setError(res.error || 'Failed to load users.');
       }
@@ -50,7 +52,7 @@ const UserManagement = () => {
   }, [fetchUsers]);
 
   // ── Computed stats ──────────────────────────────────────────────────────────
-  const totalAdmin = users.length;
+  const totalUsers = users.length;
   const activeCount = users.filter(u => u.status === 'Active').length;
   const pendingCount = users.filter(u => u.status === 'Pending').length;
 
@@ -95,7 +97,7 @@ const UserManagement = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-3xl font-black text-slate-800 tracking-tight">User Accounts</h2>
-          <p className="text-slate-500 font-medium">Manage administrative accounts and permissions.</p>
+          <p className="text-slate-500 font-medium">Manage student and staff accounts.</p>
         </div>
         <div className="flex items-center gap-3">
           <button
@@ -126,11 +128,11 @@ const UserManagement = () => {
               <span className="text-sm font-bold">Loading…</span>
             </div>
           ) : (
-            <p className="text-3xl font-black text-slate-900">{totalAdmin}</p>
+            <p className="text-3xl font-black text-slate-900">{totalUsers}</p>
           )}
         </div>
         <div className="bg-white p-6 rounded-lg border border-slate-100 shadow-xl shadow-slate-200/40">
-          <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Active Now</p>
+          <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Active Accounts</p>
           {loading ? (
             <div className="flex items-center gap-2 text-slate-400">
               <Loader2 size={18} className="animate-spin" />
@@ -175,7 +177,7 @@ const UserManagement = () => {
               type="text" 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search users by name, email, or role..."
+              placeholder="Search by name, email, or role..."
               className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-lg text-sm font-bold focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
             />
           </div>
@@ -193,7 +195,7 @@ const UserManagement = () => {
           ) : filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-slate-400">
               <Search size={32} className="mb-4 opacity-40" />
-              <p className="text-sm font-bold">{search ? 'No users match your search.' : 'No administrative accounts found.'}</p>
+              <p className="text-sm font-bold">{search ? 'No users match your search.' : 'No accounts found.'}</p>
             </div>
           ) : (
             <table className="w-full text-left border-collapse">
@@ -287,7 +289,7 @@ import {
   ArrowLeft
 } from 'lucide-react';
 
-const AVAILABLE_ROLES = ['College Student', 'High School Student', 'Faculty', 'Outsider', 'Staff', 'Director', 'Admin'];
+const AVAILABLE_ROLES = ['College Student', 'High School Student', 'Faculty', 'Outsider', 'Staff', 'Director'];
 
 const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => {
   const { accessToken } = useAuth();
@@ -334,7 +336,6 @@ const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => 
     const fetchData = async () => {
       const academicRes = await cmsApi.getAcademicData();
       if (academicRes.ok && academicRes.data) {
-        // Simple normalization for the modal
         const source = (academicRes.data as any).data || (academicRes.data as any).content || academicRes.data;
         setColleges(Array.isArray(source.colleges) ? source.colleges : []);
         setOccupations(Array.isArray(source.occupations) ? source.occupations.map((o: any) => typeof o === 'string' ? o : o.occupation_name) : []);
@@ -343,7 +344,6 @@ const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => 
     fetchData();
   }, []);
 
-  // Validation Helpers (Matching Register.tsx)
   const validatePhone = (phone: string) => {
     const clean = phone.replace(/\s/g, '');
     if (!/^\+?\d+$/.test(clean)) return { error: 'Digits only.' };
@@ -682,4 +682,4 @@ const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => 
   );
 };
 
-export default UserManagement;
+export default AccountManagement;
