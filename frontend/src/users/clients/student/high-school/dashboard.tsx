@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import {
   MessageCircle,
   ClipboardCheck,
-  ChevronRight,
   Calendar,
   Clock,
   GraduationCap,
