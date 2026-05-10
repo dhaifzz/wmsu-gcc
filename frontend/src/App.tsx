@@ -6,6 +6,7 @@ import ProtectedRoute from './auth/ProtectedRoute';
 import Login from './auth/Login';
 import Register from './auth/Register';
 import ForgotPassword from './auth/ForgotPassword';
+import ResetPassword from './auth/ResetPassword';
 import HomePage from './public/HomePage';
 import CounselingDetails from './public/services/CounselingDetails';
 import AssessmentDetails from './public/services/AssessmentDetails';
@@ -52,6 +53,7 @@ function AppContent() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/about" element={<AboutUs />} />
       <Route path="/team" element={<OurTeam />} />
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />

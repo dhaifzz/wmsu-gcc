@@ -5,11 +5,13 @@ import { motion } from 'framer-motion';
 import authBg from '../assets/img/Auth-Background.jpg';
 import gccLogoAsset from '../assets/logos/GCC.png';
 import wmsuLogoAsset from '../assets/logos/WMSU.png';
-import { cmsApi } from '../lib/api';
+import { authApi, cmsApi } from '../lib/api';
+import Swal from 'sweetalert2';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [logos, setLogos] = useState({
     wmsuLogo: wmsuLogoAsset,
     gccLogo: gccLogoAsset
@@ -32,9 +34,33 @@ export default function ForgotPassword() {
     fetchLogos();
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitted(true);
+    setIsLoading(true);
+    
+    try {
+      const res = await authApi.forgotPassword(email);
+      if (res.ok) {
+        setIsSubmitted(true);
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: res.error || 'Failed to send reset link. Please try again.',
+          confirmButtonColor: '#065f46'
+        });
+      }
+    } catch (err) {
+      console.error('Forgot password error:', err);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'An unexpected error occurred. Please try again later.',
+        confirmButtonColor: '#065f46'
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -89,10 +115,15 @@ export default function ForgotPassword() {
 
                 <button
                   type="submit"
-                  className="w-full flex items-center justify-center gap-4 rounded-lg bg-emerald-900 py-5 text-base font-black text-white shadow-xl shadow-emerald-950/20 transition-all hover:-translate-y-1 hover:bg-emerald-800 active:translate-y-0 active:shadow-md"
+                  disabled={isLoading}
+                  className="w-full flex items-center justify-center gap-4 rounded-lg bg-emerald-900 py-5 text-base font-black text-white shadow-xl shadow-emerald-950/20 transition-all hover:-translate-y-1 hover:bg-emerald-800 active:translate-y-0 active:shadow-md disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  <Send className="h-5 w-5" />
-                  Send Reset Link
+                  {isLoading ? (
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                  ) : (
+                    <Send className="h-5 w-5" />
+                  )}
+                  {isLoading ? 'Sending Reset Link...' : 'Send Reset Link'}
                 </button>
               </form>
             </>

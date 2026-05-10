@@ -140,6 +140,12 @@ export const authApi = {
 
   getProfile: (token: string) =>
     api<{ user: UserProfile; redirectPath: string }>('/api/auth/profile', { token }),
+
+  forgotPassword: (email: string) =>
+    api<{ message: string }>('/api/auth/forgot-password', { method: 'POST', body: { email } }),
+
+  resetPassword: (password: string, token: string) =>
+    api<{ message: string }>('/api/auth/reset-password', { method: 'POST', body: { password }, token }),
 };
 
 export const cmsApi = {
