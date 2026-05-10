@@ -356,6 +356,10 @@ const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => 
   const handleNext = () => {
     if (step === 1) {
       if (!email.includes('@')) return toast.error('Valid email required.');
+      const domain = email.split('@')[1]?.toLowerCase();
+      if (!['wmsu.edu.ph', 'gmail.com'].includes(domain)) {
+        return toast.error('Only @wmsu.edu.ph or @gmail.com allowed.');
+      }
       if (password.length < 8) return toast.error('Password min 8 chars.');
       if (password !== confirmPassword) return toast.error('Passwords mismatch.');
       setStep(2);

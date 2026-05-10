@@ -51,6 +51,13 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const domain = email.split('@')[1]?.toLowerCase();
+    if (!['wmsu.edu.ph', 'gmail.com'].includes(domain)) {
+      showToast.error('Only @wmsu.edu.ph or @gmail.com emails are allowed.');
+      return;
+    }
+
     setLoading(true);
 
     try {

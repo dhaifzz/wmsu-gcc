@@ -318,6 +318,13 @@ export default function Register() {
     if (!email.trim()) { showToast.error('Email is required.'); return; }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) { showToast.error('Please enter a valid email address.'); return; }
+    
+    const domain = email.split('@')[1]?.toLowerCase();
+    if (!['wmsu.edu.ph', 'gmail.com'].includes(domain)) {
+      showToast.error('Only @wmsu.edu.ph or @gmail.com emails are allowed.');
+      return;
+    }
+
     if (password.length < 8) { showToast.error('Password must be at least 8 characters.'); return; }
     if (!/[A-Z]/.test(password)) { showToast.error('Password must contain at least one uppercase letter.'); return; }
     if (!/[0-9]/.test(password)) { showToast.error('Password must contain at least one number.'); return; }
