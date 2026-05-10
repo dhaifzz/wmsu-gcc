@@ -14,7 +14,7 @@ import {
   EyeOff,
 } from 'lucide-react';
 import { showAlert } from '../../../components/modal-notification/sweetalert';
-import toast from 'react-hot-toast';
+import { showToast } from '../../../components/modal-notification/toast';
 import { useAuth } from '../../../auth/AuthContext';
 import { adminApi, type AdminUser } from '../../../lib/api';
 
@@ -76,12 +76,12 @@ const UserManagement = () => {
         const res = await adminApi.deleteUser(user.id, accessToken);
         if (res.ok) {
           setUsers(prev => prev.filter(u => u.id !== user.id));
-          toast.success('Account deleted successfully.');
+          showAlert.success('Account Deleted', `The account for ${user.firstName} ${user.lastName} has been permanently removed.`);
         } else {
-          toast.error(res.error || 'Failed to delete account.');
+          showToast.error(res.error || 'Failed to delete account.');
         }
       } catch {
-        toast.error('An error occurred while deleting the account.');
+        showToast.error('An error occurred while deleting the account.');
       }
     }
   };
@@ -355,23 +355,23 @@ const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => 
 
   const handleNext = () => {
     if (step === 1) {
-      if (!email.includes('@')) return toast.error('Valid email required.');
+      if (!email.includes('@')) return showToast.error('Valid email required.');
       const domain = email.split('@')[1]?.toLowerCase();
       if (!['wmsu.edu.ph', 'gmail.com'].includes(domain)) {
-        return toast.error('Only @wmsu.edu.ph or @gmail.com allowed.');
+        return showToast.error('Only @wmsu.edu.ph or @gmail.com allowed.');
       }
-      if (password.length < 8) return toast.error('Password min 8 chars.');
-      if (password !== confirmPassword) return toast.error('Passwords mismatch.');
+      if (password.length < 8) return showToast.error('Password min 8 chars.');
+      if (password !== confirmPassword) return showToast.error('Passwords mismatch.');
       setStep(2);
     } else if (step === 2) {
-      if (!firstName || !lastName) return toast.error('Names required.');
+      if (!firstName || !lastName) return showToast.error('Names required.');
       const { normalized, error } = validatePhone(contactNumber);
-      if (error) return toast.error(error);
+      if (error) return showToast.error(error);
       setContactNumber(normalized!);
-      if (!city || !barangay) return toast.error('Address required.');
+      if (!city || !barangay) return showToast.error('Address required.');
       setStep(3);
     } else if (step === 3) {
-      if (!sex || !birthdate) return toast.error('Sex and Birthdate required.');
+      if (!sex || !birthdate) return showToast.error('Sex and Birthdate required.');
       if (shouldShowEducationStep) setStep(4);
       else handleSubmit();
     }
@@ -391,13 +391,13 @@ const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => 
       };
       const res = await adminApi.createUser(payload, accessToken);
       if (res.ok) {
-        toast.success('Account created successfully!');
+        await showAlert.emailConfirmation(email);
         onCreated();
       } else {
-        toast.error(res.error || 'Failed to create account.');
+        showToast.error(res.error || 'Failed to create account.');
       }
     } catch {
-      toast.error('An error occurred.');
+      showToast.error('An error occurred.');
     } finally {
       setSubmitting(false);
     }
