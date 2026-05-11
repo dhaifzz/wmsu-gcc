@@ -137,6 +137,15 @@ const ClientProfile = ({ user }: ProfileProps) => {
     return 'bg-slate-200 text-slate-500';
   };
 
+  const hourToTimeSlot: Record<number, string> = {
+    8: '08:00 AM - 09:00 AM',
+    9: '09:00 AM - 10:00 AM',
+    10: '10:00 AM - 11:00 AM',
+    13: '01:00 PM - 02:00 PM',
+    14: '02:00 PM - 03:00 PM',
+    15: '03:00 PM - 04:00 PM'
+  };
+
   return (
     <>
     <motion.div
@@ -340,13 +349,14 @@ const ClientProfile = ({ user }: ProfileProps) => {
         const modalTitle = historyModal === 'counseling' ? 'Counseling History' : historyModal === 'assessment' ? 'Assessment History' : 'Shifting Requests';
         const ModalIcon = historyModal === 'counseling' ? MessageCircle : historyModal === 'assessment' ? ClipboardCheck : RefreshCw;
 
-        const statusColor = (s: string) => {
+        const formatStatusColor = (s: string) => {
           if (s === 'Completed') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
           if (s === 'Cancelled' || s === 'Rejected') return 'bg-rose-50 text-rose-700 border-rose-200';
           return 'bg-blue-50 text-blue-700 border-blue-200';
         };
 
-        const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' }) : '—';
+        const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' }) : '—';
+        const formatTime = (d: string) => d ? (hourToTimeSlot[new Date(d).getUTCHours()] || 'Scheduled') : '—';
 
         return (
           <motion.div
@@ -394,7 +404,9 @@ const ClientProfile = ({ user }: ProfileProps) => {
                       historyModal === 'counseling' ? 'text-blue-600' : historyModal === 'assessment' ? 'text-emerald-600' : 'text-rose-600'
                     }`}>Current Active {isShifting ? 'Request' : 'Appointment'}</p>
                     <p className="text-sm font-bold text-slate-700">
-                      {isShifting ? `${active.currentCourse || '—'} → ${active.targetCourse || '—'}` : `${formatDate(active.date || active.scheduled_date || active.scheduledDate)} • ${active.time || active.scheduled_time || active.timeSlot || '—'}`}
+                      {isShifting
+                        ? `${active.currentCourse || '—'} → ${active.targetCourse || '—'}`
+                        : `${formatDate(active.scheduledTime)} • ${formatTime(active.scheduledTime)}`}
                     </p>
                     <p className="text-xs text-slate-500 mt-0.5">Status: <span className="font-black">{active.status}</span></p>
                   </div>
@@ -419,7 +431,7 @@ const ClientProfile = ({ user }: ProfileProps) => {
                         isActive ? 'border-slate-200 bg-slate-50' : 'border-slate-100 bg-white'
                       }`}>
                         <div className="flex items-center justify-between gap-2">
-                          <span className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg border ${statusColor(item.status)}`}>
+                          <span className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg border ${formatStatusColor(item.status)}`}>
                             {item.status}
                           </span>
                           <span className="text-[10px] text-slate-400 font-medium">{item.type}</span>
@@ -434,11 +446,11 @@ const ClientProfile = ({ user }: ProfileProps) => {
                           <div className="flex flex-col gap-1">
                             <div className="flex items-center gap-2 text-sm text-slate-600">
                               <Calendar size={14} className="text-slate-400 shrink-0" />
-                              <span className="font-bold">{formatDate(item.date || item.scheduled_date || item.scheduledDate)}</span>
+                              <span className="font-bold">{formatDate(item.scheduledTime)}</span>
                             </div>
                             <div className="flex items-center gap-2 text-sm text-slate-600">
                               <Clock size={14} className="text-slate-400 shrink-0" />
-                              <span className="font-bold">{item.time || item.scheduled_time || item.timeSlot || '—'}</span>
+                              <span className="font-bold">{formatTime(item.scheduledTime)}</span>
                             </div>
                           </div>
                         )}
