@@ -92,7 +92,10 @@ const CollegeDashboard = () => {
     studentId: authUser?.schoolId?.toString() || authUser?.id?.substring(0, 8).toUpperCase() || "N/A",
     college: authUser?.collegeName || authUser?.department || "WMSU College",
     course: authUser?.courseName || authUser?.track || "Not specified in profile",
-    joinedDate: "N/A"
+    joinedDate: "N/A",
+    city: authUser?.city || "N/A",
+    barangay: authUser?.barangay || "N/A",
+    street: authUser?.street || "N/A"
   };
 
 

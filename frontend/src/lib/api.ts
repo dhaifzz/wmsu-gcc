@@ -98,6 +98,12 @@ export interface UserProfile {
   lrn?: number | null;
   employeeId?: number | null;
   track?: string | null;
+  city?: string | null;
+  barangay?: string | null;
+  street?: string | null;
+  address_city?: string | null;
+  address_barangay?: string | null;
+  address_street?: string | null;
 }
 
 export interface RegisterPayload {
@@ -146,6 +152,9 @@ export const authApi = {
 
   resetPassword: (password: string, token: string) =>
     api<{ message: string }>('/api/auth/reset-password', { method: 'POST', body: { password }, token }),
+
+  updateProfile: (payload: Partial<UserProfile>, token: string) =>
+    api<{ message: string; user: UserProfile }>('/api/auth/profile', { method: 'PUT', body: payload as unknown as Record<string, unknown>, token }),
 };
 
 export const cmsApi = {
@@ -222,6 +231,9 @@ export interface LatestShiftingAppointmentResponse {
     created_at: string;
     currentCourse?: string;
     targetCourse?: string;
+    appointment_statuses?: {
+      status_name: string;
+    } | null;
   } | null;
 }
 
@@ -523,3 +535,40 @@ export const adminApi = {
       token,
     }),
 };
+
+// ------------------------------------------
+// Notification API helpers
+// ------------------------------------------
+
+export interface Notification {
+  id: string;
+  recipient_id: string;
+  title: string;
+  message: string;
+  type: string;
+  link?: string;
+  is_read: boolean;
+  created_at: string;
+}
+
+export interface NotificationsResponse {
+  notifications: Notification[];
+}
+
+export const notificationApi = {
+  getNotifications: (token: string) =>
+    api<NotificationsResponse>('/api/notifications', { token }),
+
+  markAsRead: (id: string, token: string) =>
+    api<{ message: string }>(`/api/notifications/${id}/read`, {
+      method: 'PUT',
+      token,
+    }),
+
+  markAllAsRead: (token: string) =>
+    api<{ message: string }>('/api/notifications/read-all', {
+      method: 'PUT',
+      token,
+    }),
+};
+

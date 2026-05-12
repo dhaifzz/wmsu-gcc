@@ -57,7 +57,10 @@ const OutsideClientDashboard = () => {
     studentId: "N/A - Guest",
     department: "None (External)",
     status: "Active",
-    joinedDate: "N/A"
+    joinedDate: "N/A",
+    city: authUser?.city || "N/A",
+    barangay: authUser?.barangay || "N/A",
+    street: authUser?.street || "N/A"
   };
 
 

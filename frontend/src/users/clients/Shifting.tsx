@@ -92,7 +92,7 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmissionOpen, setIsSubmissionOpen] = useState(false);
   const [submissionDates, setSubmissionDates] = useState<{ start: string | null; end: string | null; exam: string | null }>({ start: null, end: null, exam: null });
-  const [submittedInfo, setSubmittedInfo] = useState<{ submittedAt: string; currentCourse?: string; targetCourse?: string } | null>(null);
+  const [submittedInfo, setSubmittedInfo] = useState<{ submittedAt: string; currentCourse?: string; targetCourse?: string; status: string } | null>(null);
   const [logoSettings, setLogoSettings] = useState<any>(null);
   const [uploadedDocs, setUploadedDocs] = useState<Record<string, File | null>>({
     picture: null,
@@ -181,7 +181,8 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
           setSubmittedInfo({
             submittedAt: result.data.appointment.created_at,
             currentCourse: result.data.appointment.currentCourse,
-            targetCourse: result.data.appointment.targetCourse
+            targetCourse: result.data.appointment.targetCourse,
+            status: result.data.appointment.appointment_statuses?.status_name || 'Pending'
           });
         }
       };
@@ -382,7 +383,8 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
       setSubmittedInfo({
         submittedAt: result.data.appointment.created_at,
         currentCourse: profileData.currentCourse,
-        targetCourse: formData.targetCourse
+        targetCourse: formData.targetCourse,
+        status: 'Pending'
       });
       showToast.success('Shifting application submitted. Staff will review your requirements.');
       setFormData((prev) => ({ ...prev, targetCourse: '', reason: '' }));
@@ -428,8 +430,8 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
             <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 print:bg-rose-200">
               <CheckCircle2 size={32} className="text-white print:text-rose-600" />
             </div>
-            <h3 className="text-2xl font-black mb-2">Application Submitted!</h3>
-            <p className="text-rose-100 text-sm font-medium print:text-rose-800">Your shifting application has been successfully submitted and is pending staff review.</p>
+            <h3 className="text-2xl font-black mb-2">Application {submittedInfo.status === 'Evaluated' || submittedInfo.status === 'Approved' ? 'Validated' : 'Submitted'}!</h3>
+            <p className="text-rose-100 text-sm font-medium print:text-rose-800">Your shifting application has been successfully submitted and is currently <span className="font-black uppercase">{submittedInfo.status}</span>.</p>
           </div>
 
           <div className="p-8 space-y-8">
@@ -481,7 +483,7 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
                 </div>
                 <div className="text-right">
                   <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Status</p>
-                  <span className="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest print:bg-white print:border print:border-amber-300">Pending Review</span>
+                  <span className="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest print:bg-white print:border print:border-amber-300">{submittedInfo.status}</span>
                 </div>
               </div>
             </div>
@@ -500,14 +502,25 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
 
 
 
-        <div className="mt-8 flex justify-center print:hidden">
-          <button
-            onClick={() => window.print()}
-            className="bg-slate-900 text-white px-8 py-4 rounded-xl font-black text-sm hover:bg-slate-800 transition-colors shadow-xl shadow-slate-900/20 flex items-center gap-3"
-          >
-            <FileText size={18} />
-            Print Receipt
-          </button>
+        <div className="mt-8 flex flex-col items-center gap-4 print:hidden">
+          {submittedInfo.status === 'Evaluated' || submittedInfo.status === 'Approved' ? (
+            <button
+              onClick={() => window.print()}
+              className="bg-slate-900 text-white px-8 py-4 rounded-xl font-black text-sm hover:bg-slate-800 transition-colors shadow-xl shadow-slate-900/20 flex items-center gap-3"
+            >
+              <FileText size={18} />
+              Print Receipt
+            </button>
+          ) : (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 flex items-start gap-4 max-w-md">
+              <div className="w-10 h-10 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center shrink-0">
+                <Clock size={20} />
+              </div>
+              <p className="text-xs font-bold text-amber-800 leading-relaxed">
+                Wait for the approval of the request then you can print and provide the receipt to the GCC Office.
+              </p>
+            </div>
+          )}
         </div>
       </motion.div>
     );

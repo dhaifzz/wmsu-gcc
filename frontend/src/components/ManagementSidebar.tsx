@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   LayoutDashboard,
   User,
+  UserRound,
   LogOut
 } from 'lucide-react';
 
@@ -31,7 +32,7 @@ interface ManagementSidebarProps {
 }
 
 const ManagementSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen, onClose, links, colorScheme = 'emerald' }: ManagementSidebarProps) => {
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const navigate = useNavigate();
   const [logos, setLogos] = useState({
     wmsuLogo: WMSULogoAsset,
@@ -135,8 +136,12 @@ const ManagementSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen
             onClick={() => { setActiveTab('profile'); onClose?.(); }}
             className={`w-full ${c.userCardBg} rounded-[2rem] p-4 flex items-center gap-3 border hover:opacity-80 transition-opacity text-left`}
           >
-            <div className={`w-12 h-12 ${c.userAvatar} flex items-center justify-center border`}>
-              <User size={24} className={c.userAvatarIcon} />
+            <div className={`w-12 h-12 ${c.userAvatar} flex items-center justify-center border overflow-hidden`}>
+              {user?.sex?.toLowerCase() === 'female' ? (
+                <UserRound size={24} className={c.userAvatarIcon} />
+              ) : (
+                <User size={24} className={c.userAvatarIcon} />
+              )}
             </div>
             <div className="flex-1 overflow-hidden">
               <MarqueeText

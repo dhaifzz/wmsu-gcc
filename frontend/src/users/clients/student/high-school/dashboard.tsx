@@ -80,7 +80,10 @@ const HighSchoolDashboard = () => {
     gradeLevel: authUser?.gradeLevel?.toString() || "N/A",
     track: "Academic", // This would ideally come from the DB as well
     school: authUser?.school || "WMSU High School",
-    joinedDate: "N/A"
+    joinedDate: "N/A",
+    city: authUser?.city || "N/A",
+    barangay: authUser?.barangay || "N/A",
+    street: authUser?.street || "N/A"
   };
 
 

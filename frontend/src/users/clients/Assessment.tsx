@@ -384,14 +384,25 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
 
 
 
-        <div className="mt-8 flex justify-center print:hidden">
-          <button
-            onClick={() => window.print()}
-            className="bg-slate-900 text-white px-8 py-4 rounded-xl font-black text-sm hover:bg-slate-800 transition-colors shadow-xl shadow-slate-900/20 flex items-center gap-3"
-          >
-            <FileText size={18} />
-            Print Receipt
-          </button>
+        <div className="mt-8 flex flex-col items-center gap-4 print:hidden">
+          {submittedInfo.status === 'Evaluated' || submittedInfo.status === 'Approved' ? (
+            <button
+              onClick={() => window.print()}
+              className="bg-slate-900 text-white px-8 py-4 rounded-xl font-black text-sm hover:bg-slate-800 transition-colors shadow-xl shadow-slate-900/20 flex items-center gap-3"
+            >
+              <FileText size={18} />
+              Print Receipt
+            </button>
+          ) : (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 flex items-start gap-4 max-w-md">
+              <div className="w-10 h-10 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center shrink-0">
+                <Clock size={20} />
+              </div>
+              <p className="text-xs font-bold text-amber-800 leading-relaxed">
+                Wait for the approval of the request then you can print and provide the receipt to the GCC Office.
+              </p>
+            </div>
+          )}
         </div>
       </motion.div>
     );

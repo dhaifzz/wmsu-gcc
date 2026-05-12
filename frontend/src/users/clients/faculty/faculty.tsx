@@ -59,7 +59,10 @@ const FacultyDashboard = () => {
     studentId: authUser?.id?.substring(0, 8).toUpperCase() || "N/A",
     department: authUser?.department || "WMSU Faculty",
     status: "Permanent",
-    joinedDate: "N/A"
+    joinedDate: "N/A",
+    city: authUser?.city || "N/A",
+    barangay: authUser?.barangay || "N/A",
+    street: authUser?.street || "N/A"
   };
 
 
