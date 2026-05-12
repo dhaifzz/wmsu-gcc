@@ -93,6 +93,7 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
   const [isSubmissionOpen, setIsSubmissionOpen] = useState(false);
   const [submissionDates, setSubmissionDates] = useState<{ start: string | null; end: string | null; exam: string | null }>({ start: null, end: null, exam: null });
   const [submittedInfo, setSubmittedInfo] = useState<{ submittedAt: string; currentCourse?: string; targetCourse?: string } | null>(null);
+  const [logoSettings, setLogoSettings] = useState<any>(null);
   const [uploadedDocs, setUploadedDocs] = useState<Record<string, File | null>>({
     picture: null,
     grades: null,
@@ -190,6 +191,17 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
         fetchSchedule(),
         loadLatest()
       ]);
+
+      // Fetch logos
+      try {
+        const logoRes = await cmsApi.getContent('logos');
+        if (logoRes.ok && logoRes.data) {
+          setLogoSettings(logoRes.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch logos:", err);
+      }
+
       setLoading(false);
     };
 
@@ -473,8 +485,20 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
                 </div>
               </div>
             </div>
+
+            <div className="pt-12 border-t border-slate-100 flex flex-col items-center gap-2">
+              <div className="flex items-center -space-x-4">
+                <img src={logoSettings?.wmsuLogo || "/src/assets/logos/WMSU.png"} alt="WMSU Logo" className="w-12 h-12 object-contain drop-shadow-xl z-10" />
+                <img src={logoSettings?.gccLogo || "/src/assets/logos/GCC.png"} alt="GCC Logo" className="w-12 h-12 object-contain drop-shadow-xl z-20" />
+              </div>
+              <div className="text-center">
+                <h1 className="text-md font-black text-emerald-900 uppercase leading-none">WMSU GCC</h1>
+              </div>
+            </div>
           </div>
         </div>
+
+
 
         <div className="mt-8 flex justify-center print:hidden">
           <button

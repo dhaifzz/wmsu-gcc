@@ -54,4 +54,13 @@
     scrollbar-width: thin;
     scrollbar-color: rgba(228, 59, 84, 0.6) transparent;
   }
+
+  @media print {
+    @page {
+      margin: 0;
+    }
+    body {
+      padding: 1cm;
+    }
+  }
 }
