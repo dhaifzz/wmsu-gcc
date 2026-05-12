@@ -90,6 +90,16 @@ const Loader = ({ type = 'dashboard' }: LoaderProps) => {
             </div>
             <div className="h-14 w-48 bg-slate-200 rounded-lg animate-pulse"></div>
           </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="bg-white p-6 rounded-lg border border-slate-100 shadow-sm space-y-3">
+                <div className="h-3 w-24 bg-slate-100 rounded animate-pulse"></div>
+                <div className="h-10 w-16 bg-slate-200 rounded animate-pulse"></div>
+              </div>
+            ))}
+          </div>
+
           <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
             <div className="h-12 w-full md:w-96 bg-slate-100 rounded-lg animate-pulse"></div>
             <div className="flex gap-2 w-full md:w-auto">
@@ -101,15 +111,27 @@ const Loader = ({ type = 'dashboard' }: LoaderProps) => {
             <div className="h-16 bg-emerald-950 animate-pulse"></div>
             <div className="divide-y divide-slate-100">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="p-6 flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-4 flex-1">
+                <div key={i} className="p-6 flex items-center gap-8">
+                  {/* User Details */}
+                  <div className="flex items-center gap-4 flex-[2]">
                     <div className="w-12 h-12 bg-slate-100 rounded-lg animate-pulse shrink-0"></div>
-                    <div className="space-y-2 flex-1">
+                    <div className="space-y-2">
                       <div className="h-4 w-32 bg-slate-200 rounded animate-pulse"></div>
                       <div className="h-3 w-48 bg-slate-100 rounded animate-pulse"></div>
                     </div>
                   </div>
-                  <div className="h-10 w-20 bg-slate-100 rounded-lg animate-pulse"></div>
+                  {/* Role */}
+                  <div className="flex-1 hidden md:block">
+                    <div className="h-4 w-20 bg-slate-100 rounded animate-pulse"></div>
+                  </div>
+                  {/* Status */}
+                  <div className="flex-1 hidden md:block">
+                    <div className="h-6 w-24 bg-slate-100 rounded-full animate-pulse"></div>
+                  </div>
+                  {/* Actions */}
+                  <div className="w-20 flex justify-end">
+                    <div className="h-10 w-10 bg-slate-100 rounded-lg animate-pulse"></div>
+                  </div>
                 </div>
               ))}
             </div>

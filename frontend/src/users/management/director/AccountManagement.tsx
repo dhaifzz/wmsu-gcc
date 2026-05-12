@@ -17,6 +17,7 @@ import { showAlert } from '../../../components/modal-notification/sweetalert';
 import { showToast } from '../../../components/modal-notification/toast';
 import { useAuth } from '../../../auth/AuthContext';
 import { adminApi, type AdminUser } from '../../../lib/api';
+import Loader from '../../../components/loader/Loader';
 
 const AccountManagement = () => {
   const { accessToken } = useAuth();
@@ -49,6 +50,7 @@ const AccountManagement = () => {
 
   useEffect(() => {
     fetchUsers();
+    window.scrollTo(0, 0);
   }, [fetchUsers]);
 
   // ── Computed stats ──────────────────────────────────────────────────────────
@@ -88,7 +90,12 @@ const AccountManagement = () => {
     }
   };
 
+  if (loading && users.length === 0) {
+    return <Loader type="management-table" />;
+  }
+
   return (
+    <>
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -110,7 +117,7 @@ const AccountManagement = () => {
           </button>
           <button 
             onClick={() => setShowCreateModal(true)}
-            className="flex items-center justify-center gap-2 px-8 py-4 bg-teal-600 hover:bg-teal-700 text-white font-black rounded-lg transition-all shadow-lg shadow-teal-200"
+            className="flex items-center justify-center gap-2 px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-lg transition-all shadow-lg shadow-emerald-200"
           >
             <UserPlus size={20} />
             Create Account
@@ -139,7 +146,7 @@ const AccountManagement = () => {
               <span className="text-sm font-bold">Loading…</span>
             </div>
           ) : (
-            <p className="text-3xl font-black text-teal-600">{activeCount}</p>
+            <p className="text-3xl font-black text-emerald-600">{activeCount}</p>
           )}
         </div>
         <div className="bg-white p-6 rounded-lg border border-slate-100 shadow-xl shadow-slate-200/40">
@@ -178,7 +185,7 @@ const AccountManagement = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name, email, or role..."
-              className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-lg text-sm font-bold focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
+              className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-lg text-sm font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all"
             />
           </div>
           <p className="text-xs font-black text-slate-400 uppercase tracking-widest ml-4">
@@ -189,7 +196,7 @@ const AccountManagement = () => {
         <div className="overflow-x-auto">
           {loading && users.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-              <Loader2 size={32} className="animate-spin mb-4" />
+              <Loader2 size={32} className="animate-spin mb-4 text-emerald-600" />
               <p className="text-sm font-bold">Loading users…</p>
             </div>
           ) : filtered.length === 0 ? (
@@ -200,11 +207,11 @@ const AccountManagement = () => {
           ) : (
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50/50">
-                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">User Details</th>
-                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Role</th>
-                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Status</th>
-                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Actions</th>
+                <tr className="bg-emerald-900">
+                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-emerald-100/80">User Details</th>
+                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-emerald-100/80">Role</th>
+                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-emerald-100/80">Status</th>
+                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-emerald-100/80">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
@@ -212,7 +219,7 @@ const AccountManagement = () => {
                   <tr key={user.id} className="hover:bg-slate-50/30 transition-colors">
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-lg bg-teal-100 flex items-center justify-center text-teal-700 font-black">
+                        <div className="w-12 h-12 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-700 font-black">
                           {user.firstName.charAt(0)}
                         </div>
                         <div>
@@ -226,14 +233,14 @@ const AccountManagement = () => {
                     </td>
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-2 text-slate-600 font-black text-xs uppercase tracking-wider">
-                        <Shield size={14} className="text-teal-500" />
+                        <Shield size={14} className="text-emerald-500" />
                         {user.role}
                       </div>
                     </td>
                     <td className="px-8 py-6">
                       <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
                         user.status === 'Active' 
-                        ? 'bg-teal-50 text-teal-600' 
+                        ? 'bg-emerald-50 text-emerald-600' 
                         : 'bg-amber-50 text-amber-600'
                       }`}>
                         {user.status}
@@ -258,19 +265,21 @@ const AccountManagement = () => {
         </div>
       </div>
 
-      {/* Create Account Modal */}
-      <AnimatePresence>
-        {showCreateModal && (
-          <CreateAccountModal
-            onClose={() => setShowCreateModal(false)}
-            onCreated={() => {
-              setShowCreateModal(false);
-              fetchUsers();
-            }}
-          />
-        )}
-      </AnimatePresence>
     </motion.div>
+
+    {/* Create Account Modal */}
+    <AnimatePresence>
+      {showCreateModal && (
+        <CreateAccountModal
+          onClose={() => setShowCreateModal(false)}
+          onCreated={() => {
+            setShowCreateModal(false);
+            fetchUsers();
+          }}
+        />
+      )}
+    </AnimatePresence>
+    </>
   );
 };
 
@@ -408,7 +417,7 @@ const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => 
   return (
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 overflow-y-auto"
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
     >
       <motion.div
@@ -422,7 +431,7 @@ const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => 
             <h3 className="text-xl font-black text-slate-900">Create Account</h3>
             <div className="flex items-center gap-2 mt-1">
               {[1, 2, 3, (shouldShowEducationStep ? 4 : null)].filter(Boolean).map((s: any) => (
-                <div key={s} className={`h-1.5 w-8 rounded-full transition-all ${step >= s ? 'bg-teal-600' : 'bg-slate-200'}`} />
+                <div key={s} className={`h-1.5 w-8 rounded-full transition-all ${step >= s ? 'bg-emerald-600' : 'bg-slate-200'}`} />
               ))}
             </div>
           </div>
@@ -440,7 +449,7 @@ const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => 
                     <button key={r} onClick={() => {
                       setRole(r);
                       setIsWMSU(r !== 'Outsider');
-                    }} className={`px-3 py-3 rounded-xl text-[11px] font-black border transition-all ${role === r ? 'bg-teal-600 text-white border-teal-600 shadow-lg shadow-teal-100' : 'bg-white text-slate-600 border-slate-200 hover:border-teal-300'}`}>
+                    }} className={`px-3 py-3 rounded-xl text-[11px] font-black border transition-all ${role === r ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg shadow-emerald-100' : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-300'}`}>
                       {r}
                     </button>
                   ))}
@@ -452,7 +461,7 @@ const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => 
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Email Address</label>
                   <div className="relative">
                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                    <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="user@example.com" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 pl-12 pr-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none" />
+                    <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="user@example.com" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 pl-12 pr-4 text-sm font-bold focus:ring-2 focus:ring-emerald-500/20 outline-none" />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -460,8 +469,8 @@ const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => 
                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Password</label>
                     <div className="relative">
                       <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                      <input type={showPassword ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 pl-12 pr-12 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none" />
-                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-teal-600 transition-colors">
+                      <input type={showPassword ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 pl-12 pr-12 text-sm font-bold focus:ring-2 focus:ring-emerald-500/20 outline-none" />
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 transition-colors">
                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
                     </div>
@@ -470,7 +479,7 @@ const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => 
                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Confirm Password</label>
                     <div className="relative">
                       <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                      <input type={showPassword ? 'text' : 'password'} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="••••••••" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 pl-12 pr-12 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none" />
+                      <input type={showPassword ? 'text' : 'password'} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="••••••••" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 pl-12 pr-12 text-sm font-bold focus:ring-2 focus:ring-emerald-500/20 outline-none" />
                     </div>
                   </div>
                 </div>
@@ -487,7 +496,7 @@ const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => 
                     const val = e.target.value.replace(/[^a-zA-Z\s.-]/g, '');
                     const capitalized = val.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
                     setFirstName(capitalized);
-                  }} maxLength={50} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none" />
+                  }} maxLength={50} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-emerald-500/20 outline-none" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Middle Name</label>
@@ -495,7 +504,7 @@ const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => 
                     const val = e.target.value.replace(/[^a-zA-Z\s.-]/g, '');
                     const capitalized = val.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
                     setMiddleInitial(capitalized);
-                  }} maxLength={50} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none" />
+                  }} maxLength={50} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-emerald-500/20 outline-none" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Last Name</label>
@@ -503,7 +512,7 @@ const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => 
                     const val = e.target.value.replace(/[^a-zA-Z\s.-]/g, '');
                     const capitalized = val.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
                     setLastName(capitalized);
-                  }} maxLength={50} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none" />
+                  }} maxLength={50} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-emerald-500/20 outline-none" />
                 </div>
               </div>
               <div className="space-y-2">
@@ -518,7 +527,7 @@ const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => 
                     }} 
                     placeholder="09xxxxxxxxx" 
                     maxLength={11}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 pl-12 pr-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none" 
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 pl-12 pr-4 text-sm font-bold focus:ring-2 focus:ring-emerald-500/20 outline-none" 
                   />
                 </div>
               </div>
@@ -548,7 +557,7 @@ const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => 
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Street / House No.</label>
-                <input value={street} onChange={e => setStreet(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none" />
+                <input value={street} onChange={e => setStreet(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-emerald-500/20 outline-none" />
               </div>
             </div>
           )}
@@ -560,13 +569,13 @@ const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => 
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Sex</label>
                   <div className="flex gap-2">
                     {['Male', 'Female'].map(s => (
-                      <button key={s} onClick={() => setSex(s)} className={`flex-1 py-4 rounded-xl text-sm font-black border transition-all ${sex === s ? 'bg-teal-600 text-white border-teal-600 shadow-lg shadow-teal-100' : 'bg-white text-slate-600 border-slate-200 hover:border-teal-300'}`}>{s}</button>
+                      <button key={s} onClick={() => setSex(s)} className={`flex-1 py-4 rounded-xl text-sm font-black border transition-all ${sex === s ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg shadow-emerald-100' : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-300'}`}>{s}</button>
                     ))}
                   </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Birthdate</label>
-                  <input type="date" value={birthdate} onChange={e => setBirthdate(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none" />
+                  <input type="date" value={birthdate} onChange={e => setBirthdate(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-emerald-500/20 outline-none" />
                 </div>
               </div>
               {!isStudent && (
@@ -593,7 +602,7 @@ const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => 
                     }} 
                     placeholder="6 digits" 
                     maxLength={6}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none" 
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-emerald-500/20 outline-none" 
                   />
                 </div>
               )}
@@ -604,7 +613,7 @@ const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => 
             <div className="space-y-6">
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">School Name</label>
-                <input disabled={isWMSU} value={isWMSU ? 'Western Mindanao State University' : school} onChange={e => setSchool(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none disabled:opacity-50" />
+                <input disabled={isWMSU} value={isWMSU ? 'Western Mindanao State University' : school} onChange={e => setSchool(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-emerald-500/20 outline-none disabled:opacity-50" />
               </div>
               
               {role === 'College Student' && (
@@ -633,7 +642,7 @@ const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => 
                         }} 
                         placeholder="9 digits" 
                         maxLength={9}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none" 
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-emerald-500/20 outline-none" 
                       />
                     </div>
                   )}
@@ -648,7 +657,7 @@ const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => 
                       <select value={gradeLevel} onChange={e => {
                         setGradeLevel(e.target.value);
                         setEducationLevel('High School');
-                      }} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none">
+                      }} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-emerald-500/20 outline-none">
                         <option value="">Select</option>
                         {[7,8,9,10,11,12].map(g => <option key={g} value={g}>Grade {g}</option>)}
                       </select>
@@ -656,7 +665,7 @@ const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => 
                     {['11', '12'].includes(gradeLevel) && (
                       <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Track</label>
-                        <input value={track} onChange={e => setTrack(e.target.value)} placeholder="STEM, ABM, etc." className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none" />
+                        <input value={track} onChange={e => setTrack(e.target.value)} placeholder="STEM, ABM, etc." className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-emerald-500/20 outline-none" />
                       </div>
                     )}
                   </div>
@@ -671,7 +680,7 @@ const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => 
                         }} 
                         placeholder="12 digits" 
                         maxLength={12}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none" 
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-emerald-500/20 outline-none" 
                       />
                     </div>
                   )}
@@ -689,7 +698,7 @@ const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => 
             </button>
           )}
           <button onClick={onClose} className="px-6 py-4 text-slate-500 font-bold hover:bg-slate-200 rounded-xl transition-all">Cancel</button>
-          <button disabled={submitting} onClick={handleNext} className="flex-1 py-4 bg-teal-600 text-white font-black rounded-xl hover:bg-teal-700 transition-all shadow-lg shadow-teal-200 flex items-center justify-center gap-2 disabled:opacity-50">
+          <button disabled={submitting} onClick={handleNext} className="flex-1 py-4 bg-emerald-600 text-white font-black rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-200 flex items-center justify-center gap-2 disabled:opacity-50">
             {submitting ? <Loader2 size={18} className="animate-spin" /> : (step === (shouldShowEducationStep ? 4 : 3) ? 'Create Account' : 'Next Step')}
           </button>
         </div>

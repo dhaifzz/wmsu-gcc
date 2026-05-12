@@ -38,6 +38,7 @@ const OfficeSchedule = () => {
 
   useEffect(() => {
     fetchOfficeSchedule();
+    window.scrollTo(0, 0);
   }, []);
 
   const fetchOfficeSchedule = async () => {

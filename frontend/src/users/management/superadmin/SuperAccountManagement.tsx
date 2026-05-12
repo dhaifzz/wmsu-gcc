@@ -17,6 +17,7 @@ import { showAlert } from '../../../components/modal-notification/sweetalert';
 import { showToast } from '../../../components/modal-notification/toast';
 import { useAuth } from '../../../auth/AuthContext';
 import { adminApi, type AdminUser } from '../../../lib/api';
+import Loader from '../../../components/loader/Loader';
 
 const UserManagement = () => {
   const { accessToken } = useAuth();
@@ -47,6 +48,7 @@ const UserManagement = () => {
 
   useEffect(() => {
     fetchUsers();
+    window.scrollTo(0, 0);
   }, [fetchUsers]);
 
   // ── Computed stats ──────────────────────────────────────────────────────────
@@ -86,7 +88,12 @@ const UserManagement = () => {
     }
   };
 
+  if (loading && users.length === 0) {
+    return <Loader type="management-table" />;
+  }
+
   return (
+    <>
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -187,7 +194,7 @@ const UserManagement = () => {
         <div className="overflow-x-auto">
           {loading && users.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-              <Loader2 size={32} className="animate-spin mb-4" />
+              <Loader2 size={32} className="animate-spin mb-4 text-teal-600" />
               <p className="text-sm font-bold">Loading users…</p>
             </div>
           ) : filtered.length === 0 ? (
@@ -198,11 +205,11 @@ const UserManagement = () => {
           ) : (
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50/50">
-                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">User Details</th>
-                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Role</th>
-                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Status</th>
-                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Actions</th>
+                <tr className="bg-teal-900">
+                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-teal-100/80">User Details</th>
+                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-teal-100/80">Role</th>
+                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-teal-100/80">Status</th>
+                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-teal-100/80">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
@@ -256,19 +263,21 @@ const UserManagement = () => {
         </div>
       </div>
 
-      {/* Create Account Modal */}
-      <AnimatePresence>
-        {showCreateModal && (
-          <CreateAccountModal
-            onClose={() => setShowCreateModal(false)}
-            onCreated={() => {
-              setShowCreateModal(false);
-              fetchUsers();
-            }}
-          />
-        )}
-      </AnimatePresence>
     </motion.div>
+
+    {/* Create Account Modal */}
+    <AnimatePresence>
+      {showCreateModal && (
+        <CreateAccountModal
+          onClose={() => setShowCreateModal(false)}
+          onCreated={() => {
+            setShowCreateModal(false);
+            fetchUsers();
+          }}
+        />
+      )}
+    </AnimatePresence>
+    </>
   );
 };
 
@@ -408,7 +417,7 @@ const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => 
   return (
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 overflow-y-auto"
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
     >
       <motion.div
