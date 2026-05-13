@@ -626,7 +626,7 @@ const ClientProfile = ({ user }: ProfileProps) => {
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Contact Number</label>
                     <input
-                      type="text"
+                      type="number"
                       required
                       value={editForm.contactNumber}
                       onChange={(e) => setEditForm({ ...editForm, contactNumber: e.target.value })}
