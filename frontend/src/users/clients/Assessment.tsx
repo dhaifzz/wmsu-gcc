@@ -173,6 +173,11 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
     const nextDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + offset, 1);
     const today = new Date();
     if (nextDate.getMonth() < today.getMonth() && nextDate.getFullYear() <= today.getFullYear()) return;
+
+    // Reset selection when month changes to prevent invalid state
+    setSelectedDate(null);
+    setSelectedTime(null);
+
     setCurrentDate(nextDate);
   };
 
@@ -458,7 +463,10 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
           </div>
 
           <div className="flex-1 flex flex-col justify-between py-2">
-            <div className="grid grid-cols-7 gap-y-4 lg:gap-y-6 gap-x-1 lg:gap-x-2">
+            <div 
+              key={`${currentDate.getFullYear()}-${currentDate.getMonth()}`}
+              className="grid grid-cols-7 gap-y-4 lg:gap-y-6 gap-x-1 lg:gap-x-2"
+            >
               {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(day => (
                 <div key={day} className="text-center text-[8px] lg:text-[10px] font-black uppercase tracking-[0.1em] lg:tracking-[0.2em] text-slate-300">
                   {day.slice(0, 3)}
@@ -481,23 +489,40 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
                   }}
                   disabled={loadingSchedule}
                   className={`
-                    aspect-square rounded-lg flex items-center justify-center font-bold text-base lg:text-lg transition-all
+                    aspect-square rounded-xl flex flex-col items-center justify-center transition-all relative overflow-hidden group
                     ${selectedDate === day 
                       ? 'bg-emerald-600 text-white shadow-xl shadow-emerald-100 scale-105 lg:scale-110 z-10' 
-                      : isPastDay(day)
-                        ? 'bg-slate-50 text-slate-300 cursor-not-allowed opacity-60'
-                        : 'hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 hover:scale-105'}
+                      : getDateStatus(day) === 'Holiday' || getDateStatus(day) === 'Closed'
+                        ? 'bg-rose-50/50 border border-rose-100/50 text-rose-300 cursor-not-allowed'
+                        : getDateStatus(day) === 'Weekend'
+                          ? 'bg-slate-50/50 text-slate-200 cursor-not-allowed'
+                          : getDateStatus(day) === 'Past'
+                            ? 'bg-slate-50/30 text-slate-200 cursor-not-allowed opacity-60'
+                            : 'hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 hover:scale-105 border border-transparent hover:border-emerald-100'}
                   `}
                 >
-                  <span className={`text-base font-black ${selectedDate === day ? 'text-white' : ''}`}>{day}</span>
+                  <span className={`text-base lg:text-lg font-black mb-0.5 ${selectedDate === day ? 'text-white' : ''}`}>
+                    {day}
+                  </span>
+                  
                   {getDateStatus(day) && (
-                    <span className={`text-[7px] font-black uppercase tracking-tighter mt-0.5 truncate w-full px-1 text-center ${
-                      selectedDate === day ? 'text-white/80' : 
-                      getDateStatus(day) === 'Holiday' || getDateStatus(day) === 'Closed' ? 'text-rose-500' :
-                      'text-slate-400'
-                    }`}>
+                    <div className={`
+                      px-1.5 py-0.5 rounded-full text-[6px] lg:text-[7px] font-black uppercase tracking-widest
+                      ${selectedDate === day 
+                        ? 'bg-white/20 text-white' 
+                        : getDateStatus(day) === 'Holiday' || getDateStatus(day) === 'Closed'
+                          ? 'bg-rose-100 text-rose-500'
+                          : getDateStatus(day) === 'Past' || getDateStatus(day) === 'Weekend'
+                            ? 'bg-slate-100 text-slate-400'
+                            : 'bg-emerald-100 text-emerald-600'}
+                    `}>
                       {getDateStatus(day)}
-                    </span>
+                    </div>
+                  )}
+
+                  {/* Visual indicator for past/unavailable dates */}
+                  {isPastDay(day) && selectedDate !== day && (
+                    <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,#000_10px,#000_11px)]"></div>
                   )}
                 </button>
               ))}
@@ -553,7 +578,7 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
               <h3 className="font-black text-lg lg:text-xl text-emerald-950">Select Time</h3>
             </div>
 
-            <div className="grid grid-cols-1 gap-3 max-h-[300px] overflow-y-auto pr-2 scrollbar-hide">
+            <div className="grid grid-cols-1 gap-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
               {(() => {
                 const dateKey = selectedDateKey;
                 const config = dateKey ? officeSchedule[dateKey] : null;

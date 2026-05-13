@@ -13,13 +13,31 @@ import {
   Save,
   Phone,
   RefreshCw,
-  UserRound
+  UserRound,
+  ChevronDown
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../auth/AuthContext';
 import { analyticsApi, authApi } from '../lib/api';
 import { showToast } from '../components/modal-notification/toast';
 import phAddresses from '../ph_addresses.json';
+
+const validateAndNormalizePhone = (phone: string): { normalized: string; error: string | null } => {
+  const cleanPhone = phone.replace(/\s/g, '');
+  if (!/^\d+$/.test(cleanPhone)) {
+    return { normalized: '', error: 'Phone number must contain only digits.' };
+  }
+
+  if (!cleanPhone.startsWith('09')) {
+    return { normalized: '', error: 'Phone number must start with 09.' };
+  }
+
+  if (cleanPhone.length !== 11) {
+    return { normalized: '', error: 'Phone number must be exactly 11 digits.' };
+  }
+
+  return { normalized: cleanPhone, error: null };
+};
 
 interface ProfileProps {
   user: {
@@ -57,6 +75,29 @@ const ManagementProfile = ({ user }: ProfileProps) => {
     employeeId: ''
   });
 
+  const [isDropdownOpen, setIsDropdownOpen] = useState<{ [key: string]: boolean }>({
+    sex: false,
+    city: false,
+    barangay: false
+  });
+
+  const [citySearch, setCitySearch] = useState('');
+  const [barangaySearch, setBarangaySearch] = useState('');
+
+  const ALL_CITIES = Object.keys(phAddresses).sort((a, b) => {
+    if (a === 'Zamboanga City') return -1;
+    if (b === 'Zamboanga City') return 1;
+    return a.localeCompare(b);
+  });
+
+  const filteredCities = ALL_CITIES.filter(c => c.toLowerCase().includes(citySearch.toLowerCase()));
+
+  const filteredBarangays = (editForm.city && phAddresses[editForm.city as keyof typeof phAddresses])
+    ? (phAddresses[editForm.city as keyof typeof phAddresses] as string[]).filter(b => 
+        b.toLowerCase().includes(barangaySearch.toLowerCase())
+      )
+    : [];
+
   useEffect(() => {
     if (authUser) {
       setEditForm({
@@ -92,9 +133,32 @@ const ManagementProfile = ({ user }: ProfileProps) => {
     fetchStats();
   }, [accessToken]);
 
+  const isDirty = authUser ? (
+    editForm.firstName !== authUser.firstName ||
+    editForm.middleName !== (authUser.middleName || '') ||
+    editForm.lastName !== authUser.lastName ||
+    editForm.email !== (authUser.email || '') ||
+    editForm.contactNumber !== authUser.contactNumber ||
+    editForm.sex !== authUser.sex ||
+    editForm.birthdate !== (authUser.birthdate ? new Date(authUser.birthdate).toISOString().split('T')[0] : '') ||
+    editForm.city !== (authUser.city || authUser.address_city || '') ||
+    editForm.barangay !== (authUser.barangay || authUser.address_barangay || '') ||
+    editForm.street !== (authUser.street || authUser.address_street || '') ||
+    editForm.occupation !== (authUser.occupation || '') ||
+    editForm.department !== (authUser.department || '') ||
+    editForm.employeeId !== (authUser.employeeId?.toString() || '')
+  ) : false;
+
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!accessToken) return;
+
+    // Contact Number Validation
+    const { normalized, error } = validateAndNormalizePhone(editForm.contactNumber);
+    if (error) {
+      showToast.error(error);
+      return;
+    }
 
     try {
       setSaving(true);
@@ -102,6 +166,7 @@ const ManagementProfile = ({ user }: ProfileProps) => {
       // Convert numeric fields from string to number before sending
       const payload = {
         ...editForm,
+        contactNumber: normalized,
         employeeId: editForm.employeeId ? parseInt(editForm.employeeId) : null
       };
 
@@ -139,33 +204,33 @@ const ManagementProfile = ({ user }: ProfileProps) => {
       <div className="bg-white rounded-lg p-6 md:p-10 shadow-sm border border-slate-100 relative overflow-hidden">
         <div className={`absolute top-0 left-0 w-full h-24 md:h-32 bg-gradient-to-r ${theme.bg600} to-slate-900 opacity-10`}></div>
         
-        <div className="relative z-10 flex flex-col md:flex-row items-center gap-6 md:gap-8">
-          <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8 flex-1 w-full">
-            <div className="relative group">
-              <div className={`w-24 h-24 md:w-32 md:h-32 rounded-2xl flex items-center justify-center border-4 border-white shadow-xl overflow-hidden ${getAvatarStyles()}`}>
+        <div className="relative z-10 flex flex-col items-center gap-6 md:flex-row md:items-start md:gap-8">
+          <div className="flex flex-col items-center gap-6 md:flex-row md:items-center md:gap-8 flex-1 w-full">
+            <div className="relative group shrink-0">
+              <div className={`w-28 h-28 md:w-32 md:h-32 rounded-2xl flex items-center justify-center border-4 border-white shadow-xl overflow-hidden ${getAvatarStyles()}`}>
                 {(authUser?.sex || '').toLowerCase() === 'female' ? (
-                  <UserRound className="w-12 h-12 md:w-16 md:h-16" />
+                  <UserRound className="w-14 h-14 md:w-16 md:h-16" />
                 ) : (
-                  <UserIcon className="w-12 h-12 md:w-16 md:h-16" />
+                  <UserIcon className="w-14 h-14 md:w-16 md:h-16" />
                 )}
               </div>
             </div>
             
-            <div className="text-center md:text-left w-full">
-              <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-2">
-                <h2 className="text-2xl md:text-4xl font-black tracking-tight truncate max-w-full text-slate-900">{user.name}</h2>
-                <span className={`px-3 md:px-4 py-1 rounded-full ${theme.bg100} ${theme.text700} text-[10px] md:text-xs font-black uppercase tracking-widest border ${theme.border200} w-fit mx-auto md:mx-0`}>
+            <div className="text-center md:text-left flex-1 min-w-0">
+              <div className="flex flex-col items-center md:flex-row md:items-center gap-2 md:gap-4 mb-3">
+                <h2 className="text-2xl md:text-4xl font-black tracking-tight break-words text-slate-900 leading-tight">{user.name}</h2>
+                <span className={`px-3 md:px-4 py-1.5 rounded-full ${theme.bg100} ${theme.text700} text-[10px] md:text-xs font-black uppercase tracking-widest border ${theme.border200} w-fit`}>
                   {user.role}
                 </span>
               </div>
-              <div className="flex flex-wrap justify-center md:justify-start gap-4">
+              <div className="flex flex-wrap justify-center md:justify-start gap-3 md:gap-4">
                 <div className="flex items-center gap-2 text-slate-500">
                    <Shield size={14} className={theme.text600} />
-                   <span className="text-xs font-bold uppercase tracking-wider">{user.educationLevel || 'Staff'}</span>
+                   <span className="text-[10px] md:text-xs font-bold uppercase tracking-wider">{user.educationLevel || 'Staff'}</span>
                 </div>
                 <div className="flex items-center gap-2 text-slate-500">
                    <UserCheck size={14} className={theme.text600} />
-                   <span className="text-xs font-bold uppercase tracking-wider">ID: {user.studentId || 'N/A'}</span>
+                   <span className="text-[10px] md:text-xs font-bold uppercase tracking-wider">ID: {user.studentId || 'N/A'}</span>
                 </div>
               </div>
             </div>
@@ -189,7 +254,7 @@ const ManagementProfile = ({ user }: ProfileProps) => {
               </button>
             </div>
             
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
               <div className="group">
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 group-hover:text-emerald-600 transition-colors">Affiliation</p>
                 <p className="text-lg font-bold text-slate-700">Western Mindanao State University</p>
@@ -320,14 +385,18 @@ const ManagementProfile = ({ user }: ProfileProps) => {
             <form onSubmit={handleUpdateProfile} className="flex-1 flex flex-col overflow-hidden">
               {/* Scrollable Body */}
               <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">First Name</label>
                     <input
                       type="text"
                       required
                       value={editForm.firstName}
-                      onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/[^a-zA-Z\s.-]/g, '');
+                        const capitalized = val.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+                        setEditForm({ ...editForm, firstName: capitalized });
+                      }}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm font-bold focus:ring-2 focus:ring-emerald-500/20 outline-none"
                     />
                   </div>
@@ -336,7 +405,11 @@ const ManagementProfile = ({ user }: ProfileProps) => {
                     <input
                       type="text"
                       value={editForm.middleName}
-                      onChange={(e) => setEditForm({ ...editForm, middleName: e.target.value })}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/[^a-zA-Z\s.-]/g, '');
+                        const capitalized = val.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+                        setEditForm({ ...editForm, middleName: capitalized });
+                      }}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm font-bold focus:ring-2 focus:ring-emerald-500/20 outline-none"
                       placeholder="Optional"
                     />
@@ -347,7 +420,11 @@ const ManagementProfile = ({ user }: ProfileProps) => {
                       type="text"
                       required
                       value={editForm.lastName}
-                      onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/[^a-zA-Z\s.-]/g, '');
+                        const capitalized = val.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+                        setEditForm({ ...editForm, lastName: capitalized });
+                      }}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm font-bold focus:ring-2 focus:ring-emerald-500/20 outline-none"
                     />
                   </div>
@@ -385,20 +462,49 @@ const ManagementProfile = ({ user }: ProfileProps) => {
                       type="text"
                       required
                       value={editForm.contactNumber}
-                      onChange={(e) => setEditForm({ ...editForm, contactNumber: e.target.value })}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, '');
+                        if (val.length > 0 && val[0] !== '0') return;
+                        if (val.length > 1 && val[1] !== '9') return;
+                        if (val.length <= 11) setEditForm({ ...editForm, contactNumber: val });
+                      }}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm font-bold focus:ring-2 focus:ring-emerald-500/20 outline-none"
                     />
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-1 relative">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sex</label>
-                    <select
-                      value={editForm.sex}
-                      onChange={(e) => setEditForm({ ...editForm, sex: e.target.value })}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm font-bold focus:ring-2 focus:ring-emerald-500/20 outline-none appearance-none"
+                    <button
+                      type="button"
+                      onClick={() => setIsDropdownOpen(prev => ({ ...prev, sex: !prev.sex }))}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm font-bold flex items-center justify-between hover:bg-slate-100 transition-all outline-none"
                     >
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                    </select>
+                      <span className={editForm.sex ? 'text-slate-900' : 'text-slate-400'}>{editForm.sex || 'Select Sex'}</span>
+                      <ChevronDown size={16} className={`text-slate-400 transition-transform ${isDropdownOpen.sex ? 'rotate-180' : ''}`} />
+                    </button>
+                    <AnimatePresence>
+                      {isDropdownOpen.sex && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 10 }}
+                          className="absolute z-50 top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-xl shadow-xl overflow-hidden"
+                        >
+                          {['Male', 'Female'].map((option) => (
+                            <button
+                              key={option}
+                              type="button"
+                              onClick={() => {
+                                setEditForm({ ...editForm, sex: option });
+                                setIsDropdownOpen(prev => ({ ...prev, sex: false }));
+                              }}
+                              className="w-full px-4 py-3 text-left text-sm font-bold hover:bg-emerald-50 hover:text-emerald-700 transition-colors border-b border-slate-50 last:border-0"
+                            >
+                              {option}
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
 
@@ -434,33 +540,123 @@ const ManagementProfile = ({ user }: ProfileProps) => {
                   </div>
                 )}
 
-                <div className="space-y-1">
+                <div className="space-y-1 relative">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">City</label>
-                  <select
-                    value={editForm.city}
-                    onChange={(e) => setEditForm({ ...editForm, city: e.target.value, barangay: '' })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm font-bold focus:ring-2 focus:ring-emerald-500/20 outline-none"
-                  >
-                    <option value="">Select City</option>
-                    {Object.keys(phAddresses).sort().map(city => (
-                      <option key={city} value={city}>{city}</option>
-                    ))}
-                  </select>
+                  <div className={`w-full flex items-center bg-slate-50 border transition-all rounded-xl overflow-hidden ${isDropdownOpen.city ? 'border-emerald-500 bg-white ring-4 ring-emerald-500/10' : 'border-slate-200'}`}>
+                    <div className="flex-1">
+                      <input
+                        type="text"
+                        placeholder="Search or Select City"
+                        value={isDropdownOpen.city ? citySearch : (editForm.city || '')}
+                        onFocus={() => {
+                          setIsDropdownOpen(prev => ({ ...prev, city: true }));
+                          setCitySearch('');
+                        }}
+                        onChange={(e) => setCitySearch(e.target.value)}
+                        className="w-full bg-transparent py-3 px-4 text-sm font-bold text-slate-700 placeholder:text-slate-400 focus:outline-none"
+                      />
+                    </div>
+                    <div className="pr-4 pointer-events-none">
+                      <ChevronDown size={18} className={`text-slate-400 transition-transform ${isDropdownOpen.city ? 'rotate-180' : ''}`} />
+                    </div>
+                  </div>
+                  <AnimatePresence>
+                    {isDropdownOpen.city && (
+                      <>
+                        <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(prev => ({ ...prev, city: false }))} />
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 10 }}
+                          className="absolute z-50 top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[250px]"
+                        >
+                          <div className="overflow-y-auto scrollbar-hide">
+                            {filteredCities.map((opt) => (
+                              <button
+                                key={opt}
+                                type="button"
+                                onClick={() => {
+                                  setEditForm({ ...editForm, city: opt, barangay: '' });
+                                  setIsDropdownOpen(prev => ({ ...prev, city: false }));
+                                  setCitySearch('');
+                                }}
+                                className={`w-full px-6 py-4 text-left text-sm font-bold transition-colors border-b border-slate-50 last:border-0 ${editForm.city === opt ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-emerald-50/50'}`}
+                              >
+                                {opt}
+                              </button>
+                            ))}
+                            {filteredCities.length === 0 && (
+                              <div className="p-4 text-center text-slate-400 text-xs italic">No cities found</div>
+                            )}
+                          </div>
+                        </motion.div>
+                      </>
+                    )}
+                  </AnimatePresence>
                 </div>
 
-                <div className="space-y-1">
+                <div className="space-y-1 relative">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Barangay</label>
-                  <select
-                    value={editForm.barangay}
-                    disabled={!editForm.city}
-                    onChange={(e) => setEditForm({ ...editForm, barangay: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm font-bold focus:ring-2 focus:ring-emerald-500/20 outline-none disabled:opacity-50"
-                  >
-                    <option value="">Select Barangay</option>
-                    {editForm.city && (phAddresses[editForm.city as keyof typeof phAddresses] as string[]).sort().map(brgy => (
-                      <option key={brgy} value={brgy}>{brgy}</option>
-                    ))}
-                  </select>
+                  <div className={`w-full flex items-center transition-all border rounded-xl overflow-hidden ${!editForm.city ? 'bg-slate-50 cursor-not-allowed opacity-50 border-slate-200' : isDropdownOpen.barangay ? 'border-emerald-500 bg-white ring-4 ring-emerald-500/10' : 'bg-slate-50 border-slate-200'}`}>
+                    <div className="flex-1">
+                      <input
+                        type="text"
+                        placeholder={editForm.city ? "Search or Type Barangay" : "Select city first"}
+                        disabled={!editForm.city}
+                        value={isDropdownOpen.barangay ? barangaySearch : (editForm.barangay || '')}
+                        onFocus={() => {
+                          if (editForm.city) {
+                            setIsDropdownOpen(prev => ({ ...prev, barangay: true }));
+                            setBarangaySearch('');
+                          }
+                        }}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setBarangaySearch(val);
+                          if (editForm.city !== 'Zamboanga City') {
+                            setEditForm({ ...editForm, barangay: val });
+                          }
+                        }}
+                        className="w-full bg-transparent py-3 px-4 text-sm font-bold text-slate-700 placeholder:text-slate-400 focus:outline-none disabled:cursor-not-allowed"
+                      />
+                    </div>
+                    <div className="pr-4 pointer-events-none">
+                      <ChevronDown size={18} className={`text-slate-400 transition-transform ${isDropdownOpen.barangay ? 'rotate-180' : ''}`} />
+                    </div>
+                  </div>
+                  <AnimatePresence>
+                    {isDropdownOpen.barangay && (
+                      <>
+                        <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(prev => ({ ...prev, barangay: false }))} />
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 10 }}
+                          className="absolute z-50 top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[250px]"
+                        >
+                          <div className="overflow-y-auto scrollbar-hide">
+                            {filteredBarangays.map((opt) => (
+                              <button
+                                key={opt}
+                                type="button"
+                                onClick={() => {
+                                  setEditForm({ ...editForm, barangay: opt });
+                                  setIsDropdownOpen(prev => ({ ...prev, barangay: false }));
+                                  setBarangaySearch('');
+                                }}
+                                className={`w-full px-6 py-4 text-left text-sm font-bold transition-colors border-b border-slate-50 last:border-0 ${editForm.barangay === opt ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-emerald-50/50'}`}
+                              >
+                                {opt}
+                              </button>
+                            ))}
+                            {filteredBarangays.length === 0 && editForm.city === 'Zamboanga City' && (
+                              <div className="p-4 text-center text-slate-400 text-xs italic">No barangays found</div>
+                            )}
+                          </div>
+                        </motion.div>
+                      </>
+                    )}
+                  </AnimatePresence>
                 </div>
 
                 <div className="space-y-1">
@@ -487,8 +683,8 @@ const ManagementProfile = ({ user }: ProfileProps) => {
                 </button>
                 <button
                   type="submit"
-                  disabled={saving}
-                  className={`flex-1 py-4 ${theme.bg600} text-white font-black rounded-xl hover:opacity-90 transition-all shadow-lg flex items-center justify-center gap-2 text-xs uppercase tracking-widest disabled:opacity-50`}
+                  disabled={saving || !isDirty}
+                  className={`flex-1 py-4 ${theme.bg600} text-white font-black rounded-xl hover:opacity-90 transition-all shadow-lg flex items-center justify-center gap-2 text-xs uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                   {saving ? (
                     <RefreshCw className="animate-spin" size={16} />

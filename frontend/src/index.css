@@ -37,22 +37,20 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(217, 37, 37, 0.6);
-    /* Rich Crimson Red */
+    background: rgba(148, 163, 184, 0.4);
+    /* Slate-400 */
     border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    /* Very subtle rim */
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(104, 7, 31, 0.9);
-    /* Vibrant Crimson (Rose-700) */
+    background: rgba(100, 116, 139, 0.7);
+    /* Slate-500 */
   }
 
   /* Firefox */
   .custom-scrollbar {
     scrollbar-width: thin;
-    scrollbar-color: rgba(228, 59, 84, 0.6) transparent;
+    scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
   }
 
   @media print {

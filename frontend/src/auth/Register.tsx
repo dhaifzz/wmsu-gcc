@@ -123,29 +123,19 @@ const normalizeAcademicData = (payload: unknown) => {
 const validateAndNormalizePhone = (phone: string): { normalized: string; error: string | null } => {
   const cleanPhone = phone.replace(/\s/g, '');
   
-  // Rule 5: Reject strings with letters or symbols (except leading +)
-  if (!/^\+?\d+$/.test(cleanPhone)) {
+  if (!/^\d+$/.test(cleanPhone)) {
     return { normalized: '', error: 'Phone number must contain only digits.' };
   }
 
-  let normalized = cleanPhone;
-  
-  // Rule 2 & 3: Convert/Validate prefixes and lengths
-  if (cleanPhone.startsWith('+639')) {
-    if (cleanPhone.length !== 13) return { normalized: '', error: 'Invalid length for +639 format (expected 13 characters).' };
-    normalized = cleanPhone;
-  } else if (cleanPhone.startsWith('639')) {
-    if (cleanPhone.length !== 12) return { normalized: '', error: 'Invalid length for 639 format (expected 12 characters).' };
-    normalized = '+' + cleanPhone;
-  } else if (cleanPhone.startsWith('09')) {
-    if (cleanPhone.length !== 11) return { normalized: '', error: 'Invalid length for 09 format (expected 11 characters).' };
-    normalized = '+63' + cleanPhone.substring(1);
-  } else {
-    // Rule 4: Reject incorrect prefixes
-    return { normalized: '', error: 'Phone number must start with 09, 639, or +639.' };
+  if (!cleanPhone.startsWith('09')) {
+    return { normalized: '', error: 'Phone number must start with 09.' };
   }
 
-  return { normalized, error: null };
+  if (cleanPhone.length !== 11) {
+    return { normalized: '', error: 'Phone number must be exactly 11 digits.' };
+  }
+
+  return { normalized: cleanPhone, error: null };
 };
 
 export default function Register() {
@@ -701,11 +691,13 @@ export default function Register() {
                         </div>
                           <input
                             type="text"
-                            placeholder="Contact Number"
+                            placeholder="Contact Number (e.g. 09123456789)"
                             value={contactNumber}
                             onChange={(e) => {
-                              const val = e.target.value.replace(/[^\d+]/g, '');
-                              if (val.length <= 13) setContactNumber(val);
+                              const val = e.target.value.replace(/\D/g, '');
+                              if (val.length > 0 && val[0] !== '0') return;
+                              if (val.length > 1 && val[1] !== '9') return;
+                              if (val.length <= 11) setContactNumber(val);
                             }}
                             required
                             className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
