@@ -1,4 +1,4 @@
-import { Bell, Menu, CheckCircle2, Inbox, AlertCircle, X, Clock } from 'lucide-react';
+import { Bell, Menu, CheckCircle2, Inbox, AlertCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../auth/AuthContext';
