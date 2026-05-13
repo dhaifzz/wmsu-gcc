@@ -209,7 +209,7 @@ const ClientNavbar = ({ activeTab, setActiveTab }: ClientNavbarProps) => {
                         <div className="w-16 h-16 bg-slate-50 text-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
                           <Inbox size={32} />
                         </div>
-                        <p className="text-sm font-black text-slate-400 uppercase tracking-widest">All caught up!</p>
+                        <p className="text-sm font-black text-slate-400 tracking-widest">All caught up!</p>
                         <p className="text-xs text-slate-300 font-medium mt-1">No new notifications to show.</p>
                       </div>
                     )}

@@ -170,7 +170,7 @@ const ManagementNavbar = ({ userName, onMenuClick }: ManagementNavbarProps) => {
                       <div className="w-20 h-20 bg-slate-50 text-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Inbox size={40} />
                       </div>
-                      <p className="text-sm font-black text-slate-400 uppercase tracking-widest">No New Alerts</p>
+                      <p className="text-sm font-black text-slate-400 tracking-widest">No New Alerts</p>
                       <p className="text-xs text-slate-300 font-medium mt-1">You're all caught up for today.</p>
                     </div>
                   )}
