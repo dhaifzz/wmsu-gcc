@@ -103,15 +103,15 @@ const ClientNavbar = ({ activeTab, setActiveTab }: ClientNavbarProps) => {
   }, []);
 
   return (
-    <header className="bg-emerald-900 text-white sticky top-0 z-30 px-4 md:px-6 lg:px-10 py-3 md:py-4 flex items-center justify-between shadow-xl print:hidden overflow-x-hidden">
-      <div className="flex flex-col md:flex-row items-center gap-1 md:gap-3 shrink-0">
+    <header className="bg-emerald-900 text-white sticky top-0 z-50 px-4 md:px-6 lg:px-10 py-3 md:py-4 flex items-center justify-between shadow-xl print:hidden overflow-x-hidden">
+      <div className="flex items-center gap-3 shrink-0">
         <div className="flex items-center -space-x-1.5 shrink-0">
-          <img src={logos.wmsuLogo} alt="WMSU Logo" className="w-9 h-9 md:w-11 md:h-11 object-contain z-10" />
-          <img src={logos.gccLogo} alt="GCC Logo" className="w-9 h-9 md:w-11 md:h-11 object-contain z-20" />
+          <img src={logos.wmsuLogo} alt="WMSU Logo" className="w-10 h-10 md:w-11 md:h-11 object-contain z-10" />
+          <img src={logos.gccLogo} alt="GCC Logo" className="w-10 h-10 md:w-11 md:h-11 object-contain z-20" />
         </div>
-        <div className="flex flex-col justify-center items-center md:items-start">
-          <h1 className="text-[11px] md:text-2xl font-black tracking-wide uppercase leading-none text-white whitespace-nowrap">WMSU GCC</h1>
-          <p className="text-[7px] md:text-[11px] font-bold uppercase tracking-[0.15em] text-emerald-400 mt-0.5 md:mt-1 hidden md:block">Portal System</p>
+        <div className="hidden md:flex flex-col justify-center">
+          <h1 className="text-2xl font-black tracking-wide uppercase leading-none text-white whitespace-nowrap">WMSU GCC</h1>
+          <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-emerald-400 mt-1">Portal System</p>
         </div>
       </div>
 
@@ -148,7 +148,7 @@ const ClientNavbar = ({ activeTab, setActiveTab }: ClientNavbarProps) => {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 15, scale: 0.95 }}
                   transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-                  className="absolute right-0 top-full mt-4 w-[calc(100vw-2rem)] sm:w-[380px] max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-50 origin-top-right"
+                  className="absolute right-0 top-full mt-4 w-[calc(100vw-2rem)] sm:w-[380px] max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-[100] origin-top-right"
                 >
                   <div className="p-5 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
                     <div className="flex items-center gap-2">

@@ -70,7 +70,7 @@ const ManagementNavbar = ({ userName, onMenuClick }: ManagementNavbarProps) => {
   };
 
   return (
-    <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 px-6 lg:px-10 py-4 lg:py-6 flex items-center justify-between">
+    <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 px-6 lg:px-10 py-4 lg:py-6 flex items-center justify-between">
       <div className="flex items-center gap-4">
         <button 
           onClick={onMenuClick}
@@ -109,7 +109,7 @@ const ManagementNavbar = ({ userName, onMenuClick }: ManagementNavbarProps) => {
                 initial={{ opacity: 0, y: 15, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 15, scale: 0.95 }}
-                className="absolute right-0 top-full mt-4 w-[380px] bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 overflow-hidden z-50 origin-top-right"
+                className="absolute right-0 top-full mt-4 w-[calc(100vw-2rem)] sm:w-[380px] max-w-[calc(100vw-2rem)] bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 overflow-hidden z-[100] origin-top-right"
               >
                 <div className="p-6 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
                   <div className="flex items-center gap-3">
