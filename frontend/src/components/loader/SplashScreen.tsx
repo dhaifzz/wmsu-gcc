@@ -1,16 +1,36 @@
 import { motion } from 'framer-motion';
-import wmsuLogo from '../../assets/logos/WMSU.png';
-import gccLogo from '../../assets/logos/GCC.png';
+import wmsuLogoAsset from '../../assets/logos/WMSU.png';
+import gccLogoAsset from '../../assets/logos/GCC.png';
 
 import { useEffect, useState } from 'react';
+import { cmsApi } from '../../lib/api';
 
 // SplashScreen shows only on the first visit to the HomePage.
 // It self-manages visibility using a sessionStorage flag to avoid
 // flashing on subsequent navigations.
 const SplashScreen = () => {
   const [visible, setVisible] = useState(false);
+  const [logos, setLogos] = useState({
+    wmsuLogo: wmsuLogoAsset,
+    gccLogo: gccLogoAsset
+  });
 
   useEffect(() => {
+    const fetchLogos = async () => {
+      try {
+        const res = await cmsApi.getContent('logos');
+        if (res.ok && res.data) {
+          setLogos({
+            wmsuLogo: res.data.wmsuLogo || wmsuLogoAsset,
+            gccLogo: res.data.gccLogo || gccLogoAsset
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch logos:', error);
+      }
+    };
+    fetchLogos();
+
     const hasShownSplash = sessionStorage.getItem('hasShownSplashHome');
     if (!hasShownSplash) {
       setVisible(true);
@@ -36,8 +56,8 @@ const SplashScreen = () => {
           }}
           className="flex items-center -space-x-4"
         >
-          <img src={wmsuLogo} alt="WMSU" className="w-28 h-28 object-contain drop-shadow-2xl z-10" />
-          <img src={gccLogo} alt="GCC" className="w-28 h-28 object-contain drop-shadow-2xl z-20" />
+          <img src={logos.wmsuLogo} alt="WMSU" className="w-28 h-28 object-contain drop-shadow-2xl z-10" />
+          <img src={logos.gccLogo} alt="GCC" className="w-28 h-28 object-contain drop-shadow-2xl z-20" />
         </motion.div>
         
         <motion.div
