@@ -75,13 +75,15 @@ export default function ForgotPassword() {
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="relative z-30 flex w-full max-w-[32rem] flex-col overflow-hidden rounded-lg bg-white shadow-2xl p-10 lg:p-14"
+        className="relative z-30 flex w-full max-w-[32rem] max-h-full flex-col overflow-hidden rounded-lg bg-white shadow-2xl"
       >
         {/* Decorative Spheres (Internal to card) */}
         <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-emerald-50/80 opacity-50"></div>
         <div className="absolute -bottom-12 -left-12 h-40 w-40 rounded-full bg-emerald-50/50 opacity-30"></div>
 
-        <div className="relative z-10 flex flex-col items-center">
+        <div className="relative z-10 h-full w-full overflow-y-auto overflow-x-hidden custom-scrollbar">
+          <div className="flex min-h-full flex-col justify-center p-10 lg:p-14">
+            <div className="relative z-10 flex flex-col items-center">
           {/* Header Logos */}
           <div className="mb-10 flex gap-4 justify-center items-center">
             <img src={logos.wmsuLogo} alt="WMSU Logo" className="h-16 w-16 object-contain drop-shadow-sm" />
@@ -160,6 +162,8 @@ export default function ForgotPassword() {
               <ArrowLeft className="h-5 w-5 transition-transform group-hover:-translate-x-1.5" />
               Back to Sign in
             </Link>
+          </div>
+            </div>
           </div>
         </div>
       </motion.div>
