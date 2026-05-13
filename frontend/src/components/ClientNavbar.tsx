@@ -103,7 +103,7 @@ const ClientNavbar = ({ activeTab, setActiveTab }: ClientNavbarProps) => {
   }, []);
 
   return (
-    <header className="bg-emerald-900 text-white sticky top-0 z-50 px-4 md:px-6 lg:px-10 py-3 md:py-4 flex items-center justify-between shadow-xl print:hidden overflow-x-hidden">
+    <header className="bg-emerald-900 text-white sticky top-0 z-50 px-4 md:px-6 lg:px-10 py-3 md:py-4 flex items-center justify-between shadow-xl print:hidden">
       <div className="flex items-center gap-3 shrink-0">
         <div className="flex items-center -space-x-1.5 shrink-0">
           <img src={logos.wmsuLogo} alt="WMSU Logo" className="w-10 h-10 md:w-11 md:h-11 object-contain z-10" />
@@ -231,25 +231,25 @@ const ClientNavbar = ({ activeTab, setActiveTab }: ClientNavbarProps) => {
           <button
             onClick={() => setActiveTab('overview')}
             className={`group relative flex items-center transition-all duration-300 ease-out overflow-hidden rounded-full font-bold text-sm ${activeTab === 'overview'
-                ? 'bg-white text-emerald-900 px-5 py-2.5 shadow-lg'
+                ? 'bg-white text-emerald-900 px-3 md:px-5 py-2.5 shadow-lg'
                 : 'text-emerald-100 hover:bg-emerald-800/50 px-3 py-2.5'
               }`}
           >
             <div className="flex items-center">
               <LayoutDashboard size={18} />
-              <span className={`transition-all duration-300 ease-out overflow-hidden whitespace-nowrap hidden md:inline-block ${activeTab === 'overview' ? 'max-w-xs opacity-100 ml-2' : 'max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100 group-hover:ml-2'
+              <span className={`transition-all duration-300 ease-out overflow-hidden whitespace-nowrap hidden lg:inline-block ${activeTab === 'overview' ? 'max-w-xs opacity-100 ml-2' : 'max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100 group-hover:ml-2'
                 }`}>
                 Dashboard
               </span>
             </div>
-            {activeTab === 'overview' && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 ml-2 animate-pulse"></span>}
+            {activeTab === 'overview' && <span className="hidden md:block w-1.5 h-1.5 rounded-full bg-emerald-500 ml-2 animate-pulse"></span>}
           </button>
 
           {/* Profile Button */}
           <button
             onClick={() => setActiveTab('profile')}
             className={`group relative flex items-center transition-all duration-300 ease-out overflow-hidden rounded-full font-bold text-sm ${activeTab === 'profile'
-                ? 'bg-white text-emerald-900 px-5 py-2.5 shadow-lg'
+                ? 'bg-white text-emerald-900 px-3 md:px-5 py-2.5 shadow-lg'
                 : 'text-emerald-100 hover:bg-emerald-800/50 px-3 py-2.5'
               }`}
           >
@@ -259,12 +259,12 @@ const ClientNavbar = ({ activeTab, setActiveTab }: ClientNavbarProps) => {
               ) : (
                 <User size={18} />
               )}
-              <span className={`transition-all duration-300 ease-out overflow-hidden whitespace-nowrap hidden md:inline-block ${activeTab === 'profile' ? 'max-w-xs opacity-100 ml-2' : 'max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100 group-hover:ml-2'
+              <span className={`transition-all duration-300 ease-out overflow-hidden whitespace-nowrap hidden lg:inline-block ${activeTab === 'profile' ? 'max-w-xs opacity-100 ml-2' : 'max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100 group-hover:ml-2'
                 }`}>
                 My Profile
               </span>
             </div>
-            {activeTab === 'profile' && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 ml-2 animate-pulse"></span>}
+            {activeTab === 'profile' && <span className="hidden md:block w-1.5 h-1.5 rounded-full bg-emerald-500 ml-2 animate-pulse"></span>}
           </button>
         </nav>
       </div>
