@@ -75,8 +75,10 @@ import { showToast } from '../../../components/modal-notification/toast';
 import { cmsApi } from '../../../lib/api';
 import { supabase } from '../../../lib/supabaseClient';
 import Loader from '../../../components/loader/Loader';
+import { useAuth } from '../../../auth/AuthContext';
 
 const CMS = () => {
+  const { accessToken } = useAuth();
   const [activeSection, setActiveSection] = useState<string | null>('home');
   const [isLoading, setIsLoading] = useState(true);
 
@@ -510,7 +512,7 @@ const CMS = () => {
       const { key, data } = mapping[section];
 
       if (key) {
-        const updateResult = await cmsApi.updateContent(key, data);
+        const updateResult = await cmsApi.updateContent(key, data, accessToken || undefined);
         if (updateResult.ok) {
           setSavedStates(prev => ({ ...prev, [key]: JSON.parse(JSON.stringify(data)) }));
           showToast.success(`${section} updated successfully!`);

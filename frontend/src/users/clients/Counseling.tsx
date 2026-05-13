@@ -235,8 +235,12 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
   }, [currentDate, getMonthAvailabilityData]);
 
   useEffect(() => {
+    if (!accessToken) return undefined;
     const socketUrl = import.meta.env.VITE_WS_URL || API_URL;
-    const socket = io(socketUrl, { transports: ['websocket', 'polling'] });
+    const socket = io(socketUrl, {
+      transports: ['websocket', 'polling'],
+      auth: { token: accessToken },
+    });
 
     const onSlotBooked = () => {
       fetchMonthAvailability(currentDate);
@@ -247,7 +251,7 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
       socket.off('counseling:slot-booked', onSlotBooked);
       socket.disconnect();
     };
-  }, [currentDate, fetchMonthAvailability]);
+  }, [accessToken, currentDate, fetchMonthAvailability]);
 
   useEffect(() => {
     const handleSlotTaken = () => {

@@ -1,8 +1,14 @@
-const isLocal = typeof window !== 'undefined' && 
+const isLocal =
+  typeof window !== 'undefined' &&
   (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
-export const API_URL = import.meta.env.VITE_API_URL || 
-  (isLocal ? 'http://localhost:5001' : 'https://gcc-backend-9t7w.onrender.com');
+const envApiUrl = (import.meta.env.VITE_API_URL || '').trim();
+
+export const API_URL = envApiUrl || (isLocal ? 'http://localhost:5001' : '');
+
+if (typeof window !== 'undefined' && import.meta.env.PROD && !envApiUrl) {
+  console.error('VITE_API_URL is required for production builds.');
+}
 
 interface ApiOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
@@ -32,19 +38,46 @@ export async function api<T = unknown>(
   }
 
   try {
-    const response = await fetch(`${API_URL}${endpoint}`, {
+    const base = API_URL || (isLocal ? 'http://localhost:5001' : '');
+    if (!base) {
+      return {
+        ok: false,
+        status: 500,
+        data: null as unknown as T,
+        error: 'API is not configured. Set VITE_API_URL.',
+      };
+    }
+
+    const response = await fetch(`${base}${endpoint}`, {
       method,
       headers,
       body: body ? JSON.stringify(body) : undefined,
     });
 
-    const data = await response.json();
+    const contentType = response.headers.get('content-type') || '';
+    let data: unknown = null;
+
+    if (contentType.includes('application/json')) {
+      try {
+        data = await response.json();
+      } catch {
+        data = null;
+      }
+    } else {
+      const text = await response.text();
+      data = text ? { error: text.slice(0, 500) } : null;
+    }
+
+    const errMsg =
+      data && typeof data === 'object' && data !== null && 'error' in data
+        ? String((data as { error?: unknown }).error)
+        : undefined;
 
     return {
       ok: response.ok,
       status: response.status,
-      data,
-      error: !response.ok && data?.error ? data.error : undefined,
+      data: data as T,
+      error: !response.ok ? errMsg || 'Request failed.' : undefined,
     };
   } catch (err: any) {
     console.error(`API Error (${endpoint}):`, err);
@@ -134,7 +167,7 @@ export interface RegisterPayload {
 
 export interface RegisterResponse {
   message: string;
-  userId: string;
+  userId?: string;
 }
 
 export const authApi = {

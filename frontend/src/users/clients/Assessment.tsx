@@ -232,8 +232,12 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
   }, [currentDate, fetchMonthAvailability]);
 
   useEffect(() => {
+    if (!accessToken) return undefined;
     const socketUrl = import.meta.env.VITE_WS_URL || API_URL;
-    const socket = io(socketUrl, { transports: ['websocket', 'polling'] });
+    const socket = io(socketUrl, {
+      transports: ['websocket', 'polling'],
+      auth: { token: accessToken },
+    });
 
     const onSlotBooked = (payload?: { assessmentType?: string }) => {
       if (!assessmentType) return;
@@ -246,7 +250,7 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
       socket.off('assessment:slot-booked', onSlotBooked);
       socket.disconnect();
     };
-  }, [assessmentType, currentDate, fetchMonthAvailability]);
+  }, [accessToken, assessmentType, currentDate, fetchMonthAvailability]);
 
   useEffect(() => {
     if (selectedTime && selectedDayOccupied.includes(selectedTime)) {
