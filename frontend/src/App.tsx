@@ -30,6 +30,7 @@ import SplashScreen from './components/loader/SplashScreen';
 function AppContent() {
   const { loading } = useAuth();
   const [showSplash, setShowSplash] = useState(() => !sessionStorage.getItem('hasShownSplash'));
+  const [installPromptEvent, setInstallPromptEvent] = useState<any>(null);
 
   useEffect(() => {
     // PWA Install Prompt Logic
@@ -41,24 +42,8 @@ function AppContent() {
       const hasDismissed = sessionStorage.getItem('pwaInstallDismissed');
       if (hasDismissed) return;
 
-      import('./components/modal-notification/toast').then(({ showToast }) => {
-        showToast.installApp(
-          async () => {
-            // Show the install prompt
-            e.prompt();
-            // Wait for the user to respond to the prompt
-            const { outcome } = await e.userChoice;
-            if (outcome === 'accepted') {
-              console.log('User accepted the install prompt');
-            } else {
-              console.log('User dismissed the install prompt');
-            }
-          },
-          () => {
-            sessionStorage.setItem('pwaInstallDismissed', 'true');
-          }
-        );
-      });
+      // Save the event to trigger it later
+      setInstallPromptEvent(e);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -67,6 +52,31 @@ function AppContent() {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
   }, []);
+
+  useEffect(() => {
+    if (!showSplash && installPromptEvent) {
+      import('./components/modal-notification/toast').then(({ showToast }) => {
+        showToast.installApp(
+          async () => {
+            // Show the install prompt
+            installPromptEvent.prompt();
+            // Wait for the user to respond to the prompt
+            const { outcome } = await installPromptEvent.userChoice;
+            if (outcome === 'accepted') {
+              console.log('User accepted the install prompt');
+            } else {
+              console.log('User dismissed the install prompt');
+            }
+            setInstallPromptEvent(null);
+          },
+          () => {
+            sessionStorage.setItem('pwaInstallDismissed', 'true');
+            setInstallPromptEvent(null);
+          }
+        );
+      });
+    }
+  }, [showSplash, installPromptEvent]);
 
   useEffect(() => {
     if (!showSplash) return;

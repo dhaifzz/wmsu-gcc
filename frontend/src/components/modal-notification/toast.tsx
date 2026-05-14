@@ -77,7 +77,7 @@ export const showToast = {
       (t) => (
         <div className="flex flex-col gap-3 w-full">
           <div className="flex items-center gap-2">
-            <span>📱</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
             <span className="font-bold">Install WMSU GCC App</span>
           </div>
           <p className="text-xs font-medium text-red-50">
@@ -106,7 +106,7 @@ export const showToast = {
         </div>
       ),
       {
-        duration: Infinity, // Keep open until action
+        duration: 5000, // Show for 5 seconds
         style: {
           background: '#991b1b', // Matching their error red or primary brand theme
           color: '#fff',
