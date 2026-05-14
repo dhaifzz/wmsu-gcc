@@ -33,6 +33,7 @@ if (typeof window !== 'undefined') {
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPwaPrompt = e;
+    (window as any).deferredPwaPrompt = e;
     
     // Dispatch a custom event so our React component knows it's ready
     window.dispatchEvent(new Event('pwa-prompt-ready'));
@@ -55,33 +56,7 @@ function AppContent() {
     };
   }, []);
 
-  useEffect(() => {
-    if (!showSplash && installPromptReady && deferredPwaPrompt) {
-      const hasDismissed = sessionStorage.getItem('pwaInstallDismissed');
-      if (hasDismissed) return;
-
-      import('./components/modal-notification/toast').then(({ showToast }) => {
-        showToast.installApp(
-          async () => {
-            deferredPwaPrompt.prompt();
-            const { outcome } = await deferredPwaPrompt.userChoice;
-            if (outcome === 'accepted') {
-              console.log('User accepted the install prompt');
-            } else {
-              console.log('User dismissed the install prompt');
-            }
-            deferredPwaPrompt = null;
-            setInstallPromptReady(false);
-          },
-          () => {
-            sessionStorage.setItem('pwaInstallDismissed', 'true');
-            deferredPwaPrompt = null;
-            setInstallPromptReady(false);
-          }
-        );
-      });
-    }
-  }, [showSplash, installPromptReady]);
+  // PWA install prompt logic moved to HomePage.tsx
 
   useEffect(() => {
     if (!showSplash) return;

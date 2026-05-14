@@ -74,10 +74,37 @@ const HomePage = () => {
     };
     fetchContent();
     
-    // Show toast every time the user visits the HomePage
-    import('../components/modal-notification/toast').then(({ showToast }) => {
-      showToast.success("Welcome to the WMSU Guidance and Counseling Center!");
-    });
+    const showInstallPrompt = () => {
+      const pwaPrompt = (window as any).deferredPwaPrompt;
+      if (pwaPrompt) {
+        import('../components/modal-notification/toast').then(({ showToast }) => {
+          showToast.installApp(
+            async () => {
+              pwaPrompt.prompt();
+              const { outcome } = await pwaPrompt.userChoice;
+              if (outcome === 'accepted') {
+                console.log('User accepted the install prompt');
+              } else {
+                console.log('User dismissed the install prompt');
+              }
+              // We do not clear it so they can install later if they want
+            },
+            () => {
+              // Dismissed: No session storage block, it will show again next time they visit
+            }
+          );
+        });
+      }
+    };
+
+    // Try showing it immediately if it's already ready
+    showInstallPrompt();
+
+    // Or wait for the event if it hasn't fired yet
+    window.addEventListener('pwa-prompt-ready', showInstallPrompt);
+    return () => {
+      window.removeEventListener('pwa-prompt-ready', showInstallPrompt);
+    };
   }, []);
 
   useEffect(() => {
