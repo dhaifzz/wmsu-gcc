@@ -11,6 +11,12 @@ import ourServicesImg3 from '../assets/img/our-services3.png';
 import { cmsApi } from '../lib/api';
 import SplashScreen from '../components/loader/SplashScreen';
 
+// BeforeInstallPromptEvent is not in standard TS DOM lib
+interface BeforeInstallPromptEvent extends Event {
+  prompt(): Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
+
 
 const HomePage = () => {
   // SplashScreen handles first-visit display internally; do not manage here
@@ -73,34 +79,39 @@ const HomePage = () => {
       }
     };
     fetchContent();
-    
-    const showInstallPrompt = () => {
-      const pwaPrompt = (window as any).deferredPwaPrompt;
-      if (pwaPrompt) {
-        import('../components/modal-notification/toast').then(({ showToast }) => {
-          showToast.installApp(
-            async () => {
-              pwaPrompt.prompt();
-              const { outcome } = await pwaPrompt.userChoice;
-              if (outcome === 'accepted') {
-                console.log('User accepted the install prompt');
-              } else {
-                console.log('User dismissed the install prompt');
-              }
-              // We do not clear it so they can install later if they want
-            },
-            () => {
-              // Dismissed: No session storage block, it will show again next time they visit
-            }
-          );
-        });
+
+    const showInstallPrompt = async () => {
+      const pwaPrompt = (window as { deferredPwaPrompt?: BeforeInstallPromptEvent }).deferredPwaPrompt;
+      if (!pwaPrompt) return;
+
+      const Swal = (await import('sweetalert2')).default;
+      const result = await Swal.fire({
+        title: 'Install WMSU GCC App',
+        html: `
+          <p style="margin: 0; color: #475569; font-size: 15px; line-height: 1.6;">
+            Get a faster, offline-ready experience by installing our app on your device!
+          </p>
+        `,
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonText: 'Install Now',
+        cancelButtonText: 'Maybe Later',
+        confirmButtonColor: '#065f46',
+        cancelButtonColor: '#94a3b8',
+        reverseButtons: true,
+        customClass: {
+          popup: 'swal-install-popup',
+        },
+      });
+
+      if (result.isConfirmed) {
+        await pwaPrompt.prompt();
+        const { outcome } = await pwaPrompt.userChoice;
+        console.log(`PWA install outcome: ${outcome}`);
       }
     };
 
-    // Try showing it immediately if it's already ready
     showInstallPrompt();
-
-    // Or wait for the event if it hasn't fired yet
     window.addEventListener('pwa-prompt-ready', showInstallPrompt);
     return () => {
       window.removeEventListener('pwa-prompt-ready', showInstallPrompt);
