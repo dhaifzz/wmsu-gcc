@@ -27,15 +27,11 @@ import TermsOfService from './public/legal/TermsOfService';
 import { useAuth } from './auth/AuthContext';
 import SplashScreen from './components/loader/SplashScreen';
 
-let deferredPwaPrompt: any = null;
-
 if (typeof window !== 'undefined') {
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
-    deferredPwaPrompt = e;
-    (window as any).deferredPwaPrompt = e;
-    
-    // Dispatch a custom event so our React component knows it's ready
+    // Store on window so HomePage.tsx can access it directly
+    (window as { deferredPwaPrompt?: Event }).deferredPwaPrompt = e;
     window.dispatchEvent(new Event('pwa-prompt-ready'));
   });
 }
