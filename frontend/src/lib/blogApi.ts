@@ -1,15 +1,29 @@
 import { api } from './api';
 import { supabase } from './supabaseClient';
+import { Megaphone, CalendarDays, Brain, Briefcase, BookOpen, GraduationCap, MessageSquareText, type LucideIcon } from 'lucide-react';
 
 // ── Types ───────────────────────────────────────────────────────────
 
 export type ReactionType = 'support' | 'inspire' | 'care' | 'celebrate' | 'insightful';
+
+export type BlogCategory = 'announcements' | 'events' | 'mental-health' | 'career-guidance' | 'academic-support' | 'student-life' | 'general';
+
+export const BLOG_CATEGORIES: { value: BlogCategory; label: string; icon: LucideIcon }[] = [
+  { value: 'announcements', label: 'Announcements', icon: Megaphone },
+  { value: 'events', label: 'Events', icon: CalendarDays },
+  { value: 'mental-health', label: 'Mental Health', icon: Brain },
+  { value: 'career-guidance', label: 'Career Guidance', icon: Briefcase },
+  { value: 'academic-support', label: 'Academic Support', icon: BookOpen },
+  { value: 'student-life', label: 'Student Life', icon: GraduationCap },
+  { value: 'general', label: 'General', icon: MessageSquareText },
+];
 
 export interface BlogPost {
   id: string;
   author_id: string;
   author_name: string;
   author_role: string;
+  category: BlogCategory;
   content: string;
   media_urls: string[];
   media_types: string[]; // 'image' | 'video'
@@ -161,8 +175,12 @@ export async function uploadBlogMedia(
 
 export const blogApi = {
   // Public: get approved posts
-  getPosts: (page = 1, limit = 10) =>
-    api<PostsResponse>(`/api/blog/posts?page=${page}&limit=${limit}`),
+  getPosts: (page = 1, limit = 10, category?: string, search?: string) => {
+    let url = `/api/blog/posts?page=${page}&limit=${limit}`;
+    if (category) url += `&category=${category}`;
+    if (search) url += `&search=${encodeURIComponent(search)}`;
+    return api<PostsResponse>(url);
+  },
 
   // Management: get all posts (any status)
   getAllPosts: (token: string, status?: string, page = 1, limit = 20) => {
@@ -179,6 +197,7 @@ export const blogApi = {
   createPost: (
     payload: {
       content: string;
+      category?: string;
       media_urls?: string[];
       media_types?: string[];
       link_url?: string | null;
@@ -196,6 +215,7 @@ export const blogApi = {
     id: string,
     payload: {
       content: string;
+      category?: string;
       media_urls?: string[];
       media_types?: string[];
       link_url?: string | null;

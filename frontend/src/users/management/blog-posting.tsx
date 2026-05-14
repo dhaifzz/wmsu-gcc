@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { Image as ImageIcon, Video, Link2, Send, Trash2, CheckCircle, XCircle, Clock, Eye, Pencil, X, Loader2, AlertCircle } from 'lucide-react';
+import { Image as ImageIcon, Video, Link2, Send, Trash2, CheckCircle, XCircle, Clock, Eye, Pencil, X, Loader2, AlertCircle, Tag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../auth/AuthContext';
-import { blogApi, uploadBlogMedia, type BlogPost } from '../../lib/blogApi';
+import { blogApi, uploadBlogMedia, BLOG_CATEGORIES, type BlogPost, type BlogCategory } from '../../lib/blogApi';
 
 interface BlogPostingProps {
   role?: 'staff' | 'director' | 'admin';
@@ -29,6 +29,7 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
 
   // Compose state
   const [content, setContent] = useState('');
+  const [category, setCategory] = useState<BlogCategory>('general');
   const [linkUrl, setLinkUrl] = useState('');
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
@@ -101,6 +102,7 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
 
       const payload = {
         content: content.trim(),
+        category,
         media_urls: uploadedMedia.map(m => m.url),
         media_types: uploadedMedia.map(m => m.type),
         link_url: linkUrl.trim() || null,
@@ -130,6 +132,7 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
 
   const resetCompose = () => {
     setContent('');
+    setCategory('general');
     setLinkUrl('');
     setShowLinkInput(false);
     mediaPreviews.forEach(p => URL.revokeObjectURL(p.url));
@@ -201,6 +204,7 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
 
   const startEdit = (post: BlogPost) => {
     setContent(post.content);
+    setCategory(post.category || 'general');
     setLinkUrl(post.link_url || '');
     setShowLinkInput(!!post.link_url);
     setEditingPost(post);
@@ -256,6 +260,25 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
               placeholder="What's on your mind? Share an update with the community..."
               className="w-full min-h-[150px] resize-none outline-none text-slate-700 text-[15px] leading-relaxed placeholder:text-slate-400 border border-slate-100 rounded-2xl p-4 focus:border-emerald-300 transition-colors"
             />
+
+            {/* Category Selector */}
+            <div className="mt-3">
+              <label className="flex items-center gap-1.5 text-xs font-bold text-slate-500 mb-2">
+                <Tag size={12} /> Category
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {BLOG_CATEGORIES.map(cat => (
+                  <button key={cat.value} onClick={() => setCategory(cat.value)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                      category === cat.value
+                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                        : 'bg-white text-slate-500 border-slate-200 hover:border-emerald-300 hover:text-emerald-600'
+                    }`}>
+                    <cat.icon size={12} /> {cat.label}
+                  </button>
+                ))}
+              </div>
+            </div>
 
             {/* Link Input */}
             <AnimatePresence>
