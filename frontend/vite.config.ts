@@ -8,7 +8,10 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['/src/assets/logos/GCC.png'],
+      // Icons must live under `public/` with stable URLs. `/src/assets/...`
+      // is not emitted in production, so Chrome never gets installable icons
+      // and `beforeinstallprompt` never fires.
+      includeAssets: ['pwa-192x192.png', 'pwa-512x512.png'],
       manifest: {
         name: 'WMSU GCC',
         short_name: 'GCC',
@@ -18,17 +21,20 @@ export default defineConfig({
         display: 'standalone',
         icons: [
           {
-            src: '/src/assets/logos/GCC.png',
+            src: 'pwa-192x192.png',
             sizes: '192x192',
-            type: 'image/png'
+            type: 'image/png',
           },
           {
-            src: '/src/assets/logos/GCC.png',
+            src: 'pwa-512x512.png',
             sizes: '512x512',
-            type: 'image/png'
-          }
-        ]
-      }
+            type: 'image/png',
+          },
+        ],
+      },
+      devOptions: {
+        enabled: true,
+      },
     })
   ],
 })
