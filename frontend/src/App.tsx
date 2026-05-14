@@ -43,18 +43,6 @@ if (typeof window !== 'undefined') {
 function AppContent() {
   const { loading } = useAuth();
   const [showSplash, setShowSplash] = useState(() => !sessionStorage.getItem('hasShownSplash'));
-  const [installPromptReady, setInstallPromptReady] = useState(() => !!deferredPwaPrompt);
-
-  useEffect(() => {
-    const handlePwaReady = () => {
-      setInstallPromptReady(true);
-    };
-
-    window.addEventListener('pwa-prompt-ready', handlePwaReady);
-    return () => {
-      window.removeEventListener('pwa-prompt-ready', handlePwaReady);
-    };
-  }, []);
 
   // PWA install prompt logic moved to HomePage.tsx
 
