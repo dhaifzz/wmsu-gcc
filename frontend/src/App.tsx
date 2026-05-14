@@ -27,56 +27,61 @@ import TermsOfService from './public/legal/TermsOfService';
 import { useAuth } from './auth/AuthContext';
 import SplashScreen from './components/loader/SplashScreen';
 
+let deferredPwaPrompt: any = null;
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPwaPrompt = e;
+    
+    // Dispatch a custom event so our React component knows it's ready
+    window.dispatchEvent(new Event('pwa-prompt-ready'));
+  });
+}
+
 function AppContent() {
   const { loading } = useAuth();
   const [showSplash, setShowSplash] = useState(() => !sessionStorage.getItem('hasShownSplash'));
-  const [installPromptEvent, setInstallPromptEvent] = useState<any>(null);
+  const [installPromptReady, setInstallPromptReady] = useState(() => !!deferredPwaPrompt);
 
   useEffect(() => {
-    // PWA Install Prompt Logic
-    const handleBeforeInstallPrompt = (e: any) => {
-      // Prevent the mini-infobar from appearing on mobile
-      e.preventDefault();
-      
-      // Check if we've already asked or user dismissed recently
-      const hasDismissed = sessionStorage.getItem('pwaInstallDismissed');
-      if (hasDismissed) return;
-
-      // Save the event to trigger it later
-      setInstallPromptEvent(e);
+    const handlePwaReady = () => {
+      setInstallPromptReady(true);
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
+    window.addEventListener('pwa-prompt-ready', handlePwaReady);
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('pwa-prompt-ready', handlePwaReady);
     };
   }, []);
 
   useEffect(() => {
-    if (!showSplash && installPromptEvent) {
+    if (!showSplash && installPromptReady && deferredPwaPrompt) {
+      const hasDismissed = sessionStorage.getItem('pwaInstallDismissed');
+      if (hasDismissed) return;
+
       import('./components/modal-notification/toast').then(({ showToast }) => {
         showToast.installApp(
           async () => {
-            // Show the install prompt
-            installPromptEvent.prompt();
-            // Wait for the user to respond to the prompt
-            const { outcome } = await installPromptEvent.userChoice;
+            deferredPwaPrompt.prompt();
+            const { outcome } = await deferredPwaPrompt.userChoice;
             if (outcome === 'accepted') {
               console.log('User accepted the install prompt');
             } else {
               console.log('User dismissed the install prompt');
             }
-            setInstallPromptEvent(null);
+            deferredPwaPrompt = null;
+            setInstallPromptReady(false);
           },
           () => {
             sessionStorage.setItem('pwaInstallDismissed', 'true');
-            setInstallPromptEvent(null);
+            deferredPwaPrompt = null;
+            setInstallPromptReady(false);
           }
         );
       });
     }
-  }, [showSplash, installPromptEvent]);
+  }, [showSplash, installPromptReady]);
 
   useEffect(() => {
     if (!showSplash) return;

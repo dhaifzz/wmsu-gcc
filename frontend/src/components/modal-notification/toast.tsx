@@ -107,6 +107,7 @@ export const showToast = {
       ),
       {
         duration: 5000, // Show for 5 seconds
+        position: 'top-right',
         style: {
           background: '#991b1b', // Matching their error red or primary brand theme
           color: '#fff',
