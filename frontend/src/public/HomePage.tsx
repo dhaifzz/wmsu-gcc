@@ -73,6 +73,11 @@ const HomePage = () => {
       }
     };
     fetchContent();
+    
+    // Show toast every time the user visits the HomePage
+    import('../components/modal-notification/toast').then(({ showToast }) => {
+      showToast.success("Welcome to the WMSU Guidance and Counseling Center!");
+    });
   }, []);
 
   useEffect(() => {
