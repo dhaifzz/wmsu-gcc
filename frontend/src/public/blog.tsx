@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Heart, Sparkles, HandHeart, PartyPopper, Lightbulb, MessageCircle, Send, CornerDownRight, ExternalLink, X, LogIn, Search } from 'lucide-react';
+import { Heart, Sparkles, HandHeart, PartyPopper, Lightbulb, MessageCircle, Send, CornerDownRight, ExternalLink, X, LogIn, Search, Phone, Mail, MapPin, Clock, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -402,23 +402,13 @@ const BlogPage = () => {
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <Navbar />
 
-      {/* Hero */}
-      <section className="relative pt-24 sm:pt-28 pb-10 sm:pb-12 overflow-hidden bg-emerald-900">
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20" />
-        <div className="absolute top-1/4 -right-20 w-96 h-96 bg-emerald-500/20 blur-3xl animate-pulse" />
-        <div className="container mx-auto px-4 sm:px-6 relative z-10 text-center">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-2 sm:mb-3">News & Updates</h1>
-          <p className="text-sm sm:text-base text-emerald-100/80 max-w-xl mx-auto font-medium">
-            Stay connected with the latest from the WMSU Guidance and Counseling Center.
-          </p>
-        </div>
-      </section>
+      {/* Hero removed — jump straight to content */}
 
       {/* Search & Filter Bar */}
-      <section className="sticky top-16 z-30 bg-slate-50/90 backdrop-blur-md border-b border-slate-100">
-        <div className="container mx-auto px-3 sm:px-6 max-w-xl md:max-w-2xl py-3 space-y-3">
+      <section className="sticky top-16 z-30 bg-slate-50/90 backdrop-blur-md border-b border-slate-100 pt-2">
+        <div className="container mx-auto px-3 sm:px-6 max-w-6xl py-3 space-y-3">
           {/* Search */}
-          <div className="relative">
+          <div className="relative max-w-xl">
             <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               value={searchInput}
@@ -460,37 +450,133 @@ const BlogPage = () => {
         </div>
       </section>
 
-      {/* Feed */}
+      {/* Main Content: Feed + Sidebar */}
       <section className="py-6 sm:py-8 flex-1">
-        <div className="container mx-auto px-3 sm:px-6 max-w-xl md:max-w-2xl">
-          {loading && posts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 gap-3">
-              <div className="w-10 h-10 border-3 border-emerald-200 border-t-emerald-600 rounded-full animate-spin" />
-              <p className="text-slate-400 font-bold text-sm">Loading posts...</p>
-            </div>
-          ) : posts.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <MessageCircle size={32} className="text-slate-300" />
-              </div>
-              <h3 className="text-xl font-black text-slate-400">No posts yet</h3>
-              <p className="text-slate-400 text-sm font-medium mt-1">Check back soon for updates!</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {posts.map(post => (
-                <PostCard key={post.id} post={post} user={user} token={accessToken} onNeedLogin={() => setShowLoginPrompt(true)} />
-              ))}
-              {posts.length < total && (
-                <div className="text-center pt-3">
-                  <button onClick={loadMore} disabled={loading}
-                    className="px-8 py-3 bg-white border border-slate-200 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-50 hover:border-emerald-200 hover:text-emerald-700 transition-all shadow-sm disabled:opacity-50">
-                    {loading ? 'Loading...' : 'Load More Posts'}
-                  </button>
+        <div className="container mx-auto px-3 sm:px-6 max-w-6xl">
+          <div className="flex gap-6 items-start">
+
+            {/* ── Feed Column ─────────────────────────── */}
+            <div className="flex-1 min-w-0 max-w-2xl">
+              {loading && posts.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 gap-3">
+                  <div className="w-10 h-10 border-3 border-emerald-200 border-t-emerald-600 rounded-full animate-spin" />
+                  <p className="text-slate-400 font-bold text-sm">Loading posts...</p>
+                </div>
+              ) : posts.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <MessageCircle size={32} className="text-slate-300" />
+                  </div>
+                  <h3 className="text-xl font-black text-slate-400">No posts yet</h3>
+                  <p className="text-slate-400 text-sm font-medium mt-1">Check back soon for updates!</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {posts.map(post => (
+                    <PostCard key={post.id} post={post} user={user} token={accessToken} onNeedLogin={() => setShowLoginPrompt(true)} />
+                  ))}
+                  {posts.length < total && (
+                    <div className="text-center pt-3">
+                      <button onClick={loadMore} disabled={loading}
+                        className="px-8 py-3 bg-white border border-slate-200 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-50 hover:border-emerald-200 hover:text-emerald-700 transition-all shadow-sm disabled:opacity-50">
+                        {loading ? 'Loading...' : 'Load More Posts'}
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
-          )}
+
+            {/* ── Sidebar ─────────────────────────────── */}
+            <aside className="hidden lg:block w-80 shrink-0 sticky top-36 space-y-4">
+
+              {/* About Card */}
+              <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+                <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 px-5 py-4">
+                  <h3 className="text-white font-black text-sm">Guidance & Counseling Center</h3>
+                  <p className="text-emerald-100/80 text-xs font-medium mt-1">Western Mindanao State University</p>
+                </div>
+                <div className="p-4 text-xs text-slate-500 leading-relaxed">
+                  Your safe space for academic guidance, career counseling, mental health support, and personal development.
+                </div>
+              </div>
+
+              {/* Quick Links */}
+              <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
+                <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-3">Quick Links</h4>
+                <div className="space-y-1.5">
+                  {[
+                    { label: 'Book an Appointment', href: '/login' },
+                    { label: 'Our Services', href: '/services/counseling' },
+                    { label: 'About Us', href: '/about' },
+                    { label: 'Meet the Team', href: '/team' },
+                  ].map(link => (
+                    <a key={link.href} href={link.href}
+                      className="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold text-slate-500 hover:bg-emerald-50 hover:text-emerald-700 transition-colors group">
+                      {link.label}
+                      <ArrowRight size={12} className="opacity-0 group-hover:opacity-100 transition-opacity text-emerald-500" />
+                    </a>
+                  ))}
+                </div>
+              </div>
+
+              {/* Browse by Category */}
+              <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
+                <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-3">Browse by Category</h4>
+                <div className="space-y-1">
+                  {BLOG_CATEGORIES.map(cat => (
+                    <button key={cat.value}
+                      onClick={() => handleCategoryChange(cat.value)}
+                      className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition-all text-left ${
+                        activeCategory === cat.value
+                          ? 'bg-emerald-50 text-emerald-700'
+                          : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
+                      }`}>
+                      <cat.icon size={14} className={activeCategory === cat.value ? 'text-emerald-600' : 'text-slate-400'} />
+                      {cat.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Contact Info */}
+              <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
+                <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-3">Contact Us</h4>
+                <div className="space-y-2.5">
+                  <div className="flex items-start gap-2.5">
+                    <MapPin size={13} className="text-emerald-600 shrink-0 mt-0.5" />
+                    <p className="text-[11px] text-slate-500 leading-relaxed">GCC Building, WMSU Campus, Zamboanga City</p>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <Phone size={13} className="text-emerald-600 shrink-0" />
+                    <p className="text-[11px] text-slate-500">(062) 991-1040</p>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <Mail size={13} className="text-emerald-600 shrink-0" />
+                    <p className="text-[11px] text-slate-500">gcc@wmsu.edu.ph</p>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <Clock size={13} className="text-emerald-600 shrink-0" />
+                    <p className="text-[11px] text-slate-500">Mon – Fri, 8:00 AM – 5:00 PM</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sign In Prompt (guests only) */}
+              {!user && (
+                <div className="bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-xl border border-emerald-200/50 p-4 text-center">
+                  <LogIn size={20} className="text-emerald-600 mx-auto mb-2" />
+                  <p className="text-xs font-bold text-slate-700 mb-1">Join the conversation</p>
+                  <p className="text-[11px] text-slate-500 mb-3">Sign in to react and comment on posts.</p>
+                  <a href="/login"
+                    className="block w-full py-2 rounded-lg bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-500 transition-colors shadow-sm">
+                    Sign In
+                  </a>
+                </div>
+              )}
+            </aside>
+
+          </div>
         </div>
       </section>
 
