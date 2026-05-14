@@ -23,6 +23,7 @@ import StaffDashboard from './users/management/staff/staff';
 import SuperAdminDashboard from './users/management/superadmin/superadmin';
 import PrivacyPolicy from './public/legal/PrivacyPolicy';
 import TermsOfService from './public/legal/TermsOfService';
+import BlogPage from './public/blog';
 
 import { useAuth } from './auth/AuthContext';
 import SplashScreen from './components/loader/SplashScreen';
@@ -69,6 +70,7 @@ function AppContent() {
       <Route path="/team" element={<OurTeam />} />
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/terms-of-service" element={<TermsOfService />} />
+      <Route path="/blog" element={<BlogPage />} />
 
       {/* Service Details Routes */}
       <Route path="/services/counseling" element={<CounselingDetails />} />

@@ -7,7 +7,8 @@ import {
   Clock,
   LayoutDashboard,
   Users,
-  FileEdit
+  FileEdit,
+  Newspaper
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ManagementSidebar from '../../../components/ManagementSidebar';
@@ -22,6 +23,7 @@ import CMS from './SuperCMS';
 import UserManagement from './SuperAccountManagement';
 import Overview from './SuperDashboard';
 import OfficeSchedule from '../director/OfficeSchedule';
+import BlogPosting from '../blog-posting';
 import { useAuth } from '../../../auth/AuthContext';
 import { ThemeProvider } from '../../../contexts/ThemeContext';
 import { Building2 } from 'lucide-react';
@@ -48,6 +50,7 @@ const SuperAdminDashboard = () => {
     { id: 'shifting', label: 'Shifting', icon: RefreshCw },
     { id: 'history', label: 'System History', icon: Clock },
     { id: 'office-schedule', label: 'Office Schedule', icon: Building2 },
+    { id: 'blog', label: 'Blog', icon: Newspaper },
   ];
 
   return (
@@ -113,12 +116,16 @@ const SuperAdminDashboard = () => {
                 <OfficeSchedule key="office-mgmt" />
               )}
 
+              {activeTab === 'blog' && (
+                <BlogPosting key="blog-posting" role="admin" />
+              )}
+
               {activeTab === 'profile' && (
                 <ManagementProfile key="profile" user={{ ...superAdmin, type: 'director' } as any} />
               )}
 
               {/* Fallback for other tabs */}
-              {!['overview', 'analytics', 'counseling', 'assessment', 'shifting', 'cms', 'accounts', 'history', 'office-schedule', 'profile'].includes(activeTab) && (
+              {!['overview', 'analytics', 'counseling', 'assessment', 'shifting', 'cms', 'accounts', 'history', 'office-schedule', 'blog', 'profile'].includes(activeTab) && (
                 <motion.div
                   key="coming-soon"
                   initial={{ opacity: 0 }}

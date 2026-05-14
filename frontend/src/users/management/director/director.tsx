@@ -6,7 +6,8 @@ import {
   RefreshCw,
   BarChart3,
   Building2,
-  Users
+  Users,
+  Newspaper
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ManagementSidebar from '../../../components/ManagementSidebar';
@@ -19,6 +20,7 @@ import ShiftingAppointments from '../Appointment/ShiftingAppointments';
 import History from '../History';
 import OfficeSchedule from './OfficeSchedule';
 import AccountManagement from './AccountManagement';
+import BlogPosting from '../blog-posting';
 import { useAuth } from '../../../auth/AuthContext';
 
 const DirectorDashboard = () => {
@@ -44,6 +46,7 @@ const DirectorDashboard = () => {
     { id: 'office-schedule', label: 'Office Schedule', icon: Building2 },
     { id: 'accounts', label: 'Accounts', icon: Users },
     { id: 'history', label: 'History', icon: Clock },
+    { id: 'blog', label: 'Blog', icon: Newspaper },
   ];
 
   return (
@@ -94,12 +97,16 @@ const DirectorDashboard = () => {
               <AccountManagement key="account-mgmt" />
             )}
 
+            {activeTab === 'blog' && (
+              <BlogPosting key="blog-posting" role="director" />
+            )}
+
             {activeTab === 'profile' && (
               <ManagementProfile key="profile" user={{ ...director, type: 'director' } as any} />
             )}
 
             {/* Fallback for other tabs */}
-            {!['analytics', 'counseling', 'assessment', 'shifting', 'history', 'office-schedule', 'accounts', 'profile'].includes(activeTab) && (
+            {!['analytics', 'counseling', 'assessment', 'shifting', 'history', 'office-schedule', 'accounts', 'blog', 'profile'].includes(activeTab) && (
               <motion.div
                 key="coming-soon"
                 initial={{ opacity: 0 }}

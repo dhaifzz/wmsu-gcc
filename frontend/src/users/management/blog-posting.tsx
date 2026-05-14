@@ -1,0 +1,465 @@
+import { useState, useEffect, useRef } from 'react';
+import { Image as ImageIcon, Video, Link2, Send, Trash2, CheckCircle, XCircle, Clock, Eye, Pencil, X, Loader2, AlertCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../../auth/AuthContext';
+import { blogApi, uploadBlogMedia, type BlogPost } from '../../lib/blogApi';
+
+interface BlogPostingProps {
+  role?: 'staff' | 'director' | 'admin';
+}
+
+const STATUS_STYLES: Record<string, { bg: string; text: string; icon: any; label: string }> = {
+  pending: { bg: 'bg-amber-50', text: 'text-amber-700', icon: Clock, label: 'Pending' },
+  approved: { bg: 'bg-emerald-50', text: 'text-emerald-700', icon: CheckCircle, label: 'Approved' },
+  rejected: { bg: 'bg-rose-50', text: 'text-rose-700', icon: XCircle, label: 'Rejected' },
+};
+
+function formatDate(dateString: string) {
+  return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
+  const { user, accessToken } = useAuth();
+  const canApprove = role === 'director' || role === 'admin';
+
+  const [activeView, setActiveView] = useState<'compose' | 'my-posts' | 'approval'>('compose');
+  const [myPosts, setMyPosts] = useState<BlogPost[]>([]);
+  const [pendingPosts, setPendingPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Compose state
+  const [content, setContent] = useState('');
+  const [linkUrl, setLinkUrl] = useState('');
+  const [showLinkInput, setShowLinkInput] = useState(false);
+  const [mediaFiles, setMediaFiles] = useState<File[]>([]);
+  const [mediaPreviews, setMediaPreviews] = useState<{ url: string; type: string }[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  // Edit state
+  const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
+
+  const fetchMyPosts = async () => {
+    if (!accessToken) return;
+    setLoading(true);
+    const res = await blogApi.getMyPosts(accessToken);
+    if (res.ok) setMyPosts(res.data.posts);
+    setLoading(false);
+  };
+
+  const fetchPendingPosts = async () => {
+    if (!accessToken || !canApprove) return;
+    setLoading(true);
+    const res = await blogApi.getAllPosts(accessToken, 'pending');
+    if (res.ok) setPendingPosts(res.data.posts);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    if (activeView === 'my-posts') fetchMyPosts();
+    if (activeView === 'approval') fetchPendingPosts();
+  }, [activeView, accessToken]);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const valid = files.filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
+    if (mediaFiles.length + valid.length > 10) {
+      importSwal().then(Swal => Swal.fire('Limit Reached', 'Maximum 10 media files per post.', 'warning'));
+      return;
+    }
+    setMediaFiles(prev => [...prev, ...valid]);
+    const newPreviews = valid.map(f => ({
+      url: URL.createObjectURL(f),
+      type: f.type.startsWith('video/') ? 'video' : 'image',
+    }));
+    setMediaPreviews(prev => [...prev, ...newPreviews]);
+    if (fileRef.current) fileRef.current.value = '';
+  };
+
+  const removeMedia = (index: number) => {
+    URL.revokeObjectURL(mediaPreviews[index].url);
+    setMediaFiles(prev => prev.filter((_, i) => i !== index));
+    setMediaPreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const importSwal = async () => (await import('sweetalert2')).default;
+
+  const handleSubmit = async () => {
+    if (!content.trim() || !accessToken || submitting) return;
+    setSubmitting(true);
+    setUploading(mediaFiles.length > 0);
+
+    try {
+      // Upload media
+      const uploadedMedia: { url: string; type: 'image' | 'video' }[] = [];
+      for (const file of mediaFiles) {
+        const result = await uploadBlogMedia(file, accessToken);
+        if (result) uploadedMedia.push(result);
+      }
+      setUploading(false);
+
+      const payload = {
+        content: content.trim(),
+        media_urls: uploadedMedia.map(m => m.url),
+        media_types: uploadedMedia.map(m => m.type),
+        link_url: linkUrl.trim() || null,
+      };
+
+      const res = editingPost
+        ? await blogApi.updatePost(editingPost.id, payload, accessToken)
+        : await blogApi.createPost(payload, accessToken);
+
+      if (res.ok) {
+        const Swal = await importSwal();
+        await Swal.fire({ icon: 'success', title: editingPost ? 'Post Updated' : 'Post Created', text: res.data.message, confirmButtonColor: '#065f46' });
+        resetCompose();
+        setActiveView('my-posts');
+        fetchMyPosts();
+      } else {
+        const Swal = await importSwal();
+        await Swal.fire({ icon: 'error', title: 'Error', text: res.error || 'Failed to create post.', confirmButtonColor: '#065f46' });
+      }
+    } catch (err) {
+      const Swal = await importSwal();
+      await Swal.fire({ icon: 'error', title: 'Error', text: 'Something went wrong.', confirmButtonColor: '#065f46' });
+    }
+    setSubmitting(false);
+    setUploading(false);
+  };
+
+  const resetCompose = () => {
+    setContent('');
+    setLinkUrl('');
+    setShowLinkInput(false);
+    mediaPreviews.forEach(p => URL.revokeObjectURL(p.url));
+    setMediaFiles([]);
+    setMediaPreviews([]);
+    setEditingPost(null);
+  };
+
+  const handleDelete = async (postId: string) => {
+    if (!accessToken) return;
+    const Swal = await importSwal();
+    const result = await Swal.fire({
+      title: 'Delete Post?',
+      text: 'This action cannot be undone.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#dc2626',
+      cancelButtonColor: '#94a3b8',
+    });
+    if (!result.isConfirmed) return;
+    const res = await blogApi.deletePost(postId, accessToken);
+    if (res.ok) {
+      fetchMyPosts();
+      fetchPendingPosts();
+    }
+  };
+
+  const handleApprove = async (postId: string) => {
+    if (!accessToken) return;
+    const Swal = await importSwal();
+    const result = await Swal.fire({
+      title: 'Approve Post?',
+      text: 'This post will be visible to the public.',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Approve',
+      confirmButtonColor: '#065f46',
+      cancelButtonColor: '#94a3b8',
+    });
+    if (!result.isConfirmed) return;
+    const res = await blogApi.approvePost(postId, accessToken);
+    if (res.ok) {
+      await Swal.fire({ icon: 'success', title: 'Approved!', timer: 1500, showConfirmButton: false });
+      fetchPendingPosts();
+    }
+  };
+
+  const handleReject = async (postId: string) => {
+    if (!accessToken) return;
+    const Swal = await importSwal();
+    const { value: reason } = await Swal.fire({
+      title: 'Reject Post',
+      input: 'textarea',
+      inputLabel: 'Reason for rejection (optional)',
+      showCancelButton: true,
+      confirmButtonText: 'Reject',
+      confirmButtonColor: '#dc2626',
+      cancelButtonColor: '#94a3b8',
+    });
+    if (reason === undefined) return; // cancelled
+    const res = await blogApi.rejectPost(postId, reason || '', accessToken);
+    if (res.ok) {
+      await Swal.fire({ icon: 'success', title: 'Rejected', timer: 1500, showConfirmButton: false });
+      fetchPendingPosts();
+    }
+  };
+
+  const startEdit = (post: BlogPost) => {
+    setContent(post.content);
+    setLinkUrl(post.link_url || '');
+    setShowLinkInput(!!post.link_url);
+    setEditingPost(post);
+    setMediaFiles([]);
+    setMediaPreviews(post.media_urls.map((url, i) => ({ url, type: post.media_types[i] || 'image' })));
+    setActiveView('compose');
+  };
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+      {/* Page Header */}
+      <div>
+        <h1 className="text-3xl font-black text-slate-900 tracking-tight">Blog Management</h1>
+        <p className="text-slate-500 font-medium mt-1">Create and manage posts for the public blog feed.</p>
+      </div>
+
+      {/* Tab Navigation */}
+      <div className="flex gap-2 bg-white rounded-2xl p-1.5 shadow-sm border border-slate-100 w-fit">
+        {[
+          { id: 'compose' as const, label: editingPost ? 'Edit Post' : 'New Post', icon: Pencil },
+          { id: 'my-posts' as const, label: 'My Posts', icon: Eye },
+          ...(canApprove ? [{ id: 'approval' as const, label: `Approval Queue${pendingPosts.length > 0 ? ` (${pendingPosts.length})` : ''}`, icon: Clock }] : []),
+        ].map(tab => (
+          <button key={tab.id} onClick={() => { if (tab.id === 'compose' && activeView === 'compose') resetCompose(); setActiveView(tab.id); }}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
+              activeView === tab.id ? 'bg-emerald-900 text-white shadow-lg' : 'text-slate-500 hover:bg-slate-50'
+            }`}>
+            <tab.icon size={16} /> {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ── Compose View ──────────────────────────────────────────── */}
+      {activeView === 'compose' && (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
+          <div className="p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-11 h-11 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white font-black text-lg shadow-md">
+                {user?.firstName?.charAt(0)?.toUpperCase() || '?'}
+              </div>
+              <div>
+                <p className="font-black text-slate-900 text-sm">{user?.firstName} {user?.lastName}</p>
+                <p className="text-[10px] text-slate-400 font-bold">
+                  {canApprove ? '🟢 Auto-publish' : '🟡 Requires approval'}
+                </p>
+              </div>
+            </div>
+
+            <textarea
+              value={content}
+              onChange={e => setContent(e.target.value)}
+              placeholder="What's on your mind? Share an update with the community..."
+              className="w-full min-h-[150px] resize-none outline-none text-slate-700 text-[15px] leading-relaxed placeholder:text-slate-400 border border-slate-100 rounded-2xl p-4 focus:border-emerald-300 transition-colors"
+            />
+
+            {/* Link Input */}
+            <AnimatePresence>
+              {showLinkInput && (
+                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                  <div className="flex items-center gap-2 mt-3 bg-slate-50 rounded-xl p-3 border border-slate-100">
+                    <Link2 size={16} className="text-slate-400 shrink-0" />
+                    <input value={linkUrl} onChange={e => setLinkUrl(e.target.value)}
+                      placeholder="https://example.com" className="flex-1 bg-transparent outline-none text-sm text-slate-700" />
+                    <button onClick={() => { setShowLinkInput(false); setLinkUrl(''); }} className="text-slate-400 hover:text-slate-600"><X size={14} /></button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Media Previews */}
+            {mediaPreviews.length > 0 && (
+              <div className="mt-4 grid grid-cols-3 gap-2">
+                {mediaPreviews.map((p, i) => (
+                  <div key={i} className="relative rounded-xl overflow-hidden bg-slate-100 aspect-square group">
+                    {p.type === 'video' ? (
+                      <video src={p.url} className="w-full h-full object-cover" />
+                    ) : (
+                      <img src={p.url} alt="" className="w-full h-full object-cover" />
+                    )}
+                    <button onClick={() => removeMedia(i)}
+                      className="absolute top-2 right-2 w-7 h-7 bg-black/60 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <X size={14} />
+                    </button>
+                    {p.type === 'video' && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                        <Video size={24} className="text-white" />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Action Bar */}
+          <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
+            <div className="flex gap-2">
+              <input ref={fileRef} type="file" multiple accept="image/*,video/*" onChange={handleFileSelect} className="hidden" />
+              <button onClick={() => fileRef.current?.click()}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-500 hover:bg-white hover:text-emerald-600 transition-all border border-transparent hover:border-emerald-100">
+                <ImageIcon size={18} /> Photo
+              </button>
+              <button onClick={() => { fileRef.current?.setAttribute('accept', 'video/*'); fileRef.current?.click(); }}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-500 hover:bg-white hover:text-emerald-600 transition-all border border-transparent hover:border-emerald-100">
+                <Video size={18} /> Video
+              </button>
+              <button onClick={() => setShowLinkInput(!showLinkInput)}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all border border-transparent ${
+                  showLinkInput ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'text-slate-500 hover:bg-white hover:text-emerald-600 hover:border-emerald-100'
+                }`}>
+                <Link2 size={18} /> Link
+              </button>
+            </div>
+
+            <button onClick={handleSubmit} disabled={!content.trim() || submitting}
+              className="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 text-white rounded-xl font-bold text-sm hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-900/20 disabled:opacity-50 disabled:cursor-not-allowed">
+              {submitting ? <><Loader2 size={16} className="animate-spin" /> {uploading ? 'Uploading...' : 'Posting...'}</> : <><Send size={16} /> {editingPost ? 'Update' : 'Post'}</>}
+            </button>
+          </div>
+        </motion.div>
+      )}
+
+      {/* ── My Posts View ─────────────────────────────────────────── */}
+      {activeView === 'my-posts' && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+          {loading ? (
+            <div className="flex justify-center py-20">
+              <div className="w-8 h-8 border-3 border-emerald-200 border-t-emerald-600 rounded-full animate-spin" />
+            </div>
+          ) : myPosts.length === 0 ? (
+            <div className="bg-white rounded-2xl p-12 text-center border border-slate-100">
+              <Pencil size={40} className="text-slate-200 mx-auto mb-4" />
+              <h3 className="text-lg font-black text-slate-400">No posts yet</h3>
+              <p className="text-sm text-slate-400 font-medium mt-1">Create your first post!</p>
+            </div>
+          ) : (
+            myPosts.map(post => (
+              <div key={post.id} className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div className="p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      {(() => { const s = STATUS_STYLES[post.status]; return (
+                        <span className={`flex items-center gap-1.5 text-xs font-black px-3 py-1 rounded-full ${s.bg} ${s.text}`}>
+                          <s.icon size={12} /> {s.label}
+                        </span>
+                      ); })()}
+                      <span className="text-[11px] text-slate-400 font-bold">{formatDate(post.created_at)}</span>
+                    </div>
+                    <div className="flex gap-1">
+                      <button onClick={() => startEdit(post)}
+                        className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition-colors">
+                        <Pencil size={14} />
+                      </button>
+                      <button onClick={() => handleDelete(post.id)}
+                        className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-colors">
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                  <p className="text-slate-700 text-sm leading-relaxed line-clamp-3">{post.content}</p>
+                  {post.media_urls.length > 0 && (
+                    <div className="flex gap-2 mt-3">
+                      {post.media_urls.slice(0, 3).map((url, i) => (
+                        <div key={i} className="w-16 h-16 rounded-lg overflow-hidden bg-slate-100">
+                          {post.media_types[i] === 'video' ? (
+                            <video src={url} className="w-full h-full object-cover" />
+                          ) : (
+                            <img src={url} alt="" className="w-full h-full object-cover" />
+                          )}
+                        </div>
+                      ))}
+                      {post.media_urls.length > 3 && (
+                        <div className="w-16 h-16 rounded-lg bg-slate-100 flex items-center justify-center text-xs font-black text-slate-400">
+                          +{post.media_urls.length - 3}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {post.status === 'rejected' && post.rejection_reason && (
+                    <div className="mt-3 flex items-start gap-2 bg-rose-50 text-rose-700 text-xs font-bold px-3 py-2 rounded-lg border border-rose-100">
+                      <AlertCircle size={14} className="shrink-0 mt-0.5" />
+                      <span>Rejection reason: {post.rejection_reason}</span>
+                    </div>
+                  )}
+                  <div className="flex gap-4 mt-3 text-xs text-slate-400 font-bold">
+                    <span>❤️ {post.totalReactions} reactions</span>
+                    <span>💬 {post.commentCount} comments</span>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </motion.div>
+      )}
+
+      {/* ── Approval Queue View (Director/Admin only) ────────────── */}
+      {activeView === 'approval' && canApprove && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+          {loading ? (
+            <div className="flex justify-center py-20">
+              <div className="w-8 h-8 border-3 border-emerald-200 border-t-emerald-600 rounded-full animate-spin" />
+            </div>
+          ) : pendingPosts.length === 0 ? (
+            <div className="bg-white rounded-2xl p-12 text-center border border-slate-100">
+              <CheckCircle size={40} className="text-emerald-200 mx-auto mb-4" />
+              <h3 className="text-lg font-black text-slate-400">All caught up!</h3>
+              <p className="text-sm text-slate-400 font-medium mt-1">No posts awaiting approval.</p>
+            </div>
+          ) : (
+            pendingPosts.map(post => (
+              <div key={post.id} className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div className="p-5">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white font-black">
+                      {post.author_name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-black text-slate-900 text-sm">{post.author_name}</p>
+                      <p className="text-[10px] text-slate-400 font-bold">{post.author_role} • {formatDate(post.created_at)}</p>
+                    </div>
+                  </div>
+                  <p className="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">{post.content}</p>
+                  {post.link_url && (
+                    <a href={post.link_url} target="_blank" rel="noopener noreferrer" className="mt-2 text-emerald-600 text-xs font-bold hover:underline flex items-center gap-1">
+                      <Link2 size={12} /> {post.link_url}
+                    </a>
+                  )}
+                  {post.media_urls.length > 0 && (
+                    <div className="flex gap-2 mt-3 flex-wrap">
+                      {post.media_urls.map((url, i) => (
+                        <div key={i} className="w-24 h-24 rounded-xl overflow-hidden bg-slate-100">
+                          {post.media_types[i] === 'video' ? (
+                            <video src={url} className="w-full h-full object-cover" controls />
+                          ) : (
+                            <img src={url} alt="" className="w-full h-full object-cover" />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="px-5 py-3 bg-slate-50/50 border-t border-slate-100 flex gap-2 justify-end">
+                  <button onClick={() => handleReject(post.id)}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-rose-600 bg-white border border-rose-200 hover:bg-rose-50 transition-all">
+                    <XCircle size={16} /> Reject
+                  </button>
+                  <button onClick={() => handleApprove(post.id)}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-900/20">
+                    <CheckCircle size={16} /> Approve
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </motion.div>
+      )}
+    </motion.div>
+  );
+};
+
+export default BlogPosting;
