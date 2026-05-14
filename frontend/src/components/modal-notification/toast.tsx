@@ -71,6 +71,51 @@ export const showToast = {
         padding: '14px 20px',
       },
     }),
+
+  installApp: (onInstall: () => void, onDismiss: () => void) =>
+    toast(
+      (t) => (
+        <div className="flex flex-col gap-3 w-full">
+          <div className="flex items-center gap-2">
+            <span>📱</span>
+            <span className="font-bold">Install WMSU GCC App</span>
+          </div>
+          <p className="text-xs font-medium text-red-50">
+            Install our app for a better, faster offline experience!
+          </p>
+          <div className="flex justify-end gap-2 mt-1">
+            <button
+              onClick={() => {
+                onDismiss();
+                toast.dismiss(t.id);
+              }}
+              className="text-xs font-bold px-3 py-1.5 rounded bg-red-800 text-white hover:bg-red-700 transition-colors"
+            >
+              Later
+            </button>
+            <button
+              onClick={() => {
+                onInstall();
+                toast.dismiss(t.id);
+              }}
+              className="text-xs font-bold px-3 py-1.5 rounded bg-white text-red-900 hover:bg-gray-100 transition-colors"
+            >
+              Install App
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        duration: Infinity, // Keep open until action
+        style: {
+          background: '#991b1b', // Matching their error red or primary brand theme
+          color: '#fff',
+          borderRadius: '12px',
+          padding: '16px',
+          maxWidth: '350px',
+        },
+      }
+    ),
 };
 
 // ToastProvider component — mount once in App.tsx

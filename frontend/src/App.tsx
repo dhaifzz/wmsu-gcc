@@ -32,6 +32,43 @@ function AppContent() {
   const [showSplash, setShowSplash] = useState(() => !sessionStorage.getItem('hasShownSplash'));
 
   useEffect(() => {
+    // PWA Install Prompt Logic
+    const handleBeforeInstallPrompt = (e: any) => {
+      // Prevent the mini-infobar from appearing on mobile
+      e.preventDefault();
+      
+      // Check if we've already asked or user dismissed recently
+      const hasDismissed = sessionStorage.getItem('pwaInstallDismissed');
+      if (hasDismissed) return;
+
+      import('./components/modal-notification/toast').then(({ showToast }) => {
+        showToast.installApp(
+          async () => {
+            // Show the install prompt
+            e.prompt();
+            // Wait for the user to respond to the prompt
+            const { outcome } = await e.userChoice;
+            if (outcome === 'accepted') {
+              console.log('User accepted the install prompt');
+            } else {
+              console.log('User dismissed the install prompt');
+            }
+          },
+          () => {
+            sessionStorage.setItem('pwaInstallDismissed', 'true');
+          }
+        );
+      });
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!showSplash) return;
 
     const timer = setTimeout(() => {
