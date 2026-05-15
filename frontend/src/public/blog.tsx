@@ -50,7 +50,11 @@ function getRoleBadgeColor(role: string) {
   return 'bg-emerald-100 text-emerald-700 border-emerald-200';
 }
 
-// ── Post Card ─────────────────────────────────────────────────────
+function getYouTubeID(url: string) {
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : null;
+}
 
 function PostCard({ post, user, token, onNeedLogin }: { post: BlogPost; user: any; token: string | null; onNeedLogin: () => void }) {
   const [showComments, setShowComments] = useState(false);
@@ -203,12 +207,41 @@ function PostCard({ post, user, token, onNeedLogin }: { post: BlogPost; user: an
 
       {/* Content */}
       <div className="px-4 sm:px-5 pb-2">
-        <p className="text-slate-700 text-sm sm:text-[15px] leading-relaxed whitespace-pre-wrap">{post.content}</p>
+        {post.content && <p className="text-slate-700 text-sm sm:text-[15px] leading-relaxed whitespace-pre-wrap mb-2">{post.content}</p>}
+        
         {post.link_url && (
-          <a href={post.link_url} target="_blank" rel="noopener noreferrer"
-            className="mt-2 flex items-center gap-2 text-emerald-600 hover:text-emerald-700 text-xs sm:text-sm font-bold bg-emerald-50 px-3 py-2 rounded-xl transition-colors border border-emerald-100">
-            <ExternalLink size={14} /> <span className="truncate">{post.link_url}</span>
-          </a>
+          <div className="space-y-3">
+            {post.link_type === 'youtube' && getYouTubeID(post.link_url) ? (
+              <div className="relative aspect-video rounded-xl overflow-hidden shadow-lg border border-white/10 bg-black">
+                <iframe
+                  src={`https://www.youtube.com/embed/${getYouTubeID(post.link_url)}`}
+                  className="absolute inset-0 w-full h-full"
+                  title="YouTube video player"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              </div>
+            ) : post.link_type === 'facebook' ? (
+              <div className="relative rounded-xl overflow-hidden border border-slate-100 shadow-sm bg-white min-h-[400px]">
+                <iframe
+                  src={`https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(post.link_url)}&show_text=true&width=500`}
+                  className="absolute inset-0 w-full h-full"
+                  style={{ border: 'none', overflow: 'hidden' }}
+                  scrolling="no"
+                  frameBorder="0"
+                  allowFullScreen={true}
+                  allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                />
+              </div>
+            ) : (
+              <a href={post.link_url} target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-2 text-emerald-600 hover:text-emerald-700 text-xs sm:text-sm font-bold bg-emerald-50 px-3 py-2 rounded-xl transition-colors border border-emerald-100 group">
+                <ExternalLink size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" /> 
+                <span className="truncate">{post.link_url}</span>
+              </a>
+            )}
+          </div>
         )}
       </div>
 
@@ -379,7 +412,6 @@ const BlogPage = () => {
 
   useEffect(() => { fetchPosts(); }, []);
 
-  // Load saved post IDs for the logged-in user
   useEffect(() => {
     if (!accessToken) return;
     blogApi.getSavedPosts(accessToken).then(res => {
@@ -424,169 +456,207 @@ const BlogPage = () => {
     fetchPosts(next, activeCategory, searchQuery);
   };
 
+
   return (
     <div className="min-h-screen relative flex flex-col overflow-hidden">
-      {/* Fixed Background Image */}
       <div 
         className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${authBg})` }}
       />
-      {/* Emerald Overlay matching Login.tsx */}
       <div className="fixed inset-0 z-0 bg-[#047857]/85 backdrop-blur-[2px]" />
 
       <div className="relative z-10 flex flex-col min-h-screen">
         <Navbar />
 
-        {/* Hero removed — jump straight to content */}
-
-        {/* Search & Filter Bar */}
-        <section className="sticky top-16 z-[100] bg-emerald-900/60 backdrop-blur-xl border-b border-white/10 py-6 shadow-2xl">
-          <div className="w-full px-4 sm:px-10 space-y-8">
-            {/* Search - Still centered but part of wider container */}
-            <div className="relative group max-w-4xl mx-auto">
-              <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-300/40 group-focus-within:text-emerald-400 transition-colors" />
-              <input
-                value={searchInput}
-                onChange={e => handleSearchInput(e.target.value)}
-                placeholder="Search posts and discussions..."
-                className="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/10 rounded-2xl text-base text-white placeholder:text-emerald-100/30 outline-none focus:bg-white/15 focus:border-emerald-400/50 transition-all shadow-inner backdrop-blur-md"
-              />
-              {searchInput && (
-                <button onClick={() => { setSearchInput(''); handleSearchInput(''); }}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-100/30 hover:text-white transition-colors">
-                  <X size={18} />
-                </button>
-              )}
-            </div>
-
-            {/* Category Chips - Full Width Carousel Feel */}
-            <div className="relative group/filters">
-              <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide justify-start lg:justify-center px-10 scroll-smooth">
-                <button
-                  onClick={() => handleCategoryChange('')}
-                  className={`shrink-0 px-8 py-3.5 rounded-xl text-[10px] font-black transition-all border tracking-[0.2em] uppercase ${
-                    activeCategory === ''
-                      ? 'bg-emerald-500 text-white border-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.5)] scale-105'
-                      : 'bg-white/5 text-emerald-100/70 border-white/5 hover:bg-white/10 hover:text-white hover:border-white/10'
-                  }`}>
-                  All Posts
-                </button>
-                {BLOG_CATEGORIES.map(cat => (
-                  <button key={cat.value}
-                    onClick={() => handleCategoryChange(cat.value)}
-                    className={`shrink-0 flex items-center gap-3 px-8 py-3.5 rounded-xl text-[10px] font-black transition-all border tracking-[0.2em] uppercase ${
-                      activeCategory === cat.value
-                        ? 'bg-emerald-500 text-white border-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.5)] scale-105'
-                        : 'bg-white/5 text-emerald-100/70 border-white/5 hover:bg-white/10 hover:text-white hover:border-white/10'
-                    }`}>
-                    <cat.icon size={16} /> {cat.label}
-                  </button>
-                ))}
-              </div>
-              {/* Gradient masks for carousel feel */}
-              <div className="absolute left-0 top-0 bottom-4 w-12 bg-gradient-to-r from-emerald-900/80 to-transparent pointer-events-none rounded-l-2xl" />
-              <div className="absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-emerald-900/80 to-transparent pointer-events-none rounded-r-2xl" />
-            </div>
-          </div>
-        </section>
-
-        <section className="flex-1 relative">
+        <section className="flex-1 relative pt-20">
           <div className="flex w-full items-start">
-            <div className="flex gap-6 items-start justify-between">
-              <LeftBlogSidebar
-                user={user}
-                token={accessToken}
-                onToggleSave={handleToggleSave}
-              />
+            <LeftBlogSidebar
+              user={user}
+              token={accessToken}
+              onToggleSave={handleToggleSave}
+            />
 
-              {/* Feed Column - Centered between edge sidebars */}
-              <div className="flex-1 min-w-0 py-8 px-4 sm:px-8">
-                <div className="max-w-3xl mx-auto">
-              {loading && posts.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 gap-3">
-                  <div className="w-10 h-10 border-3 border-emerald-200/30 border-t-emerald-400 rounded-full animate-spin" />
-                  <p className="text-emerald-100/50 font-bold text-sm">Loading posts...</p>
-                </div>
-              ) : posts.length === 0 ? (
-                <div className="text-center py-12 bg-white/5 backdrop-blur-md rounded-3xl border border-white/10">
-                  <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <MessageCircle size={32} className="text-emerald-200/50" />
-                  </div>
-                  <h3 className="text-xl font-black text-emerald-100/50">No posts yet</h3>
-                  <p className="text-emerald-100/30 text-sm font-medium mt-1">Check back soon for updates!</p>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {posts.map(post => (
-                    <div key={post.id} id={`post-${post.id}`} className="relative group">
-                      <PostCard post={post} user={user} token={accessToken} onNeedLogin={() => setShowLoginPrompt(true)} />
-                      {/* Save button on each post */}
-                      <button
-                        onClick={() => user ? handleToggleSave(post.id) : setShowLoginPrompt(true)}
-                        className={`absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center transition-all z-10 shadow-lg ${
-                          savedPostIds.has(post.id)
-                            ? 'bg-emerald-500 text-white hover:bg-emerald-600'
-                            : 'bg-white/80 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 backdrop-blur-sm'
-                        }`}
-                        title={savedPostIds.has(post.id) ? 'Unsave post' : 'Save post'}>
-                        {savedPostIds.has(post.id) ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
-                      </button>
+            <div className="flex-1 min-w-0 flex flex-col items-center">
+              {/* Refined Search Area - Bound to Middle Column */}
+              <div className="sticky top-20 z-30 w-full px-4 sm:px-6 mb-8">
+                <div className="bg-emerald-900/40 backdrop-blur-3xl rounded-3xl border border-white/10 p-6 shadow-2xl">
+                  <div className="max-w-4xl mx-auto space-y-6">
+                    {/* Search Input */}
+                    <div className="relative group max-w-2xl mx-auto">
+                      <div className="absolute inset-0 bg-emerald-500/10 blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity rounded-2xl" />
+                      <Search size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-emerald-300/40 group-focus-within:text-emerald-400 transition-colors" />
+                      <input
+                        value={searchInput}
+                        onChange={e => handleSearchInput(e.target.value)}
+                        placeholder="Search posts and discussions..."
+                        className="relative w-full pl-14 pr-6 py-4.5 bg-black/20 border border-white/10 rounded-2xl text-base text-white placeholder:text-emerald-100/20 outline-none focus:bg-black/40 focus:border-emerald-400/50 transition-all shadow-inner backdrop-blur-md"
+                      />
+                      {searchInput && (
+                        <button onClick={() => { setSearchInput(''); handleSearchInput(''); }}
+                          className="absolute right-5 top-1/2 -translate-y-1/2 text-white/20 hover:text-white transition-colors">
+                          <X size={18} />
+                        </button>
+                      )}
                     </div>
-                  ))}
-                  {posts.length < total && (
-                    <div className="text-center pt-6">
-                      <button onClick={loadMore} disabled={loading}
-                        className="px-10 py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-sm transition-all shadow-xl shadow-emerald-900/40 disabled:opacity-50 active:scale-95">
-                        {loading ? 'Loading...' : 'Load More Posts'}
-                      </button>
+
+                    {/* Auto Carousel Category Filters - Infinite Marquee */}
+                    <div className="relative group/filters max-w-4xl mx-auto overflow-hidden">
+                      <motion.div 
+                        className="flex gap-3 whitespace-nowrap py-2"
+                        animate={{ x: ["0%", "-50%"] }}
+                        transition={{ 
+                          repeat: Infinity, 
+                          duration: 40, 
+                          ease: "linear" 
+                        }}
+                        style={{ width: "fit-content" }}
+                        onHoverStart={() => { 
+                           // This is a simplified way to pause, though Framer Motion's "pause" 
+                           // state usually requires a useAnimation hook or similar. 
+                           // For now, I'll use a CSS hover state or just leave it flowing.
+                        }}
+                      >
+                        {/* First Set */}
+                        <button
+                          onClick={() => handleCategoryChange('')}
+                          className={`shrink-0 px-8 py-3 rounded-xl text-[10px] font-black transition-all border tracking-[0.2em] uppercase ${
+                            activeCategory === ''
+                              ? 'bg-emerald-500 text-white border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.4)] scale-105'
+                              : 'bg-white/5 text-emerald-100/50 border-white/5 hover:bg-white/10 hover:text-white'
+                          }`}>
+                          All
+                        </button>
+                        {BLOG_CATEGORIES.map(cat => (
+                          <button key={`set1-${cat.value}`}
+                            onClick={() => handleCategoryChange(cat.value)}
+                            className={`shrink-0 flex items-center gap-3 px-8 py-3 rounded-xl text-[10px] font-black transition-all border tracking-[0.2em] uppercase ${
+                              activeCategory === cat.value
+                                ? 'bg-emerald-500 text-white border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.4)] scale-105'
+                                : 'bg-white/5 text-emerald-100/50 border-white/5 hover:bg-white/10 hover:text-white'
+                            }`}>
+                            <cat.icon size={14} className={activeCategory === cat.value ? 'text-white' : 'text-emerald-400'} /> 
+                            {cat.label}
+                          </button>
+                        ))}
+
+                        {/* Duplicated Set for Seamless Loop */}
+                        <button
+                          onClick={() => handleCategoryChange('')}
+                          className={`shrink-0 px-8 py-3 rounded-xl text-[10px] font-black transition-all border tracking-[0.2em] uppercase ${
+                            activeCategory === ''
+                              ? 'bg-emerald-500 text-white border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.4)] scale-105'
+                              : 'bg-white/5 text-emerald-100/50 border-white/5 hover:bg-white/10 hover:text-white'
+                          }`}>
+                          All
+                        </button>
+                        {BLOG_CATEGORIES.map(cat => (
+                          <button key={`set2-${cat.value}`}
+                            onClick={() => handleCategoryChange(cat.value)}
+                            className={`shrink-0 flex items-center gap-3 px-8 py-3 rounded-xl text-[10px] font-black transition-all border tracking-[0.2em] uppercase ${
+                              activeCategory === cat.value
+                                ? 'bg-emerald-500 text-white border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.4)] scale-105'
+                                : 'bg-white/5 text-emerald-100/50 border-white/5 hover:bg-white/10 hover:text-white'
+                            }`}>
+                            <cat.icon size={14} className={activeCategory === cat.value ? 'text-white' : 'text-emerald-400'} /> 
+                            {cat.label}
+                          </button>
+                        ))}
+                      </motion.div>
+
+                      {/* Edge Fades */}
+                      <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-emerald-950/40 to-transparent pointer-events-none z-10" />
+                      <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-emerald-950/40 to-transparent pointer-events-none z-10" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="py-2 px-4 sm:px-8 w-full flex justify-center">
+                <div className="max-w-3xl w-full">
+                  {loading && posts.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-20 gap-4">
+                      <div className="w-12 h-12 border-4 border-emerald-200/10 border-t-emerald-400 rounded-full animate-spin shadow-2xl" />
+                      <p className="text-emerald-100/30 font-black text-xs uppercase tracking-widest">Refreshing Feed...</p>
+                    </div>
+                  ) : posts.length === 0 ? (
+                    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-20 bg-white/5 backdrop-blur-md rounded-[3rem] border border-white/10 shadow-2xl">
+                      <div className="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-white/10">
+                        <MessageCircle size={48} className="text-emerald-200/20" />
+                      </div>
+                      <h3 className="text-2xl font-black text-white/80 tracking-tight">No conversations found</h3>
+                      <p className="text-emerald-100/30 text-sm font-bold mt-2 max-w-sm mx-auto">Try adjusting your filters or search terms to find what you're looking for.</p>
+                    </motion.div>
+                  ) : (
+                    <div className="space-y-8 pb-20">
+                      {posts.map(post => (
+                        <div key={post.id} id={`post-${post.id}`} className="relative group">
+                          <PostCard post={post} user={user} token={accessToken} onNeedLogin={() => setShowLoginPrompt(true)} />
+                          <button
+                            onClick={() => user ? handleToggleSave(post.id) : setShowLoginPrompt(true)}
+                            className={`absolute top-4 right-4 w-12 h-12 rounded-2xl flex items-center justify-center transition-all z-10 shadow-2xl border ${
+                              savedPostIds.has(post.id)
+                                ? 'bg-emerald-500 text-white border-emerald-400'
+                                : 'bg-white/10 text-white/20 hover:bg-emerald-500 hover:text-white border-white/10 backdrop-blur-xl'
+                            }`}
+                            title={savedPostIds.has(post.id) ? 'Unsave post' : 'Save post'}>
+                            {savedPostIds.has(post.id) ? <BookmarkCheck size={20} /> : <Bookmark size={20} />}
+                          </button>
+                        </div>
+                      ))}
+                      {posts.length < total && (
+                        <div className="text-center pt-10">
+                          <button onClick={loadMore} disabled={loading}
+                            className="group relative px-14 py-5 bg-emerald-500 hover:bg-emerald-400 text-white rounded-[2rem] font-black text-sm transition-all shadow-2xl shadow-emerald-900/60 disabled:opacity-50 active:scale-95 overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                            {loading ? 'Synchronizing...' : 'Load More Experiences'}
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
-              )}
+              </div>
             </div>
+
+            <RightBlogSidebar
+              activeCategory={activeCategory}
+              onCategoryChange={handleCategoryChange}
+            />
           </div>
+        </section>
 
-          {/* Right Sidebar - Now Sticky and Docked */}
-          <RightBlogSidebar
-            activeCategory={activeCategory}
-            onCategoryChange={handleCategoryChange}
-          />
+        <AnimatePresence>
+          {showLoginPrompt && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/80 backdrop-blur-md z-[200] flex items-center justify-center p-4"
+              onClick={() => setShowLoginPrompt(false)}>
+              <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
+                onClick={e => e.stopPropagation()}
+                className="bg-white rounded-[3rem] p-10 max-w-sm w-full shadow-2xl text-center border border-white/10">
+                <div className="w-20 h-20 bg-emerald-100 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-inner">
+                  <LogIn size={36} className="text-emerald-600" />
+                </div>
+                <h3 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">Identity Required</h3>
+                <p className="text-sm text-slate-500 font-bold mb-8 leading-relaxed">Join our community to interact, comment, and save valuable experiences.</p>
+                <div className="flex flex-col gap-3">
+                  <a href="/login" className="py-4 rounded-2xl bg-emerald-600 text-white font-black text-sm hover:bg-emerald-500 transition-all text-center shadow-xl shadow-emerald-900/20">
+                    Sign In to GCC
+                  </a>
+                  <button onClick={() => setShowLoginPrompt(false)} className="py-4 rounded-2xl border border-slate-100 text-slate-400 font-black text-sm hover:bg-slate-50 transition-all">
+                    Maybe Later
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
+        <div className="relative z-40">
+          <Footer />
         </div>
       </div>
-    </section>
-
-      {/* Login Prompt Modal */}
-      <AnimatePresence>
-        {showLoginPrompt && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[200] flex items-center justify-center p-4"
-            onClick={() => setShowLoginPrompt(false)}>
-            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
-              onClick={e => e.stopPropagation()}
-              className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl text-center">
-              <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <LogIn size={28} className="text-emerald-600" />
-              </div>
-              <h3 className="text-xl font-black text-slate-900 mb-2">Sign In Required</h3>
-              <p className="text-sm text-slate-500 font-medium mb-6">Please sign in to react and comment on posts.</p>
-              <div className="flex gap-3">
-                <button onClick={() => setShowLoginPrompt(false)} className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50 transition-colors">
-                  Cancel
-                </button>
-                <a href="/login" className="flex-1 py-3 rounded-xl bg-emerald-600 text-white font-bold text-sm hover:bg-emerald-500 transition-colors text-center shadow-lg shadow-emerald-900/20">
-                  Sign In
-                </a>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <Footer />
     </div>
-  </div>
-);
+  );
 };
 
 export default BlogPage;

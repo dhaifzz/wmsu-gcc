@@ -8,6 +8,14 @@ interface BlogPostingProps {
   role?: 'staff' | 'director' | 'admin';
 }
 
+const Youtube = ({ size = 18 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z" /><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" /></svg>
+);
+
+const Facebook = ({ size = 18 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /></svg>
+);
+
 const STATUS_STYLES: Record<string, { bg: string; text: string; icon: any; label: string }> = {
   pending: { bg: 'bg-amber-50', text: 'text-amber-700', icon: Clock, label: 'Pending' },
   approved: { bg: 'bg-emerald-50', text: 'text-emerald-700', icon: CheckCircle, label: 'Approved' },
@@ -31,6 +39,7 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
   const [content, setContent] = useState('');
   const [category, setCategory] = useState<BlogCategory>('general');
   const [linkUrl, setLinkUrl] = useState('');
+  const [linkType, setLinkType] = useState<'general' | 'youtube' | 'facebook'>('general');
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [mediaPreviews, setMediaPreviews] = useState<{ url: string; type: string }[]>([]);
@@ -87,7 +96,11 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
   const importSwal = async () => (await import('sweetalert2')).default;
 
   const handleSubmit = async () => {
-    if (!content.trim() || !accessToken || submitting) return;
+    const hasMedia = mediaFiles.length > 0 || (editingPost && editingPost.media_urls.length > 0);
+    const hasLink = linkUrl.trim().length > 0;
+    const hasContent = content.trim().length > 0;
+
+    if (!(hasContent || hasMedia || hasLink) || !accessToken || submitting) return;
     setSubmitting(true);
     setUploading(mediaFiles.length > 0);
 
@@ -103,9 +116,10 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
       const payload = {
         content: content.trim(),
         category,
-        media_urls: uploadedMedia.map(m => m.url),
-        media_types: uploadedMedia.map(m => m.type),
+        media_urls: uploadedMedia.length > 0 ? uploadedMedia.map(m => m.url) : (editingPost ? editingPost.media_urls : []),
+        media_types: uploadedMedia.length > 0 ? uploadedMedia.map(m => m.type) : (editingPost ? editingPost.media_types : []),
         link_url: linkUrl.trim() || null,
+        link_type: linkType,
       };
 
       const res = editingPost
@@ -134,6 +148,7 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
     setContent('');
     setCategory('general');
     setLinkUrl('');
+    setLinkType('general');
     setShowLinkInput(false);
     mediaPreviews.forEach(p => URL.revokeObjectURL(p.url));
     setMediaFiles([]);
@@ -206,6 +221,7 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
     setContent(post.content);
     setCategory(post.category || 'general');
     setLinkUrl(post.link_url || '');
+    setLinkType((post.link_type as any) || 'general');
     setShowLinkInput(!!post.link_url);
     setEditingPost(post);
     setMediaFiles([]);
@@ -284,11 +300,29 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
             <AnimatePresence>
               {showLinkInput && (
                 <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                  <div className="flex items-center gap-2 mt-3 bg-slate-50 rounded-xl p-3 border border-slate-100">
-                    <Link2 size={16} className="text-slate-400 shrink-0" />
-                    <input value={linkUrl} onChange={e => setLinkUrl(e.target.value)}
-                      placeholder="https://example.com" className="flex-1 bg-transparent outline-none text-sm text-slate-700" />
-                    <button onClick={() => { setShowLinkInput(false); setLinkUrl(''); }} className="text-slate-400 hover:text-slate-600"><X size={14} /></button>
+                  <div className="mt-3 space-y-2">
+                    <div className="flex items-center gap-2 bg-slate-50 rounded-xl p-3 border border-slate-100">
+                      <Link2 size={16} className="text-slate-400 shrink-0" />
+                      <input value={linkUrl} onChange={e => setLinkUrl(e.target.value)}
+                        placeholder="https://example.com" className="flex-1 bg-transparent outline-none text-sm text-slate-700" />
+                      <button onClick={() => { setShowLinkInput(false); setLinkUrl(''); }} className="text-slate-400 hover:text-slate-600"><X size={14} /></button>
+                    </div>
+                    <div className="flex gap-2">
+                      {[
+                        { id: 'general', label: 'General', icon: Link2 },
+                        { id: 'youtube', label: 'YouTube', icon: Youtube },
+                        { id: 'facebook', label: 'Facebook', icon: Facebook },
+                      ].map(t => (
+                        <button key={t.id} onClick={() => setLinkType(t.id as any)}
+                          className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[10px] font-black transition-all border ${
+                            linkType === t.id 
+                              ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm' 
+                              : 'bg-white text-slate-500 border-slate-200 hover:border-emerald-300 hover:text-emerald-600'
+                          }`}>
+                          <t.icon size={12} /> {t.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </motion.div>
               )}
@@ -339,7 +373,7 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
               </button>
             </div>
 
-            <button onClick={handleSubmit} disabled={!content.trim() || submitting}
+            <button onClick={handleSubmit} disabled={submitting || !(content.trim() || mediaFiles.length > 0 || (editingPost && editingPost.media_urls.length > 0) || linkUrl.trim())}
               className="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 text-white rounded-xl font-bold text-sm hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-900/20 disabled:opacity-50 disabled:cursor-not-allowed">
               {submitting ? <><Loader2 size={16} className="animate-spin" /> {uploading ? 'Uploading...' : 'Posting...'}</> : <><Send size={16} /> {editingPost ? 'Update' : 'Post'}</>}
             </button>

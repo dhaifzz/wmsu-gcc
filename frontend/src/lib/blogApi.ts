@@ -26,8 +26,9 @@ export interface BlogPost {
   category: BlogCategory;
   content: string;
   media_urls: string[];
-  media_types: string[]; // 'image' | 'video'
+  media_types: string[];  
   link_url: string | null;
+  link_type: 'general' | 'youtube' | 'facebook' | null;
   status: 'pending' | 'approved' | 'rejected';
   approved_by: string | null;
   rejection_reason: string | null;
@@ -201,6 +202,7 @@ export const blogApi = {
       media_urls?: string[];
       media_types?: string[];
       link_url?: string | null;
+      link_type?: 'general' | 'youtube' | 'facebook' | null;
     },
     token: string
   ) =>
@@ -219,6 +221,7 @@ export const blogApi = {
       media_urls?: string[];
       media_types?: string[];
       link_url?: string | null;
+      link_type?: 'general' | 'youtube' | 'facebook' | null;
     },
     token: string
   ) =>

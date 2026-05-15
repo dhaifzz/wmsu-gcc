@@ -13,6 +13,7 @@ const Navbar = () => {
     gccLogo: gccLogoAsset
   });
   const location = useLocation();
+  const isSolidNeeded = isScrolled || location.pathname === '/blog';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -50,7 +51,7 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white/80 backdrop-blur-md shadow-lg py-2' : 'bg-transparent py-4'
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isSolidNeeded ? 'bg-white/95 backdrop-blur-md shadow-lg py-2' : 'bg-transparent py-4'
         }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -62,10 +63,10 @@ const Navbar = () => {
               <img src={logos.gccLogo} alt="GCC" className="h-12 w-12 object-contain drop-shadow-md" />
             </div>
             <div className="flex flex-col leading-tight">
-              <span className={`text-xl font-black tracking-tighter transition-colors ${isScrolled ? 'text-emerald-900' : 'text-white'}`}>
+              <span className={`text-xl font-black tracking-tighter transition-colors ${isSolidNeeded ? 'text-emerald-900' : 'text-white'}`}>
                 WMSU GCC
               </span>
-              <span className={`text-[10px] font-bold uppercase tracking-widest transition-colors ${isScrolled ? 'text-emerald-600' : 'text-emerald-200'}`}>
+              <span className={`text-[10px] font-bold uppercase tracking-widest transition-colors ${isSolidNeeded ? 'text-emerald-600' : 'text-emerald-200'}`}>
                 Guidance & Counseling Center
               </span>
             </div>
@@ -78,8 +79,8 @@ const Navbar = () => {
                 key={link.name}
                 href={link.path}
                 className={`text-md font-bold transition-all hover:scale-105 ${isActive(link.path)
-                  ? (isScrolled ? 'text-emerald-600' : 'text-white border-b-2 border-emerald-400')
-                  : (isScrolled ? 'text-gray-600 hover:text-emerald-600' : 'text-emerald-50/80 hover:text-white')
+                  ? (isSolidNeeded ? 'text-emerald-600' : 'text-white border-b-2 border-emerald-400')
+                  : (isSolidNeeded ? 'text-gray-600 hover:text-emerald-600' : 'text-emerald-50/80 hover:text-white')
                   }`}
               >
                 {link.name}
@@ -88,7 +89,7 @@ const Navbar = () => {
             <div className="flex items-center gap-4 ml-4">
               <a
                 href="/login"
-                className={`text-md font-bold transition-colors ${isScrolled ? 'text-emerald-900 hover:text-emerald-600' : 'text-white hover:text-emerald-200'
+                className={`text-md font-bold transition-colors ${isSolidNeeded ? 'text-emerald-900 hover:text-emerald-600' : 'text-white hover:text-emerald-200'
                   }`}
               >
                 Sign In
@@ -106,7 +107,7 @@ const Navbar = () => {
           <div className="md:hidden">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className={`p-2 rounded-lg transition-colors ${isScrolled ? 'text-emerald-900' : 'text-white'}`}
+              className={`p-2 rounded-lg transition-colors ${isSolidNeeded ? 'text-emerald-900' : 'text-white'}`}
             >
               {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
             </button>
