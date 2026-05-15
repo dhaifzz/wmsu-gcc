@@ -35,6 +35,9 @@ export default defineConfig({
       devOptions: {
         enabled: true,
       },
+      workbox: {
+        maximumFileSizeToCacheInBytes: 30 * 1024 * 1024, // Increase limit to 30MB for AI models
+      }
     })
   ],
 })
