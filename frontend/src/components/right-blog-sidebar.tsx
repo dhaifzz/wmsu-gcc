@@ -1,5 +1,5 @@
 import { Heart, Sparkles, HandHeart, PartyPopper, Lightbulb, Phone, Mail, MapPin, Clock, ShieldCheck } from 'lucide-react';
-import { BLOG_CATEGORIES, type BlogCategory } from '../lib/blogApi';
+import { BLOG_CATEGORIES } from '../lib/blogApi';
 
 const REACTION_GUIDE = [
   { icon: Heart, label: 'Support', color: 'text-emerald-600', bg: 'bg-emerald-100', desc: 'Show solidarity' },
