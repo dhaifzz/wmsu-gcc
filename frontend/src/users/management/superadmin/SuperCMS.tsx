@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
+import { removeBackground } from "@imgly/background-removal";
 import {
   Home,
   Info,
@@ -95,6 +96,35 @@ const CMS = () => {
   const [shiftingContent, setShiftingContent] = useState<any>(null);
   const [privacyContent, setPrivacyContent] = useState<any>(null);
   const [termsContent, setTermsContent] = useState<any>(null);
+  const [contactErrors, setContactErrors] = useState<Record<string, string>>({});
+
+  const validateContactField = (name: string, value: string) => {
+    let error = '';
+    switch (name) {
+      case 'phone':
+        if (value && !/^[0-9()\-\s]+$/.test(value)) {
+          error = 'Only numbers and phone symbols (() -) are allowed.';
+        } else if (value && (value.length < 7 || value.length > 20)) {
+          error = 'Phone number must be between 7 and 20 characters.';
+        }
+        break;
+      case 'address':
+        if (value && !/^[a-zA-Z0-9\s.,#()/\-]+$/.test(value)) {
+          error = 'Only letters, numbers, and common address symbols are allowed.';
+        }
+        break;
+      case 'facebook':
+        if (value && !/^[a-zA-Z0-9\s&.\-]+$/.test(value)) {
+          error = 'Only letters, numbers, spaces, and common symbols are allowed.';
+        }
+        break;
+    }
+    setContactErrors(prev => ({ ...prev, [name]: error }));
+  };
+
+  const sanitizeTeamInput = (val: string) => {
+    return val.replace(/[^a-zA-Z0-9\s&.\-]/g, '');
+  };
 
   const [savedStates, setSavedStates] = useState<Record<string, any>>({});
 
@@ -371,11 +401,105 @@ const CMS = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadContext, setUploadContext] = useState<{ section: string; path: (string | number)[]; index?: number } | null>(null);
 
+  const processAllTeamImages = async () => {
+    try {
+      const allMembers: { category: string; list: any[] }[] = [
+        { category: 'director', list: teamContent.mainCampus?.director || [] },
+        { category: 'counselors', list: teamContent.mainCampus?.counselors || [] },
+        { category: 'staff', list: teamContent.mainCampus?.staff || [] },
+        { category: 'coordinators', list: teamContent.mainCampus?.coordinators || [] },
+        { category: 'esuCampus', list: teamContent.esuCampus || [] }
+      ];
+
+      let totalToProcess = 0;
+      allMembers.forEach(cat => {
+        cat.list.forEach(member => {
+          if (member.profileImage && member.profileImage.startsWith('http')) totalToProcess++;
+        });
+      });
+
+      if (totalToProcess === 0) {
+        showToast.info("No existing images found to process.");
+        return;
+      }
+
+      const result = await showAlert.confirm(
+        'Process All Photos?',
+        `This will automatically remove backgrounds from all ${totalToProcess} currently saved team photos. This may take a few minutes.`,
+        'Yes, Start Process',
+        'Cancel'
+      );
+
+      if (!result.isConfirmed) return;
+
+      showToast.info(`Starting batch processing...`, { duration: 5000 });
+      
+      const newTeamContent = JSON.parse(JSON.stringify(teamContent));
+      let processedCount = 0;
+
+      for (const catGroup of allMembers) {
+        for (let i = 0; i < catGroup.list.length; i++) {
+          const member = catGroup.list[i];
+          if (member.profileImage && member.profileImage.startsWith('http')) {
+            try {
+              const response = await fetch(member.profileImage, { mode: 'cors' });
+              if (!response.ok) throw new Error(`Fetch failed`);
+              const blob = await response.blob();
+              const file = new File([blob], `temp.png`, { type: 'image/png' });
+
+              const processedBlob = await removeBackground(file, {
+                publicPath: 'https://staticimgly.com/@imgly/background-removal-data/1.7.0/dist/',
+              });
+              
+              const fileName = `cms/auto-batch-${Date.now()}-${processedCount}.png`;
+              const { error: uploadError } = await supabase.storage.from('cms-assets').upload(fileName, processedBlob);
+              if (uploadError) throw uploadError;
+
+              const { data: { publicUrl } } = supabase.storage.from('cms-assets').getPublicUrl(fileName);
+
+              if (catGroup.category === 'esuCampus') newTeamContent.esuCampus[i].profileImage = publicUrl;
+              else newTeamContent.mainCampus[catGroup.category][i].profileImage = publicUrl;
+
+              processedCount++;
+              showToast.info(`Processed ${processedCount}/${totalToProcess}...`);
+            } catch (err) {
+              console.error(`Failed:`, err);
+            }
+          }
+        }
+      }
+
+      setTeamContent(newTeamContent);
+      showToast.success(`Finished! Updated ${processedCount} images. Remember to Save Changes.`);
+    } catch (error) {
+      showToast.error("Batch processing failed.");
+    }
+  };
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    let file = e.target.files?.[0];
     if (!file || !uploadContext) return;
 
     try {
+      const { section, path, index } = uploadContext;
+
+      // Always-on Background Removal for Team section
+      if (section === 'team') {
+        const processingToast = showToast.info('AI is removing background...', { duration: 15000 });
+        try {
+          const blob = await removeBackground(file, {
+            publicPath: 'https://staticimgly.com/@imgly/background-removal-data/1.7.0/dist/',
+          });
+          file = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".png", { type: 'image/png' });
+          showToast.success('Background removed!');
+        } catch (bgError) {
+          console.error("BG removal failed:", bgError);
+          showToast.error("Background removal failed. Uploading original.");
+        } finally {
+          showToast.dismiss(processingToast);
+        }
+      }
+
       showToast.info('Uploading image...');
       const fileName = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
       const filePath = `cms/${fileName}`;
@@ -390,8 +514,6 @@ const CMS = () => {
         .from('cms-assets')
         .getPublicUrl(filePath);
 
-      const { section, path, index } = uploadContext;
-      
       const updateContentState = (setter: React.Dispatch<React.SetStateAction<any>>) => {
         setter((prev: any) => {
           const newContent = JSON.parse(JSON.stringify(prev));
@@ -509,7 +631,24 @@ const CMS = () => {
         'Privacy Policy': { key: 'privacy', data: privacyContent },
         'Terms of Service': { key: 'terms', data: termsContent }
       };
-      const { key, data } = mapping[section];
+      let { key, data } = mapping[section];
+
+      if (key === 'contact') {
+        const hasErrors = Object.values(contactErrors).some(err => err !== '');
+        if (hasErrors) {
+          showToast.error("Please fix the validation errors before saving.");
+          return;
+        }
+        data = {
+          ...data,
+          phone: data.phone.trim(),
+          email: data.email.trim(),
+          address: data.address.trim(),
+          facebook: data.facebook.trim(),
+          messenger: data.messenger.trim()
+        };
+        setContactContent(data);
+      }
 
       if (key) {
         const updateResult = await cmsApi.updateContent(key, data, accessToken || undefined);
@@ -611,7 +750,12 @@ return (
               </button>
               <button
                 onClick={() => handleSave('Home Page')}
-                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+                disabled={!hasChanges('home')}
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-black text-sm transition-all shadow-lg ${
+                  !hasChanges('home')
+                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
+                    : 'bg-teal-600 text-white hover:bg-teal-700 shadow-teal-600/20'
+                }`}
               >
                 <Save size={16} />
                 Save Changes
@@ -943,7 +1087,12 @@ return (
               </button>
               <button
                 onClick={() => handleSave('About Us')}
-                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+                disabled={!hasChanges('about')}
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-black text-sm transition-all shadow-lg ${
+                  !hasChanges('about')
+                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
+                    : 'bg-teal-600 text-white hover:bg-teal-700 shadow-teal-600/20'
+                }`}
               >
                 <Save size={16} />
                 Save Changes
@@ -1113,12 +1262,19 @@ return (
           exit={{ opacity: 0, y: -20 }}
           className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
         >
-          <div className="flex items-center justify-between mb-8">
+           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
               <div className="w-2 h-8 bg-teal-500 rounded-full"></div>
               <h3 className="text-2xl font-black text-slate-800">Our Team Editor</h3>
             </div>
             <div className="flex items-center gap-2">
+              <button
+                onClick={() => processAllTeamImages()}
+                className="px-4 py-3 bg-teal-50 text-teal-600 rounded-lg font-black text-xs hover:bg-teal-100 transition-all border border-teal-200 flex items-center gap-2"
+              >
+                <ImageIcon size={14} />
+                Process All Existing Photos
+              </button>
               <button
                 onClick={() => discardSection('team')}
                 className="px-6 py-3 bg-slate-100 text-slate-500 rounded-lg font-black text-sm hover:bg-slate-200 transition-all"
@@ -1127,7 +1283,12 @@ return (
               </button>
               <button
                 onClick={() => handleSave('Our Team')}
-                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+                disabled={!hasChanges('team')}
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-black text-sm transition-all shadow-lg ${
+                  !hasChanges('team')
+                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
+                    : 'bg-teal-600 text-white hover:bg-teal-700 shadow-teal-600/20'
+                }`}
               >
                 <Save size={16} />
                 Save Changes
@@ -1244,7 +1405,7 @@ return (
                           value={member.name}
                           onChange={(e) => {
                             const newItems = [...teamContent.mainCampus.director];
-                            newItems[idx].name = e.target.value;
+                            newItems[idx].name = sanitizeTeamInput(e.target.value);
                             setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, director: newItems } });
                           }}
                           placeholder="Name"
@@ -1255,7 +1416,7 @@ return (
                           value={member.degree}
                           onChange={(e) => {
                             const newItems = [...teamContent.mainCampus.director];
-                            newItems[idx].degree = e.target.value;
+                            newItems[idx].degree = sanitizeTeamInput(e.target.value);
                             setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, director: newItems } });
                           }}
                           placeholder="Degree"
@@ -1266,7 +1427,7 @@ return (
                           value={member.dept}
                           onChange={(e) => {
                             const newItems = [...teamContent.mainCampus.director];
-                            newItems[idx].dept = e.target.value;
+                            newItems[idx].dept = sanitizeTeamInput(e.target.value);
                             setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, director: newItems } });
                           }}
                           placeholder="Department"
@@ -1343,7 +1504,7 @@ return (
                           value={member.name}
                           onChange={(e) => {
                             const newItems = [...teamContent.mainCampus.counselors];
-                            newItems[idx].name = e.target.value;
+                            newItems[idx].name = sanitizeTeamInput(e.target.value);
                             setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, counselors: newItems } });
                           }}
                           placeholder="Name"
@@ -1354,7 +1515,7 @@ return (
                           value={member.degree}
                           onChange={(e) => {
                             const newItems = [...teamContent.mainCampus.counselors];
-                            newItems[idx].degree = e.target.value;
+                            newItems[idx].degree = sanitizeTeamInput(e.target.value);
                             setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, counselors: newItems } });
                           }}
                           placeholder="Degree"
@@ -1365,7 +1526,7 @@ return (
                           value={member.dept}
                           onChange={(e) => {
                             const newItems = [...teamContent.mainCampus.counselors];
-                            newItems[idx].dept = e.target.value;
+                            newItems[idx].dept = sanitizeTeamInput(e.target.value);
                             setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, counselors: newItems } });
                           }}
                           placeholder="Department"
@@ -1442,7 +1603,7 @@ return (
                           value={member.name}
                           onChange={(e) => {
                             const newItems = [...teamContent.mainCampus.staff];
-                            newItems[idx].name = e.target.value;
+                            newItems[idx].name = sanitizeTeamInput(e.target.value);
                             setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, staff: newItems } });
                           }}
                           placeholder="Name"
@@ -1453,7 +1614,7 @@ return (
                           value={member.degree}
                           onChange={(e) => {
                             const newItems = [...teamContent.mainCampus.staff];
-                            newItems[idx].degree = e.target.value;
+                            newItems[idx].degree = sanitizeTeamInput(e.target.value);
                             setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, staff: newItems } });
                           }}
                           placeholder="Degree"
@@ -1464,7 +1625,7 @@ return (
                           value={member.dept}
                           onChange={(e) => {
                             const newItems = [...teamContent.mainCampus.staff];
-                            newItems[idx].dept = e.target.value;
+                            newItems[idx].dept = sanitizeTeamInput(e.target.value);
                             setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, staff: newItems } });
                           }}
                           placeholder="Department"
@@ -1541,7 +1702,7 @@ return (
                           value={member.name}
                           onChange={(e) => {
                             const newItems = [...teamContent.mainCampus.coordinators];
-                            newItems[idx].name = e.target.value;
+                            newItems[idx].name = sanitizeTeamInput(e.target.value);
                             setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, coordinators: newItems } });
                           }}
                           placeholder="Name"
@@ -1552,7 +1713,7 @@ return (
                           value={member.degree}
                           onChange={(e) => {
                             const newItems = [...teamContent.mainCampus.coordinators];
-                            newItems[idx].degree = e.target.value;
+                            newItems[idx].degree = sanitizeTeamInput(e.target.value);
                             setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, coordinators: newItems } });
                           }}
                           placeholder="Degree"
@@ -1563,7 +1724,7 @@ return (
                           value={member.dept}
                           onChange={(e) => {
                             const newItems = [...teamContent.mainCampus.coordinators];
-                            newItems[idx].dept = e.target.value;
+                            newItems[idx].dept = sanitizeTeamInput(e.target.value);
                             setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, coordinators: newItems } });
                           }}
                           placeholder="Department"
@@ -1635,12 +1796,12 @@ return (
                       </div>
                       <input type="text" value={member.name} onChange={(e) => {
                         const newItems = [...teamContent.esuCampus];
-                        newItems[idx].name = e.target.value;
+                        newItems[idx].name = sanitizeTeamInput(e.target.value);
                         setTeamContent({ ...teamContent, esuCampus: newItems });
                       }} className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-[10px] font-black text-slate-800 outline-none" />
                       <input type="text" value={member.dept} onChange={(e) => {
                         const newItems = [...teamContent.esuCampus];
-                        newItems[idx].dept = e.target.value;
+                        newItems[idx].dept = sanitizeTeamInput(e.target.value);
                         setTeamContent({ ...teamContent, esuCampus: newItems });
                       }} className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-[9px] font-bold text-emerald-600 outline-none" />
                     </Reorder.Item>
@@ -1673,7 +1834,12 @@ return (
               </button>
               <button
                 onClick={() => handleSave('Contact Info')}
-                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+                disabled={!hasChanges('contact') || Object.values(contactErrors).some(err => err !== '')}
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-black text-sm transition-all shadow-lg ${
+                  (!hasChanges('contact') || Object.values(contactErrors).some(err => err !== ''))
+                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
+                    : 'bg-teal-600 text-white hover:bg-teal-700 shadow-teal-600/20'
+                }`}
               >
                 <Save size={16} />
                 Save Changes
@@ -1689,14 +1855,22 @@ return (
                   Primary Contact
                 </h4>
                 <div className="space-y-4">
-                  <div>
+                   <div>
                     <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Office Phone Number</label>
                     <input
                       type="text"
                       value={contactContent.phone}
-                      onChange={(e) => setContactContent({ ...contactContent, phone: e.target.value })}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
+                      maxLength={20}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setContactContent({ ...contactContent, phone: val });
+                        validateContactField('phone', val);
+                      }}
+                      className={`w-full bg-slate-50 border rounded-lg px-4 py-3 text-sm font-bold text-slate-700 outline-none transition-all ${
+                        contactErrors.phone ? 'border-red-500 ring-2 ring-red-500/10' : 'border-slate-200 focus:ring-2 focus:ring-teal-500'
+                      }`}
                     />
+                    {contactErrors.phone && <p className="text-[10px] font-bold text-red-500 mt-1.5 ml-1">{contactErrors.phone}</p>}
                   </div>
                   <div>
                     <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Official Email Address</label>
@@ -1715,14 +1889,21 @@ return (
                   <MapPin className="text-teal-500" size={20} />
                   Location
                 </h4>
-                <div>
+                 <div>
                   <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Full Office Address</label>
                   <textarea
                     rows={4}
                     value={contactContent.address}
-                    onChange={(e) => setContactContent({ ...contactContent, address: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setContactContent({ ...contactContent, address: val });
+                      validateContactField('address', val);
+                    }}
+                    className={`w-full bg-slate-50 border rounded-lg px-4 py-3 text-sm font-medium text-slate-700 outline-none transition-all resize-none ${
+                      contactErrors.address ? 'border-red-500 ring-2 ring-red-500/10' : 'border-slate-200 focus:ring-2 focus:ring-teal-500'
+                    }`}
                   ></textarea>
+                  {contactErrors.address && <p className="text-[10px] font-bold text-red-500 mt-1.5 ml-1">{contactErrors.address}</p>}
                 </div>
               </div>
 
@@ -1732,22 +1913,33 @@ return (
                   Social Media Links
                 </h4>
                 <div className="grid md:grid-cols-2 gap-4">
-                  <div>
+                   <div>
                     <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Facebook Page Name</label>
                     <input
                       type="text"
                       value={contactContent.facebook}
-                      onChange={(e) => setContactContent({ ...contactContent, facebook: e.target.value })}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setContactContent({ ...contactContent, facebook: val });
+                        validateContactField('facebook', val);
+                      }}
+                      className={`w-full bg-slate-50 border rounded-lg px-4 py-3 text-sm font-bold text-slate-700 outline-none transition-all ${
+                        contactErrors.facebook ? 'border-red-500 ring-2 ring-red-500/10' : 'border-slate-200 focus:ring-2 focus:ring-teal-500'
+                      }`}
                     />
+                    {contactErrors.facebook && <p className="text-[10px] font-bold text-red-500 mt-1.5 ml-1">{contactErrors.facebook}</p>}
                   </div>
-                  <div>
-                    <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Messenger Shortlink</label>
+                   <div>
+                    <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Facebook Page Link</label>
                     <input
                       type="text"
                       value={contactContent.messenger}
-                      onChange={(e) => setContactContent({ ...contactContent, messenger: e.target.value })}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setContactContent({ ...contactContent, messenger: val });
+                      }}
+                      placeholder="https://facebook.com/yourpage"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-teal-500 transition-all"
                     />
                   </div>
                 </div>
@@ -1778,7 +1970,12 @@ return (
               </button>
               <button
                 onClick={() => handleSave('Privacy Policy')}
-                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+                disabled={!hasChanges('privacy')}
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-black text-sm transition-all shadow-lg ${
+                  !hasChanges('privacy')
+                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
+                    : 'bg-teal-600 text-white hover:bg-teal-700 shadow-teal-600/20'
+                }`}
               >
                 <Save size={16} />
                 Save Changes
@@ -1885,7 +2082,12 @@ return (
               </button>
               <button
                 onClick={() => handleSave('Terms of Service')}
-                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+                disabled={!hasChanges('terms')}
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-black text-sm transition-all shadow-lg ${
+                  !hasChanges('terms')
+                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
+                    : 'bg-teal-600 text-white hover:bg-teal-700 shadow-teal-600/20'
+                }`}
               >
                 <Save size={16} />
                 Save Changes
@@ -1993,7 +2195,12 @@ return (
               </button>
               <button
                 onClick={() => handleSave('System Data')}
-                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+                disabled={!hasChanges('system')}
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-black text-sm transition-all shadow-lg ${
+                  !hasChanges('system')
+                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
+                    : 'bg-teal-600 text-white hover:bg-teal-700 shadow-teal-600/20'
+                }`}
               >
                 <Save size={16} />
                 Save Changes
@@ -2034,8 +2241,9 @@ return (
                           type="text"
                           value={college.name}
                           onChange={(e) => {
+                            const filteredValue = e.target.value.replace(/[^a-zA-Z\s\-()&]/g, '');
                             const newColleges = [...systemData.colleges];
-                            newColleges[cIdx].name = e.target.value;
+                            newColleges[cIdx].name = filteredValue;
                             setSystemData({ ...systemData, colleges: newColleges });
                           }}
                           placeholder="College Name (e.g. College of Computing Studies)"
@@ -2076,9 +2284,10 @@ return (
                                 type="text"
                                 value={course.name}
                                 onChange={(e) => {
+                                  const filteredValue = e.target.value.replace(/[^a-zA-Z\s\-()&]/g, '');
                                   const newColleges = [...systemData.colleges];
                                   const actualIdx = newColleges[cIdx].courses.indexOf(course);
-                                  newColleges[cIdx].courses[actualIdx].name = e.target.value;
+                                  newColleges[cIdx].courses[actualIdx].name = filteredValue;
                                   setSystemData({ ...systemData, colleges: newColleges });
                                 }}
                                 className="flex-1 bg-white border border-slate-200 rounded-lg px-4 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
@@ -2121,9 +2330,10 @@ return (
                                 type="text"
                                 value={course.name}
                                 onChange={(e) => {
+                                  const filteredValue = e.target.value.replace(/[^a-zA-Z\s\-()&]/g, '');
                                   const newColleges = [...systemData.colleges];
                                   const actualIdx = newColleges[cIdx].courses.indexOf(course);
-                                  newColleges[cIdx].courses[actualIdx].name = e.target.value;
+                                  newColleges[cIdx].courses[actualIdx].name = filteredValue;
                                   setSystemData({ ...systemData, colleges: newColleges });
                                 }}
                                 className="flex-1 bg-teal-50/30 border border-teal-100 rounded-lg px-4 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
@@ -2171,8 +2381,9 @@ return (
                       type="text"
                       value={occ}
                       onChange={(e) => {
+                        const filteredValue = e.target.value.replace(/[^a-zA-Z\s\-()&]/g, '');
                         const newOccs = [...systemData.occupations];
-                        newOccs[idx] = e.target.value;
+                        newOccs[idx] = filteredValue;
                         setSystemData({ ...systemData, occupations: newOccs });
                       }}
                       className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"
@@ -2214,7 +2425,12 @@ return (
               </button>
               <button
                 onClick={() => handleSave('Footer')}
-                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+                disabled={!hasChanges('footer')}
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-black text-sm transition-all shadow-lg ${
+                  !hasChanges('footer')
+                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
+                    : 'bg-teal-600 text-white hover:bg-teal-700 shadow-teal-600/20'
+                }`}
               >
                 <Save size={16} />
                 Save Changes
@@ -2264,9 +2480,14 @@ return (
               >
                 Discard
               </button>
-              <button
+               <button
                 onClick={() => handleSave('System Logos')}
-                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+                disabled={!hasChanges('logos')}
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-black text-sm transition-all shadow-lg ${
+                  !hasChanges('logos')
+                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
+                    : 'bg-teal-600 text-white hover:bg-teal-700 shadow-teal-600/20'
+                }`}
               >
                 <Save size={16} />
                 Save Logos
@@ -2342,7 +2563,12 @@ return (
               </button>
               <button
                 onClick={() => handleSave('Counseling Service')}
-                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+                disabled={!hasChanges('counseling')}
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-black text-sm transition-all shadow-lg ${
+                  !hasChanges('counseling')
+                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
+                    : 'bg-teal-600 text-white hover:bg-teal-700 shadow-teal-600/20'
+                }`}
               >
                 <Save size={16} />
                 Save Service
@@ -2569,7 +2795,12 @@ return (
               </button>
               <button
                 onClick={() => handleSave('Assessment Service')}
-                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+                disabled={!hasChanges('assessment')}
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-black text-sm transition-all shadow-lg ${
+                  !hasChanges('assessment')
+                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
+                    : 'bg-teal-600 text-white hover:bg-teal-700 shadow-teal-600/20'
+                }`}
               >
                 <Save size={16} />
                 Save Service
@@ -2866,9 +3097,14 @@ return (
               >
                 Discard
               </button>
-              <button
+               <button
                 onClick={() => handleSave('Shifting Service')}
-                className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg font-black text-sm hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+                disabled={!hasChanges('shifting')}
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-black text-sm transition-all shadow-lg ${
+                  !hasChanges('shifting')
+                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
+                    : 'bg-teal-600 text-white hover:bg-teal-700 shadow-teal-600/20'
+                }`}
               >
                 <Save size={16} />
                 Save Service

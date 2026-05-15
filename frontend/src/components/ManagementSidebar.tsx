@@ -132,9 +132,9 @@ const ManagementSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen
 
         {/* User Card — clicking opens profile */}
         <div className={`mt-auto pt-6 border-t ${c.userCardBorder}`}>
-          <button
+          <div
             onClick={() => { setActiveTab('profile'); onClose?.(); }}
-            className={`w-full ${c.userCardBg} rounded-[2rem] p-4 flex items-center gap-3 border hover:opacity-80 transition-opacity text-left`}
+            className={`w-full ${c.userCardBg} rounded-[2rem] p-4 flex items-center gap-3 border hover:opacity-80 transition-opacity text-left cursor-pointer`}
           >
             <div className={`w-12 h-12 ${c.userAvatar} flex items-center justify-center border overflow-hidden`}>
               {user?.sex?.toLowerCase() === 'female' ? (
@@ -168,7 +168,7 @@ const ManagementSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen
             >
               <LogOut size={18} />
             </button>
-          </button>
+          </div>
         </div>
       </aside>
     </>
