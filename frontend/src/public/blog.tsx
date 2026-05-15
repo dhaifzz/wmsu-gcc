@@ -440,66 +440,60 @@ const BlogPage = () => {
         {/* Hero removed — jump straight to content */}
 
         {/* Search & Filter Bar */}
-        <section className="sticky top-16 z-30 bg-emerald-900/40 backdrop-blur-md border-b border-white/10 pt-2">
-          <div className="w-full px-4 xl:px-10 py-3 space-y-3">
-            {/* Search - Centered to avoid sidebar overlap */}
-            <div className="relative max-w-2xl mx-auto">
-              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-200/60" />
+        <section className="sticky top-16 z-30 bg-emerald-900/60 backdrop-blur-xl border-b border-white/10 py-6 shadow-2xl">
+          <div className="max-w-4xl mx-auto px-6 space-y-6">
+            {/* Search - More prominent and spaced */}
+            <div className="relative group">
+              <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-300/40 group-focus-within:text-emerald-400 transition-colors" />
               <input
                 value={searchInput}
                 onChange={e => handleSearchInput(e.target.value)}
-                placeholder="Search posts..."
-                className="w-full pl-10 pr-4 py-2.5 bg-white/10 border border-white/10 rounded-xl text-sm text-white placeholder:text-emerald-100/40 outline-none focus:border-emerald-400/50 transition-all shadow-inner backdrop-blur-sm"
+                placeholder="Search posts and discussions..."
+                className="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/10 rounded-2xl text-base text-white placeholder:text-emerald-100/30 outline-none focus:bg-white/15 focus:border-emerald-400/50 transition-all shadow-inner backdrop-blur-md"
               />
               {searchInput && (
                 <button onClick={() => { setSearchInput(''); handleSearchInput(''); }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-100/40 hover:text-white transition-colors">
-                  <X size={14} />
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-100/30 hover:text-white transition-colors">
+                  <X size={18} />
                 </button>
               )}
             </div>
 
-            {/* Category Chips - Also Centered */}
-            <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar justify-center">
+            {/* Category Chips - Better spacing */}
+            <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar justify-center">
               <button
                 onClick={() => handleCategoryChange('')}
-                className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                className={`shrink-0 px-5 py-2.5 rounded-xl text-xs font-black transition-all border tracking-wider uppercase ${
                   activeCategory === ''
-                    ? 'bg-emerald-500 text-white border-emerald-400 shadow-md scale-105'
-                    : 'bg-white/10 text-emerald-100 border-white/10 hover:bg-white/20 hover:border-white/20'
+                    ? 'bg-emerald-500 text-white border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.4)] scale-105'
+                    : 'bg-white/5 text-emerald-100/70 border-white/5 hover:bg-white/15 hover:text-white'
                 }`}>
-                All
+                All Posts
               </button>
               {BLOG_CATEGORIES.map(cat => (
                 <button key={cat.value}
                   onClick={() => handleCategoryChange(cat.value)}
-                  className={`shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                  className={`shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black transition-all border tracking-wider uppercase ${
                     activeCategory === cat.value
-                      ? 'bg-emerald-500 text-white border-emerald-400 shadow-md scale-105'
-                      : 'bg-white/10 text-emerald-100 border-white/10 hover:bg-white/20 hover:border-white/20'
+                      ? 'bg-emerald-500 text-white border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.4)] scale-105'
+                      : 'bg-white/5 text-emerald-100/70 border-white/5 hover:bg-white/15 hover:text-white'
                   }`}>
-                  <cat.icon size={12} /> {cat.label}
+                  <cat.icon size={14} /> {cat.label}
                 </button>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Three-Column Layout: Left Sidebar | Feed | Right Sidebar */}
-        <section className="py-6 sm:py-8 flex-1">
-          <div className="w-full px-4 xl:px-8">
-            <div className="flex gap-5 xl:gap-8 items-start justify-between">
-
-            {/* Left Sidebar */}
+        <section className="flex-1 relative">
+          <div className="flex w-full min-h-screen">
             <LeftBlogSidebar
               user={user}
               token={accessToken}
-              savedPostIds={savedPostIds}
               onToggleSave={handleToggleSave}
             />
-
-            {/* Feed Column */}
-            <div className="flex-1 min-w-0 max-w-3xl mx-auto">
+            <div className="flex-1 min-w-0 xl:ml-80 lg:mr-80 py-8 px-4">
+              <div className="max-w-3xl mx-auto">
               {loading && posts.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 gap-3">
                   <div className="w-10 h-10 border-3 border-emerald-200/30 border-t-emerald-400 rounded-full animate-spin" />

@@ -1,26 +1,16 @@
 import { useState, useEffect } from 'react';
-import { LogIn, Bookmark, BookmarkCheck, UserCircle, Pencil, Check, X, Heart, MessageCircle, Sparkles, Save } from 'lucide-react';
+import { LogIn, Bookmark, BookmarkCheck, UserCircle, Pencil, Check, X, Heart, MessageCircle, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { blogApi, type SavedPostItem } from '../lib/blogApi';
 
 interface LeftBlogSidebarProps {
   user: { id: string; firstName?: string; lastName?: string } | null;
   token: string | null;
-  savedPostIds: Set<string>;
   onToggleSave: (postId: string) => void;
 }
 
-function formatTimeShort(dateString: string) {
-  const diff = Date.now() - new Date(dateString).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 60) return `${mins}m ago`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  return `${days}d ago`;
-}
 
-const LeftBlogSidebar = ({ user, token, savedPostIds, onToggleSave }: LeftBlogSidebarProps) => {
+const LeftBlogSidebar = ({ user, token, onToggleSave }: LeftBlogSidebarProps) => {
   const [nickname, setNickname] = useState<string | null>(null);
   const [nicknameInput, setNicknameInput] = useState('');
   const [editingNickname, setEditingNickname] = useState(false);
@@ -60,39 +50,40 @@ const LeftBlogSidebar = ({ user, token, savedPostIds, onToggleSave }: LeftBlogSi
   // ── Not logged in ────────────────────────────────────────────────
   if (!user) {
     return (
-      <aside className="hidden xl:block w-72 shrink-0 sticky top-36 space-y-4">
-        {/* Sign In Card */}
-        <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl overflow-hidden">
-          <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 px-5 py-5 text-center">
-            <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3">
-              <LogIn size={24} className="text-white" />
+      <aside className="hidden xl:flex flex-col fixed left-0 top-[64px] bottom-0 w-80 bg-emerald-950/20 backdrop-blur-3xl border-r border-white/5 z-20 overflow-y-auto no-scrollbar">
+        <div className="p-6 space-y-6">
+          {/* Sign In Card */}
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
+            <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 px-6 py-8 text-center">
+              <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4 shadow-inner">
+                <LogIn size={32} className="text-white" />
+              </div>
+              <h3 className="text-white font-black text-lg">Join the Conversation</h3>
+              <p className="text-emerald-100/60 text-xs font-medium mt-2 leading-relaxed">
+                Sign in to react, comment, and save your favorite wellness posts.
+              </p>
             </div>
-            <h3 className="text-white font-black text-sm">Join the Conversation</h3>
-            <p className="text-emerald-100/70 text-[11px] font-medium mt-1">
-              Sign in to react and comment on posts.
-            </p>
-          </div>
-          <div className="p-4 space-y-3">
-            {/* Feature preview */}
-            <div className="space-y-2">
-              {[
-                { icon: Heart, label: 'React to posts', color: 'text-rose-500' },
-                { icon: MessageCircle, label: 'Join discussions', color: 'text-blue-500' },
-                { icon: Bookmark, label: 'Save favorites', color: 'text-amber-500' },
-                { icon: Sparkles, label: 'Set a nickname', color: 'text-purple-500' },
-              ].map(f => (
-                <div key={f.label} className="flex items-center gap-2.5">
-                  <div className="w-6 h-6 rounded-md bg-slate-50 flex items-center justify-center">
-                    <f.icon size={12} className={f.color} />
+            <div className="p-6 space-y-4">
+              <div className="space-y-3">
+                {[
+                  { icon: Heart, label: 'React to posts', color: 'text-rose-400' },
+                  { icon: MessageCircle, label: 'Join discussions', color: 'text-blue-400' },
+                  { icon: Bookmark, label: 'Save favorites', color: 'text-amber-400' },
+                  { icon: Sparkles, label: 'Set a nickname', color: 'text-purple-400' },
+                ].map(f => (
+                  <div key={f.label} className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center border border-white/5">
+                      <f.icon size={14} className={f.color} />
+                    </div>
+                    <span className="text-xs text-emerald-50/70 font-bold">{f.label}</span>
                   </div>
-                  <span className="text-[11px] text-slate-500 font-medium">{f.label}</span>
-                </div>
-              ))}
+                ))}
+              </div>
+              <a href="/login"
+                className="flex items-center justify-center w-full py-4 rounded-xl bg-emerald-500 text-white text-sm font-black hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-900/40 active:scale-95">
+                Sign In Now
+              </a>
             </div>
-            <a href="/login"
-              className="block w-full py-2.5 rounded-lg bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-500 transition-colors text-center shadow-sm">
-              Sign In
-            </a>
           </div>
         </div>
       </aside>
@@ -101,125 +92,140 @@ const LeftBlogSidebar = ({ user, token, savedPostIds, onToggleSave }: LeftBlogSi
 
   // ── Loged in ────────────────────────────────────────────────────
   return (
-    <aside className="hidden xl:block w-72 shrink-0 sticky top-36 space-y-4">
-      {/* Profile Card */}
-      <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl overflow-hidden">
-        <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white font-black text-lg shrink-0">
-              {user.firstName?.charAt(0)?.toUpperCase() || '?'}
-            </div>
-            <div className="min-w-0">
-              <p className="text-white font-black text-sm truncate">{user.firstName} {user.lastName}</p>
-              {nickname && (
-                <p className="text-emerald-200/80 text-[10px] font-bold truncate">@{nickname}</p>
-              )}
+    <aside className="hidden xl:flex flex-col fixed left-0 top-[64px] bottom-0 w-80 bg-emerald-950/20 backdrop-blur-3xl border-r border-white/5 z-20 overflow-y-auto no-scrollbar">
+      <div className="p-6 space-y-6">
+        {/* Profile Card */}
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
+          <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 px-6 py-6">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center text-white font-black text-2xl shrink-0 shadow-inner">
+                {user.firstName?.charAt(0).toUpperCase() || 'U'}
+              </div>
+              <div className="min-w-0">
+                <p className="text-white font-black text-lg truncate leading-tight">
+                  {user.firstName} {user.lastName}
+                </p>
+                <p className="text-emerald-100/60 text-xs font-bold flex items-center gap-1.5 mt-1">
+                  <UserCircle size={12} /> Active Account
+                </p>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Nickname Editor */}
-        <div className="p-3 border-b border-slate-50">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Comment Nickname</span>
-            {!editingNickname && (
-              <button onClick={() => { setEditingNickname(true); setNicknameInput(nickname || ''); }}
-                className="text-slate-400 hover:text-emerald-600 transition-colors">
-                <Pencil size={11} />
-              </button>
-            )}
-          </div>
-          <AnimatePresence mode="wait">
+          <div className="p-5 bg-emerald-900/40">
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="text-[10px] font-black text-emerald-100/50 uppercase tracking-[0.2em]">Your Identity</h4>
+              <Sparkles size={12} className="text-amber-400" />
+            </div>
+
             {editingNickname ? (
-              <motion.div key="edit" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="flex items-center gap-1.5">
-                <input
-                  value={nicknameInput}
-                  onChange={e => setNicknameInput(e.target.value)}
-                  placeholder="e.g. WMSUBear"
-                  maxLength={30}
-                  className="flex-1 text-xs px-2.5 py-1.5 rounded-md border border-slate-200 outline-none focus:border-emerald-300 text-slate-700"
-                  autoFocus
-                />
-                <button onClick={handleSaveNickname} disabled={savingNickname || nicknameInput.trim().length < 2}
-                  className="w-7 h-7 rounded-md bg-emerald-600 text-white flex items-center justify-center hover:bg-emerald-500 disabled:opacity-40 transition-colors">
-                  <Check size={12} />
-                </button>
-                <button onClick={() => setEditingNickname(false)}
-                  className="w-7 h-7 rounded-md bg-slate-100 text-slate-400 flex items-center justify-center hover:bg-slate-200 transition-colors">
-                  <X size={12} />
-                </button>
-              </motion.div>
+              <div className="flex flex-col gap-2">
+                <div className="relative">
+                  <input
+                    value={nicknameInput}
+                    onChange={(e) => setNicknameInput(e.target.value)}
+                    placeholder="Enter nickname..."
+                    className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-emerald-400 outline-none transition-all"
+                    autoFocus
+                    maxLength={30}
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-white/30 font-bold">
+                    {nicknameInput.length}/30
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleSaveNickname}
+                    disabled={savingNickname || nicknameInput.trim().length < 2}
+                    className="flex-1 bg-emerald-500 text-white py-2.5 rounded-xl text-xs font-black hover:bg-emerald-400 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+                  >
+                    {savingNickname ? <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Check size={14} />}
+                    Save
+                  </button>
+                  <button
+                    onClick={() => { setEditingNickname(false); setNicknameInput(nickname || ''); }}
+                    className="px-4 bg-white/5 text-white/70 py-2.5 rounded-xl text-xs font-black hover:bg-white/10 transition-all"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              </div>
             ) : (
-              <motion.p key="display" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="text-xs text-slate-600 font-medium">
-                {nickname ? (
-                  <span className="text-emerald-600 font-bold">@{nickname}</span>
-                ) : (
-                  <span className="text-slate-400 italic">No nickname set — tap edit</span>
-                )}
-              </motion.p>
-            )}
-          </AnimatePresence>
-          <p className="text-[9px] text-slate-300 mt-1">Used when posting comments</p>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-2 divide-x divide-slate-50">
-          <div className="p-3 text-center">
-            <p className="text-lg font-black text-emerald-600">{savedPostIds.size}</p>
-            <p className="text-[10px] text-slate-400 font-bold">Saved</p>
-          </div>
-          <div className="p-3 text-center">
-            <p className="text-lg font-black text-blue-500">
-              <UserCircle size={18} className="inline" />
-            </p>
-            <p className="text-[10px] text-slate-400 font-bold">Active</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Saved Posts */}
-      <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <BookmarkCheck size={13} className="text-emerald-600" />
-          <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-wider">Saved Posts</h4>
-        </div>
-
-        {loadingSaved ? (
-          <div className="flex justify-center py-4">
-            <div className="w-5 h-5 border-2 border-emerald-200 border-t-emerald-600 rounded-full animate-spin" />
-          </div>
-        ) : savedPosts.length === 0 ? (
-          <div className="text-center py-3">
-            <Save size={20} className="text-slate-200 mx-auto mb-1.5" />
-            <p className="text-[11px] text-slate-400 font-medium">No saved posts yet</p>
-            <p className="text-[10px] text-slate-300 mt-0.5">Bookmark posts to see them here</p>
-          </div>
-        ) : (
-          <div className="space-y-2 max-h-64 overflow-y-auto">
-            {savedPosts.map(item => (
-              <div key={item.post_id} className="group relative">
-                <a href={`#post-${item.post_id}`}
-                  className="block p-2.5 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
-                  <p className="text-[11px] text-slate-700 font-medium line-clamp-2 leading-relaxed">
-                    {item.blog_posts?.content?.slice(0, 80) || 'Post'}
-                    {(item.blog_posts?.content?.length ?? 0) > 80 ? '...' : ''}
+              <div className="flex items-center justify-between group">
+                <div className="min-w-0">
+                  <p className="text-white font-black text-base truncate">
+                    {nickname ? `@${nickname}` : 'No Nickname Set'}
                   </p>
-                  <p className="text-[10px] text-slate-400 mt-1">
-                    {item.blog_posts?.author_name} · {formatTimeShort(item.created_at)}
+                  <p className="text-[10px] text-emerald-100/40 font-bold mt-0.5">
+                    Visible in comments
                   </p>
-                </a>
+                </div>
                 <button
-                  onClick={(e) => { e.preventDefault(); onToggleSave(item.post_id); setSavedPosts(prev => prev.filter(p => p.post_id !== item.post_id)); }}
-                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-slate-300 hover:text-rose-400"
-                  title="Unsave">
-                  <X size={12} />
+                  onClick={() => { setNicknameInput(nickname || ''); setEditingNickname(true); }}
+                  className="p-2.5 rounded-xl bg-white/5 text-emerald-400 hover:bg-white/10 hover:text-emerald-300 transition-all"
+                >
+                  <Pencil size={14} />
                 </button>
               </div>
-            ))}
+            )}
           </div>
-        )}
+        </div>
+
+        {/* Saved Posts */}
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl p-6">
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-2.5">
+              <BookmarkCheck size={16} className="text-emerald-400" />
+              <h4 className="text-[11px] font-black text-emerald-100/70 uppercase tracking-widest">Bookmarks</h4>
+            </div>
+            {savedPosts.length > 0 && (
+              <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full font-black border border-emerald-500/30">
+                {savedPosts.length}
+              </span>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            {loadingSaved ? (
+              <div className="flex justify-center py-4">
+                <div className="w-5 h-5 border-2 border-emerald-200/20 border-t-emerald-400 rounded-full animate-spin" />
+              </div>
+            ) : savedPosts.length === 0 ? (
+              <div className="text-center py-8 px-4 bg-black/10 rounded-2xl border border-white/5">
+                <Bookmark size={24} className="text-emerald-100/10 mx-auto mb-2" />
+                <p className="text-[10px] text-emerald-100/30 font-bold leading-relaxed">
+                  Saved posts appear here.
+                </p>
+              </div>
+            ) : (
+              <div className="max-h-[300px] overflow-y-auto pr-1 no-scrollbar space-y-2.5">
+                <AnimatePresence>
+                  {savedPosts.map(p => (
+                    <motion.div
+                      key={p.post_id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -10 }}
+                      className="group relative bg-white/5 hover:bg-white/10 rounded-xl p-3 border border-white/5 transition-all cursor-pointer"
+                    >
+                      <a href={`#post-${p.post_id}`} className="block pr-6">
+                        <p className="text-[11px] text-emerald-50 font-black line-clamp-2 leading-relaxed">
+                          {p.blog_posts?.content || 'Saved Post'}
+                        </p>
+                      </a>
+                      <button
+                        onClick={(e) => { e.preventDefault(); onToggleSave(p.post_id); }}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-white/20 hover:text-rose-400 transition-colors opacity-0 group-hover:opacity-100"
+                      >
+                        <X size={14} />
+                      </button>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </aside>
   );

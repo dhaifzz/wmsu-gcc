@@ -1,4 +1,4 @@
-import { Heart, Sparkles, HandHeart, PartyPopper, Lightbulb, Phone, Mail, MapPin, Clock, ShieldCheck } from 'lucide-react';
+import { Heart, Sparkles, HandHeart, PartyPopper, Lightbulb, Phone, Mail, MapPin, ShieldCheck } from 'lucide-react';
 import { BLOG_CATEGORIES } from '../lib/blogApi';
 
 const REACTION_GUIDE = [
@@ -27,101 +27,105 @@ const RightBlogSidebar = ({ activeCategory, onCategoryChange }: RightBlogSidebar
   const tipIndex = new Date().getDate() % WELLNESS_TIPS.length;
 
   return (
-    <aside className="hidden lg:block w-72 xl:w-80 shrink-0 sticky top-36 space-y-4">
+    <aside className="hidden lg:flex flex-col fixed right-0 top-[64px] bottom-0 w-80 bg-emerald-950/20 backdrop-blur-3xl border-l border-white/5 z-20 overflow-y-auto no-scrollbar">
+      <div className="p-6 space-y-6">
 
-      {/* About Card */}
-      <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl overflow-hidden">
-        <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 px-5 py-4">
-          <h3 className="text-white font-black text-sm">Guidance & Counseling Center</h3>
-          <p className="text-emerald-100/80 text-xs font-medium mt-1">Western Mindanao State University</p>
-        </div>
-        <div className="p-4 text-xs text-slate-500 leading-relaxed">
-          Your safe space for academic guidance, career counseling, mental health support, and personal development.
-        </div>
-      </div>
-
-      {/* Wellness Tip */}
-      <div className="bg-gradient-to-br from-amber-500/90 to-orange-600/90 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl p-4">
-        <div className="flex items-center gap-2 mb-2.5">
-          <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center">
-            <Lightbulb size={14} className="text-white" />
+        {/* About Card */}
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
+          <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 px-6 py-6">
+            <h3 className="text-white font-black text-lg">WMSU GCC</h3>
+            <p className="text-emerald-100/60 text-xs font-bold mt-1 uppercase tracking-widest">Guidance & Counseling</p>
           </div>
-          <h4 className="text-xs font-black text-white uppercase tracking-wider">Wellness Tip</h4>
+          <div className="p-6 text-xs text-emerald-50/70 leading-relaxed font-medium">
+            Your safe space for academic guidance, career counseling, mental health support, and personal development at Western Mindanao State University.
+          </div>
         </div>
-        <p className="text-xs text-white/90 leading-relaxed italic">
-          {WELLNESS_TIPS[tipIndex]}
-        </p>
-      </div>
 
-      {/* Browse by Category */}
-      <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl p-4">
-        <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-3">Browse by Category</h4>
-        <div className="space-y-1">
-          {BLOG_CATEGORIES.map(cat => (
-            <button key={cat.value}
-              onClick={() => onCategoryChange(cat.value)}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition-all text-left ${
-                activeCategory === cat.value
-                  ? 'bg-emerald-50 text-emerald-700'
-                  : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
-              }`}>
-              <cat.icon size={14} className={activeCategory === cat.value ? 'text-emerald-600' : 'text-slate-400'} />
-              {cat.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Reaction Guide */}
-      <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl p-4">
-        <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-3">How to React</h4>
-        <div className="space-y-2">
-          {REACTION_GUIDE.map(r => (
-            <div key={r.label} className="flex items-center gap-2.5">
-              <div className={`w-7 h-7 rounded-full ${r.bg} flex items-center justify-center shrink-0`}>
-                <r.icon size={13} className={r.color} />
-              </div>
-              <div className="min-w-0">
-                <p className="text-[11px] font-bold text-slate-700">{r.label}</p>
-                <p className="text-[10px] text-slate-400">{r.desc}</p>
-              </div>
+        {/* Wellness Tip */}
+        <div className="bg-gradient-to-br from-amber-500/90 to-orange-600/90 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center border border-white/10">
+              <Lightbulb size={20} className="text-white" />
             </div>
-          ))}
+            <h4 className="text-xs font-black text-white uppercase tracking-widest">Wellness Tip</h4>
+          </div>
+          <p className="text-sm text-white/90 leading-relaxed italic font-medium">
+            {WELLNESS_TIPS[tipIndex]}
+          </p>
         </div>
-      </div>
 
-      {/* Contact Info */}
-      <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl p-4">
-        <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-3">Contact Us</h4>
-        <div className="space-y-2.5">
-          <div className="flex items-start gap-2.5">
-            <MapPin size={13} className="text-emerald-600 shrink-0 mt-0.5" />
-            <p className="text-[11px] text-slate-500 leading-relaxed">GCC Building, WMSU Campus, Zamboanga City</p>
-          </div>
-          <div className="flex items-center gap-2.5">
-            <Phone size={13} className="text-emerald-600 shrink-0" />
-            <p className="text-[11px] text-slate-500">(062) 991-1040</p>
-          </div>
-          <div className="flex items-center gap-2.5">
-            <Mail size={13} className="text-emerald-600 shrink-0" />
-            <p className="text-[11px] text-slate-500">gcc@wmsu.edu.ph</p>
-          </div>
-          <div className="flex items-center gap-2.5">
-            <Clock size={13} className="text-emerald-600 shrink-0" />
-            <p className="text-[11px] text-slate-500">Mon – Fri, 8:00 AM – 5:00 PM</p>
+        {/* Browse by Category */}
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl p-6">
+          <h4 className="text-[10px] font-black text-emerald-100/50 uppercase tracking-[0.2em] mb-4">Browse by Category</h4>
+          <div className="space-y-2">
+            {BLOG_CATEGORIES.map(cat => (
+              <button key={cat.value}
+                onClick={() => onCategoryChange(cat.value)}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-black transition-all text-left border ${
+                  activeCategory === cat.value
+                    ? 'bg-emerald-500 text-white border-emerald-400 shadow-lg'
+                    : 'text-emerald-100/60 border-transparent hover:bg-white/5 hover:text-white'
+                }`}>
+                <cat.icon size={16} className={activeCategory === cat.value ? 'text-white' : 'text-emerald-400/60'} />
+                {cat.label}
+              </button>
+            ))}
           </div>
         </div>
-      </div>
 
-      {/* Community Badge */}
-      <div className="bg-emerald-600/90 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl p-4">
-        <div className="flex items-center gap-2.5 mb-2">
-          <ShieldCheck size={16} className="text-white" />
-          <p className="text-xs font-black text-white">Trusted Community</p>
+        {/* Reaction Guide */}
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl p-6">
+          <h4 className="text-[10px] font-black text-emerald-100/50 uppercase tracking-[0.2em] mb-4">How to React</h4>
+          <div className="space-y-4">
+            {REACTION_GUIDE.map(r => (
+              <div key={r.label} className="flex items-center gap-4 group">
+                <div className={`w-10 h-10 rounded-xl ${r.bg} flex items-center justify-center shrink-0 shadow-lg transition-transform group-hover:scale-110`}>
+                  <r.icon size={18} className={r.color} />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-black text-white">{r.label}</p>
+                  <p className="text-[10px] text-emerald-100/40 font-bold mt-0.5">{r.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-        <p className="text-[11px] text-emerald-50 leading-relaxed">
-          All posts are reviewed by the GCC team to ensure quality and relevance for our students.
-        </p>
+
+        {/* Contact Info */}
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl p-6">
+          <h4 className="text-[10px] font-black text-emerald-100/50 uppercase tracking-[0.2em] mb-4">Get in Touch</h4>
+          <div className="space-y-4">
+            <div className="flex items-start gap-4">
+              <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center border border-white/5 shrink-0">
+                <MapPin size={14} className="text-emerald-400" />
+              </div>
+              <p className="text-[11px] text-emerald-50/70 leading-relaxed font-bold">GCC Building, WMSU Campus, Normal Road, Zamboanga City</p>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center border border-white/5 shrink-0">
+                <Phone size={14} className="text-emerald-400" />
+              </div>
+              <p className="text-[11px] text-emerald-50/70 font-bold">(062) 991-1040</p>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center border border-white/5 shrink-0">
+                <Mail size={14} className="text-emerald-400" />
+              </div>
+              <p className="text-[11px] text-emerald-50/70 font-bold">gcc@wmsu.edu.ph</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Community Badge */}
+        <div className="bg-emerald-600/20 backdrop-blur-md rounded-2xl border border-emerald-500/20 shadow-xl p-6">
+          <div className="flex items-center gap-3 mb-3">
+            <ShieldCheck size={20} className="text-emerald-400" />
+            <p className="text-xs font-black text-white">Trusted Community</p>
+          </div>
+          <p className="text-[11px] text-emerald-100/50 leading-relaxed font-bold">
+            All posts are reviewed by the GCC team to ensure quality and relevance for our students.
+          </p>
+        </div>
       </div>
     </aside>
   );
