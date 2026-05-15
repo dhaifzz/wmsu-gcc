@@ -36,7 +36,8 @@ export default defineConfig({
         enabled: true,
       },
       workbox: {
-        maximumFileSizeToCacheInBytes: 30 * 1024 * 1024, // Increase limit to 30MB for AI models
+        maximumFileSizeToCacheInBytes: 100 * 1024 * 1024, // 100MB limit for large WASM files
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,wasm}']
       }
     })
   ],
