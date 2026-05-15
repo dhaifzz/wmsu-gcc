@@ -27,7 +27,7 @@ const RightBlogSidebar = ({ activeCategory, onCategoryChange }: RightBlogSidebar
   const tipIndex = new Date().getDate() % WELLNESS_TIPS.length;
 
   return (
-    <aside className="hidden lg:flex flex-col fixed right-0 top-[64px] bottom-0 w-80 bg-emerald-950/20 backdrop-blur-3xl border-l border-white/5 z-20 overflow-y-auto no-scrollbar">
+    <aside className="hidden lg:flex flex-col sticky top-[260px] h-[calc(100vh-280px)] w-80 bg-emerald-950/20 backdrop-blur-3xl border border-white/5 rounded-3xl z-20 overflow-y-auto no-scrollbar">
       <div className="p-6 space-y-6">
 
         {/* About Card */}

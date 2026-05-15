@@ -485,15 +485,18 @@ const BlogPage = () => {
           </div>
         </section>
 
-        <section className="flex-1 relative">
-          <div className="flex w-full min-h-screen">
-            <LeftBlogSidebar
-              user={user}
-              token={accessToken}
-              onToggleSave={handleToggleSave}
-            />
-            <div className="flex-1 min-w-0 xl:ml-80 lg:mr-80 py-8 px-4">
-              <div className="max-w-3xl mx-auto">
+        <section className="flex-1 relative py-8">
+          <div className="w-full px-4 xl:px-10 max-w-[1920px] mx-auto">
+            <div className="flex gap-6 items-start justify-between">
+              {/* Left Sidebar - Now Sticky */}
+              <LeftBlogSidebar
+                user={user}
+                token={accessToken}
+                onToggleSave={handleToggleSave}
+              />
+
+              {/* Feed Column - Centered with margins for sidebars */}
+              <div className="flex-1 min-w-0 max-w-3xl mx-auto">
               {loading && posts.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 gap-3">
                   <div className="w-10 h-10 border-3 border-emerald-200/30 border-t-emerald-400 rounded-full animate-spin" />
