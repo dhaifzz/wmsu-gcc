@@ -480,18 +480,20 @@ const BlogPage = () => {
 
       <div className="relative z-10 flex flex-col h-full overflow-hidden">
         <Navbar />
+        
+        {/* Navbar Spacer - ensures content starts below the fixed navbar */}
+        <div className="h-20 shrink-0" />
 
-        <section className="flex-1 relative flex flex-col pt-20 overflow-hidden">
-          <div className="flex w-full h-full items-start overflow-hidden">
-            <LeftBlogSidebar
-              user={user}
-              token={accessToken}
-              onToggleSave={handleToggleSave}
-            />
+        <section className="flex-1 relative flex w-full overflow-hidden">
+          <LeftBlogSidebar
+            user={user}
+            token={accessToken}
+            onToggleSave={handleToggleSave}
+          />
 
-            <div className="flex-1 h-full min-w-0 overflow-y-auto custom-scrollbar flex flex-col items-center">
-              {/* Refined Search Area - Bound to Middle Column */}
-              <div className="sticky top-0 z-30 w-full px-4 sm:px-6 mb-8 pt-6">
+          <div className="flex-1 h-full min-w-0 overflow-y-auto custom-scrollbar flex flex-col items-center">
+            {/* Search Area - No longer needs top-20 because parent section is already below navbar */}
+            <div className="sticky top-0 z-30 w-full px-4 sm:px-6 mb-8 pt-6">
                 <div className="bg-emerald-900/40 backdrop-blur-3xl rounded-3xl border border-white/10 p-6 shadow-2xl">
                   <div className="max-w-4xl mx-auto space-y-6">
                     {/* Search Input */}
@@ -636,10 +638,9 @@ const BlogPage = () => {
               activeCategory={activeCategory}
               onCategoryChange={handleCategoryChange}
             />
-          </div>
         </section>
 
-        <div className="relative z-20 bg-[#BD2D2D] border-t border-rose-800/50">
+        <div className="relative z-20 bg-[#BD2D2D] border-t border-rose-800/50 shrink-0">
           <Footer />
         </div>
 
