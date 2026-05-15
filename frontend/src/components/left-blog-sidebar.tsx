@@ -50,7 +50,7 @@ const LeftBlogSidebar = ({ user, token, onToggleSave }: LeftBlogSidebarProps) =>
   // ── Not logged in ────────────────────────────────────────────────
   if (!user) {
     return (
-      <aside className="hidden xl:flex flex-col sticky top-[260px] h-[calc(100vh-280px)] w-80 bg-emerald-950/20 backdrop-blur-3xl border border-white/5 rounded-3xl z-20 overflow-y-auto no-scrollbar">
+      <aside className="hidden xl:flex flex-col sticky top-[280px] h-[calc(100vh-300px)] w-80 bg-emerald-950/20 backdrop-blur-3xl border-r border-white/5 z-20 overflow-y-auto scrollbar-hide">
         <div className="p-6 space-y-6">
           {/* Sign In Card */}
           <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
@@ -92,7 +92,7 @@ const LeftBlogSidebar = ({ user, token, onToggleSave }: LeftBlogSidebarProps) =>
 
   // ── Loged in ────────────────────────────────────────────────────
   return (
-    <aside className="hidden xl:flex flex-col sticky top-[260px] h-[calc(100vh-280px)] w-80 bg-emerald-950/20 backdrop-blur-3xl border border-white/5 rounded-3xl z-20 overflow-y-auto no-scrollbar">
+    <aside className="hidden xl:flex flex-col sticky top-[280px] h-[calc(100vh-300px)] w-80 bg-emerald-950/20 backdrop-blur-3xl border-r border-white/5 z-20 overflow-y-auto scrollbar-hide">
       <div className="p-6 space-y-6">
         {/* Profile Card */}
         <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl overflow-hidden">

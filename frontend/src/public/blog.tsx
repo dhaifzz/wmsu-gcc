@@ -440,10 +440,10 @@ const BlogPage = () => {
         {/* Hero removed — jump straight to content */}
 
         {/* Search & Filter Bar */}
-        <section className="sticky top-16 z-30 bg-emerald-900/60 backdrop-blur-xl border-b border-white/10 py-6 shadow-2xl">
-          <div className="max-w-4xl mx-auto px-6 space-y-6">
-            {/* Search - More prominent and spaced */}
-            <div className="relative group">
+        <section className="sticky top-16 z-[100] bg-emerald-900/60 backdrop-blur-xl border-b border-white/10 py-6 shadow-2xl">
+          <div className="w-full px-4 sm:px-10 space-y-8">
+            {/* Search - Still centered but part of wider container */}
+            <div className="relative group max-w-4xl mx-auto">
               <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-300/40 group-focus-within:text-emerald-400 transition-colors" />
               <input
                 value={searchInput}
@@ -459,44 +459,49 @@ const BlogPage = () => {
               )}
             </div>
 
-            {/* Category Chips - Better spacing */}
-            <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar justify-center">
-              <button
-                onClick={() => handleCategoryChange('')}
-                className={`shrink-0 px-5 py-2.5 rounded-xl text-xs font-black transition-all border tracking-wider uppercase ${
-                  activeCategory === ''
-                    ? 'bg-emerald-500 text-white border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.4)] scale-105'
-                    : 'bg-white/5 text-emerald-100/70 border-white/5 hover:bg-white/15 hover:text-white'
-                }`}>
-                All Posts
-              </button>
-              {BLOG_CATEGORIES.map(cat => (
-                <button key={cat.value}
-                  onClick={() => handleCategoryChange(cat.value)}
-                  className={`shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black transition-all border tracking-wider uppercase ${
-                    activeCategory === cat.value
-                      ? 'bg-emerald-500 text-white border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.4)] scale-105'
-                      : 'bg-white/5 text-emerald-100/70 border-white/5 hover:bg-white/15 hover:text-white'
+            {/* Category Chips - Full Width Carousel Feel */}
+            <div className="relative group/filters">
+              <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide justify-start lg:justify-center px-10 scroll-smooth">
+                <button
+                  onClick={() => handleCategoryChange('')}
+                  className={`shrink-0 px-8 py-3.5 rounded-xl text-[10px] font-black transition-all border tracking-[0.2em] uppercase ${
+                    activeCategory === ''
+                      ? 'bg-emerald-500 text-white border-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.5)] scale-105'
+                      : 'bg-white/5 text-emerald-100/70 border-white/5 hover:bg-white/10 hover:text-white hover:border-white/10'
                   }`}>
-                  <cat.icon size={14} /> {cat.label}
+                  All Posts
                 </button>
-              ))}
+                {BLOG_CATEGORIES.map(cat => (
+                  <button key={cat.value}
+                    onClick={() => handleCategoryChange(cat.value)}
+                    className={`shrink-0 flex items-center gap-3 px-8 py-3.5 rounded-xl text-[10px] font-black transition-all border tracking-[0.2em] uppercase ${
+                      activeCategory === cat.value
+                        ? 'bg-emerald-500 text-white border-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.5)] scale-105'
+                        : 'bg-white/5 text-emerald-100/70 border-white/5 hover:bg-white/10 hover:text-white hover:border-white/10'
+                    }`}>
+                    <cat.icon size={16} /> {cat.label}
+                  </button>
+                ))}
+              </div>
+              {/* Gradient masks for carousel feel */}
+              <div className="absolute left-0 top-0 bottom-4 w-12 bg-gradient-to-r from-emerald-900/80 to-transparent pointer-events-none rounded-l-2xl" />
+              <div className="absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-emerald-900/80 to-transparent pointer-events-none rounded-r-2xl" />
             </div>
           </div>
         </section>
 
-        <section className="flex-1 relative py-8">
-          <div className="w-full px-4 xl:px-10 max-w-[1920px] mx-auto">
+        <section className="flex-1 relative">
+          <div className="flex w-full items-start">
             <div className="flex gap-6 items-start justify-between">
-              {/* Left Sidebar - Now Sticky */}
               <LeftBlogSidebar
                 user={user}
                 token={accessToken}
                 onToggleSave={handleToggleSave}
               />
 
-              {/* Feed Column - Centered with margins for sidebars */}
-              <div className="flex-1 min-w-0 max-w-3xl mx-auto">
+              {/* Feed Column - Centered between edge sidebars */}
+              <div className="flex-1 min-w-0 py-8 px-4 sm:px-8">
+                <div className="max-w-3xl mx-auto">
               {loading && posts.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 gap-3">
                   <div className="w-10 h-10 border-3 border-emerald-200/30 border-t-emerald-400 rounded-full animate-spin" />
@@ -539,16 +544,17 @@ const BlogPage = () => {
                 </div>
               )}
             </div>
-
-            {/* Right Sidebar */}
-            <RightBlogSidebar
-              activeCategory={activeCategory}
-              onCategoryChange={handleCategoryChange}
-            />
-
           </div>
+
+          {/* Right Sidebar - Now Sticky and Docked */}
+          <RightBlogSidebar
+            activeCategory={activeCategory}
+            onCategoryChange={handleCategoryChange}
+          />
+
         </div>
-      </section>
+      </div>
+    </section>
 
       {/* Login Prompt Modal */}
       <AnimatePresence>
