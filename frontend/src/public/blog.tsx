@@ -56,6 +56,14 @@ function getYouTubeID(url: string) {
   return (match && match[2].length === 11) ? match[2] : null;
 }
 
+function getFacebookEmbedURL(url: string) {
+  let sanitized = url.replace('m.facebook.com', 'www.facebook.com');
+  if (!sanitized.includes('www.facebook.com') && sanitized.includes('facebook.com')) {
+    sanitized = sanitized.replace('facebook.com', 'www.facebook.com');
+  }
+  return `https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(sanitized)}&show_text=true&width=500`;
+}
+
 function PostCard({ post, user, token, onNeedLogin }: { post: BlogPost; user: any; token: string | null; onNeedLogin: () => void }) {
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState<BlogComment[]>([]);
@@ -223,9 +231,9 @@ function PostCard({ post, user, token, onNeedLogin }: { post: BlogPost; user: an
                 />
               </div>
             ) : post.link_type === 'facebook' ? (
-              <div className="relative rounded-xl overflow-hidden border border-slate-100 shadow-sm bg-white min-h-[400px]">
+              <div className="relative rounded-xl overflow-hidden border border-slate-100 shadow-sm bg-white min-h-[500px]">
                 <iframe
-                  src={`https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(post.link_url)}&show_text=true&width=500`}
+                  src={getFacebookEmbedURL(post.link_url)}
                   className="absolute inset-0 w-full h-full"
                   style={{ border: 'none', overflow: 'hidden' }}
                   scrolling="no"
@@ -233,6 +241,11 @@ function PostCard({ post, user, token, onNeedLogin }: { post: BlogPost; user: an
                   allowFullScreen={true}
                   allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
                 />
+                <div className="absolute bottom-0 left-0 right-0 p-2 bg-white/90 backdrop-blur-sm border-t border-slate-100 flex justify-center">
+                  <a href={post.link_url} target="_blank" rel="noopener noreferrer" className="text-[10px] font-black text-emerald-600 hover:text-emerald-700 flex items-center gap-1">
+                    <ExternalLink size={10} /> View on Facebook
+                  </a>
+                </div>
               </div>
             ) : (
               <a href={post.link_url} target="_blank" rel="noopener noreferrer"
@@ -458,27 +471,27 @@ const BlogPage = () => {
 
 
   return (
-    <div className="min-h-screen relative flex flex-col overflow-hidden">
+    <div className="h-screen relative flex flex-col overflow-hidden bg-[#047857]">
       <div 
         className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${authBg})` }}
       />
       <div className="fixed inset-0 z-0 bg-[#047857]/85 backdrop-blur-[2px]" />
 
-      <div className="relative z-10 flex flex-col min-h-screen">
+      <div className="relative z-10 flex flex-col h-full overflow-hidden">
         <Navbar />
 
-        <section className="flex-1 relative pt-20">
-          <div className="flex w-full items-start">
+        <section className="flex-1 relative flex flex-col pt-20 overflow-hidden">
+          <div className="flex w-full h-full items-start overflow-hidden">
             <LeftBlogSidebar
               user={user}
               token={accessToken}
               onToggleSave={handleToggleSave}
             />
 
-            <div className="flex-1 min-w-0 flex flex-col items-center">
+            <div className="flex-1 h-full min-w-0 overflow-y-auto custom-scrollbar flex flex-col items-center">
               {/* Refined Search Area - Bound to Middle Column */}
-              <div className="sticky top-20 z-30 w-full px-4 sm:px-6 mb-8">
+              <div className="sticky top-0 z-30 w-full px-4 sm:px-6 mb-8 pt-6">
                 <div className="bg-emerald-900/40 backdrop-blur-3xl rounded-3xl border border-white/10 p-6 shadow-2xl">
                   <div className="max-w-4xl mx-auto space-y-6">
                     {/* Search Input */}
@@ -614,6 +627,10 @@ const BlogPage = () => {
                       )}
                     </div>
                   )}
+                  
+                  <div className="w-full mt-20 pb-10">
+                    <Footer />
+                  </div>
                 </div>
               </div>
             </div>
@@ -651,9 +668,8 @@ const BlogPage = () => {
           )}
         </AnimatePresence>
 
-        <div className="relative z-40">
-          <Footer />
-        </div>
+        {/* Removed Footer from scroll area to keep focus on feed, 
+            or we can put it at the bottom of the middle column scroll */}
       </div>
     </div>
   );
