@@ -628,9 +628,6 @@ const BlogPage = () => {
                     </div>
                   )}
                   
-                  <div className="w-full mt-20 pb-10">
-                    <Footer />
-                  </div>
                 </div>
               </div>
             </div>
@@ -641,6 +638,10 @@ const BlogPage = () => {
             />
           </div>
         </section>
+
+        <div className="relative z-20 bg-[#BD2D2D] border-t border-rose-800/50">
+          <Footer />
+        </div>
 
         <AnimatePresence>
           {showLoginPrompt && (
