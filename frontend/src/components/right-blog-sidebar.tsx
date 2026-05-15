@@ -30,7 +30,7 @@ const RightBlogSidebar = ({ activeCategory, onCategoryChange }: RightBlogSidebar
     <aside className="hidden lg:block w-72 xl:w-80 shrink-0 sticky top-36 space-y-4">
 
       {/* About Card */}
-      <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+      <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl overflow-hidden">
         <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 px-5 py-4">
           <h3 className="text-white font-black text-sm">Guidance & Counseling Center</h3>
           <p className="text-emerald-100/80 text-xs font-medium mt-1">Western Mindanao State University</p>
@@ -41,20 +41,20 @@ const RightBlogSidebar = ({ activeCategory, onCategoryChange }: RightBlogSidebar
       </div>
 
       {/* Wellness Tip */}
-      <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border border-amber-200/40 shadow-sm p-4">
+      <div className="bg-gradient-to-br from-amber-500/90 to-orange-600/90 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl p-4">
         <div className="flex items-center gap-2 mb-2.5">
-          <div className="w-7 h-7 rounded-lg bg-amber-100 flex items-center justify-center">
-            <Lightbulb size={14} className="text-amber-600" />
+          <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center">
+            <Lightbulb size={14} className="text-white" />
           </div>
-          <h4 className="text-xs font-black text-amber-900 uppercase tracking-wider">Wellness Tip</h4>
+          <h4 className="text-xs font-black text-white uppercase tracking-wider">Wellness Tip</h4>
         </div>
-        <p className="text-xs text-amber-800/70 leading-relaxed italic">
+        <p className="text-xs text-white/90 leading-relaxed italic">
           {WELLNESS_TIPS[tipIndex]}
         </p>
       </div>
 
       {/* Browse by Category */}
-      <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
+      <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl p-4">
         <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-3">Browse by Category</h4>
         <div className="space-y-1">
           {BLOG_CATEGORIES.map(cat => (
@@ -73,7 +73,7 @@ const RightBlogSidebar = ({ activeCategory, onCategoryChange }: RightBlogSidebar
       </div>
 
       {/* Reaction Guide */}
-      <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
+      <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl p-4">
         <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-3">How to React</h4>
         <div className="space-y-2">
           {REACTION_GUIDE.map(r => (
@@ -91,7 +91,7 @@ const RightBlogSidebar = ({ activeCategory, onCategoryChange }: RightBlogSidebar
       </div>
 
       {/* Contact Info */}
-      <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
+      <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl p-4">
         <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-3">Contact Us</h4>
         <div className="space-y-2.5">
           <div className="flex items-start gap-2.5">
@@ -114,12 +114,12 @@ const RightBlogSidebar = ({ activeCategory, onCategoryChange }: RightBlogSidebar
       </div>
 
       {/* Community Badge */}
-      <div className="bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-xl border border-emerald-200/50 p-4">
+      <div className="bg-emerald-600/90 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl p-4">
         <div className="flex items-center gap-2.5 mb-2">
-          <ShieldCheck size={16} className="text-emerald-600" />
-          <p className="text-xs font-black text-emerald-800">Trusted Community</p>
+          <ShieldCheck size={16} className="text-white" />
+          <p className="text-xs font-black text-white">Trusted Community</p>
         </div>
-        <p className="text-[11px] text-emerald-700/60 leading-relaxed">
+        <p className="text-[11px] text-emerald-50 leading-relaxed">
           All posts are reviewed by the GCC team to ensure quality and relevance for our students.
         </p>
       </div>

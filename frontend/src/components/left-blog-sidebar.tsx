@@ -60,9 +60,9 @@ const LeftBlogSidebar = ({ user, token, savedPostIds, onToggleSave }: LeftBlogSi
   // ── Not logged in ────────────────────────────────────────────────
   if (!user) {
     return (
-      <aside className="hidden xl:block w-64 shrink-0 sticky top-36 space-y-4">
+      <aside className="hidden xl:block w-72 shrink-0 sticky top-36 space-y-4">
         {/* Sign In Card */}
-        <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+        <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl overflow-hidden">
           <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 px-5 py-5 text-center">
             <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3">
               <LogIn size={24} className="text-white" />
@@ -99,11 +99,11 @@ const LeftBlogSidebar = ({ user, token, savedPostIds, onToggleSave }: LeftBlogSi
     );
   }
 
-  // ── Logged in ────────────────────────────────────────────────────
+  // ── Loged in ────────────────────────────────────────────────────
   return (
-    <aside className="hidden xl:block w-64 shrink-0 sticky top-36 space-y-4">
+    <aside className="hidden xl:block w-72 shrink-0 sticky top-36 space-y-4">
       {/* Profile Card */}
-      <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+      <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl overflow-hidden">
         <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 px-4 py-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white font-black text-lg shrink-0">
@@ -180,7 +180,7 @@ const LeftBlogSidebar = ({ user, token, savedPostIds, onToggleSave }: LeftBlogSi
       </div>
 
       {/* Saved Posts */}
-      <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
+      <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl p-4">
         <div className="flex items-center gap-2 mb-3">
           <BookmarkCheck size={13} className="text-emerald-600" />
           <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-wider">Saved Posts</h4>

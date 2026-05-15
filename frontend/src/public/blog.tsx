@@ -7,6 +7,7 @@ import LeftBlogSidebar from '../components/left-blog-sidebar';
 import RightBlogSidebar from '../components/right-blog-sidebar';
 import { useAuth } from '../auth/AuthContext';
 import { blogApi, BLOG_CATEGORIES, type BlogPost, type BlogComment, type ReactionType } from '../lib/blogApi';
+import authBg from '../assets/img/Auth-Background.jpg';
 
 const REACTION_CONFIG: { type: ReactionType; icon: any; label: string; color: string; bg: string; desc: string }[] = [
   { type: 'support', icon: Heart, label: 'Support', color: 'text-emerald-600', bg: 'bg-emerald-100', desc: 'Show solidarity' },
@@ -147,7 +148,7 @@ function PostCard({ post, user, token, onNeedLogin }: { post: BlogPost; user: an
           {c.author_name.charAt(0).toUpperCase()}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="bg-slate-50 rounded-2xl px-3 sm:px-4 py-2">
+          <div className="bg-emerald-50/50 backdrop-blur-sm rounded-2xl px-3 sm:px-4 py-2">
             <p className="font-bold text-xs sm:text-sm text-slate-800">{c.author_name}</p>
             <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
               {c.mentioned_user_name && <span className="text-emerald-600 font-bold">@{c.mentioned_user_name} </span>}
@@ -175,7 +176,7 @@ function PostCard({ post, user, token, onNeedLogin }: { post: BlogPost; user: an
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-xl sm:rounded-2xl shadow-md shadow-slate-200/50 border border-slate-100 overflow-hidden"
+      className="bg-white/95 backdrop-blur-md rounded-xl sm:rounded-2xl shadow-xl border border-white/20 overflow-hidden"
     >
       {/* Header */}
       <div className="px-4 sm:px-5 pt-3.5 sm:pt-4 pb-2 flex items-center gap-2.5 sm:gap-3">
@@ -424,61 +425,70 @@ const BlogPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <Navbar />
+    <div className="min-h-screen relative flex flex-col overflow-hidden">
+      {/* Fixed Background Image */}
+      <div 
+        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${authBg})` }}
+      />
+      {/* Emerald Overlay matching Login.tsx */}
+      <div className="fixed inset-0 z-0 bg-[#047857]/85 backdrop-blur-[2px]" />
 
-      {/* Hero removed — jump straight to content */}
+      <div className="relative z-10 flex flex-col min-h-screen">
+        <Navbar />
 
-      {/* Search & Filter Bar */}
-      <section className="sticky top-16 z-30 bg-slate-50/90 backdrop-blur-md border-b border-slate-100 pt-2">
-        <div className="container mx-auto px-3 sm:px-6 max-w-7xl py-3 space-y-3">
-          {/* Search */}
-          <div className="relative max-w-2xl mx-auto xl:mx-0">
-            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              value={searchInput}
-              onChange={e => handleSearchInput(e.target.value)}
-              placeholder="Search posts..."
-              className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-700 placeholder:text-slate-400 outline-none focus:border-emerald-300 transition-colors shadow-sm"
-            />
-            {searchInput && (
-              <button onClick={() => { setSearchInput(''); handleSearchInput(''); }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                <X size={14} />
-              </button>
-            )}
-          </div>
+        {/* Hero removed — jump straight to content */}
 
-          {/* Category Chips */}
-          <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar justify-center xl:justify-start">
-            <button
-              onClick={() => handleCategoryChange('')}
-              className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
-                activeCategory === ''
-                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
-                  : 'bg-white text-slate-500 border-slate-200 hover:border-emerald-300 hover:text-emerald-600'
-              }`}>
-              All
-            </button>
-            {BLOG_CATEGORIES.map(cat => (
-              <button key={cat.value}
-                onClick={() => handleCategoryChange(cat.value)}
-                className={`shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
-                  activeCategory === cat.value
-                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
-                    : 'bg-white text-slate-500 border-slate-200 hover:border-emerald-300 hover:text-emerald-600'
+        {/* Search & Filter Bar */}
+        <section className="sticky top-16 z-30 bg-emerald-900/40 backdrop-blur-md border-b border-white/10 pt-2">
+          <div className="w-full px-4 xl:px-10 py-3 space-y-3">
+            {/* Search - Centered to avoid sidebar overlap */}
+            <div className="relative max-w-2xl mx-auto">
+              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-200/60" />
+              <input
+                value={searchInput}
+                onChange={e => handleSearchInput(e.target.value)}
+                placeholder="Search posts..."
+                className="w-full pl-10 pr-4 py-2.5 bg-white/10 border border-white/10 rounded-xl text-sm text-white placeholder:text-emerald-100/40 outline-none focus:border-emerald-400/50 transition-all shadow-inner backdrop-blur-sm"
+              />
+              {searchInput && (
+                <button onClick={() => { setSearchInput(''); handleSearchInput(''); }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-100/40 hover:text-white transition-colors">
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+
+            {/* Category Chips - Also Centered */}
+            <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar justify-center">
+              <button
+                onClick={() => handleCategoryChange('')}
+                className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                  activeCategory === ''
+                    ? 'bg-emerald-500 text-white border-emerald-400 shadow-md scale-105'
+                    : 'bg-white/10 text-emerald-100 border-white/10 hover:bg-white/20 hover:border-white/20'
                 }`}>
-                <cat.icon size={12} /> {cat.label}
+                All
               </button>
-            ))}
+              {BLOG_CATEGORIES.map(cat => (
+                <button key={cat.value}
+                  onClick={() => handleCategoryChange(cat.value)}
+                  className={`shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                    activeCategory === cat.value
+                      ? 'bg-emerald-500 text-white border-emerald-400 shadow-md scale-105'
+                      : 'bg-white/10 text-emerald-100 border-white/10 hover:bg-white/20 hover:border-white/20'
+                  }`}>
+                  <cat.icon size={12} /> {cat.label}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Three-Column Layout: Left Sidebar | Feed | Right Sidebar */}
-      <section className="py-6 sm:py-8 flex-1">
-        <div className="container mx-auto px-3 sm:px-6 max-w-7xl">
-          <div className="flex gap-5 items-start">
+        {/* Three-Column Layout: Left Sidebar | Feed | Right Sidebar */}
+        <section className="py-6 sm:py-8 flex-1">
+          <div className="w-full px-4 xl:px-8">
+            <div className="flex gap-5 xl:gap-8 items-start justify-between">
 
             {/* Left Sidebar */}
             <LeftBlogSidebar
@@ -489,42 +499,42 @@ const BlogPage = () => {
             />
 
             {/* Feed Column */}
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 max-w-3xl mx-auto">
               {loading && posts.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 gap-3">
-                  <div className="w-10 h-10 border-3 border-emerald-200 border-t-emerald-600 rounded-full animate-spin" />
-                  <p className="text-slate-400 font-bold text-sm">Loading posts...</p>
+                  <div className="w-10 h-10 border-3 border-emerald-200/30 border-t-emerald-400 rounded-full animate-spin" />
+                  <p className="text-emerald-100/50 font-bold text-sm">Loading posts...</p>
                 </div>
               ) : posts.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <MessageCircle size={32} className="text-slate-300" />
+                <div className="text-center py-12 bg-white/5 backdrop-blur-md rounded-3xl border border-white/10">
+                  <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <MessageCircle size={32} className="text-emerald-200/50" />
                   </div>
-                  <h3 className="text-xl font-black text-slate-400">No posts yet</h3>
-                  <p className="text-slate-400 text-sm font-medium mt-1">Check back soon for updates!</p>
+                  <h3 className="text-xl font-black text-emerald-100/50">No posts yet</h3>
+                  <p className="text-emerald-100/30 text-sm font-medium mt-1">Check back soon for updates!</p>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {posts.map(post => (
-                    <div key={post.id} id={`post-${post.id}`} className="relative">
+                    <div key={post.id} id={`post-${post.id}`} className="relative group">
                       <PostCard post={post} user={user} token={accessToken} onNeedLogin={() => setShowLoginPrompt(true)} />
                       {/* Save button on each post */}
                       <button
                         onClick={() => user ? handleToggleSave(post.id) : setShowLoginPrompt(true)}
-                        className={`absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-all z-10 ${
+                        className={`absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center transition-all z-10 shadow-lg ${
                           savedPostIds.has(post.id)
-                            ? 'bg-emerald-100 text-emerald-600 hover:bg-emerald-200'
-                            : 'bg-slate-100/80 text-slate-400 hover:bg-slate-200 hover:text-slate-600'
+                            ? 'bg-emerald-500 text-white hover:bg-emerald-600'
+                            : 'bg-white/80 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 backdrop-blur-sm'
                         }`}
                         title={savedPostIds.has(post.id) ? 'Unsave post' : 'Save post'}>
-                        {savedPostIds.has(post.id) ? <BookmarkCheck size={14} /> : <Bookmark size={14} />}
+                        {savedPostIds.has(post.id) ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
                       </button>
                     </div>
                   ))}
                   {posts.length < total && (
-                    <div className="text-center pt-3">
+                    <div className="text-center pt-6">
                       <button onClick={loadMore} disabled={loading}
-                        className="px-8 py-3 bg-white border border-slate-200 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-50 hover:border-emerald-200 hover:text-emerald-700 transition-all shadow-sm disabled:opacity-50">
+                        className="px-10 py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-sm transition-all shadow-xl shadow-emerald-900/40 disabled:opacity-50 active:scale-95">
                         {loading ? 'Loading...' : 'Load More Posts'}
                       </button>
                     </div>
@@ -572,7 +582,8 @@ const BlogPage = () => {
 
       <Footer />
     </div>
-  );
+  </div>
+);
 };
 
 export default BlogPage;
