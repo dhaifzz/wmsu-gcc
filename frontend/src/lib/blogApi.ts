@@ -296,4 +296,45 @@ export const blogApi = {
     if (userId) url += `?userId=${userId}`;
     return api<ReactionsResponse>(url);
   },
+
+  // Saved posts
+  getSavedPosts: (token: string) =>
+    api<{ savedPosts: SavedPostItem[] }>('/api/blog/saved', { token }),
+
+  savePost: (postId: string, token: string) =>
+    api<{ message: string }>(`/api/blog/saved/${postId}`, {
+      method: 'POST',
+      body: {},
+      token,
+    }),
+
+  unsavePost: (postId: string, token: string) =>
+    api<{ message: string }>(`/api/blog/saved/${postId}`, {
+      method: 'DELETE',
+      token,
+    }),
+
+  // Nickname
+  getNickname: (token: string) =>
+    api<{ nickname: string | null }>('/api/blog/nickname', { token }),
+
+  setNickname: (nickname: string, token: string) =>
+    api<{ message: string; nickname: string }>('/api/blog/nickname', {
+      method: 'PUT',
+      body: { nickname } as unknown as Record<string, unknown>,
+      token,
+    }),
 };
+
+export interface SavedPostItem {
+  post_id: string;
+  created_at: string;
+  blog_posts: {
+    id: string;
+    content: string;
+    category: string;
+    author_name: string;
+    created_at: string;
+    media_urls: string[];
+  } | null;
+}

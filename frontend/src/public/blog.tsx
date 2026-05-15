@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import { Heart, Sparkles, HandHeart, PartyPopper, Lightbulb, MessageCircle, Send, CornerDownRight, ExternalLink, X, LogIn, Search, Phone, Mail, MapPin, Clock, ShieldCheck } from 'lucide-react';
+import { Heart, Sparkles, HandHeart, PartyPopper, Lightbulb, MessageCircle, Send, CornerDownRight, ExternalLink, X, LogIn, Search, Bookmark, BookmarkCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import LeftBlogSidebar from '../components/left-blog-sidebar';
+import RightBlogSidebar from '../components/right-blog-sidebar';
 import { useAuth } from '../auth/AuthContext';
 import { blogApi, BLOG_CATEGORIES, type BlogPost, type BlogComment, type ReactionType } from '../lib/blogApi';
 
@@ -360,6 +362,7 @@ const BlogPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const searchTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const [savedPostIds, setSavedPostIds] = useState<Set<string>>(new Set());
 
   const fetchPosts = async (p = 1, cat?: string, search?: string) => {
     setLoading(true);
@@ -374,6 +377,28 @@ const BlogPage = () => {
   };
 
   useEffect(() => { fetchPosts(); }, []);
+
+  // Load saved post IDs for the logged-in user
+  useEffect(() => {
+    if (!accessToken) return;
+    blogApi.getSavedPosts(accessToken).then(res => {
+      if (res.ok) {
+        setSavedPostIds(new Set(res.data.savedPosts.map(s => s.post_id)));
+      }
+    });
+  }, [accessToken]);
+
+  const handleToggleSave = async (postId: string) => {
+    if (!accessToken) return;
+    const isSaved = savedPostIds.has(postId);
+    if (isSaved) {
+      await blogApi.unsavePost(postId, accessToken);
+      setSavedPostIds(prev => { const next = new Set(prev); next.delete(postId); return next; });
+    } else {
+      await blogApi.savePost(postId, accessToken);
+      setSavedPostIds(prev => new Set(prev).add(postId));
+    }
+  };
 
   const handleCategoryChange = (cat: string) => {
     const newCat = activeCategory === cat ? '' : cat;
@@ -406,9 +431,9 @@ const BlogPage = () => {
 
       {/* Search & Filter Bar */}
       <section className="sticky top-16 z-30 bg-slate-50/90 backdrop-blur-md border-b border-slate-100 pt-2">
-        <div className="container mx-auto px-3 sm:px-6 max-w-5xl py-3 space-y-3">
+        <div className="container mx-auto px-3 sm:px-6 max-w-7xl py-3 space-y-3">
           {/* Search */}
-          <div className="relative max-w-2xl">
+          <div className="relative max-w-2xl mx-auto xl:mx-0">
             <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               value={searchInput}
@@ -425,7 +450,7 @@ const BlogPage = () => {
           </div>
 
           {/* Category Chips */}
-          <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+          <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar justify-center xl:justify-start">
             <button
               onClick={() => handleCategoryChange('')}
               className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
@@ -450,12 +475,20 @@ const BlogPage = () => {
         </div>
       </section>
 
-      {/* Main Content: Feed + Sidebar */}
+      {/* Three-Column Layout: Left Sidebar | Feed | Right Sidebar */}
       <section className="py-6 sm:py-8 flex-1">
-        <div className="container mx-auto px-3 sm:px-6 max-w-5xl">
-          <div className="flex gap-6 items-start">
+        <div className="container mx-auto px-3 sm:px-6 max-w-7xl">
+          <div className="flex gap-5 items-start">
 
-            {/* ── Feed Column ─────────────────────────── */}
+            {/* Left Sidebar */}
+            <LeftBlogSidebar
+              user={user}
+              token={accessToken}
+              savedPostIds={savedPostIds}
+              onToggleSave={handleToggleSave}
+            />
+
+            {/* Feed Column */}
             <div className="flex-1 min-w-0">
               {loading && posts.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 gap-3">
@@ -473,7 +506,20 @@ const BlogPage = () => {
               ) : (
                 <div className="space-y-4">
                   {posts.map(post => (
-                    <PostCard key={post.id} post={post} user={user} token={accessToken} onNeedLogin={() => setShowLoginPrompt(true)} />
+                    <div key={post.id} id={`post-${post.id}`} className="relative">
+                      <PostCard post={post} user={user} token={accessToken} onNeedLogin={() => setShowLoginPrompt(true)} />
+                      {/* Save button on each post */}
+                      <button
+                        onClick={() => user ? handleToggleSave(post.id) : setShowLoginPrompt(true)}
+                        className={`absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-all z-10 ${
+                          savedPostIds.has(post.id)
+                            ? 'bg-emerald-100 text-emerald-600 hover:bg-emerald-200'
+                            : 'bg-slate-100/80 text-slate-400 hover:bg-slate-200 hover:text-slate-600'
+                        }`}
+                        title={savedPostIds.has(post.id) ? 'Unsave post' : 'Save post'}>
+                        {savedPostIds.has(post.id) ? <BookmarkCheck size={14} /> : <Bookmark size={14} />}
+                      </button>
+                    </div>
                   ))}
                   {posts.length < total && (
                     <div className="text-center pt-3">
@@ -487,117 +533,11 @@ const BlogPage = () => {
               )}
             </div>
 
-            {/* ── Sidebar ─────────────────────────────── */}
-            <aside className="hidden lg:block w-72 xl:w-80 shrink-0 sticky top-36 space-y-4">
-
-              {/* About Card */}
-              <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
-                <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 px-5 py-4">
-                  <h3 className="text-white font-black text-sm">Guidance & Counseling Center</h3>
-                  <p className="text-emerald-100/80 text-xs font-medium mt-1">Western Mindanao State University</p>
-                </div>
-                <div className="p-4 text-xs text-slate-500 leading-relaxed">
-                  Your safe space for academic guidance, career counseling, mental health support, and personal development.
-                </div>
-              </div>
-
-              {/* Wellness Tip */}
-              <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border border-amber-200/40 shadow-sm p-4">
-                <div className="flex items-center gap-2 mb-2.5">
-                  <div className="w-7 h-7 rounded-lg bg-amber-100 flex items-center justify-center">
-                    <Lightbulb size={14} className="text-amber-600" />
-                  </div>
-                  <h4 className="text-xs font-black text-amber-900 uppercase tracking-wider">Wellness Tip</h4>
-                </div>
-                <p className="text-xs text-amber-800/70 leading-relaxed italic">
-                  "Taking a 5-minute break every hour improves focus by 30%. Step away, breathe deeply, and come back refreshed."
-                </p>
-              </div>
-
-              {/* Browse by Category */}
-              <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
-                <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-3">Browse by Category</h4>
-                <div className="space-y-1">
-                  {BLOG_CATEGORIES.map(cat => (
-                    <button key={cat.value}
-                      onClick={() => handleCategoryChange(cat.value)}
-                      className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition-all text-left ${
-                        activeCategory === cat.value
-                          ? 'bg-emerald-50 text-emerald-700'
-                          : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
-                      }`}>
-                      <cat.icon size={14} className={activeCategory === cat.value ? 'text-emerald-600' : 'text-slate-400'} />
-                      {cat.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Reaction Guide */}
-              <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
-                <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-3">How to React</h4>
-                <div className="space-y-2">
-                  {REACTION_CONFIG.map(r => (
-                    <div key={r.type} className="flex items-center gap-2.5">
-                      <div className={`w-7 h-7 rounded-full ${r.bg} flex items-center justify-center shrink-0`}>
-                        <r.icon size={13} className={r.color} />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-[11px] font-bold text-slate-700">{r.label}</p>
-                        <p className="text-[10px] text-slate-400">{r.desc}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Contact Info */}
-              <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
-                <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-3">Contact Us</h4>
-                <div className="space-y-2.5">
-                  <div className="flex items-start gap-2.5">
-                    <MapPin size={13} className="text-emerald-600 shrink-0 mt-0.5" />
-                    <p className="text-[11px] text-slate-500 leading-relaxed">GCC Building, WMSU Campus, Zamboanga City</p>
-                  </div>
-                  <div className="flex items-center gap-2.5">
-                    <Phone size={13} className="text-emerald-600 shrink-0" />
-                    <p className="text-[11px] text-slate-500">(062) 991-1040</p>
-                  </div>
-                  <div className="flex items-center gap-2.5">
-                    <Mail size={13} className="text-emerald-600 shrink-0" />
-                    <p className="text-[11px] text-slate-500">gcc@wmsu.edu.ph</p>
-                  </div>
-                  <div className="flex items-center gap-2.5">
-                    <Clock size={13} className="text-emerald-600 shrink-0" />
-                    <p className="text-[11px] text-slate-500">Mon – Fri, 8:00 AM – 5:00 PM</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Community Badge */}
-              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-xl border border-emerald-200/50 p-4">
-                <div className="flex items-center gap-2.5 mb-2">
-                  <ShieldCheck size={16} className="text-emerald-600" />
-                  <p className="text-xs font-black text-emerald-800">Trusted Community</p>
-                </div>
-                <p className="text-[11px] text-emerald-700/60 leading-relaxed">
-                  All posts are reviewed by the GCC team to ensure quality and relevance for our students.
-                </p>
-              </div>
-
-              {/* Sign In Prompt (guests only) */}
-              {!user && (
-                <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 text-center">
-                  <LogIn size={20} className="text-emerald-600 mx-auto mb-2" />
-                  <p className="text-xs font-bold text-slate-700 mb-1">Join the conversation</p>
-                  <p className="text-[11px] text-slate-500 mb-3">Sign in to react and comment on posts.</p>
-                  <a href="/login"
-                    className="block w-full py-2 rounded-lg bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-500 transition-colors shadow-sm">
-                    Sign In
-                  </a>
-                </div>
-              )}
-            </aside>
+            {/* Right Sidebar */}
+            <RightBlogSidebar
+              activeCategory={activeCategory}
+              onCategoryChange={handleCategoryChange}
+            />
 
           </div>
         </div>
