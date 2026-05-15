@@ -10,9 +10,9 @@ import toast, { Toaster } from 'react-hot-toast';
 // ============================================
 
 export const showToast = {
-  success: (message: string) =>
+  success: (message: string, options?: any) =>
     toast.success(message, {
-      duration: 3000,
+      duration: options?.duration || 3000,
       style: {
         background: '#065f46',
         color: '#fff',
@@ -27,9 +27,9 @@ export const showToast = {
       },
     }),
 
-  error: (message: string) =>
+  error: (message: string, options?: any) =>
     toast.error(message, {
-      duration: 4000,
+      duration: options?.duration || 4000,
       style: {
         background: '#991b1b',
         color: '#fff',
@@ -44,9 +44,9 @@ export const showToast = {
       },
     }),
 
-  warning: (message: string) =>
+  warning: (message: string, options?: any) =>
     toast(message, {
-      duration: 3500,
+      duration: options?.duration || 3500,
       icon: '⚠️',
       style: {
         background: '#92400e',
@@ -58,9 +58,9 @@ export const showToast = {
       },
     }),
 
-  info: (message: string) =>
+  info: (message: string, options?: any) =>
     toast(message, {
-      duration: 3000,
+      duration: options?.duration || 3000,
       icon: 'ℹ️',
       style: {
         background: '#1e40af',
@@ -117,6 +117,8 @@ export const showToast = {
         },
       }
     ),
+  
+  dismiss: (id?: string) => toast.dismiss(id),
 };
 
 // ToastProvider component — mount once in App.tsx

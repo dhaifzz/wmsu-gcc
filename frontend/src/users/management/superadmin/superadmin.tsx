@@ -45,12 +45,12 @@ const SuperAdminDashboard = () => {
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'accounts', label: 'User Accounts', icon: Users },
     { id: 'cms', label: 'Content (CMS)', icon: FileEdit },
+    { id: 'blog', label: 'Blog', icon: Newspaper },
     { id: 'counseling', label: 'Counseling', icon: MessageCircle },
     { id: 'assessment', label: 'Assessment', icon: ClipboardCheck },
     { id: 'shifting', label: 'Shifting', icon: RefreshCw },
     { id: 'history', label: 'System History', icon: Clock },
     { id: 'office-schedule', label: 'Office Schedule', icon: Building2 },
-    { id: 'blog', label: 'Blog', icon: Newspaper },
   ];
 
   return (
