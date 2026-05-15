@@ -472,6 +472,7 @@ const BlogPage = () => {
 
   return (
     <div className="h-screen relative flex flex-col overflow-hidden bg-[#047857]">
+      {/* Background Layer */}
       <div 
         className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${authBg})` }}
@@ -481,19 +482,22 @@ const BlogPage = () => {
       <div className="relative z-10 flex flex-col h-full overflow-hidden">
         <Navbar />
         
-        {/* Navbar Spacer - ensures content starts below the fixed navbar */}
-        <div className="h-20 shrink-0" />
+        {/* Main Content Area: Constrained between Navbar and Footer */}
+        <main className="flex-1 flex flex-col overflow-hidden">
+          {/* Navbar Spacer */}
+          <div className="h-20 shrink-0" />
 
-        <section className="flex-1 relative flex w-full overflow-hidden">
-          <LeftBlogSidebar
-            user={user}
-            token={accessToken}
-            onToggleSave={handleToggleSave}
-          />
+          {/* Sidebars + Feed Container */}
+          <section className="flex-1 flex w-full overflow-hidden">
+            <LeftBlogSidebar
+              user={user}
+              token={accessToken}
+              onToggleSave={handleToggleSave}
+            />
 
-          <div className="flex-1 h-full min-w-0 overflow-y-auto custom-scrollbar flex flex-col items-center">
-            {/* Search Area - No longer needs top-20 because parent section is already below navbar */}
-            <div className="sticky top-0 z-30 w-full px-4 sm:px-6 mb-8 pt-6">
+            <div className="flex-1 h-full min-w-0 overflow-y-auto custom-scrollbar flex flex-col items-center">
+              {/* Search Area */}
+              <div className="sticky top-0 z-30 w-full px-4 sm:px-6 mb-8 pt-6">
                 <div className="bg-emerald-900/40 backdrop-blur-3xl rounded-3xl border border-white/10 p-6 shadow-2xl">
                   <div className="max-w-4xl mx-auto space-y-6">
                     {/* Search Input */}
@@ -514,35 +518,21 @@ const BlogPage = () => {
                       )}
                     </div>
 
-                    {/* Auto Carousel Category Filters - Infinite Marquee */}
+                    {/* Category Filters Carousel */}
                     <div className="relative group/filters max-w-4xl mx-auto overflow-hidden">
-                      <motion.div 
-                        className="flex gap-3 whitespace-nowrap py-2"
-                        animate={{ x: ["0%", "-50%"] }}
-                        transition={{ 
-                          repeat: Infinity, 
-                          duration: 40, 
-                          ease: "linear" 
-                        }}
-                        style={{ width: "fit-content" }}
-                        onHoverStart={() => { 
-                           // This is a simplified way to pause, though Framer Motion's "pause" 
-                           // state usually requires a useAnimation hook or similar. 
-                           // For now, I'll use a CSS hover state or just leave it flowing.
-                        }}
-                      >
-                        {/* First Set */}
+                      <div className="flex gap-3 overflow-x-auto no-scrollbar py-2 px-1">
                         <button
-                          onClick={() => handleCategoryChange('')}
-                          className={`shrink-0 px-8 py-3 rounded-xl text-[10px] font-black transition-all border tracking-[0.2em] uppercase ${
-                            activeCategory === ''
+                          onClick={() => handleCategoryChange('all')}
+                          className={`shrink-0 flex items-center gap-3 px-8 py-3 rounded-xl text-[10px] font-black transition-all border tracking-[0.2em] uppercase ${
+                            activeCategory === 'all'
                               ? 'bg-emerald-500 text-white border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.4)] scale-105'
                               : 'bg-white/5 text-emerald-100/50 border-white/5 hover:bg-white/10 hover:text-white'
-                          }`}>
+                          }`}
+                        >
                           All
                         </button>
                         {BLOG_CATEGORIES.map(cat => (
-                          <button key={`set1-${cat.value}`}
+                          <button key={`cat-${cat.value}`}
                             onClick={() => handleCategoryChange(cat.value)}
                             className={`shrink-0 flex items-center gap-3 px-8 py-3 rounded-xl text-[10px] font-black transition-all border tracking-[0.2em] uppercase ${
                               activeCategory === cat.value
@@ -553,41 +543,19 @@ const BlogPage = () => {
                             {cat.label}
                           </button>
                         ))}
-
-                        {/* Duplicated Set for Seamless Loop */}
-                        <button
-                          onClick={() => handleCategoryChange('')}
-                          className={`shrink-0 px-8 py-3 rounded-xl text-[10px] font-black transition-all border tracking-[0.2em] uppercase ${
-                            activeCategory === ''
-                              ? 'bg-emerald-500 text-white border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.4)] scale-105'
-                              : 'bg-white/5 text-emerald-100/50 border-white/5 hover:bg-white/10 hover:text-white'
-                          }`}>
-                          All
-                        </button>
-                        {BLOG_CATEGORIES.map(cat => (
-                          <button key={`set2-${cat.value}`}
-                            onClick={() => handleCategoryChange(cat.value)}
-                            className={`shrink-0 flex items-center gap-3 px-8 py-3 rounded-xl text-[10px] font-black transition-all border tracking-[0.2em] uppercase ${
-                              activeCategory === cat.value
-                                ? 'bg-emerald-500 text-white border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.4)] scale-105'
-                                : 'bg-white/5 text-emerald-100/50 border-white/5 hover:bg-white/10 hover:text-white'
-                            }`}>
-                            <cat.icon size={14} className={activeCategory === cat.value ? 'text-white' : 'text-emerald-400'} /> 
-                            {cat.label}
-                          </button>
-                        ))}
-                      </motion.div>
-
+                      </div>
+                      
                       {/* Edge Fades */}
-                      <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-emerald-950/40 to-transparent pointer-events-none z-10" />
-                      <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-emerald-950/40 to-transparent pointer-events-none z-10" />
+                      <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-emerald-950/40 to-transparent pointer-events-none z-10" />
+                      <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-emerald-950/40 to-transparent pointer-events-none z-10" />
                     </div>
                   </div>
                 </div>
               </div>
 
+              {/* Feed Content */}
               <div className="py-2 px-4 sm:px-8 w-full flex justify-center">
-                <div className="max-w-3xl w-full">
+                <div className="max-w-4xl w-full">
                   {loading && posts.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 gap-4">
                       <div className="w-12 h-12 border-4 border-emerald-200/10 border-t-emerald-400 rounded-full animate-spin shadow-2xl" />
@@ -629,7 +597,11 @@ const BlogPage = () => {
                       )}
                     </div>
                   )}
-                  
+
+                  {/* Footer at the bottom of the feed scroll area */}
+                  <div className="w-full mt-20">
+                    <Footer />
+                  </div>
                 </div>
               </div>
             </div>
@@ -638,12 +610,10 @@ const BlogPage = () => {
               activeCategory={activeCategory}
               onCategoryChange={handleCategoryChange}
             />
-        </section>
+          </section>
+        </main>
 
-        <div className="relative z-20 bg-[#BD2D2D] border-t border-rose-800/50 shrink-0">
-          <Footer />
-        </div>
-
+        {/* Global Overlays */}
         <AnimatePresence>
           {showLoginPrompt && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -669,9 +639,6 @@ const BlogPage = () => {
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Removed Footer from scroll area to keep focus on feed, 
-            or we can put it at the bottom of the middle column scroll */}
       </div>
     </div>
   );

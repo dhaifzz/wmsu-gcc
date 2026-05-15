@@ -28,7 +28,7 @@ const RightBlogSidebar = ({ activeCategory, onCategoryChange }: RightBlogSidebar
   const tipIndex = new Date().getDate() % WELLNESS_TIPS.length;
 
   return (
-    <aside className="hidden xl:flex flex-col h-full w-80 bg-emerald-950/10 backdrop-blur-3xl border-l border-white/5 z-20 overflow-y-auto scrollbar-hide">
+    <aside className="hidden xl:flex flex-col h-full w-72 bg-emerald-950/10 backdrop-blur-3xl border-l border-white/5 z-20 overflow-y-auto scrollbar-hide">
       <div className="p-6 space-y-8">
 
         {/* About Card - Premium Brand Widget */}
