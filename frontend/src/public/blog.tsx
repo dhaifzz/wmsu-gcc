@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Heart, Sparkles, HandHeart, PartyPopper, Lightbulb, MessageCircle, Send, CornerDownRight, ExternalLink, X, LogIn, Search, Bookmark, BookmarkCheck } from 'lucide-react';
+import { Heart, Sparkles, HandHeart, PartyPopper, Lightbulb, MessageCircle, Send, CornerDownRight, X, LogIn, Search, Bookmark, BookmarkCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -7,6 +7,7 @@ import LeftBlogSidebar from '../components/left-blog-sidebar';
 import RightBlogSidebar from '../components/right-blog-sidebar';
 import { useAuth } from '../auth/AuthContext';
 import { blogApi, BLOG_CATEGORIES, type BlogPost, type BlogComment, type ReactionType } from '../lib/blogApi';
+import BlogPostContent from '../components/blog-post-content';
 import authBg from '../assets/img/Auth-Background.jpg';
 
 const REACTION_CONFIG: { type: ReactionType; icon: any; label: string; color: string; bg: string; desc: string }[] = [
@@ -50,19 +51,7 @@ function getRoleBadgeColor(role: string) {
   return 'bg-emerald-100 text-emerald-700 border-emerald-200';
 }
 
-function getYouTubeID(url: string) {
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-  const match = url.match(regExp);
-  return (match && match[2].length === 11) ? match[2] : null;
-}
-
-function getFacebookEmbedURL(url: string) {
-  let sanitized = url.replace('m.facebook.com', 'www.facebook.com');
-  if (!sanitized.includes('www.facebook.com') && sanitized.includes('facebook.com')) {
-    sanitized = sanitized.replace('facebook.com', 'www.facebook.com');
-  }
-  return `https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(sanitized)}&show_text=true&width=500`;
-}
+// Helper functions moved to BlogPostContent.tsx
 
 function PostCard({ post, user, token, onNeedLogin }: { post: BlogPost; user: any; token: string | null; onNeedLogin: () => void }) {
   const [showComments, setShowComments] = useState(false);
@@ -74,7 +63,6 @@ function PostCard({ post, user, token, onNeedLogin }: { post: BlogPost; user: an
   const [totalReactions, setTotalReactions] = useState(post.totalReactions || 0);
   const [userReaction, setUserReaction] = useState<ReactionType | null>(null);
   const [showReactionPicker, setShowReactionPicker] = useState(false);
-  const [mediaIndex, setMediaIndex] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const reactionTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -214,68 +202,17 @@ function PostCard({ post, user, token, onNeedLogin }: { post: BlogPost; user: an
       </div>
 
       {/* Content */}
-      <div className="px-4 sm:px-5 pb-2">
-        {post.content && <p className="text-slate-700 text-sm sm:text-[15px] leading-relaxed whitespace-pre-wrap mb-2">{post.content}</p>}
-        
-        {post.link_url && (
-          <div className="space-y-3">
-            {post.link_type === 'youtube' && getYouTubeID(post.link_url) ? (
-              <div className="relative aspect-video rounded-xl overflow-hidden shadow-lg border border-white/10 bg-black">
-                <iframe
-                  src={`https://www.youtube.com/embed/${getYouTubeID(post.link_url)}`}
-                  className="absolute inset-0 w-full h-full"
-                  title="YouTube video player"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                />
-              </div>
-            ) : post.link_type === 'facebook' ? (
-              <div className="relative rounded-xl overflow-hidden border border-slate-100 shadow-sm bg-white min-h-[500px]">
-                <iframe
-                  src={getFacebookEmbedURL(post.link_url)}
-                  className="absolute inset-0 w-full h-full"
-                  style={{ border: 'none', overflow: 'hidden' }}
-                  scrolling="no"
-                  frameBorder="0"
-                  allowFullScreen={true}
-                  allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-                />
-                <div className="absolute bottom-0 left-0 right-0 p-2 bg-white/90 backdrop-blur-sm border-t border-slate-100 flex justify-center">
-                  <a href={post.link_url} target="_blank" rel="noopener noreferrer" className="text-[10px] font-black text-emerald-600 hover:text-emerald-700 flex items-center gap-1">
-                    <ExternalLink size={10} /> View on Facebook
-                  </a>
-                </div>
-              </div>
-            ) : (
-              <a href={post.link_url} target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-2 text-emerald-600 hover:text-emerald-700 text-xs sm:text-sm font-bold bg-emerald-50 px-3 py-2 rounded-xl transition-colors border border-emerald-100 group">
-                <ExternalLink size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" /> 
-                <span className="truncate">{post.link_url}</span>
-              </a>
-            )}
-          </div>
-        )}
+      {/* Content, Links & Media */}
+      <div className="px-4 sm:px-5 pb-4">
+        <BlogPostContent 
+          content={post.content}
+          link_url={post.link_url}
+          link_type={post.link_type}
+          media_urls={post.media_urls}
+          media_types={post.media_types}
+        />
       </div>
 
-      {/* Media */}
-      {post.media_urls.length > 0 && (
-        <div className="relative">
-          {post.media_types[mediaIndex] === 'video' ? (
-            <video src={post.media_urls[mediaIndex]} controls className="w-full max-h-[300px] sm:max-h-[420px] object-contain bg-black" />
-          ) : (
-            <img src={post.media_urls[mediaIndex]} alt="" className="w-full max-h-[300px] sm:max-h-[420px] object-cover" />
-          )}
-          {post.media_urls.length > 1 && (
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full">
-              {post.media_urls.map((_, i) => (
-                <button key={i} onClick={() => setMediaIndex(i)}
-                  className={`w-2 h-2 rounded-full transition-all ${i === mediaIndex ? 'bg-white w-5' : 'bg-white/50'}`} />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Reaction Summary & Comment Count */}
       {(totalReactions > 0 || post.commentCount > 0) && (

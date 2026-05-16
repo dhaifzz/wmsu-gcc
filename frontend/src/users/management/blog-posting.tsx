@@ -3,6 +3,7 @@ import { Image as ImageIcon, Video, Link2, Send, Trash2, CheckCircle, XCircle, C
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../auth/AuthContext';
 import { blogApi, uploadBlogMedia, BLOG_CATEGORIES, type BlogPost, type BlogCategory } from '../../lib/blogApi';
+import BlogPostContent from '../../components/blog-post-content';
 
 interface BlogPostingProps {
   role?: 'staff' | 'director' | 'admin';
@@ -351,6 +352,24 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
                 ))}
               </div>
             )}
+
+            {/* Live Preview Section */}
+            {(content.trim() || linkUrl.trim() || mediaPreviews.length > 0) && (
+              <div className="mt-6 pt-6 border-t border-slate-100">
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
+                  <Eye size={12} /> Post Preview
+                </p>
+                <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
+                   <BlogPostContent 
+                    content={content}
+                    link_url={linkUrl}
+                    link_type={linkType}
+                    media_urls={mediaPreviews.map(p => p.url)}
+                    media_types={mediaPreviews.map(p => p.type)}
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Action Bar */}
@@ -418,25 +437,14 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
                       </button>
                     </div>
                   </div>
-                  <p className="text-slate-700 text-sm leading-relaxed line-clamp-3">{post.content}</p>
-                  {post.media_urls.length > 0 && (
-                    <div className="flex gap-2 mt-3">
-                      {post.media_urls.slice(0, 3).map((url, i) => (
-                        <div key={i} className="w-16 h-16 rounded-lg overflow-hidden bg-slate-100">
-                          {post.media_types[i] === 'video' ? (
-                            <video src={url} className="w-full h-full object-cover" />
-                          ) : (
-                            <img src={url} alt="" className="w-full h-full object-cover" />
-                          )}
-                        </div>
-                      ))}
-                      {post.media_urls.length > 3 && (
-                        <div className="w-16 h-16 rounded-lg bg-slate-100 flex items-center justify-center text-xs font-black text-slate-400">
-                          +{post.media_urls.length - 3}
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  <BlogPostContent 
+                    content={post.content}
+                    link_url={post.link_url}
+                    link_type={post.link_type}
+                    media_urls={post.media_urls}
+                    media_types={post.media_types}
+                  />
+                  
                   {post.status === 'rejected' && post.rejection_reason && (
                     <div className="mt-3 flex items-start gap-2 bg-rose-50 text-rose-700 text-xs font-bold px-3 py-2 rounded-lg border border-rose-100">
                       <AlertCircle size={14} className="shrink-0 mt-0.5" />
@@ -480,25 +488,13 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
                       <p className="text-[10px] text-slate-400 font-bold">{post.author_role} • {formatDate(post.created_at)}</p>
                     </div>
                   </div>
-                  <p className="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">{post.content}</p>
-                  {post.link_url && (
-                    <a href={post.link_url} target="_blank" rel="noopener noreferrer" className="mt-2 text-emerald-600 text-xs font-bold hover:underline flex items-center gap-1">
-                      <Link2 size={12} /> {post.link_url}
-                    </a>
-                  )}
-                  {post.media_urls.length > 0 && (
-                    <div className="flex gap-2 mt-3 flex-wrap">
-                      {post.media_urls.map((url, i) => (
-                        <div key={i} className="w-24 h-24 rounded-xl overflow-hidden bg-slate-100">
-                          {post.media_types[i] === 'video' ? (
-                            <video src={url} className="w-full h-full object-cover" controls />
-                          ) : (
-                            <img src={url} alt="" className="w-full h-full object-cover" />
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  <BlogPostContent 
+                    content={post.content}
+                    link_url={post.link_url}
+                    link_type={post.link_type}
+                    media_urls={post.media_urls}
+                    media_types={post.media_types}
+                  />
                 </div>
                 <div className="px-5 py-3 bg-slate-50/50 border-t border-slate-100 flex gap-2 justify-end">
                   <button onClick={() => handleReject(post.id)}
