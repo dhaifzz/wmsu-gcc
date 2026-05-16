@@ -21,7 +21,7 @@ interface AssessmentEvaluationModalProps {
 const AssessmentEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff', onSuccess }: AssessmentEvaluationModalProps) => {
   const { accessToken } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [forwardToDirector, setForwardToDirector] = useState(true);
+  const [forwardToDirector, setForwardToDirector] = useState(false);
   const [reschedMode, setReschedMode] = useState<boolean>(false);
   const [reschedType, setReschedType] = useState<'staff_picked' | 'user_picked'>('staff_picked');
   const [newDate, setNewDate] = useState('');

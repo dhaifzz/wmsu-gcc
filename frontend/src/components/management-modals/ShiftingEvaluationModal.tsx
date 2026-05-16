@@ -95,7 +95,7 @@ const PreviewModal = ({ isOpen, onClose, url, title }: { isOpen: boolean; onClos
 const ShiftingEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff', onSuccess }: ShiftingEvaluationModalProps) => {
   const { accessToken } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [forwardToDirector, setForwardToDirector] = useState(true);
+  const [forwardToDirector, setForwardToDirector] = useState(false);
   const [previewData, setPreviewData] = useState<{ url: string; title: string } | null>(null);
   const { isDirectorOnline } = useDirectorPresence(role);
 

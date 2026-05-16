@@ -20,7 +20,7 @@ interface CounselingEvaluationModalProps {
 const CounselingEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff' }: CounselingEvaluationModalProps) => {
   const { accessToken } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [forwardToDirector, setForwardToDirector] = useState(true);
+  const [forwardToDirector, setForwardToDirector] = useState(false);
   const [reschedMode, setReschedMode] = useState<boolean>(false);
   const [reschedType, setReschedType] = useState<'staff_picked' | 'user_picked'>('user_picked');
   const [newDate, setNewDate] = useState('');
