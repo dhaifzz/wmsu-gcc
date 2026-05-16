@@ -1,9 +1,8 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar as CalendarIcon, Clock, ChevronLeft, ChevronRight, Info, MessageCircle, ClipboardCheck, BookOpen } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, ChevronLeft, ChevronRight, Info, MessageCircle, ClipboardCheck, BookOpen, GraduationCap, School } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import Loader from '../components/loader/Loader';
 import { appointmentApi, cmsApi } from '../lib/api';
 
 type ServiceType = 'counseling' | 'assessment_college' | 'assessment_hs' | 'shifting';
@@ -46,7 +45,7 @@ const Schedules = () => {
   const [occupiedSlots, setOccupiedSlots] = useState<Record<string, string[]>>({});
   const [shiftingConfig, setShiftingConfig] = useState<any>(null);
   
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [loadingAvailability, setLoadingAvailability] = useState(false);
 
   useEffect(() => {
@@ -203,7 +202,6 @@ const Schedules = () => {
     [occupiedSlots, selectedDateKey]
   );
 
-  if (loading) return <Loader type="dashboard" />;
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
@@ -211,42 +209,85 @@ const Schedules = () => {
       
       <div className="flex-1 pb-24">
         {/* Hero Section */}
-        <div className="bg-emerald-950 text-white pt-32 pb-16 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-400/10 rounded-full blur-3xl -mr-64 -mt-64 z-0"></div>
-          <div className="container mx-auto px-6 relative z-10 text-center max-w-4xl">
-            <h1 className="text-4xl md:text-5xl font-black mb-4 tracking-tight">Service Schedules</h1>
-            <p className="text-emerald-100/80 text-lg md:text-xl font-medium mb-8">
+        <div className="bg-emerald-900 text-white pt-32 pb-24 relative overflow-hidden">
+          <div className="absolute top-1/4 right-0 w-96 h-96 bg-emerald-500/20 rounded-full blur-[100px]"></div>
+          <div className="absolute bottom-0 left-1/4 w-64 h-64 bg-emerald-400/10 rounded-full blur-[80px]"></div>
+          <div className="container mx-auto px-6 relative z-10 text-center">
+            <h1 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight tracking-tight">Service Schedules</h1>
+            <p className="text-lg md:text-xl text-emerald-100 max-w-2xl mx-auto font-medium px-4">
               Check the public availability of our counseling and assessment services, or stay updated on shifting examination periods.
             </p>
           </div>
         </div>
 
-        <div className="container mx-auto px-6 -mt-8 relative z-20">
-          <div className="bg-white p-3 rounded-2xl shadow-xl shadow-slate-200/50 flex flex-col sm:flex-row items-center justify-center gap-2 max-w-5xl mx-auto mb-12">
+        <div className="container mx-auto px-4 md:px-6 -mt-10 relative z-20">
+          <div className="flex flex-row justify-center gap-2 md:gap-4 mb-16 max-w-5xl mx-auto">
             {[
               { id: 'counseling', label: 'Counseling', icon: MessageCircle },
-              { id: 'assessment_college', label: 'Assessment (College)', icon: ClipboardCheck },
-              { id: 'assessment_hs', label: 'Assessment (High School)', icon: ClipboardCheck },
+              { id: 'assessment', label: 'Assessment', icon: ClipboardCheck },
               { id: 'shifting', label: 'Shifting Exam', icon: BookOpen },
             ].map(tab => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as ServiceType)}
-                className={`flex-1 flex items-center justify-center gap-3 py-4 px-6 rounded-xl text-sm font-black uppercase tracking-widest transition-all w-full sm:w-auto
-                  ${activeTab === tab.id 
-                    ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200 scale-100' 
-                    : 'text-slate-500 hover:bg-slate-50 hover:text-emerald-600'
-                  }`}
+                onClick={() => {
+                  if (tab.id === 'assessment') {
+                    if (!activeTab.startsWith('assessment')) {
+                      setActiveTab('assessment_college');
+                    }
+                  } else {
+                    setActiveTab(tab.id as ServiceType);
+                  }
+                }}
+                className={`w-full px-2 md:px-8 py-4 md:py-5 rounded-xl font-black text-[10px] sm:text-sm md:text-base transition-all flex items-center justify-center gap-1.5 md:gap-3 shadow-xl ${
+                  (tab.id === 'assessment' ? activeTab.startsWith('assessment') : activeTab === tab.id)
+                    ? 'bg-white text-emerald-700 scale-105 border-2 border-emerald-500' 
+                    : 'bg-emerald-800 text-emerald-100 border-2 border-transparent hover:bg-emerald-700'
+                }`}
               >
-                <tab.icon size={18} />
+                <tab.icon className="w-4 h-4 md:w-6 md:h-6 shrink-0" />
                 <span className="truncate">{tab.label}</span>
               </button>
             ))}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* Left Column: Calendar Card */}
-            <div className="lg:col-span-8 bg-white rounded-2xl p-6 lg:p-10 border border-slate-100 shadow-xl shadow-slate-200/30 flex flex-col min-h-[600px]">
+            {/* Left Column: Sub-tabs and Calendar */}
+            <div className="lg:col-span-8 flex flex-col gap-6">
+              {/* Calendar Card */}
+              <div className="bg-white rounded-xl p-6 lg:p-12 border border-slate-100 shadow-2xl shadow-slate-200/50 flex flex-col min-h-[600px]">
+                <AnimatePresence>
+                  {activeTab.startsWith('assessment') && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0, y: -10 }}
+                      animate={{ opacity: 1, height: 'auto', y: 0 }}
+                      exit={{ opacity: 0, height: 0, y: -10 }}
+                      className="flex flex-wrap items-center gap-3 mb-8 pt-2"
+                    >
+                      <button
+                        onClick={() => setActiveTab('assessment_college')}
+                        className={`inline-flex items-center gap-2 py-3 px-6 rounded-xl text-[10px] md:text-xs font-black uppercase tracking-widest transition-all shadow-sm
+                          ${activeTab === 'assessment_college'
+                            ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 scale-105'
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-emerald-700'
+                          }`}
+                      >
+                        <GraduationCap size={18} />
+                        College
+                      </button>
+                      <button
+                        onClick={() => setActiveTab('assessment_hs')}
+                        className={`inline-flex items-center gap-2 py-3 px-6 rounded-xl text-[10px] md:text-xs font-black uppercase tracking-widest transition-all shadow-sm
+                          ${activeTab === 'assessment_hs'
+                            ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 scale-105'
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-emerald-700'
+                          }`}
+                      >
+                        <School size={18} />
+                        High School
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               <div className="flex items-center justify-between mb-8 lg:mb-10">
                 <div>
                   <h3 className="text-xl lg:text-2xl font-black text-slate-900">Select Date to View</h3>
@@ -273,8 +314,15 @@ const Schedules = () => {
 
               <div className="flex-1 flex flex-col justify-between py-2 relative">
                 {loadingAvailability && (
-                  <div className="absolute inset-0 bg-white/50 backdrop-blur-sm z-20 flex items-center justify-center rounded-2xl">
-                    <Loader type="dashboard" />
+                  <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-20 flex flex-col justify-center rounded-2xl p-4">
+                    <div className="grid grid-cols-7 gap-y-4 lg:gap-y-6 gap-x-1 lg:gap-x-2">
+                      {[...Array(35)].map((_, i) => (
+                        <div key={i} className="aspect-square bg-slate-100 rounded-xl animate-pulse flex flex-col items-center justify-center p-2">
+                          <div className="h-4 w-6 bg-slate-200 rounded animate-pulse mb-2"></div>
+                          <div className="h-2 w-10 bg-slate-200 rounded-full animate-pulse"></div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
                 <div 
@@ -380,8 +428,9 @@ const Schedules = () => {
                 )}
               </div>
             </div>
+          </div>
 
-            {/* Right Column: Time Slots & Info */}
+          {/* Right Column: Time Slots & Info */}
             <div className="lg:col-span-4 space-y-6">
               <AnimatePresence mode="wait">
                 {activeTab === 'shifting' ? (
@@ -390,32 +439,36 @@ const Schedules = () => {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    className="bg-indigo-950 rounded-2xl p-8 text-white relative overflow-hidden shadow-2xl shadow-indigo-950/20"
+                    className="bg-[#111827] rounded-xl p-8 md:p-10 text-white relative overflow-hidden shadow-2xl shadow-slate-950/20 border border-white/5"
                   >
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-400/20 rounded-full blur-3xl"></div>
-                    <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-6 border border-white/10 relative z-10">
-                      <BookOpen size={24} className="text-indigo-300" />
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/10 rounded-full blur-3xl"></div>
+                    <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center mb-6 border border-white/10 relative z-10">
+                      <BookOpen size={24} className="text-emerald-500" />
                     </div>
-                    <h3 className="font-black text-xl mb-2 relative z-10">Shifting Examination</h3>
-                    <p className="text-indigo-200/80 text-xs font-bold mb-8 leading-relaxed">
+                    <h3 className="font-black text-xl mb-2 relative z-10 text-white">Shifting Examination</h3>
+                    <p className="text-slate-400 text-xs font-bold mb-8 leading-relaxed">
                       Below are the currently configured dates for the upcoming shifting examinations.
                     </p>
                     
                     <div className="space-y-4 relative z-10">
                       <div className="bg-white/5 rounded-xl border border-white/10 p-5">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-indigo-300 mb-2">Submission Window</p>
-                        <p className="font-bold text-sm">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Submission Window</p>
+                        <p className="font-bold text-sm text-white">
                           {shiftingConfig?.startDate ? new Date(shiftingConfig.startDate).toLocaleDateString() : 'N/A'} 
-                          <span className="text-indigo-400 mx-2">&mdash;</span> 
+                          <span className="text-slate-600 mx-2">&mdash;</span> 
                           {shiftingConfig?.endDate ? new Date(shiftingConfig.endDate).toLocaleDateString() : 'N/A'}
                         </p>
                       </div>
-                      <div className="bg-rose-500/10 rounded-xl border border-rose-500/20 p-5">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-rose-300 mb-2">Examination Date</p>
-                        <p className="font-bold text-sm text-white flex items-center justify-between">
-                          <span>{shiftingConfig?.examDate ? new Date(shiftingConfig.examDate).toLocaleDateString() : 'N/A'}</span>
-                          <span className="px-2 py-1 bg-rose-500/20 rounded text-xs text-rose-200">{shiftingConfig?.examTime || 'TBA'}</span>
-                        </p>
+                      <div className="bg-white/5 rounded-xl border border-white/10 p-5">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-emerald-500 mb-2">Examination Date & Time</p>
+                        <div className="flex items-baseline gap-3">
+                          <span className="font-black text-lg text-white">
+                            {shiftingConfig?.examDate ? new Date(shiftingConfig.examDate).toLocaleDateString() : 'N/A'}
+                          </span>
+                          <span className="text-emerald-500 font-black text-base px-2 py-0.5 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+                            {shiftingConfig?.examTime || 'TBA'}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </motion.div>
@@ -427,7 +480,7 @@ const Schedules = () => {
                     exit={{ opacity: 0, x: -20 }}
                     className="space-y-6"
                   >
-                    <div className="bg-white rounded-2xl p-6 lg:p-8 border border-slate-100 shadow-xl shadow-slate-200/30">
+                    <div className="bg-white rounded-xl p-6 lg:p-10 border border-slate-100 shadow-2xl shadow-slate-200/50">
                       <div className="flex items-center justify-between mb-6">
                         <h3 className="font-black text-lg text-slate-900 flex items-center gap-3">
                           <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">

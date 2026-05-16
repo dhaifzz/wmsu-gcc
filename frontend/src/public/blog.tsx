@@ -9,6 +9,7 @@ import { useAuth } from '../auth/AuthContext';
 import { blogApi, BLOG_CATEGORIES, type BlogPost, type BlogComment, type ReactionType } from '../lib/blogApi';
 import BlogPostContent from '../components/blog-post-content';
 import authBg from '../assets/img/Auth-Background.jpg';
+import GCCLogo from '../assets/logos/GCC.png';
 
 const REACTION_CONFIG: { type: ReactionType; icon: any; label: string; color: string; bg: string; desc: string }[] = [
   { type: 'support', icon: Heart, label: 'Support', color: 'text-emerald-600', bg: 'bg-emerald-100', desc: 'Show solidarity' },
@@ -44,15 +45,7 @@ function buildCommentTree(comments: BlogComment[]): (BlogComment & { replies: Bl
   return roots;
 }
 
-function getRoleBadgeColor(role: string) {
-  const r = role.toLowerCase();
-  if (r.includes('director')) return 'bg-amber-100 text-amber-700 border-amber-200';
-  if (r.includes('admin') || r.includes('super')) return 'bg-purple-100 text-purple-700 border-purple-200';
-  return 'bg-emerald-100 text-emerald-700 border-emerald-200';
-}
-
 // Helper functions moved to BlogPostContent.tsx
-
 function PostCard({ post, user, token, onNeedLogin }: { post: BlogPost; user: any; token: string | null; onNeedLogin: () => void }) {
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState<BlogComment[]>([]);
@@ -179,16 +172,13 @@ function PostCard({ post, user, token, onNeedLogin }: { post: BlogPost; user: an
       className="bg-white/95 backdrop-blur-md rounded-xl sm:rounded-2xl shadow-xl border border-white/20 overflow-hidden"
     >
       {/* Header */}
-      <div className="px-4 sm:px-5 pt-3.5 sm:pt-4 pb-2 flex items-center gap-2.5 sm:gap-3">
-        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white font-black text-base sm:text-lg shadow-md">
-          {post.author_name.charAt(0).toUpperCase()}
+      <div className="px-4 sm:px-5 pt-3.5 sm:pt-4 pb-2 flex items-center gap-3 sm:gap-4">
+        <div className="w-11 h-11 sm:w-14 sm:h-14 shrink-0">
+          <img src={GCCLogo} alt="GCC Logo" className="w-full h-full object-contain" />
         </div>
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-            <p className="font-black text-slate-900 text-xs sm:text-sm">{post.author_name}</p>
-            <span className={`text-[8px] sm:text-[9px] font-black uppercase tracking-widest px-1.5 sm:px-2 py-0.5 rounded-full border ${getRoleBadgeColor(post.author_role)}`}>
-              {post.author_role}
-            </span>
+            <p className="font-black text-slate-900 text-sm sm:text-base truncate">WMSU Guidance and Counseling Center</p>
           </div>
           <p className="text-[11px] text-slate-400 font-bold">
             {formatTimeAgo(post.created_at)}
@@ -342,25 +332,34 @@ const BlogPage = () => {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
-  const [activeCategory, setActiveCategory] = useState('');
+  const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const searchTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
   const [savedPostIds, setSavedPostIds] = useState<Set<string>>(new Set());
+  const [isScrolled, setIsScrolled] = useState(false);
 
   const fetchPosts = async (p = 1, cat?: string, search?: string) => {
     setLoading(true);
     const c = cat !== undefined ? cat : activeCategory;
     const s = search !== undefined ? search : searchQuery;
-    const res = await blogApi.getPosts(p, 10, c || undefined, s || undefined);
+    const res = await blogApi.getPosts(p, 2, c === 'all' ? undefined : (c || undefined), s || undefined);
     if (res.ok) {
-      setPosts(prev => p === 1 ? res.data.posts : [...prev, ...res.data.posts]);
+      setPosts(res.data.posts);
       setTotal(res.data.total);
     }
     setLoading(false);
   };
 
-  useEffect(() => { fetchPosts(); }, []);
+  useEffect(() => { 
+    fetchPosts(); 
+    
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 400);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     if (!accessToken) return;
@@ -384,7 +383,7 @@ const BlogPage = () => {
   };
 
   const handleCategoryChange = (cat: string) => {
-    const newCat = activeCategory === cat ? '' : cat;
+    const newCat = activeCategory === cat ? 'all' : cat;
     setActiveCategory(newCat);
     setPage(1);
     fetchPosts(1, newCat, searchQuery);
@@ -400,70 +399,85 @@ const BlogPage = () => {
     }, 400);
   };
 
-  const loadMore = () => {
-    const next = page + 1;
-    setPage(next);
-    fetchPosts(next, activeCategory, searchQuery);
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+    fetchPosts(newPage, activeCategory, searchQuery);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
 
   return (
-    <div className="h-screen relative flex flex-col overflow-hidden bg-[#047857]">
-      {/* Background Layer */}
-      <div 
-        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${authBg})` }}
-      />
-      <div className="fixed inset-0 z-0 bg-[#047857]/85 backdrop-blur-[2px]" />
-
-      <div className="relative z-10 flex flex-col h-full overflow-hidden">
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      <div className="relative z-10 flex flex-col min-h-screen">
         <Navbar />
         
-        {/* Main Content Area: Constrained between Navbar and Footer */}
-        <main className="flex-1 flex flex-col overflow-hidden">
-          {/* Navbar Spacer */}
-          <div className="h-20 shrink-0" />
-
+        <main className="flex-1 flex flex-col">
+          {/* Hero Section */}
+          <div className="relative pt-32 pb-24 overflow-hidden shrink-0">
+            {/* Background Image with Emerald Overlay */}
+            <div className="absolute inset-0 z-0">
+              <img src={authBg} alt="Community Background" className="absolute inset-0 w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-950/95 via-emerald-900/90 to-emerald-900/80"></div>
+            </div>
+            
+            <div className="absolute top-1/4 right-0 w-96 h-96 bg-emerald-400/20 rounded-full blur-[100px] pointer-events-none"></div>
+            <div className="absolute bottom-0 left-1/4 w-64 h-64 bg-emerald-500/10 rounded-full blur-[80px] pointer-events-none"></div>
+            
+            <div className="container mx-auto px-6 relative z-10 text-center">
+              <h1 className="text-4xl md:text-6xl font-black text-white leading-tight mb-6 animate-in fade-in slide-in-from-bottom-6 duration-1000 tracking-tight">
+                Wellness Community
+              </h1>
+              <p className="text-lg md:text-xl text-emerald-100 max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-1000 font-medium px-4">
+                Explore insights, share experiences, and support one another in a safe, professional space designed for your growth.
+              </p>
+            </div>
+          </div>
           {/* Sidebars + Feed Container */}
-          <section className="flex-1 flex w-full overflow-hidden">
+          <section className="flex flex-row w-full max-w-[1800px] relative mx-auto px-4 lg:px-8 xl:px-12 2xl:px-16 -mt-10 z-20">
             <LeftBlogSidebar
               user={user}
               token={accessToken}
               onToggleSave={handleToggleSave}
             />
 
-            <div className="flex-1 h-full min-w-0 overflow-y-auto custom-scrollbar flex flex-col items-center">
+            <div className="flex-1 min-w-0 flex flex-col items-center">
               {/* Search Area */}
-              <div className="sticky top-0 z-30 w-full px-4 sm:px-6 mb-8 pt-6">
-                <div className="bg-emerald-900/40 backdrop-blur-3xl rounded-3xl border border-white/10 p-6 shadow-2xl">
-                  <div className="max-w-4xl mx-auto space-y-6">
+              <div className="sticky top-20 z-30 w-full px-4 sm:px-6 mb-8 pt-2 transition-all duration-300">
+                <div className={`rounded-[2rem] p-6 transition-all duration-500 border ${
+                  isScrolled 
+                    ? 'bg-white/40 backdrop-blur-2xl border-white/50 shadow-[0_8px_32px_rgba(16,185,129,0.15)] hover:bg-white hover:backdrop-blur-none hover:border-slate-100 hover:shadow-2xl hover:shadow-slate-200/50 focus-within:bg-white focus-within:backdrop-blur-none focus-within:border-slate-100 focus-within:shadow-2xl focus-within:shadow-slate-200/50' 
+                    : 'bg-white border-slate-100 shadow-2xl shadow-slate-200/50'
+                } ${
+                  (isScrolled && !searchInput) ? 'opacity-70 hover:opacity-100 focus-within:opacity-100' : 'opacity-100'
+                }`}>
+                  <div className="max-w-5xl mx-auto space-y-6">
                     {/* Search Input */}
-                    <div className="relative group max-w-2xl mx-auto">
-                      <div className="absolute inset-0 bg-emerald-500/10 blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity rounded-2xl" />
-                      <Search size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-emerald-300/40 group-focus-within:text-emerald-400 transition-colors" />
+                    <div className="relative group w-full mx-auto">
+                      <div className="absolute inset-0 bg-emerald-500/5 blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity rounded-xl" />
+                      <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-colors" />
                       <input
                         value={searchInput}
                         onChange={e => handleSearchInput(e.target.value)}
                         placeholder="Search posts and discussions..."
-                        className="relative w-full pl-14 pr-6 py-4.5 bg-black/20 border border-white/10 rounded-2xl text-base text-white placeholder:text-emerald-100/20 outline-none focus:bg-black/40 focus:border-emerald-400/50 transition-all shadow-inner backdrop-blur-md"
+                        className="relative w-full pl-11 pr-6 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder:text-slate-400 outline-none focus:bg-white focus:border-emerald-400 transition-all shadow-inner"
                       />
                       {searchInput && (
                         <button onClick={() => { setSearchInput(''); handleSearchInput(''); }}
-                          className="absolute right-5 top-1/2 -translate-y-1/2 text-white/20 hover:text-white transition-colors">
+                          className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
                           <X size={18} />
                         </button>
                       )}
                     </div>
 
                     {/* Category Filters Carousel */}
-                    <div className="relative group/filters max-w-4xl mx-auto overflow-hidden">
-                      <div className="flex gap-3 overflow-x-auto no-scrollbar py-2 px-1">
+                    <div className="relative group/filters max-w-5xl mx-auto overflow-hidden">
+                      <div className="flex gap-3 overflow-x-auto custom-scrollbar-emerald py-2 px-1">
                         <button
                           onClick={() => handleCategoryChange('all')}
                           className={`shrink-0 flex items-center gap-3 px-8 py-3 rounded-xl text-[10px] font-black transition-all border tracking-[0.2em] uppercase ${
                             activeCategory === 'all'
-                              ? 'bg-emerald-500 text-white border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.4)] scale-105'
-                              : 'bg-white/5 text-emerald-100/50 border-white/5 hover:bg-white/10 hover:text-white'
+                              ? 'bg-emerald-600 text-white border-emerald-500 shadow-lg shadow-emerald-600/20 scale-105'
+                              : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100 hover:text-emerald-700'
                           }`}
                         >
                           All
@@ -473,38 +487,59 @@ const BlogPage = () => {
                             onClick={() => handleCategoryChange(cat.value)}
                             className={`shrink-0 flex items-center gap-3 px-8 py-3 rounded-xl text-[10px] font-black transition-all border tracking-[0.2em] uppercase ${
                               activeCategory === cat.value
-                                ? 'bg-emerald-500 text-white border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.4)] scale-105'
-                                : 'bg-white/5 text-emerald-100/50 border-white/5 hover:bg-white/10 hover:text-white'
+                                ? 'bg-emerald-600 text-white border-emerald-500 shadow-lg shadow-emerald-600/20 scale-105'
+                                : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100 hover:text-emerald-700'
                             }`}>
-                            <cat.icon size={14} className={activeCategory === cat.value ? 'text-white' : 'text-emerald-400'} /> 
+                            <cat.icon size={14} className={activeCategory === cat.value ? 'text-emerald-200' : 'text-emerald-600'} /> 
                             {cat.label}
                           </button>
                         ))}
                       </div>
                       
-                      {/* Edge Fades */}
-                      <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-emerald-950/40 to-transparent pointer-events-none z-10" />
-                      <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-emerald-950/40 to-transparent pointer-events-none z-10" />
-                    </div>
+                      </div>
                   </div>
                 </div>
               </div>
 
               {/* Feed Content */}
               <div className="py-2 px-4 sm:px-8 w-full flex justify-center">
-                <div className="max-w-4xl w-full">
+                <div className="max-w-5xl w-full">
                   {loading && posts.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-20 gap-4">
-                      <div className="w-12 h-12 border-4 border-emerald-200/10 border-t-emerald-400 rounded-full animate-spin shadow-2xl" />
-                      <p className="text-emerald-100/30 font-black text-xs uppercase tracking-widest">Refreshing Feed...</p>
+                    <div className="space-y-8 pb-20">
+                      {[1, 2].map((i) => (
+                        <div key={i} className="bg-white rounded-[2rem] border border-slate-100 shadow-xl overflow-hidden p-6 sm:p-8">
+                          {/* Post Header Skeleton */}
+                          <div className="flex items-center gap-4 mb-6">
+                            <div className="w-12 h-12 rounded-2xl bg-slate-100 animate-pulse shrink-0" />
+                            <div className="space-y-2 flex-1">
+                              <div className="w-32 h-4 bg-slate-100 rounded-lg animate-pulse" />
+                              <div className="w-24 h-3 bg-slate-50 rounded-lg animate-pulse" />
+                            </div>
+                            <div className="w-10 h-10 rounded-xl bg-slate-50 animate-pulse shrink-0" />
+                          </div>
+                          
+                          {/* Post Content Skeleton */}
+                          <div className="space-y-3 mb-8">
+                            <div className="w-full h-4 bg-slate-100 rounded-lg animate-pulse" />
+                            <div className="w-full h-4 bg-slate-100 rounded-lg animate-pulse" />
+                            <div className="w-3/4 h-4 bg-slate-100 rounded-lg animate-pulse" />
+                          </div>
+                          
+                          {/* Post Actions Skeleton */}
+                          <div className="flex items-center gap-4 pt-6 border-t border-slate-50">
+                            <div className="w-20 h-10 rounded-xl bg-slate-50 animate-pulse" />
+                            <div className="w-20 h-10 rounded-xl bg-slate-50 animate-pulse" />
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   ) : posts.length === 0 ? (
-                    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-20 bg-white/5 backdrop-blur-md rounded-[3rem] border border-white/10 shadow-2xl">
-                      <div className="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-white/10">
-                        <MessageCircle size={48} className="text-emerald-200/20" />
+                    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-20 bg-white rounded-[3rem] border border-slate-100 shadow-xl">
+                      <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 border border-slate-100">
+                        <MessageCircle size={48} className="text-slate-300" />
                       </div>
-                      <h3 className="text-2xl font-black text-white/80 tracking-tight">No conversations found</h3>
-                      <p className="text-emerald-100/30 text-sm font-bold mt-2 max-w-sm mx-auto">Try adjusting your filters or search terms to find what you're looking for.</p>
+                      <h3 className="text-2xl font-black text-slate-800 tracking-tight">No conversations found</h3>
+                      <p className="text-slate-500 text-sm font-bold mt-2 max-w-sm mx-auto">Try adjusting your filters or search terms to find what you're looking for.</p>
                     </motion.div>
                   ) : (
                     <div className="space-y-8 pb-20">
@@ -523,22 +558,29 @@ const BlogPage = () => {
                           </button>
                         </div>
                       ))}
-                      {posts.length < total && (
-                        <div className="text-center pt-10">
-                          <button onClick={loadMore} disabled={loading}
-                            className="group relative px-14 py-5 bg-emerald-500 hover:bg-emerald-400 text-white rounded-[2rem] font-black text-sm transition-all shadow-2xl shadow-emerald-900/60 disabled:opacity-50 active:scale-95 overflow-hidden">
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                            {loading ? 'Synchronizing...' : 'Load More Experiences'}
+                      {total > 2 && (
+                        <div className="flex items-center justify-between pt-10 border-t border-slate-200 mt-8">
+                          <button
+                            onClick={() => handlePageChange(page - 1)}
+                            disabled={page === 1 || loading}
+                            className="px-6 py-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-black hover:bg-slate-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                          >
+                            Previous
+                          </button>
+                          <span className="text-sm font-bold text-slate-500">
+                            Page {page} of {Math.ceil(total / 2)}
+                          </span>
+                          <button
+                            onClick={() => handlePageChange(page + 1)}
+                            disabled={page >= Math.ceil(total / 2) || loading}
+                            className="px-6 py-3 bg-emerald-600 border border-emerald-500 text-white rounded-xl font-black hover:bg-emerald-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-emerald-600/20"
+                          >
+                            Next
                           </button>
                         </div>
                       )}
                     </div>
                   )}
-
-                  {/* Footer at the bottom of the feed scroll area */}
-                  <div className="w-full mt-20">
-                    <Footer />
-                  </div>
                 </div>
               </div>
             </div>
@@ -548,6 +590,11 @@ const BlogPage = () => {
               onCategoryChange={handleCategoryChange}
             />
           </section>
+
+          {/* Global Footer - Now below both sidebars and feed */}
+          <div className="w-full relative z-30">
+            <Footer />
+          </div>
         </main>
 
         {/* Global Overlays */}

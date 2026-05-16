@@ -53,6 +53,29 @@
     scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
   }
 
+  .custom-scrollbar-emerald::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  .custom-scrollbar-emerald::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar-emerald::-webkit-scrollbar-thumb {
+    background: rgba(16, 185, 129, 0.5); /* emerald-500 */
+    border-radius: 10px;
+  }
+
+  .custom-scrollbar-emerald::-webkit-scrollbar-thumb:hover {
+    background: rgba(16, 185, 129, 0.8);
+  }
+
+  .custom-scrollbar-emerald {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(16, 185, 129, 0.5) transparent;
+  }
+
   @media print {
     @page {
       margin: 0;

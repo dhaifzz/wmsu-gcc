@@ -473,7 +473,8 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
             >
               {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(day => (
                 <div key={day} className="text-center text-[8px] lg:text-[10px] font-black uppercase tracking-[0.1em] lg:tracking-[0.2em] text-slate-300">
-                  {day.slice(0, 3)}
+                  <span className="hidden sm:inline">{day.slice(0, 3)}</span>
+                  <span className="inline sm:hidden">{day.slice(0, 1)}</span>
                 </div>
               ))}
               {Array.from({ length: firstDayOfMonth }).map((_, i) => (
@@ -505,13 +506,13 @@ const Assessment = ({ onBack }: { onBack: () => void }) => {
                             : 'hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 hover:scale-105 border border-transparent hover:border-emerald-100'}
                   `}
                 >
-                  <span className={`text-base lg:text-lg font-black mb-0.5 ${selectedDate === day ? 'text-white' : ''}`}>
+                  <span className={`text-sm sm:text-base lg:text-lg font-black mb-0.5 ${selectedDate === day ? 'text-white' : ''}`}>
                     {day}
                   </span>
                   
                   {getDateStatus(day) && (
                     <div className={`
-                      px-1.5 py-0.5 rounded-full text-[6px] lg:text-[7px] font-black uppercase tracking-widest
+                      px-1 lg:px-1.5 py-0.5 rounded-full text-[5px] lg:text-[7px] font-black uppercase tracking-tighter lg:tracking-widest
                       ${selectedDate === day 
                         ? 'bg-white/20 text-white' 
                         : getDateStatus(day) === 'Holiday' || getDateStatus(day) === 'Closed'

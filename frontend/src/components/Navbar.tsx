@@ -13,7 +13,7 @@ const Navbar = () => {
     gccLogo: gccLogoAsset
   });
   const location = useLocation();
-  const isSolidNeeded = isScrolled || location.pathname === '/blog';
+  const isSolidNeeded = isScrolled;
 
   useEffect(() => {
     const handleScroll = () => {
