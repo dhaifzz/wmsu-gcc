@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, BookOpen, Scaling, AlertCircle, ListChecks } from 'lucide-react';
+import { ArrowLeft, BookOpen, Scaling, AlertCircle, ListChecks, Calendar } from 'lucide-react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import shiftingImg from '../../assets/img/shifting-img.png';
@@ -149,8 +149,8 @@ const ShiftingDetails = () => {
                   <p className="text-emerald-100/80 mb-8 font-medium">
                     {content?.cta?.description}
                   </p>
-                  <a href="/register" className="block w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-white text-center rounded-lg font-black transition-all shadow-lg">
-                    Register to Book
+                  <a href="/schedules" className="block w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-white text-center rounded-lg font-black transition-all shadow-lg flex items-center justify-center gap-2">
+                    <Calendar size={18} /> View Examination Schedules
                   </a>
                 </div>
 

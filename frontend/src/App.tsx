@@ -13,6 +13,7 @@ import AssessmentDetails from './public/services/AssessmentDetails';
 import ShiftingDetails from './public/services/ShiftingDetails';
 import AboutUs from './public/AboutUs';
 import OurTeam from './public/OurTeam';
+import Schedules from './public/schedules';
 import { ToastProvider } from './components/modal-notification/toast';
 import HighSchoolDashboard from './users/clients/student/high-school/dashboard';
 import CollegeDashboard from './users/clients/student/college/dashboard';
@@ -76,6 +77,7 @@ function AppContent() {
       <Route path="/services/counseling" element={<CounselingDetails />} />
       <Route path="/services/assessment" element={<AssessmentDetails />} />
       <Route path="/services/shifting" element={<ShiftingDetails />} />
+      <Route path="/schedules" element={<Schedules />} />
 
       {/* Protected Client Routes */}
       <Route path="/student/high-school" element={

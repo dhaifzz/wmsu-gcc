@@ -194,8 +194,8 @@ const AssessmentDetails = () => {
                       Appointment Required
                     </div>
                   </div>
-                  <a href="/register" className="block w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-white text-center rounded-lg font-black transition-all">
-                    Get Started
+                  <a href="/schedules" className="block w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-white text-center rounded-lg font-black transition-all flex items-center justify-center gap-2">
+                    <Calendar size={18} /> View Live Schedules
                   </a>
                 </div>
               </div>
