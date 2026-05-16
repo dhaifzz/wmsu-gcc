@@ -6,7 +6,6 @@ export function useDirectorPresence(userRole?: string) {
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    // We create a single presence channel
     const channel = supabase.channel('director_presence', {
       config: {
         presence: {
@@ -28,7 +27,6 @@ export function useDirectorPresence(userRole?: string) {
       })
       .on('presence', { event: 'leave' }, ({ key }) => {
         if (key === 'director') {
-          // Verify with sync state if it's completely empty
           const state = channel.presenceState();
           if (!state['director'] || state['director'].length === 0) {
             setIsDirectorOnline(false);
@@ -38,7 +36,6 @@ export function useDirectorPresence(userRole?: string) {
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
           setConnected(true);
-          // If the current user is the director, broadcast their presence
           if (userRole === 'director' || userRole === 'admin') {
             await channel.track({ online_at: new Date().toISOString() });
           }

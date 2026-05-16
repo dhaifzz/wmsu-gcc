@@ -203,6 +203,7 @@ export const blogApi = {
       media_types?: string[];
       link_url?: string | null;
       link_type?: 'general' | 'youtube' | 'facebook' | null;
+      autoApprove?: boolean;
     },
     token: string
   ) =>

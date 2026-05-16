@@ -124,6 +124,7 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
         media_types: uploadedMedia.length > 0 ? uploadedMedia.map(m => m.type) : (editingPost ? editingPost.media_types : []),
         link_url: linkUrl.trim() || null,
         link_type: linkType,
+        autoApprove: !canApprove && !isDirectorOnline && autoPublish,
       };
 
       const res = editingPost
@@ -131,13 +132,6 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
         : await blogApi.createPost(payload, accessToken);
 
       if (res.ok) {
-        if (!canApprove && !isDirectorOnline && autoPublish && !editingPost) {
-          try {
-            await blogApi.approvePost(res.data.post.id, accessToken);
-          } catch (e) {
-            console.error('Failed to auto-approve post:', e);
-          }
-        }
         const Swal = await importSwal();
         await Swal.fire({ icon: 'success', title: editingPost ? 'Post Updated' : 'Post Created', text: res.data.message, confirmButtonColor: '#065f46' });
         resetCompose();
