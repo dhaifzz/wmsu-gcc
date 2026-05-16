@@ -8,6 +8,7 @@ import {
 import { useAuth } from '../../auth/AuthContext';
 import { appointmentApi } from '../../lib/api';
 import { showToast } from '../modal-notification/toast';
+import { useDirectorPresence } from '../../hooks/useDirectorPresence';
 
 interface AssessmentEvaluationModalProps {
   isOpen: boolean;
@@ -25,6 +26,10 @@ const AssessmentEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff
   const [reschedType, setReschedType] = useState<'staff_picked' | 'user_picked'>('staff_picked');
   const [newDate, setNewDate] = useState('');
   const [newTimeSlot, setNewTimeSlot] = useState('');
+  const { isDirectorOnline } = useDirectorPresence(role);
+
+  // If director is online, force forwarding to director
+  const effectiveForwardToDirector = isDirectorOnline ? true : forwardToDirector;
 
   if (!appointment) return null;
 
@@ -34,7 +39,7 @@ const AssessmentEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff
     try {
       const res = await appointmentApi.evaluateAssessmentAppointment(
         appointment.id,
-        { action: 'evaluate', forwardToDirector },
+        { action: 'evaluate', forwardToDirector: effectiveForwardToDirector },
         accessToken
       );
       if (res.ok) {
@@ -272,16 +277,20 @@ const AssessmentEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff
                     )}
                   </div>
                   {role !== 'director' && (
-                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200">
-                      <div>
+                    <div className={`flex items-center justify-between p-4 rounded-2xl border ${isDirectorOnline ? 'bg-slate-50 border-slate-200 opacity-80 cursor-not-allowed' : 'bg-slate-50 border-slate-200'}`}>
+                      <div className="flex flex-col">
                         <p className="text-sm font-bold text-slate-900">Forward to Director</p>
                         <p className="text-[10px] text-slate-500 font-medium">Require director approval before notifying the student</p>
+                        {isDirectorOnline && (
+                          <p className="text-[10px] text-teal-600 font-bold mt-1">Director is currently online. Approval is required.</p>
+                        )}
                       </div>
                       <button
-                        onClick={() => setForwardToDirector(!forwardToDirector)}
-                        className={`w-12 h-6 rounded-full transition-colors relative ${forwardToDirector ? 'bg-teal-500' : 'bg-slate-300'}`}
+                        onClick={() => !isDirectorOnline && setForwardToDirector(!forwardToDirector)}
+                        disabled={isDirectorOnline}
+                        className={`w-12 h-6 rounded-full transition-colors relative ${effectiveForwardToDirector ? 'bg-teal-500' : 'bg-slate-300'} ${isDirectorOnline ? 'opacity-50 cursor-not-allowed' : ''}`}
                       >
-                        <div className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-transform ${forwardToDirector ? 'left-7' : 'left-1'}`}></div>
+                        <div className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-transform ${effectiveForwardToDirector ? 'left-7' : 'left-1'}`}></div>
                       </button>
                     </div>
                   )}

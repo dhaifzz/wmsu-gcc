@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../auth/AuthContext';
 import { blogApi, uploadBlogMedia, BLOG_CATEGORIES, type BlogPost, type BlogCategory } from '../../lib/blogApi';
 import BlogPostContent from '../../components/blog-post-content';
+import { useDirectorPresence } from '../../hooks/useDirectorPresence';
 
 interface BlogPostingProps {
   role?: 'staff' | 'director' | 'admin';
@@ -30,6 +31,7 @@ function formatDate(dateString: string) {
 const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
   const { user, accessToken } = useAuth();
   const canApprove = role === 'director' || role === 'admin';
+  const { isDirectorOnline } = useDirectorPresence(role);
 
   const [activeView, setActiveView] = useState<'compose' | 'my-posts' | 'approval'>('compose');
   const [myPosts, setMyPosts] = useState<BlogPost[]>([]);
@@ -46,6 +48,7 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
   const [mediaPreviews, setMediaPreviews] = useState<{ url: string; type: string }[]>([]);
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [autoPublish, setAutoPublish] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   // Edit state
@@ -128,6 +131,13 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
         : await blogApi.createPost(payload, accessToken);
 
       if (res.ok) {
+        if (!canApprove && !isDirectorOnline && autoPublish && !editingPost) {
+          try {
+            await blogApi.approvePost(res.data.post.id, accessToken);
+          } catch (e) {
+            console.error('Failed to auto-approve post:', e);
+          }
+        }
         const Swal = await importSwal();
         await Swal.fire({ icon: 'success', title: editingPost ? 'Post Updated' : 'Post Created', text: res.data.message, confirmButtonColor: '#065f46' });
         resetCompose();
@@ -151,6 +161,7 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
     setLinkUrl('');
     setLinkType('general');
     setShowLinkInput(false);
+    setAutoPublish(false);
     mediaPreviews.forEach(p => URL.revokeObjectURL(p.url));
     setMediaFiles([]);
     setMediaPreviews([]);
@@ -266,7 +277,7 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
               <div>
                 <p className="font-black text-slate-900 text-sm">{user?.firstName} {user?.lastName}</p>
                 <p className="text-[10px] text-slate-400 font-bold">
-                  {canApprove ? '🟢 Auto-publish' : '🟡 Requires approval'}
+                  {canApprove ? '🟢 Auto-publish' : (isDirectorOnline ? '🟡 Requires approval (Director is online)' : '🟡 Director Offline (Auto-publish optional)')}
                 </p>
               </div>
             </div>
@@ -368,6 +379,22 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
                     media_types={mediaPreviews.map(p => p.type)}
                   />
                 </div>
+              </div>
+            )}
+            
+            {/* Auto Publish Toggle for Staff when Director is Offline */}
+            {!canApprove && !isDirectorOnline && (
+              <div className="mt-6 flex items-center justify-between p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100">
+                <div>
+                  <p className="text-sm font-bold text-slate-900">Auto-publish Post</p>
+                  <p className="text-[10px] text-slate-500 font-medium">Bypass approval queue since Director is currently offline.</p>
+                </div>
+                <button
+                  onClick={() => setAutoPublish(!autoPublish)}
+                  className={`w-12 h-6 rounded-full transition-colors relative ${autoPublish ? 'bg-emerald-500' : 'bg-slate-300'}`}
+                >
+                  <div className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-transform ${autoPublish ? 'left-7' : 'left-1'}`}></div>
+                </button>
               </div>
             )}
           </div>

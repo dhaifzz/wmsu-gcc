@@ -22,6 +22,7 @@ import OfficeSchedule from './OfficeSchedule';
 import AccountManagement from './AccountManagement';
 import BlogPosting from '../blog-posting';
 import { useAuth } from '../../../auth/AuthContext';
+import { useDirectorPresence } from '../../../hooks/useDirectorPresence';
 
 const DirectorDashboard = () => {
   const { user: authUser } = useAuth();
@@ -37,6 +38,9 @@ const DirectorDashboard = () => {
     studentId: authUser?.employeeId || authUser?.schoolId || "",
     educationLevel: authUser?.educationLevel || "Staff",
   };
+
+  // Broadcast director's presence
+  useDirectorPresence('director');
 
   const navLinks = [
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },

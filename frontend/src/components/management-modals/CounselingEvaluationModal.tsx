@@ -8,6 +8,7 @@ import {
 import { useAuth } from '../../auth/AuthContext';
 import { appointmentApi } from '../../lib/api';
 import { showToast } from '../modal-notification/toast';
+import { useDirectorPresence } from '../../hooks/useDirectorPresence';
 
 interface CounselingEvaluationModalProps {
   isOpen: boolean;
@@ -24,6 +25,10 @@ const CounselingEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff
   const [reschedType, setReschedType] = useState<'staff_picked' | 'user_picked'>('user_picked');
   const [newDate, setNewDate] = useState('');
   const [newTimeSlot, setNewTimeSlot] = useState('');
+  const { isDirectorOnline } = useDirectorPresence(role);
+
+  // If director is online, force forwarding to director
+  const effectiveForwardToDirector = isDirectorOnline ? true : forwardToDirector;
 
   if (!appointment) return null;
 
@@ -33,7 +38,7 @@ const CounselingEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff
     try {
       const res = await appointmentApi.evaluateCounselingAppointment(
         appointment.id,
-        { action: 'evaluate', forwardToDirector },
+        { action: 'evaluate', forwardToDirector: effectiveForwardToDirector },
         accessToken
       );
       if (res.ok) {
@@ -232,9 +237,20 @@ const CounselingEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff
                             </div>
                             <span className="text-[10px] font-black uppercase tracking-widest text-teal-700 group-hover:text-white">Evaluate</span>
                           </button>
-                          <label className="flex items-center gap-2 cursor-pointer mt-2 pl-2">
-                            <input type="checkbox" checked={forwardToDirector} onChange={(e) => setForwardToDirector(e.target.checked)} className="rounded text-teal-600" />
-                            <span className="text-xs font-bold text-slate-700">Forward to Director</span>
+                          <label className={`flex items-center gap-2 mt-2 pl-2 ${isDirectorOnline ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'}`}>
+                            <input 
+                              type="checkbox" 
+                              checked={effectiveForwardToDirector} 
+                              onChange={(e) => !isDirectorOnline && setForwardToDirector(e.target.checked)} 
+                              disabled={isDirectorOnline}
+                              className="rounded text-teal-600 disabled:opacity-50" 
+                            />
+                            <div className="flex flex-col">
+                              <span className="text-xs font-bold text-slate-700">Forward to Director</span>
+                              {isDirectorOnline && (
+                                <span className="text-[10px] text-teal-600 font-bold">Director is currently online. Approval is required.</span>
+                              )}
+                            </div>
                           </label>
                         </div>
                         <button onClick={() => setReschedMode(true)} disabled={loading} className="group flex sm:flex-col items-center gap-3 p-4 sm:p-6 bg-amber-50 hover:bg-amber-500 rounded-[1.5rem] sm:rounded-[2rem] border border-amber-100 hover:border-amber-500 transition-all shadow-sm hover:shadow-amber-200">

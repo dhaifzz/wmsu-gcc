@@ -10,6 +10,7 @@ import { useAuth } from '../../auth/AuthContext';
 import { appointmentApi } from '../../lib/api';
 import { showToast } from '../modal-notification/toast';
 import { supabase } from '../../lib/supabaseClient';
+import { useDirectorPresence } from '../../hooks/useDirectorPresence';
 
 interface ShiftingEvaluationModalProps {
   isOpen: boolean;
@@ -96,6 +97,10 @@ const ShiftingEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff',
   const [loading, setLoading] = useState(false);
   const [forwardToDirector, setForwardToDirector] = useState(true);
   const [previewData, setPreviewData] = useState<{ url: string; title: string } | null>(null);
+  const { isDirectorOnline } = useDirectorPresence(role);
+
+  // If director is online, force forwarding to director
+  const effectiveForwardToDirector = isDirectorOnline ? true : forwardToDirector;
 
   if (!appointment) return null;
 
@@ -131,7 +136,7 @@ const ShiftingEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff',
     try {
       const res = await appointmentApi.evaluateShiftingAppointment(
         appointment.id,
-        { action: 'evaluate', forwardToDirector },
+        { action: 'evaluate', forwardToDirector: effectiveForwardToDirector },
         accessToken
       );
       if (res.ok) {
@@ -395,17 +400,20 @@ const ShiftingEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff',
                         <span className="text-[10px] font-black uppercase tracking-widest text-teal-700 group-hover:text-white">Evaluate</span>
                       </button>
 
-                      <div className="flex flex-col justify-center items-center gap-3 p-4 sm:p-6 bg-slate-50 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-100">
+                      <div className={`flex flex-col justify-center items-center gap-3 p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] border ${isDirectorOnline ? 'bg-slate-50 border-slate-200 opacity-80 cursor-not-allowed' : 'bg-slate-50 border-slate-100'}`}>
                         <div className="text-center">
                           <p className="text-sm font-bold text-slate-900">Forward to Director</p>
                           <p className="text-[10px] text-slate-500 font-medium mt-1">Require final approval</p>
+                          {isDirectorOnline && (
+                            <p className="text-[10px] text-teal-600 font-bold mt-1">Director is currently online. Approval is required.</p>
+                          )}
                         </div>
                         <button
-                          onClick={() => setForwardToDirector(!forwardToDirector)}
-                          disabled={loading}
-                          className={`w-14 h-7 rounded-full transition-colors relative mt-2 ${forwardToDirector ? 'bg-teal-500' : 'bg-slate-300'} disabled:opacity-50`}
+                          onClick={() => !isDirectorOnline && setForwardToDirector(!forwardToDirector)}
+                          disabled={loading || isDirectorOnline}
+                          className={`w-14 h-7 rounded-full transition-colors relative mt-2 ${effectiveForwardToDirector ? 'bg-teal-500' : 'bg-slate-300'} disabled:opacity-50 ${isDirectorOnline ? 'cursor-not-allowed' : ''}`}
                         >
-                          <div className={`w-5 h-5 rounded-full bg-white absolute top-1 transition-transform ${forwardToDirector ? 'left-8' : 'left-1'}`}></div>
+                          <div className={`w-5 h-5 rounded-full bg-white absolute top-1 transition-transform ${effectiveForwardToDirector ? 'left-8' : 'left-1'}`}></div>
                         </button>
                       </div>
                     </>
