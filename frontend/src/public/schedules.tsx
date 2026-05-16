@@ -222,7 +222,7 @@ const Schedules = () => {
         </div>
 
         <div className="container mx-auto px-6 -mt-8 relative z-20">
-          <div className="bg-white p-2 rounded-2xl shadow-xl shadow-slate-200/50 flex flex-col sm:flex-row items-center justify-center gap-2 max-w-3xl mx-auto mb-12">
+          <div className="bg-white p-3 rounded-2xl shadow-xl shadow-slate-200/50 flex flex-col sm:flex-row items-center justify-center gap-2 max-w-5xl mx-auto mb-12">
             {[
               { id: 'counseling', label: 'Counseling', icon: MessageCircle },
               { id: 'assessment_college', label: 'Assessment (College)', icon: ClipboardCheck },
@@ -232,13 +232,13 @@ const Schedules = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as ServiceType)}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all w-full sm:w-auto
+                className={`flex-1 flex items-center justify-center gap-3 py-4 px-6 rounded-xl text-sm font-black uppercase tracking-widest transition-all w-full sm:w-auto
                   ${activeTab === tab.id 
                     ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200 scale-100' 
                     : 'text-slate-500 hover:bg-slate-50 hover:text-emerald-600'
                   }`}
               >
-                <tab.icon size={16} />
+                <tab.icon size={18} />
                 <span className="truncate">{tab.label}</span>
               </button>
             ))}
