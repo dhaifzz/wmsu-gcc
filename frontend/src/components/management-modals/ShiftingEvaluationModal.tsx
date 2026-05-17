@@ -9,7 +9,6 @@ import {
 import { useAuth } from '../../auth/AuthContext';
 import { appointmentApi } from '../../lib/api';
 import { showToast } from '../modal-notification/toast';
-import { supabase } from '../../lib/supabaseClient';
 import { useDirectorPresence } from '../../hooks/useDirectorPresence';
 
 interface ShiftingEvaluationModalProps {

@@ -48,44 +48,55 @@ export async function api<T = unknown>(
       };
     }
 
-    const response = await fetch(`${base}${endpoint}`, {
-      method,
-      headers,
-      body: body ? JSON.stringify(body) : undefined,
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-    const contentType = response.headers.get('content-type') || '';
-    let data: unknown = null;
+    try {
+      const response = await fetch(`${base}${endpoint}`, {
+        method,
+        headers,
+        body: body ? JSON.stringify(body) : undefined,
+        signal: controller.signal,
+      });
 
-    if (contentType.includes('application/json')) {
-      try {
-        data = await response.json();
-      } catch {
-        data = null;
+      const contentType = response.headers.get('content-type') || '';
+      let data: unknown = null;
+
+      if (contentType.includes('application/json')) {
+        try {
+          data = await response.json();
+        } catch {
+          data = null;
+        }
+      } else {
+        const text = await response.text();
+        data = text ? { error: text.slice(0, 500) } : null;
       }
-    } else {
-      const text = await response.text();
-      data = text ? { error: text.slice(0, 500) } : null;
+
+      const errMsg =
+        data && typeof data === 'object' && data !== null && 'error' in data
+          ? String((data as { error?: unknown }).error)
+          : undefined;
+
+      return {
+        ok: response.ok,
+        status: response.status,
+        data: data as T,
+        error: !response.ok ? errMsg || 'Request failed.' : undefined,
+      };
+    } finally {
+      clearTimeout(timeoutId);
     }
-
-    const errMsg =
-      data && typeof data === 'object' && data !== null && 'error' in data
-        ? String((data as { error?: unknown }).error)
-        : undefined;
-
-    return {
-      ok: response.ok,
-      status: response.status,
-      data: data as T,
-      error: !response.ok ? errMsg || 'Request failed.' : undefined,
-    };
   } catch (err: any) {
     console.error(`API Error (${endpoint}):`, err);
+    const isTimeout = err?.name === 'AbortError';
     return {
       ok: false,
-      status: 500,
+      status: isTimeout ? 408 : 500,
       data: null as unknown as T,
-      error: 'Unable to connect to the server. Please check your internet connection or try again later.',
+      error: isTimeout
+        ? 'Request timed out. Please try again.'
+        : 'Unable to connect to the server. Please check your internet connection or try again later.',
     };
   }
 }
