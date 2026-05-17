@@ -18,14 +18,10 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
   }
 
   if (allowedRoles) {
-    const normalizedUserRole = user.role?.toLowerCase().trim() || '';
-    const hasRole = allowedRoles.some(role => role.toLowerCase().trim() === normalizedUserRole);
-    
-    // As a fallback, if the user role includes 'admin' and this route allows admin-like roles, let them in.
-    const isAdminRoute = allowedRoles.some(r => r.toLowerCase().includes('admin'));
-    const isUserAdmin = normalizedUserRole.includes('admin');
-    
-    if (!hasRole && !(isAdminRoute && isUserAdmin)) {
+    const normalizedUserRole = user.role?.trim() || '';
+    const hasRole = allowedRoles.some((role) => role.trim() === normalizedUserRole);
+
+    if (!hasRole) {
       return <Navigate to="/login" replace />;
     }
   }

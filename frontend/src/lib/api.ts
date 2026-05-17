@@ -460,6 +460,13 @@ export const appointmentApi = {
       method: 'PUT',
       body: payload as unknown as Record<string, unknown>,
       token
+    }),
+    
+  getShiftingDocumentSignedUrl: (path: string, token: string) =>
+    api<{ signedUrl: string }>('/api/appointments/shifting/signed-url', {
+      method: 'POST',
+      body: { path },
+      token
     })
 };
 

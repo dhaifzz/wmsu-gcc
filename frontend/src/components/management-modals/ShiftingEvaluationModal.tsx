@@ -104,21 +104,30 @@ const ShiftingEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff',
 
   if (!appointment) return null;
 
-  const getDocUrl = (path: string) => {
-    if (!path) return '';
-    const { data } = supabase.storage.from('shifting-documents').getPublicUrl(path);
-    return data.publicUrl;
+  const getDocUrlAsync = async (path: string) => {
+    if (!path || !accessToken) return '';
+    try {
+      const res = await appointmentApi.getShiftingDocumentSignedUrl(path, accessToken);
+      if (res.ok && res.data?.signedUrl) {
+        return res.data.signedUrl;
+      }
+    } catch (e) {
+      console.error('Failed to get signed URL:', e);
+    }
+    return '';
   };
 
-  const handlePreview = (path: string, label: string) => {
-    const url = getDocUrl(path);
+  const handlePreview = async (path: string, label: string) => {
+    const url = await getDocUrlAsync(path);
     if (url) {
       setPreviewData({ url, title: label });
+    } else {
+      showToast.error('Failed to load document preview.');
     }
   };
 
-  const handleDownload = (path: string, label: string) => {
-    const url = getDocUrl(path);
+  const handleDownload = async (path: string, label: string) => {
+    const url = await getDocUrlAsync(path);
     if (url) {
       const link = document.createElement('a');
       link.href = url;
@@ -127,6 +136,8 @@ const ShiftingEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff',
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+    } else {
+      showToast.error('Failed to download document.');
     }
   };
 

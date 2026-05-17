@@ -36,7 +36,7 @@ export function useDirectorPresence(userRole?: string) {
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
           setConnected(true);
-          if (userRole === 'director' || userRole === 'admin') {
+          if (userRole === 'Director' || userRole === 'Admin' || userRole === 'Super Admin') {
             await channel.track({ online_at: new Date().toISOString() });
           }
         }

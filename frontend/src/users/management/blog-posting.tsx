@@ -48,7 +48,6 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
   const [mediaPreviews, setMediaPreviews] = useState<{ url: string; type: string }[]>([]);
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [autoPublish, setAutoPublish] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   // Edit state
@@ -124,7 +123,6 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
         media_types: uploadedMedia.length > 0 ? uploadedMedia.map(m => m.type) : (editingPost ? editingPost.media_types : []),
         link_url: linkUrl.trim() || null,
         link_type: linkType,
-        autoApprove: !canApprove && !isDirectorOnline && autoPublish,
       };
 
       const res = editingPost
@@ -155,7 +153,6 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
     setLinkUrl('');
     setLinkType('general');
     setShowLinkInput(false);
-    setAutoPublish(false);
     mediaPreviews.forEach(p => URL.revokeObjectURL(p.url));
     setMediaFiles([]);
     setMediaPreviews([]);
@@ -271,7 +268,7 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
               <div>
                 <p className="font-black text-slate-900 text-sm">{user?.firstName} {user?.lastName}</p>
                 <p className="text-[10px] text-slate-400 font-bold">
-                  {canApprove ? '🟢 Auto-publish' : (isDirectorOnline ? '🟡 Requires approval (Director is online)' : '🟡 Director Offline (Auto-publish optional)')}
+                  {canApprove ? '🟢 Publishes immediately' : '🟡 Submitted for director approval'}
                 </p>
               </div>
             </div>
@@ -376,20 +373,12 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
               </div>
             )}
             
-            {/* Auto Publish Toggle for Staff when Director is Offline */}
-            {!canApprove && !isDirectorOnline && (
-              <div className="mt-6 flex items-center justify-between p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100">
-                <div>
-                  <p className="text-sm font-bold text-slate-900">Auto-publish Post</p>
-                  <p className="text-[10px] text-slate-500 font-medium">Bypass approval queue since Director is currently offline.</p>
-                </div>
-                <button
-                  onClick={() => setAutoPublish(!autoPublish)}
-                  className={`w-12 h-6 rounded-full transition-colors relative ${autoPublish ? 'bg-emerald-500' : 'bg-slate-300'}`}
-                >
-                  <div className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-transform ${autoPublish ? 'left-7' : 'left-1'}`}></div>
-                </button>
-              </div>
+            {!canApprove && (
+              <p className="mt-4 text-[11px] text-slate-500 font-medium px-1">
+                {isDirectorOnline
+                  ? 'The director is online — your post will enter the approval queue.'
+                  : 'The director is offline — your post will still require approval before it goes live.'}
+              </p>
             )}
           </div>
 
