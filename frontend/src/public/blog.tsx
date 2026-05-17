@@ -327,7 +327,6 @@ const BlogPage = () => {
   const { user, accessToken } = useAuth();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
-  const [total, setTotal] = useState(0);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -343,7 +342,6 @@ const BlogPage = () => {
     const res = await blogApi.getPosts(1, 100, c === 'all' ? undefined : (c || undefined), s || undefined);
     if (res.ok) {
       setPosts(res.data.posts);
-      setTotal(res.data.total);
     }
     setLoading(false);
   };
