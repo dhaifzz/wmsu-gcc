@@ -1,10 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { Heart, Sparkles, HandHeart, PartyPopper, Lightbulb, MessageCircle, Send, CornerDownRight, X, LogIn, Search, Bookmark, BookmarkCheck } from 'lucide-react';
+import { Heart, Sparkles, HandHeart, PartyPopper, Lightbulb, MessageCircle, Send, CornerDownRight, X, LogIn, Search, Bookmark, BookmarkCheck, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import LeftBlogSidebar from '../components/left-blog-sidebar';
-import RightBlogSidebar from '../components/right-blog-sidebar';
 import { useAuth } from '../auth/AuthContext';
 import { blogApi, BLOG_CATEGORIES, type BlogPost, type BlogComment, type ReactionType } from '../lib/blogApi';
 import BlogPostContent from '../components/blog-post-content';
@@ -329,7 +327,6 @@ const BlogPage = () => {
   const { user, accessToken } = useAuth();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [activeCategory, setActiveCategory] = useState('all');
@@ -339,11 +336,11 @@ const BlogPage = () => {
   const [savedPostIds, setSavedPostIds] = useState<Set<string>>(new Set());
   const [isScrolled, setIsScrolled] = useState(false);
 
-  const fetchPosts = async (p = 1, cat?: string, search?: string) => {
+  const fetchPosts = async (cat?: string, search?: string) => {
     setLoading(true);
     const c = cat !== undefined ? cat : activeCategory;
     const s = search !== undefined ? search : searchQuery;
-    const res = await blogApi.getPosts(p, 2, c === 'all' ? undefined : (c || undefined), s || undefined);
+    const res = await blogApi.getPosts(1, 100, c === 'all' ? undefined : (c || undefined), s || undefined);
     if (res.ok) {
       setPosts(res.data.posts);
       setTotal(res.data.total);
@@ -385,8 +382,7 @@ const BlogPage = () => {
   const handleCategoryChange = (cat: string) => {
     const newCat = activeCategory === cat ? 'all' : cat;
     setActiveCategory(newCat);
-    setPage(1);
-    fetchPosts(1, newCat, searchQuery);
+    fetchPosts(newCat, searchQuery);
   };
 
   const handleSearchInput = (value: string) => {
@@ -394,20 +390,58 @@ const BlogPage = () => {
     clearTimeout(searchTimeout.current);
     searchTimeout.current = setTimeout(() => {
       setSearchQuery(value);
-      setPage(1);
-      fetchPosts(1, activeCategory, value);
+      fetchPosts(activeCategory, value);
     }, 400);
   };
 
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-    fetchPosts(newPage, activeCategory, searchQuery);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+
 
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-slate-50 flex flex-col relative overflow-hidden">
+      {/* Fixed Background Floating Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        {/* Animated Orbs */}
+        <motion.div
+          animate={{ y: [0, -40, 0], x: [0, 30, 0] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-[10%] left-[5%] w-96 h-96 bg-emerald-400/10 rounded-full blur-[100px]"
+        />
+        <motion.div
+          animate={{ y: [0, 50, 0], x: [0, -40, 0] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          className="absolute top-[40%] right-[2%] w-[35rem] h-[35rem] bg-emerald-500/10 rounded-full blur-[120px]"
+        />
+        <motion.div
+          animate={{ y: [0, -60, 0], scale: [1, 1.2, 1] }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+          className="absolute -bottom-[10%] left-[25%] w-[30rem] h-[30rem] bg-emerald-300/10 rounded-full blur-[100px]"
+        />
+        
+        {/* Floating Semantic Icons */}
+        <motion.div
+          animate={{ y: [0, -20, 0], rotate: [0, 15, 0] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 0 }}
+          className="absolute top-[25%] left-[8%] text-emerald-600/[0.03]"
+        >
+          <Sparkles size={140} strokeWidth={1} />
+        </motion.div>
+        <motion.div
+          animate={{ y: [0, 30, 0], rotate: [0, -20, 0] }}
+          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+          className="absolute top-[60%] right-[10%] text-emerald-600/[0.03]"
+        >
+          <Heart size={180} strokeWidth={1} />
+        </motion.div>
+        <motion.div
+          animate={{ y: [0, -25, 0], rotate: [0, 25, 0] }}
+          transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          className="absolute top-[75%] left-[18%] text-emerald-600/[0.03]"
+        >
+          <Lightbulb size={160} strokeWidth={1} />
+        </motion.div>
+      </div>
+
       <div className="relative z-10 flex flex-col min-h-screen">
         <Navbar />
         
@@ -432,25 +466,18 @@ const BlogPage = () => {
               </p>
             </div>
           </div>
-          {/* Sidebars + Feed Container */}
-          <section className="flex flex-row w-full max-w-[1800px] relative mx-auto px-4 lg:px-8 xl:px-12 2xl:px-16 -mt-10 z-20">
-            <LeftBlogSidebar
-              user={user}
-              token={accessToken}
-              onToggleSave={handleToggleSave}
-            />
-
-            <div className="flex-1 min-w-0 flex flex-col items-center">
+          {/* Feed Container */}
+          <section className="flex flex-col w-full max-w-[1400px] relative mx-auto px-4 lg:px-8 xl:px-12 2xl:px-16 -mt-10 z-20">
               {/* Search Area */}
-              <div className="sticky top-20 z-30 w-full px-4 sm:px-6 mb-8 pt-2 transition-all duration-300">
-                <div className={`rounded-[2rem] p-6 transition-all duration-500 border ${
+              <div className="sticky top-20 z-30 w-full px-0 sm:px-4 lg:px-6 mb-8 pt-2 transition-all duration-300">
+                <div className={`rounded-[2rem] p-4 sm:p-6 transition-all duration-500 border ${
                   isScrolled 
-                    ? 'bg-white/40 backdrop-blur-2xl border-white/50 shadow-[0_8px_32px_rgba(16,185,129,0.15)] hover:bg-white hover:backdrop-blur-none hover:border-slate-100 hover:shadow-2xl hover:shadow-slate-200/50 focus-within:bg-white focus-within:backdrop-blur-none focus-within:border-slate-100 focus-within:shadow-2xl focus-within:shadow-slate-200/50' 
+                    ? 'bg-white border-emerald-300 shadow-xl shadow-emerald-500/10' 
                     : 'bg-white border-slate-100 shadow-2xl shadow-slate-200/50'
                 } ${
                   (isScrolled && !searchInput) ? 'opacity-70 hover:opacity-100 focus-within:opacity-100' : 'opacity-100'
                 }`}>
-                  <div className="max-w-5xl mx-auto space-y-6">
+                  <div className="w-full mx-auto space-y-6">
                     {/* Search Input */}
                     <div className="relative group w-full mx-auto">
                       <div className="absolute inset-0 bg-emerald-500/5 blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity rounded-xl" />
@@ -470,7 +497,7 @@ const BlogPage = () => {
                     </div>
 
                     {/* Category Filters Carousel */}
-                    <div className="relative group/filters max-w-5xl mx-auto overflow-hidden">
+                    <div className="relative group/filters w-full mx-auto overflow-hidden">
                       <div className="flex gap-3 overflow-x-auto custom-scrollbar-emerald py-2 px-1">
                         <button
                           onClick={() => handleCategoryChange('all')}
@@ -502,8 +529,8 @@ const BlogPage = () => {
               </div>
 
               {/* Feed Content */}
-              <div className="py-2 px-4 sm:px-8 w-full flex justify-center">
-                <div className="max-w-5xl w-full">
+              <div className="py-2 px-0 sm:px-4 lg:px-8 w-full flex justify-center">
+                <div className="w-full">
                   {loading && posts.length === 0 ? (
                     <div className="space-y-8 pb-20">
                       {[1, 2].map((i) => (
@@ -542,40 +569,31 @@ const BlogPage = () => {
                       <p className="text-slate-500 text-sm font-bold mt-2 max-w-sm mx-auto">Try adjusting your filters or search terms to find what you're looking for.</p>
                     </motion.div>
                   ) : (
-                    <div className="space-y-8 pb-20">
+                    <div className="space-y-8 pb-4">
                       {posts.map(post => (
                         <div key={post.id} id={`post-${post.id}`} className="relative group">
                           <PostCard post={post} user={user} token={accessToken} onNeedLogin={() => setShowLoginPrompt(true)} />
                           <button
                             onClick={() => user ? handleToggleSave(post.id) : setShowLoginPrompt(true)}
-                            className={`absolute top-4 right-4 w-12 h-12 rounded-2xl flex items-center justify-center transition-all z-10 shadow-2xl border ${
+                            className={`absolute top-4 right-4 w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all z-10 border ${
                               savedPostIds.has(post.id)
-                                ? 'bg-emerald-500 text-white border-emerald-400'
-                                : 'bg-white/10 text-white/20 hover:bg-emerald-500 hover:text-white border-white/10 backdrop-blur-xl'
+                                ? 'bg-emerald-500 text-white border-emerald-400 shadow-emerald-500/20 shadow-xl'
+                                : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-emerald-50 hover:text-emerald-500 hover:border-emerald-200 shadow-sm'
                             }`}
                             title={savedPostIds.has(post.id) ? 'Unsave post' : 'Save post'}>
                             {savedPostIds.has(post.id) ? <BookmarkCheck size={20} /> : <Bookmark size={20} />}
                           </button>
                         </div>
                       ))}
-                      {total > 2 && (
-                        <div className="flex items-center justify-between pt-10 border-t border-slate-200 mt-8">
-                          <button
-                            onClick={() => handlePageChange(page - 1)}
-                            disabled={page === 1 || loading}
-                            className="px-6 py-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-black hover:bg-slate-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                      {posts.length > 0 && (
+                        <div className="flex flex-col items-center justify-center pt-8 pb-4 border-t border-slate-200 mt-6">
+                          <p className="text-slate-500 font-medium mb-3">You've reached the end of the posts.</p>
+                          <button 
+                            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                            className="flex items-center gap-2 px-6 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl font-black hover:bg-slate-50 hover:text-emerald-600 transition-all shadow-sm group"
                           >
-                            Previous
-                          </button>
-                          <span className="text-sm font-bold text-slate-500">
-                            Page {page} of {Math.ceil(total / 2)}
-                          </span>
-                          <button
-                            onClick={() => handlePageChange(page + 1)}
-                            disabled={page >= Math.ceil(total / 2) || loading}
-                            className="px-6 py-3 bg-emerald-600 border border-emerald-500 text-white rounded-xl font-black hover:bg-emerald-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-emerald-600/20"
-                          >
-                            Next
+                            <ChevronUp size={20} className="group-hover:-translate-y-1 transition-transform" />
+                            Return to Top
                           </button>
                         </div>
                       )}
@@ -583,12 +601,6 @@ const BlogPage = () => {
                   )}
                 </div>
               </div>
-            </div>
-
-            <RightBlogSidebar
-              activeCategory={activeCategory}
-              onCategoryChange={handleCategoryChange}
-            />
           </section>
 
           {/* Global Footer - Now below both sidebars and feed */}
@@ -601,7 +613,7 @@ const BlogPage = () => {
         <AnimatePresence>
           {showLoginPrompt && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/80 backdrop-blur-md z-[200] flex items-center justify-center p-4"
+              className="fixed inset-0 bg-black/60 z-[200] flex items-center justify-center p-4"
               onClick={() => setShowLoginPrompt(false)}>
               <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
                 onClick={e => e.stopPropagation()}
