@@ -45,6 +45,9 @@ export interface BlogComment {
   parent_id: string | null;
   author_id: string;
   author_name: string;
+  author_role?: string | null;
+  author_profile_picture?: string | null;
+  author_sex?: string | null;
   content: string;
   mentioned_user_id: string | null;
   mentioned_user_name: string | null;

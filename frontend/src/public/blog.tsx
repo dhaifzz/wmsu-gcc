@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Heart, Sparkles, HandHeart, PartyPopper, Lightbulb, MessageCircle, Send, CornerDownRight, X, LogIn, Search, Bookmark, BookmarkCheck, ChevronUp } from 'lucide-react';
+import { Heart, Sparkles, HandHeart, PartyPopper, Lightbulb, MessageCircle, Send, CornerDownRight, X, LogIn, Search, ChevronUp, User as UserIcon, UserRound } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -43,6 +43,48 @@ function buildCommentTree(comments: BlogComment[]): (BlogComment & { replies: Bl
   return roots;
 }
 
+const MarqueeText = ({ text, className }: { text: string; className: string }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
+  const [scrollAmount, setScrollAmount] = useState(0);
+
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (containerRef.current && textRef.current) {
+        const containerWidth = containerRef.current.offsetWidth;
+        const textWidth = textRef.current.scrollWidth;
+        if (textWidth > containerWidth) {
+          setScrollAmount(textWidth - containerWidth + 10);
+        } else {
+          setScrollAmount(0);
+        }
+      }
+    };
+
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+    return () => window.removeEventListener('resize', checkOverflow);
+  }, [text]);
+
+  return (
+    <div ref={containerRef} className={`${className} overflow-hidden whitespace-nowrap`}>
+      <motion.span
+        ref={textRef}
+        animate={scrollAmount > 0 ? { x: [0, -scrollAmount, 0] } : { x: 0 }}
+        transition={{
+          duration: Math.max(3, scrollAmount * 0.05),
+          repeat: Infinity,
+          ease: "easeInOut",
+          repeatDelay: 2
+        }}
+        className="inline-block"
+      >
+        {text}
+      </motion.span>
+    </div>
+  );
+};
+
 // Helper functions moved to BlogPostContent.tsx
 function PostCard({ post, user, token, onNeedLogin }: { post: BlogPost; user: any; token: string | null; onNeedLogin: () => void }) {
   const [showComments, setShowComments] = useState(false);
@@ -68,6 +110,34 @@ function PostCard({ post, user, token, onNeedLogin }: { post: BlogPost; user: an
       });
     }
   }, [post.id, user, token]);
+
+  const renderCurrentUserAvatar = () => {
+    if (!user) return null;
+    const roleStr = (user.role || '').toLowerCase();
+    const nameStr = (`${user.firstName} ${user.lastName}`).toLowerCase();
+    const isStaff = ['director', 'superadmin', 'super admin', 'admin', 'staff', 'faculty'].includes(roleStr) || 
+                    nameStr.includes('staff') || nameStr.includes('admin') || nameStr.includes('director');
+    
+    if (isStaff) {
+      return <img src={GCCLogo} alt="GCC Logo" className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover shrink-0 border border-slate-100 shadow-sm bg-white" />;
+    }
+
+    const sex = (user.sex || '').toLowerCase();
+    let avatarStyles = 'bg-slate-200 text-slate-500';
+    let AvatarIcon = UserIcon;
+    if (sex === 'male') {
+      avatarStyles = 'bg-blue-100 text-blue-500';
+      AvatarIcon = UserIcon;
+    } else if (sex === 'female') {
+      avatarStyles = 'bg-pink-100 text-pink-500';
+      AvatarIcon = UserRound;
+    }
+    return (
+      <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shrink-0 border border-slate-100 shadow-sm ${avatarStyles}`}>
+        <AvatarIcon size={16} />
+      </div>
+    );
+  };
 
   const loadComments = async () => {
     setLoadingComments(true);
@@ -132,20 +202,53 @@ function PostCard({ post, user, token, onNeedLogin }: { post: BlogPost; user: an
 
   const commentTree = buildCommentTree(comments);
 
-  const renderComment = (c: BlogComment & { replies: BlogComment[] }, depth = 0) => (
-    <div key={c.id} className={`${depth > 0 ? 'ml-4 sm:ml-6 border-l-2 border-slate-100 pl-3 sm:pl-4' : ''}`}>
-      <div className="flex gap-2 sm:gap-3 py-2 group">
-        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 text-[10px] sm:text-xs font-black">
-          {c.author_name.charAt(0).toUpperCase()}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="bg-emerald-50/50 backdrop-blur-sm rounded-2xl px-3 sm:px-4 py-2">
-            <p className="font-bold text-xs sm:text-sm text-slate-800">{c.author_name}</p>
-            <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
-              {c.mentioned_user_name && <span className="text-emerald-600 font-bold">@{c.mentioned_user_name} </span>}
-              {c.content}
-            </p>
-          </div>
+  const renderComment = (c: BlogComment & { replies: BlogComment[] }, depth = 0) => {
+    console.log("Evaluating Comment:", c.author_name, "Role:", c.author_role);
+    const roleStr = (c.author_role || '').toLowerCase();
+    const nameStr = (c.author_name || '').toLowerCase();
+    const isStaff = ['director', 'superadmin', 'super admin', 'admin', 'staff', 'faculty'].includes(roleStr) || 
+                    nameStr.includes('staff') || nameStr.includes('admin') || nameStr.includes('director');
+    const displayName = isStaff ? 'WMSU Guidance & Counseling Center' : c.author_name;
+    const profilePic = isStaff ? GCCLogo : (c.author_profile_picture || null);
+    
+    let AvatarIcon = null;
+    let avatarStyles = 'bg-emerald-100 text-emerald-600';
+
+    if (!profilePic && !isStaff) {
+      const sex = (c.author_sex || '').toLowerCase();
+      if (sex === 'male') {
+        avatarStyles = 'bg-blue-100 text-blue-500';
+        AvatarIcon = UserIcon;
+      } else if (sex === 'female') {
+        avatarStyles = 'bg-pink-100 text-pink-500';
+        AvatarIcon = UserRound;
+      } else {
+        avatarStyles = 'bg-slate-200 text-slate-500';
+        AvatarIcon = UserIcon;
+      }
+    }
+
+    return (
+      <div key={c.id} className={`${depth > 0 ? 'ml-4 sm:ml-6 border-l-2 border-slate-100 pl-3 sm:pl-4' : ''}`}>
+        <div className="flex gap-2 sm:gap-3 py-2 group">
+          {profilePic ? (
+            <img src={profilePic} alt={displayName} className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover shrink-0 border border-slate-100 shadow-sm bg-white" />
+          ) : (
+            <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shrink-0 border border-slate-100 shadow-sm ${avatarStyles}`}>
+              {AvatarIcon ? <AvatarIcon size={16} /> : <span className="text-[10px] sm:text-xs font-black">{displayName.charAt(0).toUpperCase()}</span>}
+            </div>
+          )}
+          <div className="flex-1 min-w-0">
+            <div className={`${isStaff ? 'bg-emerald-50/50 backdrop-blur-sm' : 'bg-slate-50'} rounded-2xl px-3 sm:px-4 py-2`}>
+              <p className="font-bold text-xs sm:text-sm text-slate-800 flex items-center gap-1.5 flex-wrap">
+                {displayName}
+                {isStaff && <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 text-[9px] rounded-full uppercase tracking-wider">Official</span>}
+              </p>
+              <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
+                {c.mentioned_user_name && <span className="text-emerald-600 font-bold">@{c.mentioned_user_name} </span>}
+                {c.content}
+              </p>
+            </div>
           <div className="flex items-center gap-4 mt-1 px-2">
             <span className="text-[10px] text-slate-400 font-bold">{formatTimeAgo(c.created_at)}</span>
             {user && token && (
@@ -162,6 +265,7 @@ function PostCard({ post, user, token, onNeedLogin }: { post: BlogPost; user: an
       {c.replies.map(r => renderComment(r as any, depth + 1))}
     </div>
   );
+  };
 
   return (
     <motion.div
@@ -176,7 +280,7 @@ function PostCard({ post, user, token, onNeedLogin }: { post: BlogPost; user: an
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-            <p className="font-black text-slate-900 text-sm sm:text-base truncate">WMSU Guidance and Counseling Center</p>
+            <MarqueeText text="WMSU Guidance and Counseling Center" className="font-black text-slate-900 text-sm sm:text-base w-full sm:w-auto flex-1 min-w-0" />
           </div>
           <p className="text-[11px] text-slate-400 font-bold">
             {formatTimeAgo(post.created_at)}
@@ -288,9 +392,7 @@ function PostCard({ post, user, token, onNeedLogin }: { post: BlogPost; user: an
                     </div>
                   )}
                     <div className="flex gap-2 sm:gap-3 items-end">
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 text-[10px] sm:text-xs font-black">
-                      {user.firstName?.charAt(0)?.toUpperCase() || '?'}
-                    </div>
+                      {renderCurrentUserAvatar()}
                     <div className="flex-1 bg-slate-50 rounded-2xl px-3 sm:px-4 py-1.5 sm:py-2 flex items-center gap-2 border border-slate-100 focus-within:border-emerald-300 transition-colors">
                       <input
                         value={commentText}
@@ -332,7 +434,6 @@ const BlogPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const searchTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
-  const [savedPostIds, setSavedPostIds] = useState<Set<string>>(new Set());
   const [isScrolled, setIsScrolled] = useState(false);
 
   const fetchPosts = async (cat?: string, search?: string) => {
@@ -355,27 +456,6 @@ const BlogPage = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  useEffect(() => {
-    if (!accessToken) return;
-    blogApi.getSavedPosts(accessToken).then(res => {
-      if (res.ok) {
-        setSavedPostIds(new Set(res.data.savedPosts.map(s => s.post_id)));
-      }
-    });
-  }, [accessToken]);
-
-  const handleToggleSave = async (postId: string) => {
-    if (!accessToken) return;
-    const isSaved = savedPostIds.has(postId);
-    if (isSaved) {
-      await blogApi.unsavePost(postId, accessToken);
-      setSavedPostIds(prev => { const next = new Set(prev); next.delete(postId); return next; });
-    } else {
-      await blogApi.savePost(postId, accessToken);
-      setSavedPostIds(prev => new Set(prev).add(postId));
-    }
-  };
 
   const handleCategoryChange = (cat: string) => {
     const newCat = activeCategory === cat ? 'all' : cat;
@@ -571,16 +651,6 @@ const BlogPage = () => {
                       {posts.map(post => (
                         <div key={post.id} id={`post-${post.id}`} className="relative group">
                           <PostCard post={post} user={user} token={accessToken} onNeedLogin={() => setShowLoginPrompt(true)} />
-                          <button
-                            onClick={() => user ? handleToggleSave(post.id) : setShowLoginPrompt(true)}
-                            className={`absolute top-4 right-4 w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all z-10 border ${
-                              savedPostIds.has(post.id)
-                                ? 'bg-emerald-500 text-white border-emerald-400 shadow-emerald-500/20 shadow-xl'
-                                : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-emerald-50 hover:text-emerald-500 hover:border-emerald-200 shadow-sm'
-                            }`}
-                            title={savedPostIds.has(post.id) ? 'Unsave post' : 'Save post'}>
-                            {savedPostIds.has(post.id) ? <BookmarkCheck size={20} /> : <Bookmark size={20} />}
-                          </button>
                         </div>
                       ))}
                       {posts.length > 0 && (
