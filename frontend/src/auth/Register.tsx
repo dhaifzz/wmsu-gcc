@@ -310,7 +310,13 @@ export default function Register() {
     if (!emailRegex.test(email)) { showToast.error('Please enter a valid email address.'); return; }
     
     const domain = email.split('@')[1]?.toLowerCase();
-    if (!['wmsu.edu.ph', 'gmail.com'].includes(domain)) {
+    
+    if (isWMSU && domain !== 'wmsu.edu.ph') {
+      showToast.error('WMSU members must use a valid @wmsu.edu.ph email address.');
+      return;
+    }
+    
+    if (!isWMSU && !['wmsu.edu.ph', 'gmail.com'].includes(domain)) {
       showToast.error('Only @wmsu.edu.ph or @gmail.com emails are allowed.');
       return;
     }
