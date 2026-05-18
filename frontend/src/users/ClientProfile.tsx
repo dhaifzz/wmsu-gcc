@@ -242,11 +242,11 @@ const ClientProfile = ({ user }: ProfileProps) => {
     track: authUser?.track || user.track,
     department: authUser?.department || user.department,
     status: authUser?.occupation || user.status,
-    contactNumber: authUser?.contactNumber || "N/A",
+    contactNumber: authUser?.contactNumber || "",
     sex: authUser?.sex || user.sex || "Prefer not to say",
-    city: authUser?.city || authUser?.address_city || "N/A",
-    barangay: authUser?.barangay || authUser?.address_barangay || "N/A",
-    street: authUser?.street || authUser?.address_street || "N/A"
+    city: authUser?.city || authUser?.address_city || "",
+    barangay: authUser?.barangay || authUser?.address_barangay || "",
+    street: authUser?.street || authUser?.address_street || ""
   };
 
   // Determine avatar styling based on sex
@@ -519,7 +519,7 @@ const ClientProfile = ({ user }: ProfileProps) => {
                   </div>
                   <div className="space-y-1">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Occupation</p>
-                    <p className="text-lg font-bold text-slate-700">{displayUser.status || "N/A"}</p>
+                    <p className="text-lg font-bold text-slate-700">{displayUser.status || ""}</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Contact Number</p>

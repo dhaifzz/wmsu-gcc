@@ -230,7 +230,7 @@ const ManagementProfile = ({ user }: ProfileProps) => {
                 </div>
                 <div className="flex items-center gap-2 text-slate-500">
                    <UserCheck size={14} className={theme.text600} />
-                   <span className="text-[10px] md:text-xs font-bold uppercase tracking-wider">ID: {user.studentId || 'N/A'}</span>
+                   <span className="text-[10px] md:text-xs font-bold uppercase tracking-wider">ID: {user.studentId || ''}</span>
                 </div>
               </div>
             </div>
@@ -276,7 +276,7 @@ const ManagementProfile = ({ user }: ProfileProps) => {
 
                <div className="group">
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 group-hover:text-emerald-600 transition-colors">Sex / Gender</p>
-                <p className="text-lg font-bold text-slate-700 capitalize">{authUser?.sex || 'N/A'}</p>
+                <p className="text-lg font-bold text-slate-700 capitalize">{authUser?.sex || ''}</p>
               </div>
 
               <div className="group md:col-span-2">
@@ -286,7 +286,7 @@ const ManagementProfile = ({ user }: ProfileProps) => {
                    <p className="text-lg font-bold text-slate-700">
                      {authUser?.street || authUser?.address_street ? `${authUser.street || authUser.address_street}, ` : ''}
                      {authUser?.barangay || authUser?.address_barangay ? `${authUser.barangay || authUser.address_barangay}, ` : ''}
-                     {authUser?.city || authUser?.address_city || 'N/A'}
+                     {authUser?.city || authUser?.address_city || ''}
                    </p>
                 </div>
               </div>
@@ -295,7 +295,7 @@ const ManagementProfile = ({ user }: ProfileProps) => {
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 group-hover:text-emerald-600 transition-colors">Contact Number</p>
                 <div className="flex items-center gap-3">
                    <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400"><Phone size={16} /></div>
-                   <p className="text-lg font-bold text-slate-700">{authUser?.contactNumber || 'N/A'}</p>
+                   <p className="text-lg font-bold text-slate-700">{authUser?.contactNumber || ''}</p>
                 </div>
               </div>
 
