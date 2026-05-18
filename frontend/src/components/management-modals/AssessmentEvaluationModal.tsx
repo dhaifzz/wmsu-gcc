@@ -28,6 +28,33 @@ const AssessmentEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff
   const [newTimeSlot, setNewTimeSlot] = useState('');
   const { isDirectorOnline } = useDirectorPresence(role);
 
+  const isEmerald = role === 'staff' || role === 'director';
+  const theme = {
+    bg900: isEmerald ? 'bg-emerald-900' : 'bg-teal-900',
+    grad: isEmerald ? 'from-emerald-800/40 to-emerald-900' : 'from-teal-800/40 to-teal-900',
+    blur1: isEmerald ? 'bg-emerald-400/10' : 'bg-teal-400/10',
+    blur2: isEmerald ? 'bg-emerald-500/10' : 'bg-teal-500/10',
+    iconText: isEmerald ? 'text-emerald-500' : 'text-teal-500',
+    subText: isEmerald ? 'text-emerald-400/80' : 'text-teal-400/80',
+    badgeBg: isEmerald ? 'bg-emerald-50' : 'bg-teal-50',
+    badgeText: isEmerald ? 'text-emerald-600' : 'text-teal-600',
+    badgeBorder: isEmerald ? 'border-emerald-100' : 'border-teal-100',
+    badgeLabel: isEmerald ? 'text-emerald-400' : 'text-teal-400',
+    boxBg: isEmerald ? 'bg-emerald-50' : 'bg-teal-50',
+    boxBorder: isEmerald ? 'border-emerald-100/50' : 'border-teal-100/50',
+    boxTitle: isEmerald ? 'text-emerald-600' : 'text-teal-600',
+    boxText: isEmerald ? 'text-emerald-900' : 'text-teal-900',
+    btnBg: isEmerald ? 'bg-emerald-50' : 'bg-teal-50',
+    btnHoverBg: isEmerald ? 'hover:bg-emerald-600' : 'hover:bg-teal-600',
+    btnBorder: isEmerald ? 'border-emerald-100' : 'border-teal-100',
+    btnHoverBorder: isEmerald ? 'hover:border-emerald-600' : 'hover:border-teal-600',
+    btnHoverShadow: isEmerald ? 'hover:shadow-emerald-200' : 'hover:shadow-teal-200',
+    btnIconHoverBg: isEmerald ? 'group-hover:bg-emerald-500' : 'group-hover:bg-teal-500',
+    btnText: isEmerald ? 'text-emerald-700' : 'text-teal-700',
+    toggleBg: isEmerald ? 'bg-emerald-500' : 'bg-teal-500',
+    text600: isEmerald ? 'text-emerald-600' : 'text-teal-600'
+  };
+
   // If director is online, force forwarding to director
   const effectiveForwardToDirector = isDirectorOnline ? true : forwardToDirector;
 
@@ -123,19 +150,19 @@ const AssessmentEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff
             className="relative w-full max-w-2xl bg-white rounded-[2rem] sm:rounded-[3rem] shadow-2xl shadow-slate-950/20 overflow-hidden h-auto max-h-[90dvh] flex flex-col"
           >
             {/* Header - Sticky */}
-            <div className="relative h-32 bg-teal-900 overflow-hidden shrink-0">
-              <div className="absolute inset-0 bg-gradient-to-br from-teal-800/40 to-teal-900"></div>
-              <div className="absolute -right-20 -top-20 w-64 h-64 bg-teal-400/10 rounded-full blur-3xl"></div>
-              <div className="absolute -left-10 -bottom-10 w-40 h-40 bg-teal-500/10 rounded-full blur-2xl"></div>
+            <div className={`relative h-32 ${theme.bg900} overflow-hidden shrink-0`}>
+              <div className={`absolute inset-0 bg-gradient-to-br ${theme.grad}`}></div>
+              <div className={`absolute -right-20 -top-20 w-64 h-64 ${theme.blur1} rounded-full blur-3xl`}></div>
+              <div className={`absolute -left-10 -bottom-10 w-40 h-40 ${theme.blur2} rounded-full blur-2xl`}></div>
 
               <div className="relative z-10 px-6 sm:px-8 h-full flex items-center justify-between">
                 <div className="flex items-center gap-3 sm:gap-4">
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white/10 rounded-2xl flex items-center justify-center border border-white/10 text-teal-500">
+                  <div className={`w-12 h-12 sm:w-14 sm:h-14 bg-white/10 rounded-2xl flex items-center justify-center border border-white/10 ${theme.iconText}`}>
                     <ClipboardCheck size={24} />
                   </div>
                   <div>
                     <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">Assessment Session</h2>
-                    <p className="text-teal-400/80 text-[9px] sm:text-[10px] font-black uppercase tracking-widest mt-1">ID: {appointment.studentId}</p>
+                    <p className={`${theme.subText} text-[9px] sm:text-[10px] font-black uppercase tracking-widest mt-1`}>ID: {appointment.studentId}</p>
                   </div>
                 </div>
                 <button
@@ -174,11 +201,11 @@ const AssessmentEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff
                     </div>
                     {appointment.evaluatedBy && (
                       <div className="flex items-center gap-3 pt-2 border-t border-slate-100">
-                        <div className="w-8 h-8 bg-teal-50 rounded-xl flex items-center justify-center text-teal-600 shadow-sm border border-teal-100">
+                        <div className={`w-8 h-8 ${theme.badgeBg} rounded-xl flex items-center justify-center ${theme.badgeText} shadow-sm border ${theme.badgeBorder}`}>
                           <ClipboardCheck size={14} />
                         </div>
                         <div>
-                          <p className="text-[9px] font-black uppercase text-teal-400 tracking-widest">Processing Staff</p>
+                          <p className={`text-[9px] font-black uppercase ${theme.badgeLabel} tracking-widest`}>Processing Staff</p>
                           <p className="text-sm font-bold text-slate-900 leading-tight">{appointment.evaluatedBy}</p>
                         </div>
                       </div>
@@ -212,14 +239,14 @@ const AssessmentEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff
               </div>
 
               {/* Assessment Specific Info */}
-              <div className="bg-teal-50 rounded-[2rem] p-5 sm:p-6 border border-teal-100/50">
+              <div className={`${theme.boxBg} rounded-[2rem] p-5 sm:p-6 border ${theme.boxBorder}`}>
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-8 h-8 bg-white rounded-xl flex items-center justify-center text-teal-500 shadow-sm">
+                  <div className={`w-8 h-8 bg-white rounded-xl flex items-center justify-center ${theme.iconText} shadow-sm`}>
                     <FileText size={14} />
                   </div>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-teal-600">Assigned Test</span>
+                  <span className={`text-[10px] font-black uppercase tracking-widest ${theme.boxTitle}`}>Assigned Test</span>
                 </div>
-                <div className="px-2 font-bold text-teal-900">{appointment.test}</div>
+                <div className={`px-2 font-bold ${theme.boxText}`}>{appointment.test}</div>
               </div>
 
               {/* Action Buttons */}
@@ -231,12 +258,12 @@ const AssessmentEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff
                         <button
                           onClick={() => handleDirectorEvaluate('approve')}
                           disabled={loading}
-                          className="group flex sm:flex-col items-center gap-3 p-4 sm:p-6 bg-teal-50 hover:bg-teal-600 rounded-[1.5rem] sm:rounded-[2rem] border border-teal-100 hover:border-teal-600 transition-all shadow-sm hover:shadow-teal-200 disabled:opacity-50"
+                          className={`group flex sm:flex-col items-center gap-3 p-4 sm:p-6 ${theme.btnBg} ${theme.btnHoverBg} rounded-[1.5rem] sm:rounded-[2rem] border ${theme.btnBorder} ${theme.btnHoverBorder} transition-all shadow-sm ${theme.btnHoverShadow} disabled:opacity-50`}
                         >
-                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white group-hover:bg-teal-500 rounded-2xl flex items-center justify-center text-teal-600 group-hover:text-white transition-all shadow-sm shrink-0">
+                          <div className={`w-10 h-10 sm:w-12 sm:h-12 bg-white ${theme.btnIconHoverBg} rounded-2xl flex items-center justify-center ${theme.badgeText} group-hover:text-white transition-all shadow-sm shrink-0`}>
                             <CheckCircle2 size={24} />
                           </div>
-                          <span className="text-[10px] font-black uppercase tracking-widest text-teal-700 group-hover:text-white">Accept</span>
+                          <span className={`text-[10px] font-black uppercase tracking-widest ${theme.btnText} group-hover:text-white`}>Accept</span>
                         </button>
 
                         <button
@@ -255,12 +282,12 @@ const AssessmentEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff
                         <button
                           onClick={handleEvaluate}
                           disabled={loading}
-                          className="group flex sm:flex-col items-center gap-3 p-4 sm:p-6 bg-teal-50 hover:bg-teal-600 rounded-[1.5rem] sm:rounded-[2rem] border border-teal-100 hover:border-teal-600 transition-all shadow-sm hover:shadow-teal-200 disabled:opacity-50"
+                          className={`group flex sm:flex-col items-center gap-3 p-4 sm:p-6 ${theme.btnBg} ${theme.btnHoverBg} rounded-[1.5rem] sm:rounded-[2rem] border ${theme.btnBorder} ${theme.btnHoverBorder} transition-all shadow-sm ${theme.btnHoverShadow} disabled:opacity-50`}
                         >
-                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white group-hover:bg-teal-500 rounded-2xl flex items-center justify-center text-teal-600 group-hover:text-white transition-all shadow-sm shrink-0">
+                          <div className={`w-10 h-10 sm:w-12 sm:h-12 bg-white ${theme.btnIconHoverBg} rounded-2xl flex items-center justify-center ${theme.badgeText} group-hover:text-white transition-all shadow-sm shrink-0`}>
                             <CheckCircle2 size={24} />
                           </div>
-                          <span className="text-[10px] font-black uppercase tracking-widest text-teal-700 group-hover:text-white">Evaluate</span>
+                          <span className={`text-[10px] font-black uppercase tracking-widest ${theme.btnText} group-hover:text-white`}>Evaluate</span>
                         </button>
 
                         <button
@@ -282,13 +309,13 @@ const AssessmentEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff
                         <p className="text-sm font-bold text-slate-900">Forward to Director</p>
                         <p className="text-[10px] text-slate-500 font-medium">Require director approval before notifying the student</p>
                         {isDirectorOnline && (
-                          <p className="text-[10px] text-teal-600 font-bold mt-1">Director is currently online. Approval is required.</p>
+                          <p className={`text-[10px] ${theme.text600} font-bold mt-1`}>Director is currently online. Approval is required.</p>
                         )}
                       </div>
                       <button
                         onClick={() => !isDirectorOnline && setForwardToDirector(!forwardToDirector)}
                         disabled={isDirectorOnline}
-                        className={`w-12 h-6 rounded-full transition-colors relative ${effectiveForwardToDirector ? 'bg-teal-500' : 'bg-slate-300'} ${isDirectorOnline ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        className={`w-12 h-6 rounded-full transition-colors relative ${effectiveForwardToDirector ? theme.toggleBg : 'bg-slate-300'} ${isDirectorOnline ? 'opacity-50 cursor-not-allowed' : ''}`}
                       >
                         <div className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-transform ${effectiveForwardToDirector ? 'left-7' : 'left-1'}`}></div>
                       </button>

@@ -27,6 +27,33 @@ const CounselingEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff
   const [newTimeSlot, setNewTimeSlot] = useState('');
   const { isDirectorOnline } = useDirectorPresence(role);
 
+  const isEmerald = role === 'staff' || role === 'director';
+  const theme = {
+    bg900: isEmerald ? 'bg-emerald-900' : 'bg-teal-900',
+    grad: isEmerald ? 'from-emerald-800/40 to-emerald-900' : 'from-teal-800/40 to-teal-900',
+    blur1: isEmerald ? 'bg-emerald-400/10' : 'bg-teal-400/10',
+    blur2: isEmerald ? 'bg-emerald-500/10' : 'bg-teal-500/10',
+    iconText: isEmerald ? 'text-emerald-500' : 'text-teal-500', // originally blue-500
+    subText: isEmerald ? 'text-emerald-400/80' : 'text-teal-400/80',
+    badgeBg: isEmerald ? 'bg-emerald-50' : 'bg-teal-50',
+    badgeText: isEmerald ? 'text-emerald-600' : 'text-teal-600',
+    badgeBorder: isEmerald ? 'border-emerald-100' : 'border-teal-100',
+    badgeLabel: isEmerald ? 'text-emerald-400' : 'text-teal-400',
+    boxBg: isEmerald ? 'bg-emerald-50' : 'bg-teal-50',
+    boxBorder: isEmerald ? 'border-emerald-100/50' : 'border-teal-100/50',
+    boxTitle: isEmerald ? 'text-emerald-600' : 'text-teal-600',
+    boxText: isEmerald ? 'text-emerald-900' : 'text-teal-900',
+    btnBg: isEmerald ? 'bg-emerald-50' : 'bg-teal-50',
+    btnHoverBg: isEmerald ? 'hover:bg-emerald-600' : 'hover:bg-teal-600',
+    btnBorder: isEmerald ? 'border-emerald-100' : 'border-teal-100',
+    btnHoverBorder: isEmerald ? 'hover:border-emerald-600' : 'hover:border-teal-600',
+    btnHoverShadow: isEmerald ? 'hover:shadow-emerald-200' : 'hover:shadow-teal-200',
+    btnIconHoverBg: isEmerald ? 'group-hover:bg-emerald-500' : 'group-hover:bg-teal-500',
+    btnText: isEmerald ? 'text-emerald-700' : 'text-teal-700',
+    toggleBg: isEmerald ? 'bg-emerald-500' : 'bg-teal-500',
+    text600: isEmerald ? 'text-emerald-600' : 'text-teal-600'
+  };
+
   // If director is online, force forwarding to director
   const effectiveForwardToDirector = isDirectorOnline ? true : forwardToDirector;
 
@@ -121,19 +148,19 @@ const CounselingEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff
             className="relative w-full max-w-2xl bg-white rounded-[2rem] sm:rounded-[3rem] shadow-2xl shadow-slate-950/20 overflow-hidden h-auto max-h-[90dvh] flex flex-col"
           >
             {/* Header - Sticky */}
-            <div className="relative h-32 bg-teal-900 overflow-hidden shrink-0">
-              <div className="absolute inset-0 bg-gradient-to-br from-teal-800/40 to-teal-900"></div>
-              <div className="absolute -right-20 -top-20 w-64 h-64 bg-teal-400/10 rounded-full blur-3xl"></div>
-              <div className="absolute -left-10 -bottom-10 w-40 h-40 bg-teal-500/10 rounded-full blur-2xl"></div>
+            <div className={`relative h-32 ${theme.bg900} overflow-hidden shrink-0`}>
+              <div className={`absolute inset-0 bg-gradient-to-br ${theme.grad}`}></div>
+              <div className={`absolute -right-20 -top-20 w-64 h-64 ${theme.blur1} rounded-full blur-3xl`}></div>
+              <div className={`absolute -left-10 -bottom-10 w-40 h-40 ${theme.blur2} rounded-full blur-2xl`}></div>
 
               <div className="relative z-10 px-6 sm:px-8 h-full flex items-center justify-between">
                 <div className="flex items-center gap-3 sm:gap-4">
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white/10 rounded-2xl flex items-center justify-center border border-white/10 text-blue-500">
+                  <div className={`w-12 h-12 sm:w-14 sm:h-14 bg-white/10 rounded-2xl flex items-center justify-center border border-white/10 ${theme.iconText}`}>
                     <MessageCircle size={24} />
                   </div>
                   <div>
                     <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">Counseling Request</h2>
-                    <p className="text-teal-400/80 text-[9px] sm:text-[10px] font-black uppercase tracking-widest mt-1">ID: {appointment.studentId}</p>
+                    <p className={`${theme.subText} text-[9px] sm:text-[10px] font-black uppercase tracking-widest mt-1`}>ID: {appointment.studentId}</p>
                   </div>
                 </div>
                 <button
@@ -172,11 +199,11 @@ const CounselingEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff
                     </div>
                     {appointment.evaluatedBy && (
                       <div className="flex items-center gap-3 pt-2 border-t border-slate-100">
-                        <div className="w-8 h-8 bg-teal-50 rounded-xl flex items-center justify-center text-teal-600 shadow-sm border border-teal-100">
+                        <div className={`w-8 h-8 ${theme.badgeBg} rounded-xl flex items-center justify-center ${theme.badgeText} shadow-sm border ${theme.badgeBorder}`}>
                           <ClipboardCheck size={14} />
                         </div>
                         <div>
-                          <p className="text-[9px] font-black uppercase text-teal-400 tracking-widest">Processing Staff</p>
+                          <p className={`text-[9px] font-black uppercase ${theme.badgeLabel} tracking-widest`}>Processing Staff</p>
                           <p className="text-sm font-bold text-slate-900 leading-tight">{appointment.evaluatedBy}</p>
                         </div>
                       </div>
@@ -213,11 +240,11 @@ const CounselingEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-2">
                 {role === 'director' ? (
                   <>
-                    <button onClick={() => handleDirectorEvaluate('approve')} disabled={loading} className="group flex sm:flex-col items-center gap-3 p-4 sm:p-6 bg-teal-50 hover:bg-teal-600 rounded-[1.5rem] sm:rounded-[2rem] border border-teal-100 hover:border-teal-600 transition-all shadow-sm hover:shadow-teal-200">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white group-hover:bg-teal-500 rounded-2xl flex items-center justify-center text-teal-600 group-hover:text-white transition-all shadow-sm shrink-0">
+                    <button onClick={() => handleDirectorEvaluate('approve')} disabled={loading} className={`group flex sm:flex-col items-center gap-3 p-4 sm:p-6 ${theme.btnBg} ${theme.btnHoverBg} rounded-[1.5rem] sm:rounded-[2rem] border ${theme.btnBorder} ${theme.btnHoverBorder} transition-all shadow-sm ${theme.btnHoverShadow}`}>
+                      <div className={`w-10 h-10 sm:w-12 sm:h-12 bg-white ${theme.btnIconHoverBg} rounded-2xl flex items-center justify-center ${theme.badgeText} group-hover:text-white transition-all shadow-sm shrink-0`}>
                         <CheckCircle2 size={24} />
                       </div>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-teal-700 group-hover:text-white">Accept</span>
+                      <span className={`text-[10px] font-black uppercase tracking-widest ${theme.btnText} group-hover:text-white`}>Accept</span>
                     </button>
                     <button onClick={() => handleDirectorEvaluate('decline')} disabled={loading} className="group flex sm:flex-col items-center gap-3 p-4 sm:p-6 bg-rose-50 hover:bg-rose-500 rounded-[1.5rem] sm:rounded-[2rem] border border-rose-100 hover:border-rose-500 transition-all shadow-sm hover:shadow-rose-200">
                       <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white group-hover:bg-rose-400 rounded-2xl flex items-center justify-center text-rose-600 group-hover:text-white transition-all shadow-sm shrink-0">
@@ -231,11 +258,11 @@ const CounselingEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff
                     {!reschedMode ? (
                       <>
                         <div className="flex flex-col gap-2">
-                          <button onClick={handleEvaluate} disabled={loading} className="group flex sm:flex-col items-center gap-3 p-4 sm:p-6 bg-teal-50 hover:bg-teal-600 rounded-[1.5rem] sm:rounded-[2rem] border border-teal-100 hover:border-teal-600 transition-all shadow-sm hover:shadow-teal-200">
-                            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white group-hover:bg-teal-500 rounded-2xl flex items-center justify-center text-teal-600 group-hover:text-white transition-all shadow-sm shrink-0">
+                          <button onClick={handleEvaluate} disabled={loading} className={`group flex sm:flex-col items-center gap-3 p-4 sm:p-6 ${theme.btnBg} ${theme.btnHoverBg} rounded-[1.5rem] sm:rounded-[2rem] border ${theme.btnBorder} ${theme.btnHoverBorder} transition-all shadow-sm ${theme.btnHoverShadow}`}>
+                            <div className={`w-10 h-10 sm:w-12 sm:h-12 bg-white ${theme.btnIconHoverBg} rounded-2xl flex items-center justify-center ${theme.badgeText} group-hover:text-white transition-all shadow-sm shrink-0`}>
                               <CheckCircle2 size={24} />
                             </div>
-                            <span className="text-[10px] font-black uppercase tracking-widest text-teal-700 group-hover:text-white">Evaluate</span>
+                            <span className={`text-[10px] font-black uppercase tracking-widest ${theme.btnText} group-hover:text-white`}>Evaluate</span>
                           </button>
                           <label className={`flex items-center gap-2 mt-2 pl-2 ${isDirectorOnline ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'}`}>
                             <input 
@@ -243,12 +270,12 @@ const CounselingEvaluationModal = ({ isOpen, onClose, appointment, role = 'staff
                               checked={effectiveForwardToDirector} 
                               onChange={(e) => !isDirectorOnline && setForwardToDirector(e.target.checked)} 
                               disabled={isDirectorOnline}
-                              className="rounded text-teal-600 disabled:opacity-50" 
+                              className={`rounded ${theme.badgeText} disabled:opacity-50`} 
                             />
                             <div className="flex flex-col">
                               <span className="text-xs font-bold text-slate-700">Forward to Director</span>
                               {isDirectorOnline && (
-                                <span className="text-[10px] text-teal-600 font-bold">Director is currently online. Approval is required.</span>
+                                <span className={`text-[10px] ${theme.text600} font-bold`}>Director is currently online. Approval is required.</span>
                               )}
                             </div>
                           </label>
