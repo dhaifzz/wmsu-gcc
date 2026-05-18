@@ -339,7 +339,6 @@ export default function Register() {
     setContactNumber(normalized);
     if (!city.trim()) { showToast.error('City is required.'); return; }
     if (!barangay.trim()) { showToast.error('Barangay is required.'); return; }
-    if (!street.trim()) { showToast.error('Street / House No. is required.'); return; }
     
     closeDropdowns();
     setStep(3);
@@ -840,10 +839,9 @@ export default function Register() {
                         </div>
                         <input
                           type="text"
-                          placeholder="Street / House No."
+                          placeholder="Street / House No. (Optional)"
                           value={street}
                           onChange={(e) => setStreet(e.target.value.replace(/[^a-zA-Z0-9\s.,#-]/g, ''))}
-                          required
                           className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
                         />
                       </div>
