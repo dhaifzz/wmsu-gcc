@@ -366,7 +366,7 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
             
           if (uploadError) {
             console.error(`Error uploading ${key}:`, uploadError);
-            throw new Error(`Failed to upload ${key}. Please try again.`);
+            throw new Error(`Failed to upload ${key}: ${uploadError.message}`);
           }
           
           uploadResults[key] = filePath;
