@@ -312,7 +312,7 @@ export default function Register() {
     const domain = email.split('@')[1]?.toLowerCase();
     
     if (isWMSU && domain !== 'wmsu.edu.ph') {
-      showToast.error('WMSU members must use a valid @wmsu.edu.ph email address.');
+      showToast.error('Please use your valid school email address.');
       return;
     }
     
@@ -569,18 +569,29 @@ export default function Register() {
                   {step === 1 && (
                     <div className="flex flex-col gap-4">
                       {/* Email Input */}
-                      <div className="relative flex items-center">
-                        <div className="absolute left-4 text-gray-700">
-                          <User className="h-5 w-5" />
+                      <div className="relative flex flex-col gap-1">
+                        <div className="relative flex items-center">
+                          <div className="absolute left-4 text-gray-700">
+                            <User className="h-5 w-5" />
+                          </div>
+                          <input
+                            type="email"
+                            placeholder="Email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            className={`w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
+                              email.includes('@') && isWMSU && email.split('@')[1]?.toLowerCase() !== 'wmsu.edu.ph' && email.split('@')[1]?.toLowerCase() !== ''
+                                ? 'focus:ring-rose-500 ring-2 ring-rose-500/50 bg-rose-50/50'
+                                : 'focus:ring-emerald-600'
+                            }`}
+                          />
                         </div>
-                        <input
-                          type="email"
-                          placeholder="Email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          required
-                          className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
-                        />
+                        {email.includes('@') && isWMSU && email.split('@')[1]?.toLowerCase() !== 'wmsu.edu.ph' && email.split('@')[1]?.toLowerCase() !== '' && (
+                          <p className="text-xs font-bold text-rose-500 ml-2 animate-in fade-in duration-200">
+                            Please use your valid school email address.
+                          </p>
+                        )}
                       </div>
 
                       {/* Password Input */}
