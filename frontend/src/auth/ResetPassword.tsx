@@ -6,6 +6,7 @@ import authBg from '../assets/img/Auth-Background.jpg';
 import gccLogoAsset from '../assets/logos/GCC.png';
 import wmsuLogoAsset from '../assets/logos/WMSU.png';
 import { authApi, cmsApi } from '../lib/api';
+import { supabase } from '../lib/supabaseClient';
 import { useAuth } from './AuthContext';
 import Swal from 'sweetalert2';
 
@@ -13,7 +14,9 @@ export default function ResetPassword() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [resolvedToken, setResolvedToken] = useState<string | null>(null);
   const [logos, setLogos] = useState({
     wmsuLogo: wmsuLogoAsset,
     gccLogo: gccLogoAsset
@@ -21,6 +24,22 @@ export default function ResetPassword() {
 
   const { accessToken } = useAuth();
   const navigate = useNavigate();
+
+  // Get the recovery token — either from AuthContext (PASSWORD_RECOVERY event)
+  // or directly from the Supabase session (for cases where the page loads fresh)
+  useEffect(() => {
+    const getToken = async () => {
+      if (accessToken) {
+        setResolvedToken(accessToken);
+      } else {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          setResolvedToken(session.access_token);
+        }
+      }
+    };
+    getToken();
+  }, [accessToken]);
 
   useEffect(() => {
     const fetchLogos = async () => {
@@ -52,17 +71,37 @@ export default function ResetPassword() {
       return;
     }
 
-    if (password.length < 6) {
+    if (password.length < 8) {
       Swal.fire({
         icon: 'error',
         title: 'Validation Error',
-        text: 'Password must be at least 6 characters long.',
+        text: 'Password must be at least 8 characters long.',
         confirmButtonColor: '#065f46'
       });
       return;
     }
 
-    if (!accessToken) {
+    if (!/[A-Z]/.test(password)) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation Error',
+        text: 'Password must contain at least one uppercase letter.',
+        confirmButtonColor: '#065f46'
+      });
+      return;
+    }
+
+    if (!/[0-9]/.test(password)) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation Error',
+        text: 'Password must contain at least one number.',
+        confirmButtonColor: '#065f46'
+      });
+      return;
+    }
+
+    if (!resolvedToken) {
       Swal.fire({
         icon: 'error',
         title: 'Session Expired',
@@ -77,7 +116,7 @@ export default function ResetPassword() {
     setIsLoading(true);
     
     try {
-      const res = await authApi.resetPassword(password, accessToken);
+      const res = await authApi.resetPassword(password, resolvedToken!);
       if (res.ok) {
         Swal.fire({
           icon: 'success',
@@ -168,13 +207,20 @@ export default function ResetPassword() {
                 <Lock className="h-6 w-6" />
               </div>
               <input
-                type={showPassword ? "text" : "password"}
+                type={showConfirmPassword ? "text" : "password"}
                 placeholder="Confirm New Password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 className="w-full rounded-lg bg-slate-50 border border-slate-100 py-5 pl-14 pr-12 text-base font-bold text-slate-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all shadow-sm"
               />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-5 text-slate-400 hover:text-emerald-600 transition-colors"
+              >
+                {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              </button>
             </div>
 
             <button

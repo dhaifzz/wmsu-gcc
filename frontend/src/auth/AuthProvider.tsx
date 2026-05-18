@@ -43,10 +43,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     initSession();
 
-    // Listen for auth state changes (e.g., token refresh)
+    // Listen for auth state changes (e.g., token refresh, password recovery)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        if (session?.access_token) {
+      async (event, session) => {
+        if (event === 'PASSWORD_RECOVERY') {
+          // For password recovery, just store the token so ResetPassword page can use it
+          setAccessToken(session?.access_token ?? null);
+          setUser(null);
+          setLoading(false);
+        } else if (session?.access_token) {
           await fetchProfile(session.access_token);
         } else {
           setUser(null);
