@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import './index.css';
 import { AuthProvider } from './auth/AuthProvider';
 import ProtectedRoute from './auth/ProtectedRoute';
@@ -36,6 +36,16 @@ if (typeof window !== 'undefined') {
     (window as { deferredPwaPrompt?: Event }).deferredPwaPrompt = e;
     window.dispatchEvent(new Event('pwa-prompt-ready'));
   });
+}
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
 }
 
 function AppContent() {
@@ -127,6 +137,7 @@ function AppContent() {
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <AuthProvider>
         <AppContent />
       </AuthProvider>
