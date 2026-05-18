@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import './index.css';
 import { AuthProvider } from './auth/AuthProvider';
 import ProtectedRoute from './auth/ProtectedRoute';
@@ -44,6 +44,20 @@ function ScrollToTop() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
+
+  return null;
+}
+
+function RecoveryRedirect() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash && hash.includes('type=recovery')) {
+      // Clear the hash so it doesn't interfere after redirect
+      navigate('/reset-password', { replace: true });
+    }
+  }, [navigate]);
 
   return null;
 }
@@ -138,6 +152,7 @@ function App() {
   return (
     <Router>
       <ScrollToTop />
+      <RecoveryRedirect />
       <AuthProvider>
         <AppContent />
       </AuthProvider>
