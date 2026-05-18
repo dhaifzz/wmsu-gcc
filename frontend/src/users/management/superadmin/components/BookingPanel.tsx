@@ -213,8 +213,25 @@ export const BookingPanel = ({ onBack }: { onBack: () => void }) => {
     const canSubmit = shiftingForm.studentName.trim() && shiftingForm.currentCourse.trim() && shiftingForm.targetCourse.trim() && shiftingForm.reason.trim() && allDocsUploaded && !isSubmittingShifting;
 
     const handleShiftingSubmit = async () => {
-      if (!canSubmit || !accessToken) {
-        toast.error('Please complete all required fields and upload all documents.');
+      if (!canSubmit) {
+        if (!shiftingForm.studentName.trim()) {
+          toast.error("Please enter the student's full name.");
+        } else if (!shiftingForm.currentCourse.trim()) {
+          toast.error("Please enter the student's current course.");
+        } else if (!shiftingForm.targetCourse.trim()) {
+          toast.error("Please select a target course.");
+        } else if (!shiftingForm.reason.trim()) {
+          toast.error("Please provide a reason for shifting.");
+        } else if (!allDocsUploaded) {
+          const missingDocs = shiftingDocuments
+            .filter(doc => !shiftingDocs[doc.key])
+            .map(doc => doc.label);
+          toast.error(`Please upload the following required documents: ${missingDocs.join(', ')}.`);
+        }
+        return;
+      }
+      if (!accessToken) {
+        toast.error('Please sign in again before submitting.');
         return;
       }
       setIsSubmittingShifting(true);
@@ -409,9 +426,13 @@ export const BookingPanel = ({ onBack }: { onBack: () => void }) => {
               Back
             </button>
             <button
-              disabled={!canSubmit}
+              disabled={isSubmittingShifting}
               onClick={handleShiftingSubmit}
-              className="flex-1 py-4 bg-teal-600 text-white font-black rounded-lg hover:bg-teal-700 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg"
+              className={`flex-1 py-4 font-black rounded-lg transition-all shadow-lg ${
+                canSubmit
+                  ? 'bg-teal-600 text-white hover:bg-teal-700'
+                  : 'bg-teal-600/55 text-white/70 hover:bg-teal-600 cursor-not-allowed'
+              }`}
             >
               {isSubmittingShifting ? 'Submitting...' : 'Submit Application'}
             </button>

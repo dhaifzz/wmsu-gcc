@@ -328,6 +328,15 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
         }
       } else if (!isTodayOfficeOpen) {
         message = closureReason || 'The office is currently closed. Please submit during office hours.';
+      } else if (!formData.targetCourse.trim()) {
+        message = 'Please select a course to shift to.';
+      } else if (!formData.reason.trim()) {
+        message = 'Please provide a reason for shifting.';
+      } else if (!allDocsUploaded) {
+        const missingDocs = documents
+          .filter(doc => !uploadedDocs[doc.key])
+          .map(doc => doc.label);
+        message = `Please upload the following required documents: ${missingDocs.join(', ')}.`;
       }
       
       showToast.warning(message);
@@ -395,6 +404,9 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
         entranceResult: null
       });
       setDocStep(0);
+    } catch (err: any) {
+      console.error('Shifting submission error:', err);
+      showToast.error(err?.message || 'An unexpected error occurred during shifting submission.');
     } finally {
       setIsSubmitting(false);
     }
@@ -814,7 +826,7 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
 
             <button
               onClick={handleSubmit}
-              disabled={!canSubmit}
+              disabled={isSubmitting}
               className={`w-full py-5 rounded-lg font-black text-sm transition-all shadow-xl shadow-rose-950/40 ${
                 canSubmit
                   ? 'bg-rose-600 text-white hover:bg-rose-500'

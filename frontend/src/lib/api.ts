@@ -48,11 +48,16 @@ export async function api<T = unknown>(
       };
     }
 
+    // Ensure no trailing slash on base, and ensure endpoint starts with a single slash to prevent double-slash errors
+    const sanitizedBase = base.replace(/\/+$/, '');
+    const sanitizedEndpoint = '/' + endpoint.replace(/^\/+/, '');
+    const requestUrl = `${sanitizedBase}${sanitizedEndpoint}`;
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
 
     try {
-      const response = await fetch(`${base}${endpoint}`, {
+      const response = await fetch(requestUrl, {
         method,
         headers,
         body: body ? JSON.stringify(body) : undefined,
