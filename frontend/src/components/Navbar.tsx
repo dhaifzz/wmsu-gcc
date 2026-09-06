@@ -62,9 +62,9 @@ const Navbar = () => {
           {/* Logo Section */}
           <Link to="/" className="flex items-center gap-3 group">
             <div className="flex items-center">
-              <img src={logos.wmsuLogo} alt="WMSU" className="h-10 w-10 sm:h-12 sm:w-12 object-contain drop-shadow-md" />
-              <div className={`h-6 sm:h-7 w-[1.5px] mx-2 sm:mx-2.5 md:hidden transition-colors ${isSolidNeeded ? 'bg-slate-300' : 'bg-white/40'}`} />
-              <img src={logos.gccLogo} alt="GCC" className="h-10 w-10 sm:h-12 sm:w-12 object-contain drop-shadow-md md:-ml-2" />
+              <img src={logos.wmsuLogo} alt="WMSU" className="h-9 w-9 sm:h-11 sm:w-11 object-contain drop-shadow-md shrink-0" />
+              <div className={`h-5 sm:h-6 w-px mx-1 sm:mx-1.5 md:hidden shrink-0 transition-colors ${isSolidNeeded ? 'bg-slate-300' : 'bg-white/40'}`} />
+              <img src={logos.gccLogo} alt="GCC" className="h-9 w-9 sm:h-11 sm:w-11 object-contain drop-shadow-md shrink-0 md:-ml-2" />
             </div>
             <div className="flex flex-col leading-tight">
               <span className={`text-xl font-black tracking-tighter transition-colors ${isSolidNeeded ? 'text-emerald-900' : 'text-white'}`}>
