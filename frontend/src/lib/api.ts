@@ -20,7 +20,7 @@ interface ApiOptions {
   token?: string;
 }
 
-interface ApiResponse<T = unknown> {
+export interface ApiResponse<T = unknown> {
   ok: boolean;
   status: number;
   data: T;

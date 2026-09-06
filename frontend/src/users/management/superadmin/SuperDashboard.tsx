@@ -12,7 +12,7 @@ import { showAlert } from '../../../components/modal-notification/sweetalert';
 import toast from 'react-hot-toast';
 
 import { useAuth } from '../../../auth/AuthContext';
-import { analyticsApi, appointmentApi, type AnalyticsDashboardResponse } from '../../../lib/api';
+import { analyticsApi, appointmentApi, type AnalyticsDashboardResponse, type ApiResponse } from '../../../lib/api';
 
 interface OverviewProps {
   userName: string;
@@ -57,19 +57,17 @@ const Overview = ({ userName, onNavigate }: OverviewProps) => {
   }, [fetchDashboardData]);
 
   // ── Resolve API endpoint for approve/decline by type ──────────────────────
-  const evaluateAppointment = async (id: string, type: string, action: 'approve' | 'decline') => {
-    if (!token) return { ok: false, error: 'Authentication required' };
+  const evaluateAppointment = async (id: string, type: string, action: 'approve' | 'decline'): Promise<ApiResponse<any>> => {
+    if (!token) return { ok: false, status: 401, data: null, error: 'Authentication required' };
     const payload = { action };
     const lowerType = type.toLowerCase();
-    let res;
     if (lowerType.includes('shifting')) {
-      res = await appointmentApi.directorEvaluateShiftingAppointment(id, payload, token);
+      return appointmentApi.directorEvaluateShiftingAppointment(id, payload, token);
     } else if (lowerType.includes('assessment')) {
-      res = await appointmentApi.directorEvaluateAssessmentAppointment(id, payload, token);
+      return appointmentApi.directorEvaluateAssessmentAppointment(id, payload, token);
     } else {
-      res = await appointmentApi.directorEvaluateCounselingAppointment(id, payload, token);
+      return appointmentApi.directorEvaluateCounselingAppointment(id, payload, token);
     }
-    return res;
   };
 
   const handleApprove = async (item: PendingItem) => {
