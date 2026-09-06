@@ -12,12 +12,19 @@ import {
   RefreshCw,
   Eye,
   EyeOff,
+  Pencil,
+  Save,
+  Lock,
+  Phone,
+  ChevronDown,
+  ArrowLeft
 } from 'lucide-react';
 import { showAlert } from '../../../components/modal-notification/sweetalert';
 import { showToast } from '../../../components/modal-notification/toast';
 import { useAuth } from '../../../auth/AuthContext';
-import { adminApi, type AdminUser } from '../../../lib/api';
+import { adminApi, cmsApi, type AdminUser, type UpdateAdminUserPayload } from '../../../lib/api';
 import Loader from '../../../components/loader/Loader';
+import phAddresses from '../../../ph_addresses.json';
 
 const UserManagement = () => {
   const { accessToken } = useAuth();
@@ -26,6 +33,8 @@ const UserManagement = () => {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
 
   // ── Fetch users ─────────────────────────────────────────────────────────────
   const fetchUsers = useCallback(async () => {
@@ -62,6 +71,12 @@ const UserManagement = () => {
     const fullName = `${u.firstName} ${u.lastName}`.toLowerCase();
     return fullName.includes(q) || u.email.toLowerCase().includes(q) || u.role.toLowerCase().includes(q);
   });
+
+  // ── Edit handler ───────────────────────────────────────────────────────────
+  const handleEdit = (user: AdminUser) => {
+    setEditingUser(user);
+    setShowEditModal(true);
+  };
 
   // ── Delete handler ──────────────────────────────────────────────────────────
   const handleDelete = async (user: AdminUser) => {
@@ -246,6 +261,13 @@ const UserManagement = () => {
                     </td>
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleEdit(user)}
+                          className="p-2 text-teal-600 hover:bg-teal-50 rounded-lg transition-all"
+                          title="Edit Account"
+                        >
+                          <Pencil size={18} />
+                        </button>
                         <button 
                           onClick={() => handleDelete(user)}
                           className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-all" 
@@ -277,7 +299,349 @@ const UserManagement = () => {
         />
       )}
     </AnimatePresence>
+
+    {/* Edit Account Modal */}
+    <AnimatePresence>
+      {showEditModal && editingUser && (
+        <EditAccountModal
+          user={editingUser}
+          onClose={() => { setShowEditModal(false); setEditingUser(null); }}
+          onUpdated={() => {
+            setShowEditModal(false);
+            setEditingUser(null);
+            fetchUsers();
+          }}
+        />
+      )}
+    </AnimatePresence>
     </>
+  );
+};
+
+// ── Edit Account Modal ──────────────────────────────────────────────────────────
+interface EditAccountModalProps {
+  user: AdminUser;
+  onClose: () => void;
+  onUpdated: () => void;
+}
+
+
+const EditAccountModal = ({ user, onClose, onUpdated }: EditAccountModalProps) => {
+  const { accessToken } = useAuth();
+  const [submitting, setSubmitting] = useState(false);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+
+  // Form state — initialised from the list row, then overwritten by the full fetch
+  const [firstName, setFirstName] = useState(user.firstName || '');
+  const [middleName, setMiddleName] = useState(user.middleName || '');
+  const [lastName, setLastName] = useState(user.lastName || '');
+  const [contactNumber, setContactNumber] = useState('');
+  const [city, setCity] = useState('');
+  const [barangay, setBarangay] = useState('');
+  const [street, setStreet] = useState('');
+  const [sex, setSex] = useState('');
+  const [birthdate, setBirthdate] = useState('');
+  const [occupation, setOccupation] = useState('');
+  const [occupations, setOccupations] = useState<string[]>([]);
+  const [isDropdownOpen, setIsDropdownOpen] = useState<any>({});
+
+  const ALL_CITIES = Object.keys(phAddresses).sort();
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
+  // Fetch full profile and occupation list in parallel
+  useEffect(() => {
+    if (!accessToken) return;
+    const load = async () => {
+      setLoadingProfile(true);
+      try {
+        const [profileRes, academicRes] = await Promise.all([
+          adminApi.getUserById(user.id, accessToken),
+          cmsApi.getAcademicData(),
+        ]);
+        if (profileRes.ok && profileRes.data) {
+          const p = profileRes.data;
+          setFirstName(p.firstName || '');
+          setMiddleName(p.middleName || '');
+          setLastName(p.lastName || '');
+          // Contact number: strip +63 prefix back to 09 format for display
+          const rawContact = p.contactNumber || '';
+          setContactNumber(
+            rawContact.startsWith('+63') ? '0' + rawContact.slice(3) : rawContact
+          );
+          setCity(p.city || '');
+          setBarangay(p.barangay || '');
+          setStreet(p.street || '');
+          setSex(p.sex || '');
+          setBirthdate(p.birthdate || '');
+          setOccupation(p.occupation || '');
+        }
+        if (academicRes.ok && academicRes.data) {
+          const source = (academicRes.data as any).data || (academicRes.data as any).content || academicRes.data;
+          setOccupations(
+            Array.isArray(source.occupations)
+              ? source.occupations.map((o: any) => typeof o === 'string' ? o : o.occupation_name)
+              : []
+          );
+        }
+      } catch { /* silent — form stays with defaults */ }
+      finally { setLoadingProfile(false); }
+    };
+    load();
+  }, [user.id, accessToken]);
+
+  const validatePhone = (phone: string) => {
+    const clean = phone.replace(/\s/g, '');
+    if (!/^\+?\d+$/.test(clean)) return { error: 'Digits only.' };
+    if (clean.startsWith('+639') && clean.length === 13) return { normalized: clean };
+    if (clean.startsWith('639') && clean.length === 12) return { normalized: '+' + clean };
+    if (clean.startsWith('09') && clean.length === 11) return { normalized: '+63' + clean.substring(1) };
+    return { error: 'Start with 09, 639, or +639.' };
+  };
+
+  const handleSubmit = async () => {
+    if (!accessToken) return;
+    if (!firstName.trim() || !lastName.trim()) return showToast.error('First and last name are required.');
+    let normalizedContact = contactNumber;
+    if (contactNumber) {
+      const { normalized, error } = validatePhone(contactNumber);
+      if (error) return showToast.error(error);
+      normalizedContact = normalized!;
+    }
+    setSubmitting(true);
+    try {
+      const payload: UpdateAdminUserPayload = {
+        firstName: firstName.trim(),
+        middleName: middleName.trim() || undefined,
+        lastName: lastName.trim(),
+        contactNumber: normalizedContact || undefined,
+        city: city || undefined,
+        barangay: barangay || undefined,
+        street: street.trim() || undefined,
+        sex: sex || undefined,
+        birthdate: birthdate || undefined,
+        occupation: occupation || undefined,
+      };
+      const res = await adminApi.updateUser(user.id, payload, accessToken);
+      if (res.ok) {
+        showToast.success('Account updated successfully.');
+        onUpdated();
+      } else {
+        showToast.error(res.error || 'Failed to update account.');
+      }
+    } catch {
+      showToast.error('An error occurred while updating.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/70 backdrop-blur-xs overflow-hidden"
+      onMouseDown={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] sm:max-h-[85vh] flex flex-col overflow-hidden my-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="px-6 sm:px-8 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
+          <div>
+            <h3 className="text-xl font-black text-slate-900">Edit Account</h3>
+            <p className="text-xs font-bold text-slate-400 mt-0.5">
+              {user.firstName} {user.lastName} &middot; <span className="text-teal-600">{user.role}</span>
+            </p>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-lg transition-all"><X size={20} className="text-slate-400" /></button>
+        </div>
+
+        {/* Body */}
+        <div className="px-6 sm:px-8 py-6 sm:py-8 flex-1 overflow-y-auto custom-scrollbar min-h-0">
+          {loadingProfile ? (
+            <div className="flex flex-col items-center justify-center py-16 gap-3 text-slate-400">
+              <Loader2 size={28} className="animate-spin text-teal-600" />
+              <p className="text-sm font-bold">Loading profile data…</p>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {/* Name row */}
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">First Name</label>
+                  <input
+                    value={firstName}
+                    onChange={e => {
+                      const val = e.target.value.replace(/[^a-zA-Z\s.-]/g, '');
+                      setFirstName(val.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' '));
+                    }}
+                    maxLength={50}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Middle Name</label>
+                  <input
+                    value={middleName}
+                    onChange={e => {
+                      const val = e.target.value.replace(/[^a-zA-Z\s.-]/g, '');
+                      setMiddleName(val.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' '));
+                    }}
+                    maxLength={50}
+                    placeholder="Optional"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Last Name</label>
+                  <input
+                    value={lastName}
+                    onChange={e => {
+                      const val = e.target.value.replace(/[^a-zA-Z\s.-]/g, '');
+                      setLastName(val.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' '));
+                    }}
+                    maxLength={50}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Contact */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Contact Number</label>
+                <div className="relative">
+                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                  <input
+                    value={contactNumber}
+                    onChange={e => {
+                      const val = e.target.value.replace(/\D/g, '');
+                      if (val.length <= 11) setContactNumber(val);
+                    }}
+                    placeholder="09xxxxxxxxx"
+                    maxLength={11}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 pl-12 pr-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* City + Barangay */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2 relative">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">City</label>
+                  <button
+                    onClick={() => setIsDropdownOpen({ city: !isDropdownOpen.city })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold text-left flex justify-between items-center"
+                  >
+                    {city || 'Select City'} <ChevronDown size={16} />
+                  </button>
+                  {isDropdownOpen.city && (
+                    <div className="absolute top-full left-0 right-0 z-20 mt-2 bg-white border border-slate-100 rounded-xl shadow-xl max-h-48 overflow-y-auto">
+                      {ALL_CITIES.map(c => (
+                        <button key={c} onClick={() => { setCity(c); setBarangay(''); setIsDropdownOpen({}); }} className="w-full px-4 py-3 text-left text-sm font-bold hover:bg-slate-50 border-b border-slate-50">{c}</button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-2 relative">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Barangay</label>
+                  <button
+                    disabled={!city}
+                    onClick={() => setIsDropdownOpen({ brgy: !isDropdownOpen.brgy })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold text-left flex justify-between items-center disabled:opacity-50"
+                  >
+                    {barangay || 'Select Barangay'} <ChevronDown size={16} />
+                  </button>
+                  {isDropdownOpen.brgy && city && (
+                    <div className="absolute top-full left-0 right-0 z-20 mt-2 bg-white border border-slate-100 rounded-xl shadow-xl max-h-48 overflow-y-auto">
+                      {(phAddresses[city as keyof typeof phAddresses] || []).map((b: string) => (
+                        <button key={b} onClick={() => { setBarangay(b); setIsDropdownOpen({}); }} className="w-full px-4 py-3 text-left text-sm font-bold hover:bg-slate-50 border-b border-slate-50">{b}</button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Street */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Street / House No.</label>
+                <input
+                  value={street}
+                  onChange={e => setStreet(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none"
+                />
+              </div>
+
+              {/* Sex + Birthdate */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Sex</label>
+                  <div className="flex gap-2">
+                    {['Male', 'Female'].map(s => (
+                      <button
+                        key={s}
+                        onClick={() => setSex(s)}
+                        className={`flex-1 py-4 rounded-xl text-sm font-black border transition-all ${
+                          sex === s
+                            ? 'bg-teal-600 text-white border-teal-600 shadow-lg shadow-teal-100'
+                            : 'bg-white text-slate-600 border-slate-200 hover:border-teal-300'
+                        }`}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Birthdate</label>
+                  <input
+                    type="date"
+                    value={birthdate}
+                    onChange={e => setBirthdate(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold focus:ring-2 focus:ring-teal-500/20 outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Occupation */}
+              <div className="space-y-2 relative">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Occupation</label>
+                <button
+                  onClick={() => setIsDropdownOpen({ occ: !isDropdownOpen.occ })}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-sm font-bold text-left flex justify-between items-center"
+                >
+                  {occupation || 'Select Occupation'} <ChevronDown size={16} />
+                </button>
+                {isDropdownOpen.occ && (
+                  <div className="absolute top-full left-0 right-0 z-20 mt-2 bg-white border border-slate-100 rounded-xl shadow-xl max-h-48 overflow-y-auto">
+                    {occupations.map(o => (
+                      <button key={o} onClick={() => { setOccupation(o); setIsDropdownOpen({}); }} className="w-full px-4 py-3 text-left text-sm font-bold hover:bg-slate-50 border-b border-slate-50">{o}</button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 sm:px-8 py-5 border-t border-slate-100 flex gap-3 bg-slate-50/50 shrink-0">
+          <button onClick={onClose} className="px-6 py-4 text-slate-500 font-bold hover:bg-slate-200 rounded-xl transition-all">Cancel</button>
+          <button
+            disabled={submitting || loadingProfile}
+            onClick={handleSubmit}
+            className="flex-1 py-4 bg-teal-600 text-white font-black rounded-xl hover:bg-teal-700 transition-all shadow-lg shadow-teal-200 flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            {submitting ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+            {submitting ? 'Saving…' : 'Save Changes'}
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
@@ -286,15 +650,6 @@ interface CreateAccountModalProps {
   onClose: () => void;
   onCreated: () => void;
 }
-
-import phAddresses from '../../../ph_addresses.json';
-import { cmsApi } from '../../../lib/api';
-import { 
-  Lock, 
-  Phone, 
-  ChevronDown, 
-  ArrowLeft
-} from 'lucide-react';
 
 const AVAILABLE_ROLES = ['College Student', 'High School Student', 'Faculty', 'Outsider', 'Staff', 'Director', 'Admin'];
 

@@ -4,14 +4,18 @@ const isLocal =
 
 const envApiUrl = (import.meta.env.VITE_API_URL || '').trim();
 
-export const API_URL = envApiUrl || (isLocal ? 'http://localhost:5001' : '');
+// When running on localhost / 127.0.0.1, connect to local backend (port 5002)
+// In production builds or when hosted, use VITE_API_URL
+export const API_URL = isLocal && import.meta.env.VITE_REMOTE_DEV !== 'true'
+  ? (envApiUrl.includes('localhost') || envApiUrl.includes('127.0.0.1') ? envApiUrl : 'http://localhost:5002')
+  : (envApiUrl || (isLocal ? 'http://localhost:5002' : ''));
 
 if (typeof window !== 'undefined' && import.meta.env.PROD && !envApiUrl) {
   console.error('VITE_API_URL is required for production builds.');
 }
 
 interface ApiOptions {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   body?: Record<string, unknown>;
   token?: string;
 }
@@ -38,7 +42,7 @@ export async function api<T = unknown>(
   }
 
   try {
-    const base = API_URL || (isLocal ? 'http://localhost:5001' : '');
+    const base = API_URL || (isLocal ? 'http://localhost:5002' : '');
     if (!base) {
       return {
         ok: false,
@@ -75,7 +79,14 @@ export async function api<T = unknown>(
         }
       } else {
         const text = await response.text();
-        data = text ? { error: text.slice(0, 500) } : null;
+        let cleanText = text;
+        const preMatch = text.match(/<pre>(.*?)<\/pre>/is);
+        if (preMatch && preMatch[1]) {
+          cleanText = preMatch[1].replace(/<[^>]*>/g, '').trim();
+        } else if (text.includes('<!DOCTYPE') || text.includes('<html')) {
+          cleanText = `Request failed with status ${response.status} (${response.statusText || 'Server error'})`;
+        }
+        data = cleanText ? { error: cleanText.slice(0, 500) } : null;
       }
 
       const errMsg =
@@ -480,7 +491,7 @@ export const appointmentApi = {
       body: payload as unknown as Record<string, unknown>,
       token
     }),
-    
+
   getShiftingDocumentSignedUrl: (path: string, token: string) =>
     api<{ signedUrl: string }>('/api/appointments/shifting/signed-url', {
       method: 'POST',
@@ -554,11 +565,20 @@ export const analyticsApi = {
 export interface AdminUser {
   id: string;
   firstName: string;
+  middleName?: string;
   lastName: string;
   email: string;
   role: string;
   status: string; // 'Active' | 'Pending'
   createdAt: string;
+  // Optional — populated when fetched by id
+  contactNumber?: string;
+  city?: string;
+  barangay?: string;
+  street?: string;
+  sex?: string;
+  birthdate?: string;
+  occupation?: string;
 }
 
 export interface AdminUsersResponse {
@@ -591,13 +611,36 @@ export interface CreateAdminUserPayload {
   role: string;
 }
 
+export interface UpdateAdminUserPayload {
+  firstName: string;
+  middleName?: string;
+  lastName: string;
+  contactNumber?: string;
+  city?: string;
+  barangay?: string;
+  street?: string;
+  sex?: string;
+  birthdate?: string;
+  occupation?: string;
+}
+
 export const adminApi = {
   getUsers: (token: string) =>
     api<AdminUsersResponse>('/api/admin/users', { token }),
 
+  getUserById: (id: string, token: string) =>
+    api<AdminUser>(`/api/admin/users/${id}`, { token }),
+
   createUser: (payload: CreateAdminUserPayload, token: string) =>
     api<{ message: string }>('/api/admin/users/create', {
       method: 'POST',
+      body: payload as unknown as Record<string, unknown>,
+      token,
+    }),
+
+  updateUser: (id: string, payload: UpdateAdminUserPayload, token: string) =>
+    api<{ message: string }>(`/api/admin/users/${id}`, {
+      method: 'PATCH',
       body: payload as unknown as Record<string, unknown>,
       token,
     }),
