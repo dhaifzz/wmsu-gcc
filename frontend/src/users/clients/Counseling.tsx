@@ -36,6 +36,42 @@ const toDateKey = (year: number, monthIndex: number, day: number) => {
   return `${year}-${mm}-${dd}`;
 };
 
+const parseSlotTo24h = (slotStr: string) => {
+  const parts = slotStr.split(/[-–]/).map(s => s.trim());
+  if (parts.length !== 2) return null;
+  const to24 = (t: string) => {
+    const m = t.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (!m) return null;
+    let h = parseInt(m[1], 10);
+    const period = m[3].toUpperCase();
+    if (period === 'PM' && h < 12) h += 12;
+    if (period === 'AM' && h === 12) h = 0;
+    return `${String(h).padStart(2, '0')}:${m[2]}`;
+  };
+  const start = to24(parts[0]);
+  const end = to24(parts[1]);
+  return (start && end) ? { start, end } : null;
+};
+
+const getVisibleTimeSlots = (allSlots: string[], config?: OfficeConfig) => {
+  if (!config) return allSlots;
+  const status = config.status || 'open';
+  if (status === 'closed' || status === 'holiday') return [];
+
+  let baseSlots = allSlots;
+  if (status === 'morning_only') baseSlots = morningSlots;
+  else if (status === 'afternoon_only') baseSlots = afternoonSlots;
+
+  const startTime = config.startTime || (status === 'afternoon_only' ? '13:00' : '08:00');
+  const endTime = config.endTime || (status === 'morning_only' ? '11:00' : '16:00');
+
+  return baseSlots.filter(slot => {
+    const parsed = parseSlotTo24h(slot);
+    if (!parsed) return true;
+    return parsed.start >= startTime && parsed.end <= endTime;
+  });
+};
+
 const Counseling = ({ onBack }: { onBack: () => void }) => {
   const { accessToken, user } = useAuth();
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -85,7 +121,11 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
       setLoadingSchedule(true);
       const res = await cmsApi.getContent('office-schedule');
       if (res.ok && res.data) {
-        if (res.data.maxAvailableDate) setMaxAvailableDate(res.data.maxAvailableDate);
+        const now = new Date();
+        const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        if (res.data.maxAvailableDate && res.data.maxAvailableDate >= todayStr) {
+          setMaxAvailableDate(res.data.maxAvailableDate);
+        }
         if (res.data.officeSchedule) setOfficeSchedule(res.data.officeSchedule);
       }
     } catch (err) {
@@ -498,13 +538,15 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
                     aspect-square rounded-xl flex flex-col items-center justify-center transition-all relative overflow-hidden group
                     ${selectedDate === day 
                       ? 'bg-emerald-600 text-white shadow-xl shadow-emerald-200 scale-105 z-10' 
-                      : getDateStatus(day) === 'Holiday' || getDateStatus(day) === 'Closed'
-                        ? 'bg-rose-50/50 border border-rose-100/50 text-rose-300 cursor-not-allowed'
-                        : getDateStatus(day) === 'Weekend'
-                          ? 'bg-slate-50/50 text-slate-200 cursor-not-allowed'
-                          : getDateStatus(day) === 'Past'
-                            ? 'bg-slate-50/30 text-slate-200 cursor-not-allowed opacity-60'
-                            : 'hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 hover:scale-105 border border-transparent hover:border-emerald-100'}
+                      : getDateStatus(day) === 'Closed'
+                        ? 'bg-slate-100/70 border border-slate-200/60 text-slate-400 cursor-not-allowed opacity-75'
+                        : getDateStatus(day) === 'Holiday'
+                          ? 'bg-rose-50/50 border border-rose-100/50 text-rose-300 cursor-not-allowed'
+                          : getDateStatus(day) === 'Weekend'
+                            ? 'bg-slate-50/50 text-slate-200 cursor-not-allowed'
+                            : getDateStatus(day) === 'Past'
+                              ? 'bg-slate-50/30 text-slate-200 cursor-not-allowed opacity-60'
+                              : 'hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 hover:scale-105 border border-transparent hover:border-emerald-100'}
                   `}
                 >
                   <span className={`text-sm sm:text-base lg:text-lg font-black mb-0.5 ${selectedDate === day ? 'text-white' : ''}`}>
@@ -516,11 +558,17 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
                       px-1 lg:px-1.5 py-0.5 rounded-full text-[5px] lg:text-[7px] font-black uppercase tracking-tighter lg:tracking-widest
                       ${selectedDate === day 
                         ? 'bg-white/20 text-white' 
-                        : getDateStatus(day) === 'Holiday' || getDateStatus(day) === 'Closed'
-                          ? 'bg-rose-100 text-rose-500'
-                          : getDateStatus(day) === 'Past' || getDateStatus(day) === 'Weekend'
-                            ? 'bg-slate-100 text-slate-400'
-                            : 'bg-emerald-100 text-emerald-600'}
+                        : getDateStatus(day) === 'Closed'
+                          ? 'bg-slate-200 text-slate-600 font-bold'
+                          : getDateStatus(day) === 'Holiday'
+                            ? 'bg-rose-100 text-rose-500'
+                            : getDateStatus(day) === 'Past' || getDateStatus(day) === 'Weekend'
+                              ? 'bg-slate-100 text-slate-400'
+                              : getDateStatus(day) === 'AM Only'
+                                ? 'bg-blue-100 text-blue-700'
+                                : getDateStatus(day) === 'PM Only'
+                                  ? 'bg-orange-100 text-orange-700'
+                                  : 'bg-emerald-100 text-emerald-600'}
                     `}>
                       {getDateStatus(day)}
                     </div>
@@ -587,12 +635,12 @@ const Counseling = ({ onBack }: { onBack: () => void }) => {
             <div className="grid grid-cols-1 gap-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
               {(() => {
                 const dateKey = selectedDateKey;
-                const config = dateKey ? officeSchedule[dateKey] : null;
-                const status = config?.status || 'open';
-                
-                let visibleSlots = timeSlots;
-                if (status === 'morning_only') visibleSlots = morningSlots;
-                if (status === 'afternoon_only') visibleSlots = afternoonSlots;
+                const config = dateKey ? officeSchedule[dateKey] : undefined;
+                const visibleSlots = getVisibleTimeSlots(timeSlots, config);
+
+                if (visibleSlots.length === 0) {
+                  return <p className="text-center text-sm font-bold text-slate-400 py-4">No slots available for this day.</p>;
+                }
 
                 return visibleSlots.map(time => (
                   <button

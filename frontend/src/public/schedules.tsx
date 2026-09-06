@@ -34,6 +34,42 @@ const toDateKey = (year: number, monthIndex: number, day: number) => {
   return `${year}-${mm}-${dd}`;
 };
 
+const parseSlotTo24h = (slotStr: string) => {
+  const parts = slotStr.split(/[-–]/).map(s => s.trim());
+  if (parts.length !== 2) return null;
+  const to24 = (t: string) => {
+    const m = t.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (!m) return null;
+    let h = parseInt(m[1], 10);
+    const period = m[3].toUpperCase();
+    if (period === 'PM' && h < 12) h += 12;
+    if (period === 'AM' && h === 12) h = 0;
+    return `${String(h).padStart(2, '0')}:${m[2]}`;
+  };
+  const start = to24(parts[0]);
+  const end = to24(parts[1]);
+  return (start && end) ? { start, end } : null;
+};
+
+const getVisibleTimeSlots = (allSlots: string[], config?: OfficeConfig) => {
+  if (!config) return allSlots;
+  const status = config.status || 'open';
+  if (status === 'closed' || status === 'holiday') return [];
+
+  let baseSlots = allSlots;
+  if (status === 'morning_only') baseSlots = morningSlots;
+  else if (status === 'afternoon_only') baseSlots = afternoonSlots;
+
+  const startTime = config.startTime || (status === 'afternoon_only' ? '13:00' : '08:00');
+  const endTime = config.endTime || (status === 'morning_only' ? '11:00' : '16:00');
+
+  return baseSlots.filter(slot => {
+    const parsed = parseSlotTo24h(slot);
+    if (!parsed) return true;
+    return parsed.start >= startTime && parsed.end <= endTime;
+  });
+};
+
 const Schedules = () => {
   const [activeTab, setActiveTab] = useState<ServiceType>('counseling');
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -59,7 +95,11 @@ const Schedules = () => {
         ]);
         
         if (scheduleRes.ok && scheduleRes.data) {
-          if (scheduleRes.data.maxAvailableDate) setMaxAvailableDate(scheduleRes.data.maxAvailableDate);
+          const now = new Date();
+          const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+          if (scheduleRes.data.maxAvailableDate && scheduleRes.data.maxAvailableDate >= todayStr) {
+            setMaxAvailableDate(scheduleRes.data.maxAvailableDate);
+          }
           if (scheduleRes.data.officeSchedule) setOfficeSchedule(scheduleRes.data.officeSchedule);
         }
         
@@ -168,9 +208,7 @@ const Schedules = () => {
     if (config?.status === 'holiday') return 'Holiday';
     if (activeTab !== 'shifting') {
       const occupied = occupiedSlots[dateKey] || [];
-      const totalSlots = (config?.status === 'morning_only' ? morningSlots.length : 
-                         config?.status === 'afternoon_only' ? afternoonSlots.length : 
-                         timeSlots.length);
+      const totalSlots = getVisibleTimeSlots(timeSlots, config || undefined).length;
                          
       if (occupied.length >= totalSlots && totalSlots > 0) return 'Fully Booked';
       if (occupied.length > 0) return 'Partial';
@@ -356,11 +394,17 @@ const Schedules = () => {
                             ? (status === 'Exam Day' ? 'bg-rose-50 border border-rose-200 text-rose-700 font-bold shadow-sm' : status === 'Open Window' ? 'bg-indigo-50 border border-indigo-200 text-indigo-700 shadow-sm' : 'bg-slate-50 text-slate-400 opacity-60')
                             : selectedDate === day 
                               ? 'bg-emerald-600 text-white shadow-xl shadow-emerald-200 scale-105 z-10' 
-                              : status === 'Holiday' || status === 'Closed' || status === 'Fully Booked'
-                                ? 'bg-rose-50/50 border border-rose-100/50 text-rose-300 cursor-not-allowed'
-                                : status === 'Weekend' || status === 'Past'
-                                  ? 'bg-slate-50/30 text-slate-300 cursor-not-allowed opacity-60'
-                                  : 'bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 hover:scale-105 border border-slate-100 hover:border-emerald-100 shadow-sm'}
+                              : status === 'Closed'
+                                ? 'bg-slate-100/70 border border-slate-200/60 text-slate-400 cursor-not-allowed opacity-75'
+                                : status === 'Holiday' || status === 'Fully Booked'
+                                  ? 'bg-rose-50/50 border border-rose-100/50 text-rose-300 cursor-not-allowed'
+                                  : status === 'Weekend' || status === 'Past'
+                                    ? 'bg-slate-50/30 text-slate-300 cursor-not-allowed opacity-60'
+                                    : status === 'AM Only'
+                                      ? 'bg-blue-50/60 hover:bg-blue-100/80 text-slate-700 hover:text-blue-800 border border-blue-200/70 hover:border-blue-300 shadow-sm'
+                                      : status === 'PM Only'
+                                        ? 'bg-orange-50/60 hover:bg-orange-100/80 text-slate-700 hover:text-orange-800 border border-orange-200/70 hover:border-orange-300 shadow-sm'
+                                        : 'bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 hover:scale-105 border border-slate-100 hover:border-emerald-100 shadow-sm'}
                         `}
                       >
                         <span className={`text-base lg:text-lg font-black mb-0.5 ${selectedDate === day ? 'text-white' : ''}`}>
@@ -376,13 +420,19 @@ const Schedules = () => {
                                 ? 'bg-rose-200 text-rose-800'
                                 : status === 'Open Window'
                                   ? 'bg-indigo-200 text-indigo-800'
-                                  : status === 'Holiday' || status === 'Closed' || status === 'Fully Booked'
-                                    ? 'bg-rose-100 text-rose-500'
-                                    : status === 'Past' || status === 'Weekend' || status === 'Deadline'
-                                      ? 'bg-slate-100 text-slate-400'
-                                      : status === 'Partial' 
-                                        ? 'bg-amber-100 text-amber-600'
-                                        : 'bg-emerald-100 text-emerald-600'}
+                                  : status === 'Closed'
+                                    ? 'bg-slate-200 text-slate-600 font-bold'
+                                    : status === 'Holiday' || status === 'Fully Booked'
+                                      ? 'bg-rose-100 text-rose-500'
+                                      : status === 'Past' || status === 'Weekend' || status === 'Deadline'
+                                        ? 'bg-slate-100 text-slate-400'
+                                        : status === 'AM Only'
+                                          ? 'bg-blue-100 text-blue-700'
+                                          : status === 'PM Only'
+                                            ? 'bg-orange-100 text-orange-700'
+                                            : status === 'Partial' 
+                                              ? 'bg-amber-100 text-amber-600'
+                                              : 'bg-emerald-100 text-emerald-600'}
                           `}>
                             {status}
                           </div>
@@ -403,15 +453,27 @@ const Schedules = () => {
                   <>
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full bg-emerald-600 shadow-md"></div>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Available</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Full Day</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-blue-500 shadow-md"></div>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">AM Only</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-orange-500 shadow-md"></div>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">PM Only</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full bg-amber-400 shadow-md"></div>
                       <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Partially Booked</span>
                     </div>
                     <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-slate-400 shadow-md"></div>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Closed</span>
+                    </div>
+                    <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full bg-rose-400 shadow-md"></div>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Fully Booked / Closed</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Fully Booked / Holiday</span>
                     </div>
                   </>
                 ) : (
@@ -499,12 +561,8 @@ const Schedules = () => {
                         <div className="grid grid-cols-1 gap-3 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
                           {(() => {
                             const dateKey = selectedDateKey;
-                            const config = dateKey ? officeSchedule[dateKey] : null;
-                            const status = config?.status || 'open';
-                            
-                            let visibleSlots = timeSlots;
-                            if (status === 'morning_only') visibleSlots = morningSlots;
-                            if (status === 'afternoon_only') visibleSlots = afternoonSlots;
+                            const config = dateKey ? officeSchedule[dateKey] : undefined;
+                            const visibleSlots = getVisibleTimeSlots(timeSlots, config);
 
                             if (visibleSlots.length === 0) {
                               return <p className="text-center text-sm font-bold text-slate-400 py-4">No slots available for this day.</p>;

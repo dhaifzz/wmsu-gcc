@@ -81,7 +81,11 @@ export const BookingPanel = ({ onBack }: { onBack: () => void }) => {
         setLoadingSchedule(true);
         const res = await cmsApi.getContent('office-schedule');
         if (res.ok && res.data) {
-          if (res.data.maxAvailableDate) setMaxAvailableDate(res.data.maxAvailableDate);
+          const now = new Date();
+          const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+          if (res.data.maxAvailableDate && res.data.maxAvailableDate >= todayStr) {
+            setMaxAvailableDate(res.data.maxAvailableDate);
+          }
           if (res.data.officeSchedule) setOfficeSchedule(res.data.officeSchedule);
         }
       } catch (err) {
@@ -167,15 +171,45 @@ export const BookingPanel = ({ onBack }: { onBack: () => void }) => {
     return null;
   };
 
+const parseSlotTo24h = (slotStr: string) => {
+  const parts = slotStr.split(/[-–]/).map(s => s.trim());
+  if (parts.length !== 2) return null;
+  const to24 = (t: string) => {
+    const m = t.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (!m) return null;
+    let h = parseInt(m[1], 10);
+    const period = m[3].toUpperCase();
+    if (period === 'PM' && h < 12) h += 12;
+    if (period === 'AM' && h === 12) h = 0;
+    return `${String(h).padStart(2, '0')}:${m[2]}`;
+  };
+  const start = to24(parts[0]);
+  const end = to24(parts[1]);
+  return (start && end) ? { start, end } : null;
+};
+
   // ── Visible time slots based on selected day's office status ───────────────
   const getVisibleTimeSlots = () => {
     if (!selectedDay) return allTimeSlots;
     const dateKey = toDateKey(currentDate.getFullYear(), currentDate.getMonth(), selectedDay);
     const config = officeSchedule[dateKey];
-    const status = config?.status || 'open';
-    if (status === 'morning_only') return morningSlots;
-    if (status === 'afternoon_only') return afternoonSlots;
-    return allTimeSlots;
+    if (!config) return allTimeSlots;
+    
+    const status = config.status || 'open';
+    if (status === 'closed' || status === 'holiday') return [];
+
+    let baseSlots = allTimeSlots;
+    if (status === 'morning_only') baseSlots = morningSlots;
+    else if (status === 'afternoon_only') baseSlots = afternoonSlots;
+
+    const startTime = config.startTime || (status === 'afternoon_only' ? '13:00' : '08:00');
+    const endTime = config.endTime || (status === 'morning_only' ? '11:00' : '16:00');
+
+    return baseSlots.filter(slot => {
+      const parsed = parseSlotTo24h(slot);
+      if (!parsed) return true;
+      return parsed.start >= startTime && parsed.end <= endTime;
+    });
   };
 
   const changeMonth = (offset: number) => {

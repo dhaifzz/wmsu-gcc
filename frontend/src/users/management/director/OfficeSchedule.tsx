@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../../../auth/AuthContext';
 import { cmsApi } from '../../../lib/api';
+import { showAlert } from '../../../components/modal-notification/sweetalert';
 import {
   Calendar as CalendarIcon,
   ChevronLeft,
@@ -13,7 +15,9 @@ import {
   Building2,
   Info,
   Clock,
-  CalendarCheck
+  CalendarCheck,
+  X,
+  Check,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Loader from '../../../components/loader/Loader';
@@ -47,7 +51,11 @@ const OfficeSchedule = () => {
       const res = await cmsApi.getContent('office-schedule');
       if (res.ok && res.data && Object.keys(res.data).length > 0) {
         if (res.data.maxAvailableDate) {
-          setMaxAvailableDate(res.data.maxAvailableDate);
+          if (res.data.maxAvailableDate >= todayStr) {
+            setMaxAvailableDate(res.data.maxAvailableDate);
+          } else {
+            setMaxAvailableDate(getDefaultDeadline());
+          }
         }
         if (res.data.officeSchedule) {
           setOfficeSchedule(res.data.officeSchedule);
@@ -69,22 +77,28 @@ const OfficeSchedule = () => {
       const res = await cmsApi.updateContent('office-schedule', { maxAvailableDate, officeSchedule }, accessToken || undefined);
       if (res.ok) {
          setSuccessMessage('Office schedule updated successfully');
+         showAlert.success(
+           'Changes Confirmed!',
+           'The office schedule configuration has been saved successfully and is now active globally across the website.'
+         );
          setTimeout(() => setSuccessMessage(null), 3000);
       } else {
          setError(res.error || 'Failed to save changes');
+         showAlert.error('Save Failed', res.error || 'Failed to save changes.');
       }
     } catch (err) {
       console.error('Error saving:', err);
       setError('An unexpected error occurred');
+      showAlert.error('Error Occurred', 'An unexpected error occurred while saving schedule changes.');
     } finally {
       setSaving(false);
     }
   };
 
-  // Default deadline to 2 months from now
+  // Default deadline to 1 year from now
   const getDefaultDeadline = () => {
     const date = new Date();
-    date.setMonth(date.getMonth() + 2);
+    date.setFullYear(date.getFullYear() + 1);
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
@@ -93,6 +107,48 @@ const OfficeSchedule = () => {
 
   const [maxAvailableDate, setMaxAvailableDate] = useState<string>(getDefaultDeadline());
   const [officeSchedule, setOfficeSchedule] = useState<{ [key: string]: OfficeConfig }>({});
+  const [isDeadlineModalOpen, setIsDeadlineModalOpen] = useState(false);
+  const [deadlineModalMonth, setDeadlineModalMonth] = useState<Date>(new Date());
+  const [tempDeadline, setTempDeadline] = useState<string>('');
+
+  const openDeadlineModal = () => {
+    const currentDL = maxAvailableDate || getDefaultDeadline();
+    setTempDeadline(currentDL);
+    const dateObj = new Date(currentDL + 'T00:00:00');
+    setDeadlineModalMonth(isNaN(dateObj.getTime()) ? new Date() : dateObj);
+    setIsDeadlineModalOpen(true);
+  };
+
+  const handleApplyDeadlineModal = async () => {
+    if (!tempDeadline) return;
+    setMaxAvailableDate(tempDeadline);
+    setIsDeadlineModalOpen(false);
+
+    try {
+      setSaving(true);
+      setError(null);
+      setSuccessMessage(null);
+      const res = await cmsApi.updateContent('office-schedule', { maxAvailableDate: tempDeadline, officeSchedule }, accessToken || undefined);
+      if (res.ok) {
+        setSuccessMessage('Global deadline updated successfully!');
+        const formattedDate = new Date(tempDeadline + 'T00:00:00').toLocaleDateString('default', { month: 'long', day: 'numeric', year: 'numeric' });
+        showAlert.success(
+          'Global Deadline Saved!',
+          `The global booking deadline has been set to ${formattedDate} and updated successfully across the website.`
+        );
+        setTimeout(() => setSuccessMessage(null), 3000);
+      } else {
+        setError(res.error || 'Failed to save deadline changes');
+        showAlert.error('Save Failed', res.error || 'Failed to save deadline changes.');
+      }
+    } catch (err) {
+      console.error('Error saving deadline:', err);
+      setError('An unexpected error occurred while saving deadline');
+      showAlert.error('Error Occurred', 'An unexpected error occurred while saving deadline changes.');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const formatDate = (date: Date) => {
     const year = date.getFullYear();
@@ -104,32 +160,103 @@ const OfficeSchedule = () => {
   const daysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
   const startOfMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1).getDay();
 
+  const renderModalCalendar = () => {
+    const totalDays = daysInMonth(deadlineModalMonth);
+    const firstDay = startOfMonth(deadlineModalMonth);
+    const days = [];
+
+    for (let i = 0; i < firstDay; i++) {
+      days.push(<div key={`modal-empty-${i}`} className="h-12 sm:h-14 border border-transparent"></div>);
+    }
+
+    for (let d = 1; d <= totalDays; d++) {
+      const date = new Date(deadlineModalMonth.getFullYear(), deadlineModalMonth.getMonth(), d);
+      const dateKey = formatDate(date);
+      const isPast = dateKey < todayStr;
+      const weekend = date.getDay() === 0 || date.getDay() === 6;
+      const isSelected = dateKey === tempDeadline;
+      const isToday = dateKey === todayStr;
+
+      days.push(
+        <button
+          key={`modal-day-${d}`}
+          type="button"
+          disabled={isPast || weekend}
+          onClick={() => !isPast && !weekend && setTempDeadline(dateKey)}
+          title={weekend ? 'Weekend (Closed)' : isPast ? 'Past Date' : `Select ${dateKey}`}
+          className={`h-12 sm:h-14 rounded-xl flex flex-col items-center justify-center font-black text-xs sm:text-sm transition-all relative ${
+            isPast || weekend
+              ? 'bg-slate-50/70 text-slate-300 cursor-not-allowed opacity-40'
+              : isSelected
+                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30 scale-105 z-10 ring-2 ring-emerald-600 ring-offset-2 font-black'
+                : 'bg-slate-50/80 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300 border border-slate-200/60 text-slate-700 cursor-pointer'
+          }`}
+        >
+          <span>{d}</span>
+          {isToday && !isSelected && (
+            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-0.5"></span>
+          )}
+        </button>
+      );
+    }
+
+    return days;
+  };
+
   const getOfficeConfig = (date: Date) => {
     const key = formatDate(date);
     const config = officeSchedule[key];
-    if (config) return config;
+    if (config) {
+      return {
+        ...config,
+        startTime: config.startTime || (config.status === 'afternoon_only' ? "13:00" : "08:00"),
+        endTime: config.endTime || (config.status === 'morning_only' ? "11:00" : "16:00")
+      };
+    }
 
-    // Default config for weekdays
+    // Default config for weekdays (8am to 4pm)
     return {
       status: 'open' as OfficeStatus,
       startTime: "08:00",
-      endTime: "17:00",
+      endTime: "16:00",
       note: ""
     };
   };
 
-  const setOfficeStatus = (status: OfficeStatus, note: string = "", startTime?: string, endTime?: string) => {
+  const setOfficeStatus = (status: OfficeStatus, note?: string, startTime?: string, endTime?: string) => {
     if (!selectedDate) return;
     const dateKey = formatDate(selectedDate);
     const existing = getOfficeConfig(selectedDate);
+
+    let newStart = startTime;
+    let newEnd = endTime;
+
+    if (startTime === undefined && endTime === undefined) {
+      if (status === 'morning_only') {
+        newStart = "08:00";
+        newEnd = "11:00";
+      } else if (status === 'afternoon_only') {
+        newStart = "13:00";
+        newEnd = "16:00";
+      } else if (status === 'open') {
+        newStart = "08:00";
+        newEnd = "16:00";
+      } else {
+        newStart = existing.startTime || "08:00";
+        newEnd = existing.endTime || "16:00";
+      }
+    } else {
+      if (newStart === undefined) newStart = existing.startTime || (status === 'afternoon_only' ? "13:00" : "08:00");
+      if (newEnd === undefined) newEnd = existing.endTime || (status === 'morning_only' ? "11:00" : "16:00");
+    }
 
     setOfficeSchedule({
       ...officeSchedule,
       [dateKey]: {
         status,
         note: note !== undefined ? note : (existing.note || ""),
-        startTime: startTime !== undefined ? startTime : (existing.startTime || "08:00"),
-        endTime: endTime !== undefined ? endTime : (existing.endTime || "17:00")
+        startTime: newStart,
+        endTime: newEnd
       }
     });
   };
@@ -172,23 +299,25 @@ const OfficeSchedule = () => {
           key={d}
           onClick={() => !weekend && !isPastDate && setSelectedDate(date)}
           disabled={weekend || isPastDate}
-          className={`h-24 md:h-32 border border-slate-100 p-3 text-left transition-all relative overflow-hidden ${weekend || isPastDate
-              ? 'bg-slate-50 cursor-not-allowed opacity-40'
+          title={weekend ? 'Weekend (Closed)' : isPastDate ? 'Past Date' : `Click to configure ${formatDate(date)}`}
+          className={`h-24 md:h-32 border border-slate-100 p-3 text-left transition-all duration-200 relative overflow-hidden group ${
+            weekend || isPastDate
+              ? 'bg-slate-50/70 cursor-not-allowed opacity-40'
               : isPastDeadline
-                ? 'bg-slate-100/50 grayscale opacity-60'
+                ? 'bg-slate-100/60 grayscale opacity-70 hover:opacity-100 hover:bg-emerald-50/30 hover:border-emerald-300 hover:shadow-md hover:scale-[1.02] hover:z-10 cursor-pointer'
                 : isSelected
-                  ? 'ring-2 ring-emerald-500 ring-inset bg-emerald-50/30 z-10'
-                  : 'bg-white hover:bg-slate-50'
-            }`}
+                  ? 'ring-2 ring-emerald-500 ring-inset bg-emerald-50/80 z-20 shadow-xl scale-[1.02]'
+                  : 'bg-white hover:bg-emerald-50/40 hover:border-emerald-400 hover:shadow-xl hover:scale-[1.03] hover:z-10 cursor-pointer'
+          }`}
         >
           <div className="flex justify-between items-start mb-1">
-            <span className={`text-sm font-black ${weekend || isPastDate ? 'text-slate-300' : isPastDeadline ? 'text-slate-400' : isSelected ? 'text-emerald-700' : isToday ? 'text-emerald-600 underline decoration-2 underline-offset-4' : 'text-slate-600'
+            <span className={`text-sm font-black transition-colors ${weekend || isPastDate ? 'text-slate-300' : isPastDeadline ? 'text-slate-400' : isSelected ? 'text-emerald-700' : isToday ? 'text-emerald-600 underline decoration-2 underline-offset-4' : 'text-slate-600 group-hover:text-emerald-700'
               }`}>
               {d}
             </span>
             {!weekend && !isPastDate && (
               <div className="flex flex-col items-end gap-1">
-                <div className={`p-1 rounded-md ${statusInfo.bg} ${statusInfo.text}`}>
+                <div className={`p-1 rounded-md ${statusInfo.bg} ${statusInfo.text} group-hover:scale-110 transition-transform`}>
                   <StatusIcon size={12} strokeWidth={3} />
                 </div>
                 {isPastDeadline && (
@@ -206,7 +335,7 @@ const OfficeSchedule = () => {
                 No Booking
               </div>
             ) : !weekend && (
-              <div className={`text-[9px] font-black uppercase tracking-tight ${statusInfo.bg} ${statusInfo.text} px-1.5 py-0.5 rounded-sm inline-block`}>
+              <div className={`text-[9px] font-black uppercase tracking-tight ${statusInfo.bg} ${statusInfo.text} px-1.5 py-0.5 rounded-sm inline-block group-hover:shadow-sm`}>
                 {statusInfo.label}
               </div>
             )}
@@ -272,26 +401,92 @@ const OfficeSchedule = () => {
         </div>
 
         <div className="xl:col-span-4 space-y-6">
-          <div className="flex items-center justify-between bg-emerald-900 p-4 rounded-lg text-white shadow-2xl shadow-emerald-900/20 w-full">
-            <button
-              onClick={() => changeMonth(-1)}
-              disabled={currentDate.getFullYear() <= new Date().getFullYear() && currentDate.getMonth() <= new Date().getMonth()}
-              className="p-2 hover:bg-emerald-800 rounded-lg transition-all disabled:opacity-30"
-            >
-              <ChevronLeft size={20} />
-            </button>
-            <div className="flex flex-col items-center">
-              <span className="text-sm font-black uppercase tracking-widest">{currentDate.toLocaleString('default', { month: 'long' })}</span>
-              <span className="text-[10px] font-bold opacity-60 tracking-[0.3em]">{currentDate.getFullYear()}</span>
+          {/* Header Month/Year Selector & Jump to Date UI */}
+          <div className="bg-emerald-900 p-4 rounded-2xl text-white shadow-2xl shadow-emerald-900/20 w-full flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => changeMonth(-1)}
+                disabled={currentDate.getFullYear() <= new Date().getFullYear() && currentDate.getMonth() <= new Date().getMonth()}
+                className="p-2 hover:bg-emerald-800 hover:scale-110 active:scale-95 rounded-lg transition-all disabled:opacity-30"
+                title="Previous Month"
+              >
+                <ChevronLeft size={20} />
+              </button>
+
+              <div className="flex items-center gap-2">
+                {/* Month Selector */}
+                <select
+                  value={currentDate.getMonth()}
+                  onChange={(e) => setCurrentDate(new Date(currentDate.getFullYear(), parseInt(e.target.value), 1))}
+                  className="bg-emerald-800/90 text-white font-black text-xs uppercase tracking-wider py-1.5 px-3 rounded-xl border border-emerald-700/60 hover:bg-emerald-700 hover:border-emerald-400 transition-all cursor-pointer outline-none focus:ring-2 focus:ring-emerald-400"
+                >
+                  {[
+                    'January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'
+                  ].map((m, idx) => (
+                    <option key={m} value={idx} className="bg-slate-900 text-white">
+                      {m}
+                    </option>
+                  ))}
+                </select>
+
+                {/* Year Selector */}
+                <select
+                  value={currentDate.getFullYear()}
+                  onChange={(e) => setCurrentDate(new Date(parseInt(e.target.value), currentDate.getMonth(), 1))}
+                  className="bg-emerald-800/90 text-white font-black text-xs tracking-wider py-1.5 px-2.5 rounded-xl border border-emerald-700/60 hover:bg-emerald-700 hover:border-emerald-400 transition-all cursor-pointer outline-none focus:ring-2 focus:ring-emerald-400"
+                >
+                  {Array.from({ length: 15 }, (_, i) => new Date().getFullYear() + i).map((y) => (
+                    <option key={y} value={y} className="bg-slate-900 text-white">
+                      {y}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <button
+                onClick={() => changeMonth(1)}
+                disabled={currentDate.getFullYear() >= 2040 && currentDate.getMonth() >= 11}
+                className="p-2 hover:bg-emerald-800 hover:scale-110 active:scale-95 rounded-lg transition-all disabled:opacity-30"
+                title="Next Month"
+              >
+                <ChevronRight size={20} />
+              </button>
             </div>
-            <button
-              onClick={() => changeMonth(1)}
-              disabled={currentDate.getFullYear() >= 2040 && currentDate.getMonth() >= 11}
-              className="p-2 hover:bg-emerald-800 rounded-lg transition-all disabled:opacity-30"
-            >
-              <ChevronRight size={20} />
-            </button>
+
+            {/* Quick Actions Bar: Today & Jump to Date */}
+            <div className="flex items-center justify-between pt-2 border-t border-emerald-800/60">
+              <button
+                onClick={() => {
+                  const today = new Date();
+                  setCurrentDate(today);
+                  setSelectedDate(today);
+                }}
+                className="text-[10px] font-black uppercase tracking-widest text-emerald-200 hover:text-white hover:bg-emerald-800 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5"
+              >
+                <CalendarIcon size={12} /> Today
+              </button>
+
+              <div className="relative group">
+                <input
+                  type="date"
+                  min={todayStr}
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      const picked = new Date(e.target.value + 'T00:00:00');
+                      setCurrentDate(picked);
+                      setSelectedDate(picked);
+                    }
+                  }}
+                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
+                />
+                <button className="text-[10px] font-black uppercase tracking-widest bg-emerald-800 hover:bg-emerald-700 text-emerald-100 hover:text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 border border-emerald-700 shadow-sm group-hover:scale-105">
+                  <CalendarCheck size={12} /> Jump to Date
+                </button>
+              </div>
+            </div>
           </div>
+
           {/* Global Booking Deadline Card */}
           <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-xl shadow-slate-200/50 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full -mr-16 -mt-16 z-0"></div>
@@ -306,29 +501,35 @@ const OfficeSchedule = () => {
                 </div>
               </div>
 
-              <div className="bg-slate-50 border border-slate-100 p-4 rounded-xl flex items-center justify-between">
+              <div 
+                onClick={openDeadlineModal}
+                className="bg-slate-50 border border-slate-200 p-4 rounded-2xl flex items-center justify-between hover:border-emerald-400 hover:shadow-md transition-all group cursor-pointer"
+              >
                 <div className="flex flex-col">
                   <span className="text-[9px] font-black uppercase tracking-widest text-emerald-600 mb-1">Accepting until</span>
-                  <span className="text-sm font-black text-slate-700">
+                  <span className="text-sm font-black text-slate-800 group-hover:text-emerald-800 transition-colors">
                     {new Date(maxAvailableDate).toLocaleDateString('default', { month: 'long', day: 'numeric', year: 'numeric' })}
                   </span>
                 </div>
-                <div className="relative">
-                  <input
-                    type="date"
-                    value={maxAvailableDate}
-                    min={todayStr}
-                    onChange={(e) => setMaxAvailableDate(e.target.value)}
-                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                  />
-                  <div className="w-10 h-10 bg-white border border-slate-200 rounded-lg flex items-center justify-center shadow-sm text-emerald-700 pointer-events-none">
-                    <CalendarCheck size={20} />
-                  </div>
-                </div>
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); openDeadlineModal(); }}
+                  className="px-3.5 py-2 bg-emerald-600 group-hover:bg-emerald-700 active:scale-95 text-white rounded-xl flex items-center gap-2 shadow-md transition-all group-hover:scale-105 cursor-pointer"
+                >
+                  <CalendarCheck size={16} />
+                  <span className="text-[10px] font-black uppercase tracking-wider">Change</span>
+                </button>
               </div>
               <p className="mt-4 text-[9px] font-bold text-slate-400 uppercase tracking-wider leading-relaxed">
                 All booking slots beyond this date will be automatically disabled globally.
               </p>
+              <button 
+                onClick={handleSaveChanges}
+                disabled={saving}
+                className="mt-3 w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[10px] uppercase tracking-wider rounded-xl transition-all shadow-md disabled:opacity-50"
+              >
+                {saving ? 'Saving Deadline...' : 'Save Global Deadline'}
+              </button>
             </div>
           </div>
 
@@ -376,42 +577,35 @@ const OfficeSchedule = () => {
                     </div>
                   </div>
 
-                  {/* Time Adjustments */}
+                  {/* Time Adjustments (Fixed based on operating mode) */}
                   {(officeSchedule[formatDate(selectedDate)]?.status !== 'closed' && officeSchedule[formatDate(selectedDate)]?.status !== 'holiday') && (
                     <div className="space-y-4 pt-4 border-t border-slate-100">
-                      <h5 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2"><Clock size={14} className="text-emerald-600" /> Custom Office Hours</h5>
+                      <h5 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2"><Clock size={14} className="text-emerald-600" /> Fixed Operating Hours</h5>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
                           <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Start Time</label>
                           <input
                             type="time"
-                            value={officeSchedule[formatDate(selectedDate)]?.startTime || "08:00"}
-                            onChange={(e) => setOfficeStatus(officeSchedule[formatDate(selectedDate)]?.status || 'open', undefined, e.target.value)}
-                            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-slate-700 focus:ring-2 focus:ring-emerald-500"
+                            value={getOfficeConfig(selectedDate).startTime}
+                            disabled
+                            readOnly
+                            className="w-full p-3 bg-slate-100 border border-slate-200 rounded-xl text-xs font-black text-slate-500 cursor-not-allowed select-none"
                           />
                         </div>
                         <div className="space-y-1">
                           <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">End Time</label>
                           <input
                             type="time"
-                            value={officeSchedule[formatDate(selectedDate)]?.endTime || "17:00"}
-                            onChange={(e) => setOfficeStatus(officeSchedule[formatDate(selectedDate)]?.status || 'open', undefined, undefined, e.target.value)}
-                            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-slate-700 focus:ring-2 focus:ring-emerald-500"
+                            value={getOfficeConfig(selectedDate).endTime}
+                            disabled
+                            readOnly
+                            className="w-full p-3 bg-slate-100 border border-slate-200 rounded-xl text-xs font-black text-slate-500 cursor-not-allowed select-none"
                           />
                         </div>
                       </div>
                     </div>
                   )}
 
-                  <div className="space-y-4">
-                    <h5 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2"><Info size={14} className="text-emerald-600" /> Administrative Note</h5>
-                    <textarea
-                      placeholder="e.g. Center-wide training session..."
-                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-emerald-500 h-24 resize-none"
-                      value={officeSchedule[formatDate(selectedDate)]?.note || ""}
-                      onChange={(e) => setOfficeStatus(officeSchedule[formatDate(selectedDate)]?.status || 'open', e.target.value)}
-                    />
-                  </div>
                 </div>
 
                 <div className="mt-12 pt-4 relative z-10">
@@ -448,6 +642,151 @@ const OfficeSchedule = () => {
           </AnimatePresence>
         </div>
       </div>
+
+      {/* Full Calendar Modal for Picking Global Deadline */}
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {isDeadlineModalOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 top-0 left-0 right-0 bottom-0 z-[9999] flex items-center justify-center p-3 sm:p-6 bg-black/75 backdrop-blur-xs overflow-hidden w-screen h-screen"
+              onMouseDown={(e) => e.target === e.currentTarget && setIsDeadlineModalOpen(false)}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                className="bg-white rounded-2xl shadow-2xl border border-slate-100 w-full max-w-2xl max-h-[90vh] sm:max-h-[85vh] flex flex-col overflow-hidden my-auto"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Modal Header */}
+                <div className="px-6 sm:px-8 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-xl bg-emerald-900 text-white flex items-center justify-center shadow-md shadow-slate-200/50 shrink-0">
+                      <CalendarIcon size={22} />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="text-xl font-black text-slate-900 tracking-tight">Select Global Deadline</h3>
+                        <span className="px-3 py-0.5 rounded-full text-xs font-black bg-emerald-50 text-emerald-700 border border-emerald-100">
+                          Booking Limit
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 font-bold mt-0.5">Pick the final date accepting appointments globally.</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setIsDeadlineModalOpen(false)}
+                    className="p-2 hover:bg-slate-200/60 rounded-xl transition-all text-slate-400 hover:text-slate-700 cursor-pointer shrink-0"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                {/* Controls Bar (Month & Year Selector) */}
+                <div className="px-6 sm:px-8 py-4 border-b border-slate-100 bg-white flex items-center justify-between shrink-0">
+                  <button
+                    onClick={() => {
+                      const prev = new Date(deadlineModalMonth.getFullYear(), deadlineModalMonth.getMonth() - 1, 1);
+                      setDeadlineModalMonth(prev);
+                    }}
+                    className="p-2 hover:bg-slate-100 rounded-xl text-slate-600 transition-all font-bold flex items-center gap-1.5 text-xs uppercase tracking-wider cursor-pointer"
+                  >
+                    <ChevronLeft size={18} /> Prev
+                  </button>
+
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={deadlineModalMonth.getMonth()}
+                      onChange={(e) => setDeadlineModalMonth(new Date(deadlineModalMonth.getFullYear(), parseInt(e.target.value), 1))}
+                      className="bg-slate-50 border border-slate-200 text-slate-800 font-black text-xs uppercase tracking-wider py-2 px-3 rounded-xl hover:border-emerald-400 transition-all cursor-pointer outline-none focus:ring-2 focus:ring-emerald-500/20"
+                    >
+                      {[
+                        'January', 'February', 'March', 'April', 'May', 'June',
+                        'July', 'August', 'September', 'October', 'November', 'December'
+                      ].map((m, idx) => (
+                        <option key={m} value={idx}>
+                          {m}
+                        </option>
+                      ))}
+                    </select>
+
+                    <select
+                      value={deadlineModalMonth.getFullYear()}
+                      onChange={(e) => setDeadlineModalMonth(new Date(parseInt(e.target.value), deadlineModalMonth.getMonth(), 1))}
+                      className="bg-slate-50 border border-slate-200 text-slate-800 font-black text-xs tracking-wider py-2 px-3 rounded-xl hover:border-emerald-400 transition-all cursor-pointer outline-none focus:ring-2 focus:ring-emerald-500/20"
+                    >
+                      {Array.from({ length: 15 }, (_, i) => new Date().getFullYear() + i).map((y) => (
+                        <option key={y} value={y}>
+                          {y}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      const next = new Date(deadlineModalMonth.getFullYear(), deadlineModalMonth.getMonth() + 1, 1);
+                      setDeadlineModalMonth(next);
+                    }}
+                    className="p-2 hover:bg-slate-100 rounded-xl text-slate-600 transition-all font-bold flex items-center gap-1.5 text-xs uppercase tracking-wider cursor-pointer"
+                  >
+                    Next <ChevronRight size={18} />
+                  </button>
+                </div>
+
+                {/* Full Calendar Grid Container */}
+                <div className="p-6 sm:p-8 flex-1 overflow-y-auto space-y-4">
+                  <div className="grid grid-cols-7 text-center">
+                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, idx) => (
+                      <span key={idx} className="text-[10px] font-black uppercase tracking-widest text-slate-400 py-1">
+                        {day}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-7 gap-2">
+                    {renderModalCalendar()}
+                  </div>
+                </div>
+
+                {/* Modal Footer */}
+                <div className="px-6 sm:px-8 py-4 bg-slate-50/80 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 shrink-0">
+                  <div className="bg-emerald-50 text-emerald-900 border border-emerald-200/60 px-4 py-2.5 rounded-xl font-black text-xs flex items-center gap-2">
+                    <CalendarCheck size={18} className="text-emerald-600" />
+                    <span>Selected Deadline: </span>
+                    <span className="text-emerald-950 font-black">
+                      {tempDeadline ? new Date(tempDeadline + 'T00:00:00').toLocaleDateString('default', { month: 'long', day: 'numeric', year: 'numeric' }) : 'None'}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+                    <button
+                      onClick={() => setIsDeadlineModalOpen(false)}
+                      className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleApplyDeadlineModal}
+                      disabled={saving}
+                      className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all shadow-md shadow-emerald-600/30 flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                    >
+                      {saving ? 'Saving...' : (
+                        <>
+                          <Check size={16} /> Confirm & Save
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </motion.div>
   );
 };

@@ -164,7 +164,11 @@ const Shifting = ({ onBack, user }: ShiftingProps) => {
           setLoadingSchedule(true);
           const res = await cmsApi.getContent('office-schedule');
           if (res.data) {
-            if (res.data.maxAvailableDate) setMaxAvailableDate(res.data.maxAvailableDate);
+            const now = new Date();
+            const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+            if (res.data.maxAvailableDate && res.data.maxAvailableDate >= todayStr) {
+              setMaxAvailableDate(res.data.maxAvailableDate);
+            }
             if (res.data.officeSchedule) setOfficeSchedule(res.data.officeSchedule);
           }
         } catch (err) {
