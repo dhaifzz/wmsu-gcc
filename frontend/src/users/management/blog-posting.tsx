@@ -28,6 +28,55 @@ function formatDate(dateString: string) {
   return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
+const PostSkeleton = ({ type = 'my-posts' }: { type?: 'my-posts' | 'approval' }) => (
+  <div className="space-y-4">
+    {[1, 2, 3].map((i) => (
+      <div key={i} className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden p-5 space-y-4 animate-pulse">
+        {type === 'my-posts' ? (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="h-6 w-20 bg-slate-200 rounded-full"></div>
+              <div className="h-3 w-28 bg-slate-100 rounded"></div>
+            </div>
+            <div className="flex gap-2">
+              <div className="w-8 h-8 bg-slate-100 rounded-lg"></div>
+              <div className="w-8 h-8 bg-slate-100 rounded-lg"></div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-slate-200 shrink-0"></div>
+            <div className="space-y-2">
+              <div className="h-4 w-32 bg-slate-200 rounded"></div>
+              <div className="h-3 w-40 bg-slate-100 rounded"></div>
+            </div>
+          </div>
+        )}
+
+        <div className="space-y-2 pt-1">
+          <div className="h-4 w-full bg-slate-200 rounded-md"></div>
+          <div className="h-4 w-4/5 bg-slate-200 rounded-md"></div>
+          <div className="h-4 w-2/3 bg-slate-100 rounded-md"></div>
+        </div>
+
+        <div className="h-48 w-full bg-slate-100 rounded-xl"></div>
+
+        {type === 'my-posts' ? (
+          <div className="flex gap-4 pt-1">
+            <div className="h-3 w-24 bg-slate-100 rounded"></div>
+            <div className="h-3 w-24 bg-slate-100 rounded"></div>
+          </div>
+        ) : (
+          <div className="pt-3 border-t border-slate-100 flex gap-2 justify-end">
+            <div className="h-10 w-24 bg-slate-100 rounded-xl"></div>
+            <div className="h-10 w-28 bg-emerald-100/60 rounded-xl"></div>
+          </div>
+        )}
+      </div>
+    ))}
+  </div>
+);
+
 const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
   const { accessToken } = useAuth();
   const canApprove = role === 'director' || role === 'admin';
@@ -414,10 +463,7 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
       {activeView === 'my-posts' && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
           {loading ? (
-            <div className="bg-white rounded-2xl p-12 text-center border border-slate-100 flex flex-col items-center justify-center gap-3">
-              <Loader2 size={36} className="animate-spin text-emerald-600" />
-              <p className="text-sm font-bold text-slate-500">Loading your posts...</p>
-            </div>
+            <PostSkeleton type="my-posts" />
           ) : myPosts.length === 0 ? (
             <div className="bg-white rounded-2xl p-12 text-center border border-slate-100">
               <Pencil size={40} className="text-slate-200 mx-auto mb-4" />
@@ -477,10 +523,7 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
       {activeView === 'approval' && canApprove && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
           {loading ? (
-            <div className="bg-white rounded-2xl p-12 text-center border border-slate-100 flex flex-col items-center justify-center gap-3">
-              <Loader2 size={36} className="animate-spin text-emerald-600" />
-              <p className="text-sm font-bold text-slate-500">Loading approval queue...</p>
-            </div>
+            <PostSkeleton type="approval" />
           ) : pendingPosts.length === 0 ? (
             <div className="bg-white rounded-2xl p-12 text-center border border-slate-100">
               <CheckCircle size={40} className="text-emerald-200 mx-auto mb-4" />

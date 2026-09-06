@@ -79,7 +79,9 @@ const ManagementNavbar = ({ userName, onMenuClick }: ManagementNavbarProps) => {
           <Menu size={24} />
         </button>
         <div>
-          <h2 className="text-xl lg:text-2xl font-black tracking-tight leading-tight">Good day, {userName.split(' ')[0]}!</h2>
+          <h2 className="text-xl lg:text-2xl font-black tracking-tight leading-tight">
+            Good day, <span className="text-emerald-600">{userName.split(' ')[0]}</span>!
+          </h2>
           <p className="text-slate-500 text-[10px] lg:text-sm font-medium">Here's what's happening with your portal today.</p>
         </div>
       </div>

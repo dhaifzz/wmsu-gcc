@@ -105,9 +105,10 @@ const ClientNavbar = ({ activeTab, setActiveTab }: ClientNavbarProps) => {
   return (
     <header className="bg-emerald-900 text-white sticky top-0 z-50 px-4 md:px-6 lg:px-10 py-3 md:py-4 flex items-center justify-between shadow-xl print:hidden">
       <div className="flex items-center gap-3 shrink-0">
-        <div className="flex items-center -space-x-1.5 shrink-0">
+        <div className="flex items-center shrink-0">
           <img src={logos.wmsuLogo} alt="WMSU Logo" className="w-10 h-10 md:w-11 md:h-11 object-contain z-10" />
-          <img src={logos.gccLogo} alt="GCC Logo" className="w-10 h-10 md:w-11 md:h-11 object-contain z-20" />
+          <div className="h-6 w-[1.5px] bg-emerald-700/60 mx-2 md:hidden" />
+          <img src={logos.gccLogo} alt="GCC Logo" className="w-10 h-10 md:w-11 md:h-11 object-contain z-20 md:-ml-1.5" />
         </div>
         <div className="hidden md:flex flex-col justify-center">
           <h1 className="text-2xl font-black tracking-wide uppercase leading-none text-white whitespace-nowrap">WMSU GCC</h1>

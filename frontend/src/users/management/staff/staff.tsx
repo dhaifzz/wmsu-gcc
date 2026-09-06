@@ -37,8 +37,8 @@ const StaffDashboardLayout = () => {
     { id: 'counseling', label: 'Counseling', icon: MessageCircle },
     { id: 'assessment', label: 'Assessment', icon: ClipboardCheck },
     { id: 'shifting', label: 'Shifting', icon: RefreshCw },
-    { id: 'history', label: 'History', icon: Clock },
     { id: 'blog', label: 'Blog', icon: Newspaper },
+    { id: 'history', label: 'History', icon: Clock },
   ];
 
   return (

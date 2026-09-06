@@ -147,8 +147,9 @@ export default function Login() {
           <div className="relative z-10 h-full w-full overflow-y-auto overflow-x-hidden">
             <div className="flex min-h-full flex-col justify-center p-8 lg:p-16">
               <div className="mx-auto w-full max-w-sm">
-                <div className="md:hidden mb-6 mt-14 flex gap-4 justify-center">
+                <div className="md:hidden mb-6 mt-14 flex items-center justify-center">
                   <img src={logos.wmsuLogo} alt="WMSU Logo" className="h-14 w-14 object-contain" />
+                  <div className="h-8 w-[1.5px] bg-slate-300 mx-4" />
                   <img src={logos.gccLogo} alt="GCC Logo" className="h-14 w-14 object-contain" />
                 </div>
 

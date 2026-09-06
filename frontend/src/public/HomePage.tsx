@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { ArrowRight, Users, Heart, Flag, MessageCircle, ChevronRight } from 'lucide-react';
+import { ArrowRight, Users, Heart, Flag, MessageCircle, ChevronRight, Flower } from 'lucide-react';
+import { motion } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import assessmentImg from '../assets/img/assessment-img.png';
@@ -165,12 +166,65 @@ const HomePage = () => {
 
         <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-4xl">
-            <h1 className="text-5xl md:text-7xl font-black text-white leading-tight mb-6 animate-in fade-in slide-in-from-bottom-6 duration-1000">
-              {homeContent.hero.title.split(' ').slice(0, -2).join(' ')} <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300 pr-4">
-                {homeContent.hero.title.split(' ').slice(-2).join(' ')}
+            <motion.h1 
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+              className="text-5xl md:text-7xl font-black text-white leading-tight mb-6"
+            >
+              <span>{homeContent.hero.title.split(' ').slice(0, -2).join(' ')}</span> <br />
+              <span className="relative inline-block mt-1">
+                {/* Shining Dots & Sparkles around the text */}
+                <motion.span 
+                  animate={{ opacity: [0.2, 1, 0.2], scale: [0.6, 1.3, 0.6] }}
+                  transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
+                  className="absolute -top-3 -left-5 w-2.5 h-2.5 rounded-full bg-emerald-300 shadow-[0_0_10px_rgba(52,211,153,0.9)]"
+                />
+                <motion.span 
+                  animate={{ opacity: [0.1, 0.9, 0.1], scale: [0.5, 1.2, 0.5] }}
+                  transition={{ duration: 3, repeat: Infinity, delay: 0.6, ease: 'easeInOut' }}
+                  className="absolute -top-4 right-12 w-2 h-2 rounded-full bg-teal-200 shadow-[0_0_8px_rgba(45,212,191,0.9)]"
+                />
+                {/* Floating Flower */}
+                <motion.span 
+                  animate={{ y: [0, -14, 0], rotate: [-12, 14, -12], opacity: [0.35, 0.95, 0.35] }}
+                  transition={{ duration: 4.5, repeat: Infinity, delay: 0.4, ease: 'easeInOut' }}
+                  className="absolute -top-6 right-6 text-emerald-300 drop-shadow-[0_0_10px_rgba(52,211,153,0.85)] pointer-events-none"
+                >
+                  <Flower size={20} className="opacity-90" />
+                </motion.span>
+                <motion.span 
+                  animate={{ opacity: [0.15, 0.85, 0.15], scale: [0.6, 1.2, 0.6] }}
+                  transition={{ duration: 2.6, repeat: Infinity, delay: 1.1, ease: 'easeInOut' }}
+                  className="absolute -bottom-2 left-1/4 w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)]"
+                />
+                <motion.span 
+                  animate={{ opacity: [0.2, 0.95, 0.2], scale: [0.5, 1.3, 0.5] }}
+                  transition={{ duration: 3.2, repeat: Infinity, delay: 1.6, ease: 'easeInOut' }}
+                  className="absolute bottom-1 -right-6 w-2 h-2 rounded-full bg-teal-300 shadow-[0_0_8px_rgba(45,212,191,0.9)]"
+                />
+
+                {/* Floating Hearts */}
+                <motion.span 
+                  animate={{ y: [0, -14, 0], rotate: [-8, 8, -8], opacity: [0.35, 0.95, 0.35] }}
+                  transition={{ duration: 4.2, repeat: Infinity, ease: 'easeInOut' }}
+                  className="absolute -top-7 -right-9 text-emerald-300 drop-shadow-[0_0_12px_rgba(52,211,153,0.8)] pointer-events-none"
+                >
+                  <Heart size={20} fill="currentColor" className="opacity-90" />
+                </motion.span>
+                <motion.span 
+                  animate={{ y: [0, -16, 0], rotate: [6, -10, 6], opacity: [0.3, 0.85, 0.3] }}
+                  transition={{ duration: 5.5, repeat: Infinity, delay: 1.2, ease: 'easeInOut' }}
+                  className="absolute -bottom-5 -left-9 text-teal-200 drop-shadow-[0_0_10px_rgba(45,212,191,0.7)] pointer-events-none"
+                >
+                  <Heart size={16} fill="currentColor" className="opacity-80" />
+                </motion.span>
+
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-200 to-emerald-300 pr-2">
+                  {homeContent.hero.title.split(' ').slice(-2).join(' ')}
+                </span>
               </span> <br />
-            </h1>
+            </motion.h1>
             <p className="text-xl text-emerald-50/80 mb-10 leading-relaxed max-w-2xl animate-in fade-in slide-in-from-bottom-8 duration-1000">
               {homeContent.hero.description}
             </p>

@@ -49,8 +49,8 @@ const SuperAdminDashboard = () => {
     { id: 'counseling', label: 'Counseling', icon: MessageCircle },
     { id: 'assessment', label: 'Assessment', icon: ClipboardCheck },
     { id: 'shifting', label: 'Shifting', icon: RefreshCw },
-    { id: 'history', label: 'System History', icon: Clock },
     { id: 'office-schedule', label: 'Office Schedule', icon: Building2 },
+    { id: 'history', label: 'System History', icon: Clock },
   ];
 
   return (

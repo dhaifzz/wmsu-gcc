@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   TrendingUp,
@@ -414,15 +415,16 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
       </motion.div>
 
       {/* ── Audit Logs Modal ────────────────────────────────────────── */}
-      <AnimatePresence>
-        {showAuditModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/70 backdrop-blur-xs overflow-hidden"
-            onMouseDown={(e) => e.target === e.currentTarget && setShowAuditModal(false)}
-          >
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {showAuditModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 bg-black/75 backdrop-blur-xs overflow-hidden"
+              onMouseDown={(e) => e.target === e.currentTarget && setShowAuditModal(false)}
+            >
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -591,7 +593,9 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
             </motion.div>
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
+      )}
     </>
   );
 };

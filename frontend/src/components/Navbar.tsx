@@ -61,9 +61,10 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo Section */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="flex -space-x-2">
-              <img src={logos.wmsuLogo} alt="WMSU" className="h-12 w-12 object-contain drop-shadow-md" />
-              <img src={logos.gccLogo} alt="GCC" className="h-12 w-12 object-contain drop-shadow-md" />
+            <div className="flex items-center">
+              <img src={logos.wmsuLogo} alt="WMSU" className="h-10 w-10 sm:h-12 sm:w-12 object-contain drop-shadow-md" />
+              <div className={`h-6 sm:h-7 w-[1.5px] mx-2 sm:mx-2.5 md:hidden transition-colors ${isSolidNeeded ? 'bg-slate-300' : 'bg-white/40'}`} />
+              <img src={logos.gccLogo} alt="GCC" className="h-10 w-10 sm:h-12 sm:w-12 object-contain drop-shadow-md md:-ml-2" />
             </div>
             <div className="flex flex-col leading-tight">
               <span className={`text-xl font-black tracking-tighter transition-colors ${isSolidNeeded ? 'text-emerald-900' : 'text-white'}`}>
