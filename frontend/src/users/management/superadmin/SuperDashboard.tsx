@@ -32,6 +32,7 @@ const Overview = ({ userName, onNavigate }: OverviewProps) => {
   const [loading, setLoading] = useState(true);
   const [analyticsData, setAnalyticsData] = useState<AnalyticsDashboardResponse | null>(null);
   const [queue, setQueue] = useState<PendingItem[]>([]);
+  const [processingId, setProcessingId] = useState<string | null>(null);
 
   const fetchDashboardData = useCallback(async () => {
     if (!token) return;
@@ -79,12 +80,19 @@ const Overview = ({ userName, onNavigate }: OverviewProps) => {
       'Cancel'
     );
     if (result.isConfirmed) {
-      const ok = await evaluateAppointment(item.id, item.type, 'approve');
-      if (ok) {
-        setQueue(q => q.filter(a => a.id !== item.id));
-        toast.success('Appointment approved!');
-      } else {
+      setProcessingId(item.id);
+      try {
+        const ok = await evaluateAppointment(item.id, item.type, 'approve');
+        if (ok) {
+          setQueue(q => q.filter(a => a.id !== item.id));
+          toast.success('Appointment approved!');
+        } else {
+          toast.error('Failed to approve appointment.');
+        }
+      } catch {
         toast.error('Failed to approve appointment.');
+      } finally {
+        setProcessingId(null);
       }
     }
   };
@@ -97,12 +105,19 @@ const Overview = ({ userName, onNavigate }: OverviewProps) => {
       'Cancel'
     );
     if (result.isConfirmed) {
-      const ok = await evaluateAppointment(item.id, item.type, 'decline');
-      if (ok) {
-        setQueue(q => q.filter(a => a.id !== item.id));
-        toast.error('Appointment declined.');
-      } else {
+      setProcessingId(item.id);
+      try {
+        const ok = await evaluateAppointment(item.id, item.type, 'decline');
+        if (ok) {
+          setQueue(q => q.filter(a => a.id !== item.id));
+          toast.error('Appointment declined.');
+        } else {
+          toast.error('Failed to decline appointment.');
+        }
+      } catch {
         toast.error('Failed to decline appointment.');
+      } finally {
+        setProcessingId(null);
       }
     }
   };
@@ -142,7 +157,7 @@ const Overview = ({ userName, onNavigate }: OverviewProps) => {
       <StatsSummary loading={loading} stats={analyticsData?.stats} pendingCount={queue.length} />
 
       {/* Approval Queue */}
-      <ApprovalQueue queue={queue} loading={loading} onApprove={handleApprove} onDecline={handleDecline} />
+      <ApprovalQueue queue={queue} loading={loading} onApprove={handleApprove} onDecline={handleDecline} processingId={processingId} />
 
       {/* Quick module nav */}
       <div>

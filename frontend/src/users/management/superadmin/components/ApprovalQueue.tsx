@@ -33,9 +33,10 @@ interface ApprovalQueueProps {
   loading: boolean;
   onApprove: (item: PendingItem) => void;
   onDecline: (item: PendingItem) => void;
+  processingId?: string | null;
 }
 
-export const ApprovalQueue = ({ queue, loading, onApprove, onDecline }: ApprovalQueueProps) => {
+export const ApprovalQueue = ({ queue, loading, onApprove, onDecline, processingId }: ApprovalQueueProps) => {
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -106,50 +107,63 @@ export const ApprovalQueue = ({ queue, loading, onApprove, onDecline }: Approval
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between px-4 sm:px-6 lg:px-8 py-4 sm:py-5 hover:bg-slate-50/50 transition-colors gap-3 sm:gap-4"
+                    className="flex flex-col sm:flex-row sm:items-center justify-between px-4 sm:px-6 lg:px-8 py-4 sm:py-5 hover:bg-slate-50/50 transition-colors gap-3.5 sm:gap-4"
                   >
-                    <div className="flex items-center justify-between sm:justify-start gap-4 min-w-0">
-                      <div className="flex items-center gap-3.5 min-w-0">
-                        <div className="w-10 sm:w-12 h-10 sm:h-12 bg-teal-100 rounded-lg flex items-center justify-center text-teal-700 font-black shrink-0 text-sm">
+                    {/* Student Info & Mobile Service Type */}
+                    <div className="flex items-start sm:items-center justify-between sm:justify-start gap-3 min-w-0">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-10 sm:w-12 h-10 sm:h-12 bg-teal-100 rounded-xl flex items-center justify-center text-teal-700 font-black shrink-0 text-sm shadow-xs">
                           {appt.student.charAt(0)}
                         </div>
                         <div className="min-w-0">
-                          <p className="font-black text-slate-900 truncate text-sm">{appt.student}</p>
-                          <p className="text-slate-400 text-xs font-bold">{appt.level}</p>
+                          <p className="font-black text-slate-900 truncate text-sm sm:text-base leading-tight">{appt.student}</p>
+                          <p className="text-slate-400 text-[11px] sm:text-xs font-bold mt-0.5">{appt.level}</p>
                         </div>
                       </div>
 
-                      <span className={`sm:hidden px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest shrink-0 ${typeColor[appt.type] ?? 'bg-slate-100 text-slate-600'}`}>
+                      <span className={`sm:hidden px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shrink-0 ${typeColor[appt.type] ?? 'bg-slate-100 text-slate-600'}`}>
                         {appt.type}
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 w-full sm:w-auto">
+                    {/* Desktop Type Badge + Date/Time + Responsive Action Buttons */}
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
                       <span className={`hidden sm:inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shrink-0 ${typeColor[appt.type] ?? 'bg-slate-100 text-slate-600'}`}>
                         {appt.type}
                       </span>
 
-                      <div className="flex items-center gap-2 text-slate-500 text-xs font-bold shrink-0">
-                        <Calendar size={13} />
-                        <span>{appt.date}</span>
-                        <Clock size={13} className="ml-1" />
-                        <span>{appt.time}</span>
+                      <div className="flex items-center gap-2 text-slate-500 text-xs font-bold bg-slate-50 sm:bg-transparent px-3 py-1.5 sm:p-0 rounded-lg border border-slate-100 sm:border-0 shrink-0">
+                        <Calendar size={13} className="text-teal-600 shrink-0" />
+                        <span className="truncate">{appt.date}</span>
+                        <span className="text-slate-300">•</span>
+                        <Clock size={13} className="text-teal-600 shrink-0" />
+                        <span className="truncate">{appt.time}</span>
                       </div>
 
-                      <div className="flex items-center gap-2 shrink-0">
+                      <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 shrink-0">
                         <button
                           onClick={() => onApprove(appt)}
-                          className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 bg-teal-50 hover:bg-teal-600 text-teal-600 hover:text-white rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border border-teal-200 hover:border-teal-600"
+                          disabled={processingId === appt.id}
+                          className="flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2.5 sm:py-2.5 bg-teal-50 hover:bg-teal-600 text-teal-700 hover:text-white active:bg-teal-700 rounded-xl text-xs sm:text-[10px] font-black uppercase tracking-wider sm:tracking-widest transition-all border border-teal-200 hover:border-teal-600 shadow-xs active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          <CheckCircle2 size={14} />
-                          Approve
+                          {processingId === appt.id ? (
+                            <Loader2 size={14} className="animate-spin" />
+                          ) : (
+                            <CheckCircle2 size={15} />
+                          )}
+                          <span>Approve</span>
                         </button>
                         <button
                           onClick={() => onDecline(appt)}
-                          className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border border-rose-200 hover:border-rose-600"
+                          disabled={processingId === appt.id}
+                          className="flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2.5 sm:py-2.5 bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white active:bg-rose-700 rounded-xl text-xs sm:text-[10px] font-black uppercase tracking-wider sm:tracking-widest transition-all border border-rose-200 hover:border-rose-600 shadow-xs active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          <XCircle size={14} />
-                          Decline
+                          {processingId === appt.id ? (
+                            <Loader2 size={14} className="animate-spin" />
+                          ) : (
+                            <XCircle size={15} />
+                          )}
+                          <span>Decline</span>
                         </button>
                       </div>
                     </div>
@@ -160,11 +174,11 @@ export const ApprovalQueue = ({ queue, loading, onApprove, onDecline }: Approval
           </AnimatePresence>
 
           {totalPages > 1 && (
-            <div className="p-4 border-t border-slate-50 flex items-center justify-between bg-slate-50/50 mt-auto">
-              <span className="text-xs font-bold text-slate-400">
+            <div className="p-4 border-t border-slate-50 flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-50/50 mt-auto">
+              <span className="text-xs font-bold text-slate-400 text-center sm:text-left">
                 Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filtered.length)} of {filtered.length} entries
               </span>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
                 <button
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
