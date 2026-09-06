@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import phAddresses from '../ph_addresses.json';
 import {
@@ -19,7 +19,12 @@ import {
   ArrowLeft,
   ChevronDown,
   Loader2,
-  Search
+  Search,
+  Check,
+  CheckCircle2,
+  ShieldCheck,
+  X,
+  FileText
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import authBg from '../assets/img/Auth-Background.jpg';
@@ -138,10 +143,41 @@ const validateAndNormalizePhone = (phone: string): { normalized: string; error: 
   return { normalized: cleanPhone, error: null };
 };
 
+const TERMS_SECTIONS = [
+  {
+    title: "1. Account Eligibility and Creation",
+    content: "The Western Mindanao State University Guidance and Counseling Center (WMSU GCC) Portal is designated for current students, incoming/shifting applicants, faculty members, university personnel, and authorized community clients. By registering, you affirm that all information provided during registration is accurate, true, and complete. Impersonation or falsification of identity is strictly prohibited."
+  },
+  {
+    title: "2. Confidentiality and Counseling Ethics",
+    content: "All counseling consultations, mental health records, psychometric assessment results, and personal disclosures are held in strict professional confidence under the Code of Ethics for Guidance Counselors and the Philippine Guidance and Counseling Act of 2004 (RA 9258). Information shared within the center or via this portal will not be disclosed to any outside party without your explicit written authorization, except in life-threatening emergencies, imminent danger of self-harm or harm to others, or when mandated by a court of law."
+  },
+  {
+    title: "3. Republic Act No. 10173 (Data Privacy Act of 2012)",
+    content: "In adherence to Republic Act No. 10173, the WMSU Guidance and Counseling Center collects, processes, and stores personal and sensitive personal information (such as name, contact details, academic program, assessment scores, and appointment history) solely for counseling assistance, student welfare monitoring, institutional reporting in non-identifiable aggregate forms, and referral services. Your data is encrypted and protected with university security standards."
+  },
+  {
+    title: "4. User Conduct and Portal Etiquette",
+    content: "You agree to use this portal only for lawful and intended purposes, including booking guidance appointments, scheduling shifting exams, and accessing counselor services. You must refrain from uploading malicious files, attempting unauthorized system access, or communicating in an abusive, harassing, or disrespectful manner toward guidance staff or counselors. Violations may result in immediate account revocation and disciplinary action under the WMSU Student/Employee Handbook."
+  },
+  {
+    title: "5. Appointments and Cancellation Policy",
+    content: "Submitting an appointment request is subject to counselor confirmation and schedule availability. Users are requested to arrive promptly for scheduled consultations. In the event of unforeseen conflicts, cancellations or rescheduling requests must be submitted through the portal at least 24 hours in advance to allow available slots to be extended to other students in need."
+  },
+  {
+    title: "6. User Declaration and Voluntary Consent",
+    content: "By proceeding with registration and clicking 'I Agree & Create Account', you certify under penalty of university administrative policy that you are the lawful owner of the credentials submitted, and that you voluntarily, knowingly, and freely give your full consent to the processing of your data and agreement to all terms, policies, and guidelines stated above."
+  }
+];
+
 export default function Register() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [agreedTerms, setAgreedTerms] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [hasScrolledTerms, setHasScrolledTerms] = useState(false);
+  const termsScrollRef = useRef<HTMLDivElement>(null);
   const [logos, setLogos] = useState({
     wmsuLogo: wmsuLogoAsset,
     gccLogo: gccLogoAsset
@@ -411,6 +447,45 @@ export default function Register() {
     return true;
   };
 
+  useEffect(() => {
+    if (showTermsModal) {
+      document.body.style.overflow = 'hidden';
+      setHasScrolledTerms(false);
+      const timer = setTimeout(() => {
+        if (termsScrollRef.current) {
+          termsScrollRef.current.scrollTop = 0;
+          const { scrollHeight, clientHeight } = termsScrollRef.current;
+          if (scrollHeight <= clientHeight + 10) {
+            setHasScrolledTerms(true);
+          }
+        }
+      }, 150);
+      return () => {
+        clearTimeout(timer);
+        document.body.style.overflow = '';
+      };
+    } else {
+      document.body.style.overflow = '';
+    }
+  }, [showTermsModal]);
+
+  const handleTermsScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    const { scrollTop, scrollHeight, clientHeight } = target;
+    if (scrollTop + clientHeight >= scrollHeight - 20) {
+      setHasScrolledTerms(true);
+    }
+  };
+
+  const scrollToBottomTerms = () => {
+    if (termsScrollRef.current) {
+      termsScrollRef.current.scrollTo({
+        top: termsScrollRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -438,6 +513,11 @@ export default function Register() {
     if (!validateStep2()) { setStep(2); return; }
     if (!validateStep3()) { setStep(3); return; }
     if (shouldShowEducationStep && !validateStep4()) { setStep(4); return; }
+
+    if (!agreedTerms) {
+      showToast.error('Please agree to the Terms and Conditions before completing sign up.');
+      return;
+    }
 
     setLoading(true);
     try {
@@ -1457,6 +1537,72 @@ export default function Register() {
                     </div>
                   )}
 
+                  {/* Terms and Agreement Card & Checkbox (Shown on final step) */}
+                  {((step === 4 && shouldShowEducationStep) || (step === 3 && !shouldShowEducationStep)) && (
+                    <div className="mt-4 flex flex-col gap-3 rounded-xl border border-slate-200/90 bg-slate-50/70 p-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4 text-emerald-800" />
+                          <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                            Terms & Agreement
+                          </span>
+                        </div>
+                        <span className="text-[10px] font-bold text-slate-500 bg-white px-2 py-0.5 rounded-full border border-slate-200">
+                          Scroll to read
+                        </span>
+                      </div>
+
+                      {/* Scrollable Box to Read Terms */}
+                      <div className="max-h-36 overflow-y-auto rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-600 space-y-2.5">
+                        <div className="rounded-xl bg-emerald-50/90 border border-emerald-200/80 p-2.5 text-xs text-emerald-900 shadow-xs">
+                          <p className="text-[11px] font-semibold leading-relaxed text-emerald-950">
+                            Please review the terms and conditions governing your WMSU GCC account before completing your registration.
+                          </p>
+                        </div>
+                        {TERMS_SECTIONS.map((sec, idx) => (
+                          <div key={idx} className="space-y-0.5">
+                            <p className="font-bold text-slate-800 text-[11px]">
+                              {sec.title}
+                            </p>
+                            <p className="text-[11px] text-slate-600 leading-relaxed">{sec.content}</p>
+                          </div>
+                        ))}
+                        <div className="pt-2 text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider border-t border-slate-100">
+                          — End of Terms and Conditions —
+                        </div>
+                      </div>
+
+                      {/* Agreement Checkbox */}
+                      <label className="flex items-start gap-2.5 cursor-pointer pt-1 select-none">
+                        <input
+                          type="checkbox"
+                          id="agreeTerms"
+                          checked={agreedTerms}
+                          onChange={(e) => setAgreedTerms(e.target.checked)}
+                          className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-800 focus:ring-emerald-600 cursor-pointer accent-emerald-800"
+                        />
+                        <span className="text-xs font-medium text-slate-700 leading-snug">
+                          I have read, understood, and agree to the{' '}
+                          <button
+                            type="button"
+                            onClick={() => setShowTermsModal(true)}
+                            className="text-emerald-900 font-bold underline hover:text-emerald-700 cursor-pointer"
+                          >
+                            Terms of Service
+                          </button>{' '}
+                          and{' '}
+                          <button
+                            type="button"
+                            onClick={() => setShowTermsModal(true)}
+                            className="text-emerald-900 font-bold underline hover:text-emerald-700 cursor-pointer"
+                          >
+                            Privacy Policy
+                          </button>.
+                        </span>
+                      </label>
+                    </div>
+                  )}
+
                   {/* Global Navigation Buttons */}
                   <div className="mt-6 flex gap-3 pt-4 border-t border-gray-100">
                     {step > 1 && (
@@ -1484,12 +1630,12 @@ export default function Register() {
                       <button type="button" disabled={loading} onClick={() => { handleNextStep3(); window.scrollTo(0, 0); }} className="w-2/3 rounded-lg bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0 disabled:opacity-50">Next</button>
                     )}
                     {step === 3 && !shouldShowEducationStep && (
-                      <button type="submit" disabled={loading} className="w-2/3 rounded-lg bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0 disabled:opacity-70 flex items-center justify-center gap-2">
+                      <button type="submit" disabled={loading || !agreedTerms} className="w-2/3 rounded-lg bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed">
                         {loading ? (<><Loader2 className="h-4 w-4 animate-spin" />Creating account...</>) : 'Complete Sign up'}
                       </button>
                     )}
                     {step === 4 && (
-                      <button type="submit" disabled={loading} className="w-2/3 rounded-lg bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0 disabled:opacity-70 flex items-center justify-center gap-2">
+                      <button type="submit" disabled={loading || !agreedTerms} className="w-2/3 rounded-lg bg-emerald-900 py-4 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:translate-y-0 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed">
                         {loading ? (<><Loader2 className="h-4 w-4 animate-spin" />Creating account...</>) : 'Complete Sign up'}
                       </button>
                     )}
@@ -1504,6 +1650,146 @@ export default function Register() {
           </div>
         </div>
       </motion.div>
+
+      {/* Terms and Agreement Modal */}
+      <AnimatePresence>
+        {showTermsModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/70 backdrop-blur-xs overflow-hidden"
+            onMouseDown={(e) => {
+              if (e.target === e.currentTarget && !loading) {
+                setShowTermsModal(false);
+              }
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              transition={{ duration: 0.2 }}
+              className="bg-white rounded-2xl shadow-2xl border border-slate-100 w-full max-w-2xl max-h-[90vh] sm:max-h-[85vh] flex flex-col overflow-hidden my-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70 shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-900 text-white flex items-center justify-center shadow-md shadow-emerald-900/20 shrink-0">
+                    <ShieldCheck size={22} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black text-slate-900 tracking-tight">Terms and Agreement</h3>
+                    <p className="text-xs text-slate-500 font-bold">Western Mindanao State University Guidance & Counseling Center</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  disabled={loading}
+                  onClick={() => setShowTermsModal(false)}
+                  className="p-2 hover:bg-slate-200/60 rounded-xl transition-all text-slate-400 hover:text-slate-700 cursor-pointer shrink-0 disabled:opacity-50"
+                  aria-label="Close terms modal"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Scrollable Terms Content */}
+              <div
+                ref={termsScrollRef}
+                onScroll={handleTermsScroll}
+                className="p-6 overflow-y-auto space-y-4 text-xs sm:text-sm text-slate-600 leading-relaxed max-h-[50vh] bg-slate-50/30"
+              >
+                <div className="relative overflow-hidden rounded-2xl border border-emerald-200/90 bg-gradient-to-br from-emerald-50/90 via-teal-50/40 to-emerald-100/30 p-4 shadow-xs">
+                  <div className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-emerald-200/40 blur-xl pointer-events-none" />
+                  <div className="relative">
+                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                      <h4 className="text-xs font-black uppercase tracking-wider text-emerald-950">
+                        Review Required
+                      </h4>
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-200/70 text-emerald-900 border border-emerald-300/60">
+                        Scroll to read
+                      </span>
+                    </div>
+                    <p className="text-xs text-emerald-900/85 font-medium leading-relaxed">
+                      Please review the terms and agreement carefully. You must scroll to the bottom of the document before accepting and completing your account registration.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-4 pt-1">
+                  {TERMS_SECTIONS.map((sec, idx) => (
+                    <div key={idx} className="bg-white p-4 rounded-xl border border-slate-100 shadow-xs">
+                      <h4 className="font-bold text-slate-900 text-sm mb-1.5 flex items-center gap-2">
+                        <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[10px] font-black shrink-0">
+                          {idx + 1}
+                        </span>
+                        {sec.title}
+                      </h4>
+                      <p className="text-slate-600 text-xs sm:text-sm leading-relaxed pl-7">
+                        {sec.content}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Bottom Marker */}
+                <div className="pt-8 pb-2 text-center border-t border-slate-200/70 text-xs font-bold text-slate-400 uppercase tracking-widest">
+                  — End of Terms and Conditions —
+                </div>
+              </div>
+
+              {/* Scroll Status & Action Footer */}
+              <div className="p-4 sm:p-5 border-t border-slate-100 bg-white flex flex-col gap-3 shrink-0">
+                {/* Scroll Prompt / Success Indicator */}
+                {!hasScrolledTerms ? (
+                  <div
+                    onClick={scrollToBottomTerms}
+                    className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-800 text-xs font-bold cursor-pointer hover:bg-amber-100/70 transition-colors"
+                    title="Click to scroll to bottom"
+                  >
+                    <div className="flex items-center gap-2">
+                      <ChevronDown className="h-4 w-4 animate-bounce text-amber-600 shrink-0" />
+                      <span>Scroll down to the bottom to enable agreement</span>
+                    </div>
+                    <span className="text-[11px] underline text-amber-700 hover:text-amber-900 hidden sm:inline">Jump to bottom</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <span>You have reviewed the terms. You may now agree and create your account.</span>
+                  </div>
+                )}
+
+                {/* Footer Buttons */}
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowTermsModal(false)}
+                    disabled={loading}
+                    className="px-5 py-3 rounded-xl border border-slate-200 text-xs sm:text-sm font-bold text-slate-600 hover:bg-slate-100 transition-colors disabled:opacity-50 cursor-pointer"
+                  >
+                    Close
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAgreedTerms(true);
+                      setShowTermsModal(false);
+                    }}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 px-5 rounded-xl text-xs sm:text-sm font-bold shadow-md bg-emerald-900 hover:bg-emerald-800 text-white cursor-pointer active:translate-y-0.5"
+                  >
+                    <Check className="h-4 w-4 stroke-[2.5]" />
+                    <span>I Understand and Agree</span>
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

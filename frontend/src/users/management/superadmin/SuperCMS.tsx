@@ -296,6 +296,35 @@ const CMS = () => {
 
 
 
+  // ─── Session cache (survives tab navigation, invalidated on save) ───────────
+  const CMS_CACHE_KEY = 'gcc_cms_cache';
+  const CMS_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+
+  const readCache = (): Record<string, any> | null => {
+    try {
+      const raw = sessionStorage.getItem(CMS_CACHE_KEY);
+      if (!raw) return null;
+      const { ts, data } = JSON.parse(raw);
+      if (Date.now() - ts > CMS_CACHE_TTL_MS) { sessionStorage.removeItem(CMS_CACHE_KEY); return null; }
+      return data;
+    } catch { return null; }
+  };
+
+  const writeCache = (data: Record<string, any>) => {
+    try { sessionStorage.setItem(CMS_CACHE_KEY, JSON.stringify({ ts: Date.now(), data })); } catch {}
+  };
+
+  const invalidateCacheSection = (section: string) => {
+    try {
+      const raw = sessionStorage.getItem(CMS_CACHE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      delete parsed.data[section];
+      sessionStorage.setItem(CMS_CACHE_KEY, JSON.stringify(parsed));
+    } catch {}
+  };
+  // ──────────────────────────────────────────────────────────────────────────────
+
   const fetchAllContent = async () => {
     setIsLoading(true);
     const sectionsToFetch = ['home', 'about', 'team', 'contact', 'footer', 'system', 'logos', 'counseling', 'assessment', 'shifting', 'privacy', 'terms'];
@@ -514,9 +543,43 @@ const CMS = () => {
         occupations: ["Student", "Employee", "Self Employed", "Unemployed", "Prefer not to say"]
       };
 
-      for (const s of sectionsToFetch) {
-        const result = await cmsApi.getContent(s);
-        
+      // ── Check session cache first ─────────────────────────────────────────
+      const cached = readCache();
+      if (cached) {
+        // Populate state from cache (instant)
+        const applySection = (s: string, data: any) => {
+          newSavedStates[s] = JSON.parse(JSON.stringify(data));
+          switch (s) {
+            case 'home': setHomeContent(data); break;
+            case 'about': setAboutContent(data); break;
+            case 'team':
+              if (data.mainCampus && !data.mainCampus.director) data.mainCampus.director = [];
+              setTeamContent(ensureTeamMemberIds(data)); break;
+            case 'contact': setContactContent(data); break;
+            case 'footer': setFooterContent(data); break;
+            case 'system': setSystemData((data && data.colleges) ? data : defaultSystem); break;
+            case 'logos': setLogoSettings(data); break;
+            case 'counseling': setCounselingContent(data); break;
+            case 'assessment': setAssessmentContent(data); break;
+            case 'shifting': setShiftingContent(data); break;
+            case 'privacy': setPrivacyContent(data); break;
+            case 'terms': setTermsContent(data); break;
+          }
+        };
+        for (const s of sectionsToFetch) {
+          if (cached[s]) applySection(s, cached[s]);
+        }
+        setSavedStates(newSavedStates);
+        setIsLoading(false);
+        return;
+      }
+
+      // ── Fetch all sections in parallel ────────────────────────────────────
+      const results = await Promise.all(sectionsToFetch.map(s => cmsApi.getContent(s)));
+      const freshCache: Record<string, any> = {};
+
+      results.forEach((result, i) => {
+        const s = sectionsToFetch[i];
         let data = result.data;
         if (!result.ok || !data || Object.keys(data).length === 0) {
           if (s === 'counseling') data = defaultCounseling;
@@ -528,20 +591,17 @@ const CMS = () => {
         }
 
         if (data && Object.keys(data).length > 0) {
+          freshCache[s] = data;
           newSavedStates[s] = JSON.parse(JSON.stringify(data));
           switch (s) {
             case 'home': setHomeContent(data); break;
             case 'about': setAboutContent(data); break;
-            case 'team': 
+            case 'team':
               if (data.mainCampus && !data.mainCampus.director) data.mainCampus.director = [];
-              setTeamContent(ensureTeamMemberIds(data)); 
-              break;
+              setTeamContent(ensureTeamMemberIds(data)); break;
             case 'contact': setContactContent(data); break;
             case 'footer': setFooterContent(data); break;
-            case 'system': 
-              const refinedSystem = (data && data.colleges) ? data : defaultSystem;
-              setSystemData(refinedSystem); 
-              break;
+            case 'system': setSystemData((data && data.colleges) ? data : defaultSystem); break;
             case 'logos': setLogoSettings(data); break;
             case 'counseling': setCounselingContent(data); break;
             case 'assessment': setAssessmentContent(data); break;
@@ -550,7 +610,9 @@ const CMS = () => {
             case 'terms': setTermsContent(data); break;
           }
         }
-      }
+      });
+
+      writeCache(freshCache);
       setSavedStates(newSavedStates);
     } catch (error) {
       console.error("Error fetching CMS content:", error);
@@ -820,6 +882,7 @@ const CMS = () => {
         const updateResult = await cmsApi.updateContent(key, data, accessToken || undefined);
         if (updateResult.ok) {
           setSavedStates(prev => ({ ...prev, [key]: JSON.parse(JSON.stringify(data)) }));
+          invalidateCacheSection(key); // drop only this section from cache
           showToast.success(`${section} updated successfully!`);
         } else {
           showToast.error(`Failed to update ${section}.`);
