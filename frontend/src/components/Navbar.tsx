@@ -60,29 +60,28 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo Section */}
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="flex items-center">
-              <img src={logos.wmsuLogo} alt="WMSU" className="h-9 w-9 sm:h-11 sm:w-11 object-contain drop-shadow-md shrink-0" />
-              <div className={`h-5 sm:h-6 w-px mx-1 sm:mx-1.5 md:hidden shrink-0 transition-colors ${isSolidNeeded ? 'bg-slate-300' : 'bg-white/40'}`} />
-              <img src={logos.gccLogo} alt="GCC" className="h-9 w-9 sm:h-11 sm:w-11 object-contain drop-shadow-md shrink-0 md:-ml-2" />
+          <Link to="/" className="flex items-center gap-2.5 sm:gap-3 group shrink-0">
+            <div className="flex items-center -space-x-2 shrink-0">
+              <img src={logos.wmsuLogo} alt="WMSU" className="h-10 w-10 sm:h-12 sm:w-12 object-contain drop-shadow-md z-10" />
+              <img src={logos.gccLogo} alt="GCC" className="h-10 w-10 sm:h-12 sm:w-12 object-contain drop-shadow-md z-20" />
             </div>
-            <div className="flex flex-col leading-tight">
-              <span className={`text-xl font-black tracking-tighter transition-colors ${isSolidNeeded ? 'text-emerald-900' : 'text-white'}`}>
+            <div className="flex flex-col leading-tight whitespace-nowrap">
+              <span className={`text-lg sm:text-xl font-black tracking-tighter transition-colors ${isSolidNeeded ? 'text-emerald-900' : 'text-white'}`}>
                 WMSU GCC
               </span>
-              <span className={`text-[10px] font-bold uppercase tracking-widest transition-colors ${isSolidNeeded ? 'text-emerald-600' : 'text-emerald-200'}`}>
+              <span className={`text-[9px] sm:text-[10px] font-bold uppercase tracking-widest transition-colors ${isSolidNeeded ? 'text-emerald-600' : 'text-emerald-200'} block md:hidden lg:block`}>
                 Guidance & Counseling Center
               </span>
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
+          {/* Desktop & Tablet Navigation */}
+          <div className="hidden md:flex items-center gap-3 lg:gap-6 xl:gap-8">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 to={link.path}
-                className={`text-md font-bold transition-all hover:scale-105 ${isActive(link.path)
+                className={`text-xs md:text-sm lg:text-base font-bold whitespace-nowrap transition-all hover:scale-105 ${isActive(link.path)
                   ? (isSolidNeeded ? 'text-emerald-600' : 'text-white border-b-2 border-emerald-400')
                   : (isSolidNeeded ? 'text-gray-600 hover:text-emerald-600' : 'text-emerald-50/80 hover:text-white')
                   }`}
@@ -90,13 +89,13 @@ const Navbar = () => {
                 {link.name}
               </Link>
             ))}
-            <div className="flex items-center gap-4 ml-4">
+            <div className="flex items-center gap-2 lg:gap-4 ml-1 lg:ml-4 shrink-0">
               {user ? (
                 <Link
                   to={redirectPath || '/'}
-                  className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 px-4 py-2 rounded-full text-sm font-black transition-all flex items-center gap-2 shadow-sm"
+                  className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 px-3 py-1.5 lg:px-4 lg:py-2 rounded-full text-xs lg:text-sm font-black whitespace-nowrap transition-all flex items-center gap-2 shadow-sm"
                 >
-                  <div className="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center">
+                  <div className="w-5 h-5 lg:w-6 lg:h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center">
                     <User size={12} />
                   </div>
                   {user.firstName}
@@ -105,15 +104,15 @@ const Navbar = () => {
                 <>
                   <Link
                     to="/login"
-                    className={`text-md font-bold transition-colors ${isSolidNeeded ? 'text-emerald-900 hover:text-emerald-600' : 'text-white hover:text-emerald-200'}`}
+                    className={`text-xs md:text-sm lg:text-base font-bold whitespace-nowrap transition-colors ${isSolidNeeded ? 'text-emerald-900 hover:text-emerald-600' : 'text-white hover:text-emerald-200'}`}
                   >
                     Sign In
                   </Link>
                   <Link
                     to="/register"
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2.5 rounded-full text-md font-black shadow-lg shadow-emerald-900/20 transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2"
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 lg:px-6 lg:py-2.5 rounded-full text-xs md:text-sm lg:text-base font-black whitespace-nowrap shadow-lg shadow-emerald-900/20 transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-1.5 lg:gap-2 shrink-0"
                   >
-                    Get Started <ArrowRight className="h-4 w-4" />
+                    Get Started <ArrowRight className="h-3.5 w-3.5 lg:h-4 lg:w-4" />
                   </Link>
                 </>
               )}
