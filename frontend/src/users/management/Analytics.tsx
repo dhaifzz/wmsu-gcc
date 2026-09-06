@@ -176,20 +176,20 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
         animate={{ opacity: 1, y: 0 }}
         className="space-y-8"
       >
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-3xl font-black tracking-tight text-slate-900">Center Analytics</h2>
-            <p className="text-slate-500 font-medium text-sm mt-1">Real-time performance metrics and distribution data.</p>
+            <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">Center Analytics</h2>
+            <p className="text-slate-500 font-medium text-xs sm:text-sm mt-1">Real-time performance metrics and distribution data.</p>
           </div>
-          <div className="flex items-center gap-3">
-            <button onClick={handleOpenAuditModal} className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm">View Logs</button>
-            <button className={`px-4 py-2 ${theme.bg600} text-white rounded-lg text-xs font-black uppercase tracking-widest ${theme.hoverBg700} transition-all shadow-lg ${theme.shadow200}`}>Generate Report</button>
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+            <button onClick={handleOpenAuditModal} className="px-3.5 sm:px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm">View Logs</button>
+            <button className={`px-3.5 sm:px-4 py-2 ${theme.bg600} text-white rounded-lg text-xs font-black uppercase tracking-widest ${theme.hoverBg700} transition-all shadow-lg ${theme.shadow200}`}>Generate Report</button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {stats.map((stat, idx) => (
-            <div key={idx} className={`bg-white p-6 rounded-lg border border-slate-200 shadow-sm group ${theme.hoverBg50} hover:${theme.border200} transition-all`}>
+            <div key={idx} className={`bg-white p-5 sm:p-6 rounded-lg border border-slate-200 shadow-sm group ${theme.hoverBg50} hover:${theme.border200} transition-all`}>
               <div className={`w-12 h-12 bg-${stat.color}-50 text-${stat.color}-600 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
                 <stat.icon size={24} />
               </div>
@@ -204,9 +204,9 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
           ))}
         </div>
 
-        <div className="grid lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-8 bg-white rounded-lg p-8 border border-slate-200 shadow-sm relative overflow-hidden">
-            <div className="flex items-center justify-between mb-10">
+        <div className="grid lg:grid-cols-12 gap-6 lg:gap-8">
+          <div className="lg:col-span-8 bg-white rounded-lg p-5 sm:p-6 lg:p-8 border border-slate-200 shadow-sm relative overflow-hidden">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 sm:mb-10">
               <h3 className="text-xl font-black tracking-tight flex items-center gap-3">
                 <PieChartIcon className={theme.text500} size={24} />
                 Service Distribution
@@ -254,7 +254,7 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
             </div>
           </div>
 
-          <div className={`lg:col-span-4 ${theme.bg900} rounded-lg p-8 text-white relative overflow-hidden shadow-xl`}>
+          <div className={`lg:col-span-4 ${theme.bg900} rounded-lg p-5 sm:p-6 lg:p-8 text-white relative overflow-hidden shadow-xl`}>
             <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-400/20 rounded-full blur-3xl"></div>
             <h3 className="text-xl font-black mb-8 relative z-10 flex items-center gap-3">
               <BookOpen className={theme.text400} size={24} />
@@ -282,8 +282,8 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
           </div>
         </div>
 
-        <div className="bg-white rounded-lg p-8 border border-slate-200 shadow-sm relative overflow-hidden">
-          <div className="flex items-center justify-between mb-8">
+        <div className="bg-white rounded-lg p-5 sm:p-6 lg:p-8 border border-slate-200 shadow-sm relative overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6 sm:mb-8">
             <h3 className="text-xl font-black tracking-tight flex items-center gap-3">
               <Award className={theme.text500} size={24} />
               Top 5 Performing Staff
@@ -291,7 +291,7 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
             <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Based on appointments reviewed</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             {currentData.topStaff.length > 0 ? currentData.topStaff.map((staff, idx) => (
               <div key={idx} className={`bg-slate-50 rounded-lg p-5 border border-slate-100 flex flex-col items-center text-center relative group ${theme.hoverBg50} hover:${theme.border200} transition-colors`}>
                 <div className={`absolute -top-3 -right-3 w-8 h-8 rounded-full border-2 border-white flex items-center justify-center font-black text-xs bg-slate-100 text-slate-600 border-slate-200`}>
@@ -306,30 +306,30 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
                   <p className={`text-[10px] font-black ${theme.text600} uppercase tracking-widest`}>{staff.count} Reviewed</p>
                 </div>
               </div>
-            )) : <div className="col-span-5 text-center text-slate-400 font-bold py-8">No staff performance data yet.</div>}
+            )) : <div className="col-span-full text-center text-slate-400 font-bold py-8">No staff performance data yet.</div>}
           </div>
         </div>
 
         {role === 'admin' && (
           <div className="pt-8 mt-12 space-y-8">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
               <div>
-                <h2 className="text-3xl font-black tracking-tight text-slate-900 flex items-center gap-3">
+                <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 flex items-center gap-3">
                   <ShieldCheck className={theme.text600} size={32} />
                   System Administration
                 </h2>
-                <p className="text-slate-500 font-medium text-sm mt-1">Platform-wide statistics, user roles, and system health.</p>
+                <p className="text-slate-500 font-medium text-xs sm:text-sm mt-1">Platform-wide statistics, user roles, and system health.</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               {[
                 { label: "Total Users", value: currentData.stats.totalUsers?.toString() ?? '0', trend: "", icon: Users, color: "blue" },
                 { label: "Active Staff", value: currentData.stats.activeStaff?.toString() ?? '0', trend: "", icon: UserCheck, color: "teal" },
                 { label: "Today's Bookings", value: currentData.stats.todaysBookings.toString(), trend: "", icon: Database, color: "amber" },
                 { label: "Completed Tests", value: currentData.stats.completedTests.toString(), trend: "", icon: Server, color: "purple" }
               ].map((stat, idx) => (
-                <div key={idx} className={`bg-white p-6 rounded-lg border border-slate-200 shadow-sm group ${theme.hoverBg50} hover:${theme.border200} transition-all`}>
+                <div key={idx} className={`bg-white p-5 sm:p-6 rounded-lg border border-slate-200 shadow-sm group ${theme.hoverBg50} hover:${theme.border200} transition-all`}>
                   <div className={`w-12 h-12 bg-${stat.color}-50 text-${stat.color}-600 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
                     <stat.icon size={24} />
                   </div>
@@ -344,8 +344,8 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
               ))}
             </div>
 
-            <div className="grid lg:grid-cols-2 gap-8">
-              <div className="bg-white rounded-lg p-8 border border-slate-200 shadow-sm relative overflow-hidden">
+            <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
+              <div className="bg-white rounded-lg p-5 sm:p-6 lg:p-8 border border-slate-200 shadow-sm relative overflow-hidden">
                 <div className="flex items-center justify-between mb-8">
                   <h3 className="text-xl font-black tracking-tight flex items-center gap-3">
                     <Users className={theme.text500} size={24} />
@@ -372,7 +372,7 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
                 </div>
               </div>
 
-              <div className={`${theme.bg900} rounded-lg p-8 text-white relative overflow-hidden shadow-xl`}>
+              <div className={`${theme.bg900} rounded-lg p-5 sm:p-6 lg:p-8 text-white relative overflow-hidden shadow-xl`}>
                 <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent pointer-events-none"></div>
                 <h3 className="text-xl font-black tracking-tight mb-8 relative z-10 flex items-center gap-3">
                   <Activity className={theme.text400} size={24} />
@@ -433,19 +433,19 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
               onClick={(e) => e.stopPropagation()}
             >
               {/* Modal Header */}
-              <div className="px-6 sm:px-8 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
+              <div className="px-4 sm:px-8 py-4 sm:py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
                 <div className="flex items-center gap-3">
-                  <div className={`w-11 h-11 rounded-xl ${theme.bg600} text-white flex items-center justify-center shadow-md shadow-slate-200/50 shrink-0`}>
-                    <Activity size={22} />
+                  <div className={`w-10 sm:w-11 h-10 sm:h-11 rounded-xl ${theme.bg600} text-white flex items-center justify-center shadow-md shadow-slate-200/50 shrink-0`}>
+                    <Activity size={20} />
                   </div>
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="text-xl font-black text-slate-900 tracking-tight">System Audit Logs</h3>
-                      <span className="px-3 py-0.5 rounded-full text-xs font-black bg-teal-50 text-teal-700 border border-teal-100">
+                      <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">System Audit Logs</h3>
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-black bg-teal-50 text-teal-700 border border-teal-100">
                         {auditLogs.length} Records
                       </span>
                     </div>
-                    <p className="text-xs text-slate-500 font-bold mt-0.5">Real-time system events, appointments, and account activities.</p>
+                    <p className="text-[11px] sm:text-xs text-slate-500 font-bold mt-0.5">Real-time system events, appointments, and account activities.</p>
                   </div>
                 </div>
                 <button
@@ -457,7 +457,7 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
               </div>
 
               {/* Controls Bar */}
-              <div className="px-6 sm:px-8 py-4 border-b border-slate-100 bg-white flex flex-col lg:flex-row gap-3 sm:gap-4 items-stretch lg:items-center justify-between shrink-0">
+              <div className="px-4 sm:px-8 py-3 sm:py-4 border-b border-slate-100 bg-white flex flex-col lg:flex-row gap-3 sm:gap-4 items-stretch lg:items-center justify-between shrink-0">
                 {/* Search Input */}
                 <div className="relative flex-1">
                   <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -516,7 +516,7 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
               </div>
 
               {/* Logs Content List (Scrollable Area) */}
-              <div className="flex-1 overflow-y-auto px-6 sm:px-8 py-6 space-y-3 custom-scrollbar min-h-0">
+              <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-4 sm:py-6 space-y-3 custom-scrollbar min-h-0">
                 {loadingAudit ? (
                   <div className="py-20 text-center flex flex-col items-center gap-3 text-slate-400">
                     <RefreshCw size={32} className="animate-spin text-teal-600" />

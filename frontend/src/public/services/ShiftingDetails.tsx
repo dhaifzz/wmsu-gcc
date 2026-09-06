@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, BookOpen, Scaling, AlertCircle, ListChecks, Calendar } from 'lucide-react';
+import { ArrowLeft, BookOpen, Scaling, AlertCircle, ListChecks, Calendar, ExternalLink } from 'lucide-react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import shiftingImg from '../../assets/img/shifting-img.png';
@@ -162,9 +162,15 @@ const ShiftingDetails = () => {
                   <p className="text-slate-500 text-sm font-medium mb-6 leading-relaxed">
                     {content?.guidance?.description}
                   </p>
-                  <button className="w-full py-4 bg-slate-100 text-slate-700 font-black rounded-lg hover:bg-slate-200 transition-all">
-                    Learn More about Careers
-                  </button>
+                  <a 
+                    href="https://www.onetonline.org/find/all" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="w-full py-4 bg-slate-100 text-slate-700 font-black rounded-lg hover:bg-emerald-50 hover:text-emerald-700 transition-all flex items-center justify-center gap-2"
+                  >
+                    <span>Learn More about Careers</span>
+                    <ExternalLink size={16} />
+                  </a>
                 </div>
               </div>
               

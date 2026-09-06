@@ -285,19 +285,19 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-black text-slate-900 tracking-tight">Blog Management</h1>
-        <p className="text-slate-500 font-medium mt-1">Create and manage posts for the public blog feed.</p>
+        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Blog Management</h1>
+        <p className="text-slate-500 text-xs sm:text-sm font-medium mt-1">Create and manage posts for the public blog feed.</p>
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex gap-2 bg-white rounded-2xl p-1.5 shadow-sm border border-slate-100 w-fit">
+      <div className="flex flex-wrap sm:flex-nowrap gap-1.5 sm:gap-2 bg-white rounded-2xl p-1.5 shadow-sm border border-slate-100 w-full sm:w-fit overflow-x-auto">
         {[
           { id: 'compose' as const, label: editingPost ? 'Edit Post' : 'New Post', icon: Pencil },
           { id: 'my-posts' as const, label: 'My Posts', icon: Eye },
           ...(canApprove ? [{ id: 'approval' as const, label: `Approval Queue${pendingPosts.length > 0 ? ` (${pendingPosts.length})` : ''}`, icon: Clock }] : []),
         ].map(tab => (
           <button key={tab.id} onClick={() => { if (tab.id === 'compose' && activeView === 'compose') resetCompose(); setActiveView(tab.id); }}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
+            className={`flex items-center justify-center gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex-1 sm:flex-initial whitespace-nowrap ${
               activeView === tab.id ? 'bg-emerald-900 text-white shadow-lg' : 'text-slate-500 hover:bg-slate-50'
             }`}>
             <tab.icon size={16} /> {tab.label}
@@ -432,19 +432,19 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
           </div>
 
           {/* Action Bar */}
-          <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
-            <div className="flex gap-2">
+          <div className="px-4 sm:px-6 py-3.5 sm:py-4 bg-slate-50/50 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2">
               <input ref={fileRef} type="file" multiple accept="image/*,video/*" onChange={handleFileSelect} className="hidden" />
               <button onClick={() => fileRef.current?.click()}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-500 hover:bg-white hover:text-emerald-600 transition-all border border-transparent hover:border-emerald-100">
+                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-500 hover:bg-white hover:text-emerald-600 transition-all border border-transparent hover:border-emerald-100">
                 <ImageIcon size={18} /> Photo
               </button>
               <button onClick={() => { fileRef.current?.setAttribute('accept', 'video/*'); fileRef.current?.click(); }}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-500 hover:bg-white hover:text-emerald-600 transition-all border border-transparent hover:border-emerald-100">
+                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-500 hover:bg-white hover:text-emerald-600 transition-all border border-transparent hover:border-emerald-100">
                 <Video size={18} /> Video
               </button>
               <button onClick={() => setShowLinkInput(!showLinkInput)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all border border-transparent ${
+                className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all border border-transparent ${
                   showLinkInput ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'text-slate-500 hover:bg-white hover:text-emerald-600 hover:border-emerald-100'
                 }`}>
                 <Link2 size={18} /> Link
@@ -452,7 +452,7 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
             </div>
 
             <button onClick={handleSubmit} disabled={submitting || !(content.trim() || mediaFiles.length > 0 || (editingPost && editingPost.media_urls.length > 0) || linkUrl.trim())}
-              className="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 text-white rounded-xl font-bold text-sm hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-900/20 disabled:opacity-50 disabled:cursor-not-allowed">
+              className="flex items-center justify-center gap-2 px-6 py-2.5 bg-emerald-600 text-white rounded-xl font-bold text-sm hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-900/20 disabled:opacity-50 disabled:cursor-not-allowed">
               {submitting ? <><Loader2 size={16} className="animate-spin" /> {uploading ? 'Uploading...' : 'Posting...'}</> : <><Send size={16} /> {editingPost ? 'Update' : 'Post'}</>}
             </button>
           </div>
@@ -551,13 +551,13 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
                     media_types={post.media_types}
                   />
                 </div>
-                <div className="px-5 py-3 bg-slate-50/50 border-t border-slate-100 flex gap-2 justify-end">
+                <div className="px-5 py-3 bg-slate-50/50 border-t border-slate-100 flex flex-wrap sm:flex-nowrap gap-2 justify-end">
                   <button onClick={() => handleReject(post.id)}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-rose-600 bg-white border border-rose-200 hover:bg-rose-50 transition-all">
+                    className="flex-1 sm:flex-initial justify-center flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-rose-600 bg-white border border-rose-200 hover:bg-rose-50 transition-all">
                     <XCircle size={16} /> Reject
                   </button>
                   <button onClick={() => handleApprove(post.id)}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-900/20">
+                    className="flex-1 sm:flex-initial justify-center flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-900/20">
                     <CheckCircle size={16} /> Approve
                   </button>
                 </div>

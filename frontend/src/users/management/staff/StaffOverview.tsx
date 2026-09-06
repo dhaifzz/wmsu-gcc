@@ -125,14 +125,14 @@ const StaffDashboard = () => {
       className="space-y-10"
     >
       {/* Stats Row */}
-      <div className="grid md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {[
           { label: "Today's Bookings", val: dashboardData?.stats.todaysBookings || 0, trend: "Live", icon: Calendar, color: "emerald" },
           { label: "Pending Review", val: dashboardData?.stats.pendingCount || 0, trend: "Live", icon: Clock, color: "blue" },
           { label: "Total Students", val: (dashboardData?.rolesDistribution?.find(r => r.role === 'College Students')?.count || 0) + (dashboardData?.rolesDistribution?.find(r => r.role === 'High School Students')?.count || 0), trend: "Live", icon: Users, color: "purple" },
           { label: "Completed Tests", val: dashboardData?.stats.completedTests || 0, trend: "Live", icon: CheckCircle2, color: "rose" }
         ].map((stat, idx) => (
-          <div key={idx} className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-all">
+          <div key={idx} className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-all">
             <div className={`w-12 h-12 bg-${stat.color}-50 text-${stat.color}-600 rounded-xl flex items-center justify-center mb-6 shadow-xs`}>
               <stat.icon size={24} />
             </div>
@@ -147,14 +147,14 @@ const StaffDashboard = () => {
         ))}
       </div>
 
-      <div className="grid lg:grid-cols-12 gap-8">
+      <div className="grid lg:grid-cols-12 gap-6 lg:gap-8">
         {/* Recent Appointments Section */}
         <div className="lg:col-span-8 bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm flex flex-col h-fit">
           <div>
             {/* Card Header */}
-            <div className="p-6 sm:p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div className="p-4 sm:p-6 lg:p-8 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center font-black shadow-xs">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center font-black shadow-xs shrink-0">
                   <Calendar size={20} />
                 </div>
                 <div>
@@ -165,7 +165,7 @@ const StaffDashboard = () => {
               
               <button 
                 onClick={() => setShowAppointmentsModal(true)}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/60 transition-all cursor-pointer shadow-xs active:scale-95"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/60 transition-all cursor-pointer shadow-xs active:scale-95 self-start sm:self-auto"
               >
                 <span>View All</span>
                 <ArrowRight size={14} />
@@ -178,33 +178,33 @@ const StaffDashboard = () => {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="bg-emerald-900">
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-emerald-100">Student Name</th>
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-emerald-100">Level</th>
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-emerald-100">Service Type</th>
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-emerald-100">Schedule</th>
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-emerald-100">Status</th>
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-emerald-100 text-right">Action</th>
+                      <th className="px-4 sm:px-6 py-3.5 sm:py-4 text-[10px] font-black uppercase tracking-widest text-emerald-100">Student Name</th>
+                      <th className="px-4 sm:px-6 py-3.5 sm:py-4 text-[10px] font-black uppercase tracking-widest text-emerald-100">Level</th>
+                      <th className="px-4 sm:px-6 py-3.5 sm:py-4 text-[10px] font-black uppercase tracking-widest text-emerald-100">Service Type</th>
+                      <th className="px-4 sm:px-6 py-3.5 sm:py-4 text-[10px] font-black uppercase tracking-widest text-emerald-100">Schedule</th>
+                      <th className="px-4 sm:px-6 py-3.5 sm:py-4 text-[10px] font-black uppercase tracking-widest text-emerald-100">Status</th>
+                      <th className="px-4 sm:px-6 py-3.5 sm:py-4 text-[10px] font-black uppercase tracking-widest text-emerald-100 text-right">Action</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {appointments.slice(0, 5).map((app) => (
                       <tr key={app.id} className="group hover:bg-slate-50/80 transition-colors text-slate-700">
-                        <td className="px-6 py-4">
+                        <td className="px-4 sm:px-6 py-3.5 sm:py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 font-black text-xs flex items-center justify-center border border-emerald-200/50">
+                            <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 font-black text-xs flex items-center justify-center border border-emerald-200/50 shrink-0">
                               {app.student.charAt(0).toUpperCase()}
                             </div>
                             <span className="font-black text-sm text-slate-900">{app.student}</span>
                           </div>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-4 sm:px-6 py-3.5 sm:py-4">
                           <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
                             app.level === 'College' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' : 'bg-amber-50 text-amber-700 border-amber-100'
                           }`}>
                             {app.level}
                           </span>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-4 sm:px-6 py-3.5 sm:py-4">
                           <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border inline-flex items-center gap-1.5 ${
                             app.type === 'Counseling' ? 'bg-blue-50 text-blue-700 border-blue-100' : 
                             app.type === 'Assessment' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
@@ -215,17 +215,17 @@ const StaffDashboard = () => {
                             {app.type}
                           </span>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-4 sm:px-6 py-3.5 sm:py-4">
                           <p className="font-black text-xs text-slate-800">{app.time}</p>
                           <p className="text-[10px] text-slate-400 font-bold">{app.date}</p>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-4 sm:px-6 py-3.5 sm:py-4">
                           <div className="flex items-center gap-2">
                             <div className={`w-2 h-2 rounded-full ${app.status === 'Approved' ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'}`}></div>
                             <span className="font-black text-xs text-slate-700">{app.status}</span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-right">
+                        <td className="px-4 sm:px-6 py-3.5 sm:py-4 text-right">
                           <div className="flex items-center justify-end gap-1.5">
                             <button 
                               title="Approve appointment"
@@ -260,7 +260,7 @@ const StaffDashboard = () => {
           </div>
 
           {/* Footer banner */}
-          <div className="px-6 py-3.5 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-500">
+          <div className="px-4 sm:px-6 py-3.5 bg-slate-50/80 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs font-bold text-slate-500">
             <span>Showing {Math.min(appointments.length, 5)} of {appointments.length} total entries</span>
             <button 
               onClick={() => setShowAppointmentsModal(true)}
@@ -273,9 +273,9 @@ const StaffDashboard = () => {
 
         {/* Sidebar Info / Notifications */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="bg-emerald-900 rounded-2xl p-8 text-white relative overflow-hidden shadow-xl shadow-emerald-900/20 border border-emerald-800">
+          <div className="bg-emerald-900 rounded-2xl p-5 sm:p-6 lg:p-8 text-white relative overflow-hidden shadow-xl shadow-emerald-900/20 border border-emerald-800">
             <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-400/20 rounded-full blur-3xl"></div>
-            <h3 className="text-xl font-black mb-8 relative z-10 flex items-center gap-2">
+            <h3 className="text-xl font-black mb-6 sm:mb-8 relative z-10 flex items-center gap-2">
               <Sparkles size={20} className="text-emerald-400" />
               User Distribution
             </h3>
@@ -302,7 +302,7 @@ const StaffDashboard = () => {
           </div>
 
           {/* Staff Blog Posts Analytics */}
-          <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200/80 shadow-sm space-y-6">
+          <div className="bg-white rounded-2xl p-5 sm:p-6 lg:p-8 border border-slate-200/80 shadow-sm space-y-6">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center font-black shadow-xs shrink-0">
                 <Newspaper size={20} />
@@ -409,19 +409,19 @@ const StaffDashboard = () => {
                 onClick={(e) => e.stopPropagation()}
               >
               {/* Modal Header */}
-              <div className="px-6 sm:px-8 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
-                <div className="flex items-center gap-3.5">
-                  <div className="w-11 h-11 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-md shadow-emerald-900/20 shrink-0">
-                    <Calendar size={22} />
+              <div className="px-4 sm:px-8 py-4 sm:py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 sm:w-11 h-10 sm:h-11 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-md shadow-emerald-900/20 shrink-0">
+                    <Calendar size={20} />
                   </div>
                   <div>
                     <div className="flex items-center gap-2.5 flex-wrap">
-                      <h3 className="text-xl font-black text-slate-900 tracking-tight">Recent Appointments</h3>
-                      <span className="px-3 py-0.5 rounded-full text-xs font-black bg-emerald-50 text-emerald-700 border border-emerald-100">
+                      <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">Recent Appointments</h3>
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-black bg-emerald-50 text-emerald-700 border border-emerald-100">
                         {appointments.length} Records
                       </span>
                     </div>
-                    <p className="text-xs text-slate-500 font-bold mt-0.5">Real-time log of student bookings, counseling requests, and evaluations.</p>
+                    <p className="text-[11px] sm:text-xs text-slate-500 font-bold mt-0.5">Real-time log of student bookings, counseling requests, and evaluations.</p>
                   </div>
                 </div>
                 <button
@@ -433,7 +433,7 @@ const StaffDashboard = () => {
               </div>
 
               {/* Controls Bar */}
-              <div className="px-6 sm:px-8 py-4 border-b border-slate-100 bg-white flex flex-col lg:flex-row gap-3 sm:gap-4 items-stretch lg:items-center justify-between shrink-0">
+              <div className="px-4 sm:px-8 py-3 sm:py-4 border-b border-slate-100 bg-white flex flex-col lg:flex-row gap-3 sm:gap-4 items-stretch lg:items-center justify-between shrink-0">
                 {/* Search Input */}
                 <div className="relative flex-1">
                   <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -493,7 +493,7 @@ const StaffDashboard = () => {
               </div>
 
               {/* Logs Content List (Scrollable Area) */}
-              <div className="flex-1 overflow-y-auto px-6 sm:px-8 py-6 space-y-3 custom-scrollbar min-h-0">
+              <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-4 sm:py-6 space-y-3 custom-scrollbar min-h-0">
                 {filteredModalAppointments.length === 0 ? (
                   <div className="py-20 text-center text-slate-400 flex flex-col items-center gap-3 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
                     <ShieldAlert size={40} className="text-slate-300" />

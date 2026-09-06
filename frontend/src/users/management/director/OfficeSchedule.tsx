@@ -263,12 +263,12 @@ const OfficeSchedule = () => {
 
   const getStatusConfig = (status: OfficeStatus) => {
     switch (status) {
-      case 'open': return { bg: 'bg-emerald-100', text: 'text-emerald-700', label: 'Regular Day', icon: Sun };
-      case 'morning_only': return { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Morning Only', icon: Sunrise };
-      case 'afternoon_only': return { bg: 'bg-orange-100', text: 'text-orange-700', label: 'Afternoon Only', icon: Sunset };
-      case 'closed': return { bg: 'bg-slate-200', text: 'text-slate-700', label: 'Full Closure', icon: Building2 };
-      case 'holiday': return { bg: 'bg-rose-100', text: 'text-rose-700', label: 'Holiday', icon: Palmtree };
-      default: return { bg: 'bg-slate-50', text: 'text-slate-400', label: 'Not Set', icon: Info };
+      case 'open': return { bg: 'bg-emerald-100', text: 'text-emerald-700', label: 'Regular Day', shortLabel: 'Open', icon: Sun };
+      case 'morning_only': return { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Morning Only', shortLabel: 'AM', icon: Sunrise };
+      case 'afternoon_only': return { bg: 'bg-orange-100', text: 'text-orange-700', label: 'Afternoon Only', shortLabel: 'PM', icon: Sunset };
+      case 'closed': return { bg: 'bg-slate-200', text: 'text-slate-700', label: 'Full Closure', shortLabel: 'Closed', icon: Building2 };
+      case 'holiday': return { bg: 'bg-rose-100', text: 'text-rose-700', label: 'Holiday', shortLabel: 'Holiday', icon: Palmtree };
+      default: return { bg: 'bg-slate-50', text: 'text-slate-400', label: 'Not Set', shortLabel: 'None', icon: Info };
     }
   };
 
@@ -278,7 +278,7 @@ const OfficeSchedule = () => {
     const days = [];
 
     for (let i = 0; i < firstDay; i++) {
-      days.push(<div key={`empty-${i}`} className="h-24 md:h-32 border border-slate-100 bg-slate-50/30"></div>);
+      days.push(<div key={`empty-${i}`} className="h-16 sm:h-24 md:h-32 border border-slate-100 bg-slate-50/30"></div>);
     }
 
     for (let d = 1; d <= totalDays; d++) {
@@ -300,7 +300,7 @@ const OfficeSchedule = () => {
           onClick={() => !weekend && !isPastDate && setSelectedDate(date)}
           disabled={weekend || isPastDate}
           title={weekend ? 'Weekend (Closed)' : isPastDate ? 'Past Date' : `Click to configure ${formatDate(date)}`}
-          className={`h-24 md:h-32 border border-slate-100 p-3 text-left transition-all duration-200 relative overflow-hidden group ${
+          className={`h-16 sm:h-24 md:h-32 border border-slate-100 p-1 sm:p-2.5 md:p-3 text-left transition-all duration-200 relative overflow-hidden flex flex-col justify-between group ${
             weekend || isPastDate
               ? 'bg-slate-50/70 cursor-not-allowed opacity-40'
               : isPastDeadline
@@ -310,26 +310,42 @@ const OfficeSchedule = () => {
                   : 'bg-white hover:bg-emerald-50/40 hover:border-emerald-400 hover:shadow-xl hover:scale-[1.03] hover:z-10 cursor-pointer'
           }`}
         >
-          <div className="flex justify-between items-start mb-1">
-            <span className={`text-sm font-black transition-colors ${weekend || isPastDate ? 'text-slate-300' : isPastDeadline ? 'text-slate-400' : isSelected ? 'text-emerald-700' : isToday ? 'text-emerald-600 underline decoration-2 underline-offset-4' : 'text-slate-600 group-hover:text-emerald-700'
+          <div className="flex justify-between items-start w-full">
+            <span className={`text-xs sm:text-sm font-black transition-colors ${weekend || isPastDate ? 'text-slate-300' : isPastDeadline ? 'text-slate-400' : isSelected ? 'text-emerald-700' : isToday ? 'text-emerald-600 underline decoration-2 underline-offset-4' : 'text-slate-600 group-hover:text-emerald-700'
               }`}>
               {d}
             </span>
             {!weekend && !isPastDate && (
-              <div className="flex flex-col items-end gap-1">
-                <div className={`p-1 rounded-md ${statusInfo.bg} ${statusInfo.text} group-hover:scale-110 transition-transform`}>
-                  <StatusIcon size={12} strokeWidth={3} />
+              <div className="flex flex-col items-end gap-0.5 sm:gap-1">
+                <div className={`p-0.5 sm:p-1 rounded-md ${statusInfo.bg} ${statusInfo.text} group-hover:scale-110 transition-transform`}>
+                  <StatusIcon size={10} strokeWidth={2.5} className="sm:hidden" />
+                  <StatusIcon size={12} strokeWidth={3} className="hidden sm:block" />
                 </div>
                 {isPastDeadline && (
-                  <div className="bg-slate-200 text-slate-500 p-1 rounded-md" title="Past Booking Deadline">
-                    <CalendarCheck size={12} strokeWidth={3} />
+                  <div className="bg-slate-200 text-slate-500 p-0.5 sm:p-1 rounded-md" title="Past Booking Deadline">
+                    <CalendarCheck size={10} strokeWidth={2.5} className="sm:hidden" />
+                    <CalendarCheck size={12} strokeWidth={3} className="hidden sm:block" />
                   </div>
                 )}
               </div>
             )}
           </div>
 
-          <div className="space-y-1 mt-auto">
+          {/* Mobile compact indicator (prevents cell text from overlapping phone boundaries) */}
+          <div className="sm:hidden w-full mt-auto">
+            {isPastDeadline ? (
+              <div className="text-[7px] font-black uppercase tracking-tighter text-slate-400 bg-slate-100 px-0.5 py-0.5 rounded text-center truncate">
+                Closed
+              </div>
+            ) : !weekend ? (
+              <div className={`text-[7px] font-black uppercase tracking-tighter ${statusInfo.bg} ${statusInfo.text} px-0.5 py-0.5 rounded text-center truncate`}>
+                {statusInfo.shortLabel}
+              </div>
+            ) : null}
+          </div>
+
+          {/* Tablet/Desktop full indicator and time slots */}
+          <div className="hidden sm:block space-y-1 mt-auto">
             {isPastDeadline ? (
               <div className="text-[8px] font-black uppercase tracking-tight text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-sm inline-block">
                 No Booking
@@ -377,23 +393,72 @@ const OfficeSchedule = () => {
 
       <div className="grid xl:grid-cols-12 gap-8">
         <div className="xl:col-span-8 space-y-6">
-          <div className="bg-white rounded-lg border border-slate-200 shadow-2xl shadow-slate-200/50 overflow-hidden">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-2xl shadow-slate-200/50 overflow-hidden w-full">
+            {/* Quick Month Navigation Header inside calendar */}
+            <div className="px-3 sm:px-6 py-2.5 sm:py-3.5 bg-slate-50/90 border-b border-slate-200 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CalendarIcon size={16} className="text-emerald-600 shrink-0" />
+                <span className="font-black text-slate-800 text-xs sm:text-base">
+                  {currentDate.toLocaleDateString('default', { month: 'long', year: 'numeric' })}
+                </span>
+              </div>
+              <div className="flex items-center gap-1 sm:gap-1.5">
+                <button
+                  onClick={() => changeMonth(-1)}
+                  disabled={currentDate.getFullYear() <= new Date().getFullYear() && currentDate.getMonth() <= new Date().getMonth()}
+                  className="p-1 sm:p-1.5 hover:bg-slate-200 rounded-lg text-slate-600 transition-all disabled:opacity-30"
+                  title="Previous Month"
+                >
+                  <ChevronLeft size={16} className="sm:w-[18px] sm:h-[18px]" />
+                </button>
+                <button
+                  onClick={() => {
+                    const today = new Date();
+                    setCurrentDate(today);
+                    setSelectedDate(today);
+                  }}
+                  className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-100/70 hover:bg-emerald-200 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md transition-all"
+                >
+                  Today
+                </button>
+                <button
+                  onClick={() => changeMonth(1)}
+                  disabled={currentDate.getFullYear() >= 2040 && currentDate.getMonth() >= 11}
+                  className="p-1 sm:p-1.5 hover:bg-slate-200 rounded-lg text-slate-600 transition-all disabled:opacity-30"
+                  title="Next Month"
+                >
+                  <ChevronRight size={16} className="sm:w-[18px] sm:h-[18px]" />
+                </button>
+              </div>
+            </div>
+
             <div className="grid grid-cols-7 bg-slate-900 text-white">
-              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                <div key={day} className="py-5 text-center text-[10px] font-black uppercase tracking-[0.2em] opacity-50">{day}</div>
+              {[
+                { full: 'Sun', short: 'S' },
+                { full: 'Mon', short: 'M' },
+                { full: 'Tue', short: 'T' },
+                { full: 'Wed', short: 'W' },
+                { full: 'Thu', short: 'T' },
+                { full: 'Fri', short: 'F' },
+                { full: 'Sat', short: 'S' }
+              ].map(day => (
+                <div key={day.full} className="py-2.5 sm:py-4 text-center text-[10px] font-black uppercase tracking-wider sm:tracking-[0.2em] opacity-60">
+                  <span className="hidden sm:inline">{day.full}</span>
+                  <span className="sm:hidden">{day.short}</span>
+                </div>
               ))}
             </div>
             <div className="grid grid-cols-7">{renderCalendar()}</div>
           </div>
 
-          <div className="bg-white p-8 rounded-lg border border-slate-200 shadow-sm flex flex-wrap gap-8 items-center">
+          <div className="bg-white p-4 sm:p-6 lg:p-8 rounded-lg border border-slate-200 shadow-sm flex flex-wrap gap-4 sm:gap-8 items-center">
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest w-full">Global Indicators</p>
             {(['morning_only', 'afternoon_only', 'closed', 'holiday'] as OfficeStatus[]).map(s => {
               const info = getStatusConfig(s);
               return (
-                <div key={s} className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-xl ${info.bg} ${info.text} flex items-center justify-center shadow-sm`}><info.icon size={18} /></div>
-                  <span className="text-xs font-black text-slate-700 uppercase tracking-wider">{info.label}</span>
+                <div key={s} className="flex items-center gap-2 sm:gap-3">
+                  <div className={`w-8 sm:w-10 h-8 sm:h-10 rounded-xl ${info.bg} ${info.text} flex items-center justify-center shadow-sm shrink-0`}><info.icon size={16} /></div>
+                  <span className="text-[11px] sm:text-xs font-black text-slate-700 uppercase tracking-wider">{info.label}</span>
                 </div>
               )
             })}
@@ -523,13 +588,6 @@ const OfficeSchedule = () => {
               <p className="mt-4 text-[9px] font-bold text-slate-400 uppercase tracking-wider leading-relaxed">
                 All booking slots beyond this date will be automatically disabled globally.
               </p>
-              <button 
-                onClick={handleSaveChanges}
-                disabled={saving}
-                className="mt-3 w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[10px] uppercase tracking-wider rounded-xl transition-all shadow-md disabled:opacity-50"
-              >
-                {saving ? 'Saving Deadline...' : 'Save Global Deadline'}
-              </button>
             </div>
           </div>
 
@@ -540,15 +598,15 @@ const OfficeSchedule = () => {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                className="bg-white rounded-lg border border-slate-200 p-8 pb-10 shadow-2xl shadow-slate-200/60 flex flex-col h-fit relative overflow-hidden"
+                className="bg-white rounded-lg border border-slate-200 p-4 sm:p-6 lg:p-8 pb-8 sm:pb-10 shadow-2xl shadow-slate-200/60 flex flex-col h-fit relative overflow-hidden"
               >
                 <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-50/50 rounded-full -mr-32 -mt-32 z-0"></div>
-                <div className="relative z-10 space-y-8">
-                  <div className="flex items-center gap-5">
-                    <div className="w-16 h-16 bg-emerald-900 text-white rounded-[1.25rem] flex items-center justify-center shadow-xl"><CalendarIcon size={32} /></div>
+                <div className="relative z-10 space-y-6 sm:space-y-8">
+                  <div className="flex items-center gap-4 sm:gap-5">
+                    <div className="w-12 sm:w-16 h-12 sm:h-16 bg-emerald-900 text-white rounded-xl sm:rounded-[1.25rem] flex items-center justify-center shadow-xl shrink-0"><CalendarIcon size={24} className="sm:w-8 sm:h-8" /></div>
                     <div>
-                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Configuration for</p>
-                      <h4 className="text-2xl font-black text-slate-900">{selectedDate.toLocaleDateString('default', { month: 'long', day: 'numeric', year: 'numeric' })}</h4>
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-0.5 sm:mb-1">Configuration for</p>
+                      <h4 className="text-xl sm:text-2xl font-black text-slate-900">{selectedDate.toLocaleDateString('default', { month: 'long', day: 'numeric', year: 'numeric' })}</h4>
                     </div>
                   </div>
 

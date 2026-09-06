@@ -931,18 +931,18 @@ return (
     </div>
 
     {/* Tabs Navigation */}
-    <div className="flex flex-wrap gap-2 p-2 bg-slate-100/50 rounded-lg border border-slate-200/60 backdrop-blur-sm">
+    <div className="flex flex-wrap gap-1.5 sm:gap-2 p-1.5 sm:p-2 bg-slate-100/50 rounded-lg border border-slate-200/60 backdrop-blur-sm">
       {sections.map((section) => (
         <button
           key={section.id}
           onClick={() => setActiveSection(section.id)}
-          className={`flex items-center gap-3 px-6 py-4 rounded-lg font-black transition-all duration-300 ${activeSection === section.id
+          className={`flex items-center gap-2 sm:gap-3 px-3.5 sm:px-6 py-2.5 sm:py-4 rounded-lg font-black transition-all duration-300 ${activeSection === section.id
             ? 'bg-white text-teal-600 shadow-lg shadow-slate-200/50 scale-[1.02]'
             : 'text-slate-400 hover:text-slate-600 hover:bg-white/50'
             }`}
         >
-          <section.icon size={20} className={activeSection === section.id ? 'text-teal-500' : ''} />
-          <span className="text-sm tracking-tight">{section.title}</span>
+          <section.icon size={18} className={activeSection === section.id ? 'text-teal-500 shrink-0' : 'shrink-0'} />
+          <span className="text-xs sm:text-sm tracking-tight">{section.title}</span>
           {activeSection === section.id && (
             <motion.div
               layoutId="activeTab"
@@ -959,19 +959,19 @@ return (
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
+          className="bg-white p-4 sm:p-6 lg:p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
         >
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div className="flex items-center gap-3">
-              <div className="w-2 h-8 bg-teal-500 rounded-full"></div>
-              <h3 className="text-2xl font-black text-slate-800">Home Page Editor</h3>
+              <div className="w-2 h-8 bg-teal-500 rounded-full shrink-0"></div>
+              <h3 className="text-xl sm:text-2xl font-black text-slate-800">Home Page Editor</h3>
               {hasChanges('home') ? (
                 <span className="px-3 py-1 bg-amber-100 text-amber-600 text-[10px] font-black rounded-full animate-pulse uppercase tracking-widest">Unsaved Changes</span>
               ) : (
                 <span className="px-3 py-1 bg-emerald-100 text-emerald-600 text-[10px] font-black rounded-full uppercase tracking-widest">Synced with DB</span>
               )}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
               <button
                 onClick={() => discardSection('home')}
                 className="px-6 py-3 bg-slate-100 text-slate-500 rounded-lg font-black text-sm hover:bg-slate-200 transition-all"
@@ -1301,14 +1301,14 @@ return (
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
+          className="bg-white p-4 sm:p-6 lg:p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
         >
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div className="flex items-center gap-3">
-              <div className="w-2 h-8 bg-teal-500 rounded-full"></div>
-              <h3 className="text-2xl font-black text-slate-800">About Us Editor</h3>
+              <div className="w-2 h-8 bg-teal-500 rounded-full shrink-0"></div>
+              <h3 className="text-xl sm:text-2xl font-black text-slate-800">About Us Editor</h3>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
               <button
                 onClick={() => discardSection('about')}
                 className="px-6 py-3 bg-slate-100 text-slate-500 rounded-lg font-black text-sm hover:bg-slate-200 transition-all"
@@ -1490,14 +1490,14 @@ return (
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
+          className="bg-white p-4 sm:p-6 lg:p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
         >
-           <div className="flex items-center justify-between mb-8">
+           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div className="flex items-center gap-3">
-              <div className="w-2 h-8 bg-teal-500 rounded-full"></div>
-              <h3 className="text-2xl font-black text-slate-800">Our Team Editor</h3>
+              <div className="w-2 h-8 bg-teal-500 rounded-full shrink-0"></div>
+              <h3 className="text-xl sm:text-2xl font-black text-slate-800">Our Team Editor</h3>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
               <button
                 onClick={() => processAllTeamImages()}
                 className="px-4 py-3 bg-teal-50 text-teal-600 rounded-lg font-black text-xs hover:bg-teal-100 transition-all border border-teal-200 flex items-center gap-2"
@@ -1855,14 +1855,14 @@ return (
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
+          className="bg-white p-4 sm:p-6 lg:p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
         >
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div className="flex items-center gap-3">
-              <div className="w-2 h-8 bg-teal-500 rounded-full"></div>
-              <h3 className="text-2xl font-black text-slate-800">Contact Info Editor</h3>
+              <div className="w-2 h-8 bg-teal-500 rounded-full shrink-0"></div>
+              <h3 className="text-xl sm:text-2xl font-black text-slate-800">Contact Info Editor</h3>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
               <button
                 onClick={() => discardSection('contact')}
                 className="px-6 py-3 bg-slate-100 text-slate-500 rounded-lg font-black text-sm hover:bg-slate-200 transition-all"
@@ -1991,14 +1991,14 @@ return (
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
+          className="bg-white p-4 sm:p-6 lg:p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
         >
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div className="flex items-center gap-3">
-              <div className="w-2 h-8 bg-teal-500 rounded-full"></div>
-              <h3 className="text-2xl font-black text-slate-800">Privacy Policy Editor</h3>
+              <div className="w-2 h-8 bg-teal-500 rounded-full shrink-0"></div>
+              <h3 className="text-xl sm:text-2xl font-black text-slate-800">Privacy Policy Editor</h3>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto justify-end">
               <button
                 onClick={() => discardSection('privacy')}
                 className="px-6 py-3 bg-slate-100 text-slate-600 rounded-lg font-black text-sm hover:bg-slate-200 transition-all"
@@ -2103,14 +2103,14 @@ return (
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
+          className="bg-white p-4 sm:p-6 lg:p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
         >
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div className="flex items-center gap-3">
-              <div className="w-2 h-8 bg-teal-500 rounded-full"></div>
-              <h3 className="text-2xl font-black text-slate-800">Terms of Service Editor</h3>
+              <div className="w-2 h-8 bg-teal-500 rounded-full shrink-0"></div>
+              <h3 className="text-xl sm:text-2xl font-black text-slate-800">Terms of Service Editor</h3>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto justify-end">
               <button
                 onClick={() => discardSection('terms')}
                 className="px-6 py-3 bg-slate-100 text-slate-600 rounded-lg font-black text-sm hover:bg-slate-200 transition-all"
@@ -2216,14 +2216,14 @@ return (
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
+          className="bg-white p-4 sm:p-6 lg:p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
         >
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div className="flex items-center gap-3">
-              <div className="w-2 h-8 bg-teal-500 rounded-full"></div>
-              <h3 className="text-2xl font-black text-slate-800">System Data Manager</h3>
+              <div className="w-2 h-8 bg-teal-500 rounded-full shrink-0"></div>
+              <h3 className="text-xl sm:text-2xl font-black text-slate-800">System Data Manager</h3>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
               <button
                 onClick={() => discardSection('system')}
                 className="px-6 py-3 bg-slate-100 text-slate-500 rounded-lg font-black text-sm hover:bg-slate-200 transition-all"
@@ -2446,14 +2446,14 @@ return (
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
+          className="bg-white p-4 sm:p-6 lg:p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
         >
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div className="flex items-center gap-3">
-              <div className="w-2 h-8 bg-teal-500 rounded-full"></div>
-              <h3 className="text-2xl font-black text-slate-800">Footer Editor</h3>
+              <div className="w-2 h-8 bg-teal-500 rounded-full shrink-0"></div>
+              <h3 className="text-xl sm:text-2xl font-black text-slate-800">Footer Editor</h3>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
               <button
                 onClick={() => discardSection('footer')}
                 className="px-6 py-3 bg-slate-100 text-slate-500 rounded-lg font-black text-sm hover:bg-slate-200 transition-all"
@@ -2503,14 +2503,14 @@ return (
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
+          className="bg-white p-4 sm:p-6 lg:p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
         >
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div className="flex items-center gap-3">
-              <div className="w-2 h-8 bg-teal-500 rounded-full"></div>
-              <h3 className="text-2xl font-black text-slate-800">System Logos</h3>
+              <div className="w-2 h-8 bg-teal-500 rounded-full shrink-0"></div>
+              <h3 className="text-xl sm:text-2xl font-black text-slate-800">System Logos</h3>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
               <button
                 onClick={() => discardSection('logos')}
                 className="px-6 py-3 bg-slate-100 text-slate-500 rounded-lg font-black text-sm hover:bg-slate-200 transition-all"
@@ -2584,14 +2584,14 @@ return (
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
+          className="bg-white p-4 sm:p-6 lg:p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
         >
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div className="flex items-center gap-3">
-              <div className="w-2 h-8 bg-teal-500 rounded-full"></div>
-              <h3 className="text-2xl font-black text-slate-800">Counseling Service</h3>
+              <div className="w-2 h-8 bg-teal-500 rounded-full shrink-0"></div>
+              <h3 className="text-xl sm:text-2xl font-black text-slate-800">Counseling Service</h3>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto justify-end">
               <button
                 onClick={() => discardSection('counseling')}
                 className="px-6 py-3 bg-slate-100 text-slate-600 rounded-lg font-black text-sm hover:bg-slate-200 transition-all"
@@ -2816,14 +2816,14 @@ return (
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
+          className="bg-white p-4 sm:p-6 lg:p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
         >
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div className="flex items-center gap-3">
-              <div className="w-2 h-8 bg-teal-500 rounded-full"></div>
-              <h3 className="text-2xl font-black text-slate-800">Assessment Service</h3>
+              <div className="w-2 h-8 bg-teal-500 rounded-full shrink-0"></div>
+              <h3 className="text-xl sm:text-2xl font-black text-slate-800">Assessment Service</h3>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto justify-end">
               <button
                 onClick={() => discardSection('assessment')}
                 className="px-6 py-3 bg-slate-100 text-slate-600 rounded-lg font-black text-sm hover:bg-slate-200 transition-all"
@@ -3120,14 +3120,14 @@ return (
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="bg-white p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
+          className="bg-white p-4 sm:p-6 lg:p-10 rounded-lg shadow-xl shadow-slate-200/50 border border-slate-100"
         >
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div className="flex items-center gap-3">
-              <div className="w-2 h-8 bg-teal-500 rounded-full"></div>
-              <h3 className="text-2xl font-black text-slate-800">Shifting Service</h3>
+              <div className="w-2 h-8 bg-teal-500 rounded-full shrink-0"></div>
+              <h3 className="text-xl sm:text-2xl font-black text-slate-800">Shifting Service</h3>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto justify-end">
               <button
                 onClick={() => discardSection('shifting')}
                 className="px-6 py-3 bg-slate-100 text-slate-600 rounded-lg font-black text-sm hover:bg-slate-200 transition-all"

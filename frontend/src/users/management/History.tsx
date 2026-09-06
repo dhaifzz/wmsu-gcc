@@ -40,7 +40,7 @@ const History = () => {
       animate={{ opacity: 1, y: 0 }}
       className="space-y-8"
     >
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h3 className="text-2xl font-black tracking-tight flex items-center gap-3">
             <Clock className="text-slate-600" size={28} />
@@ -48,16 +48,16 @@ const History = () => {
           </h3>
           <p className="text-slate-500 text-sm font-medium mt-1">Review all completed and cancelled appointments.</p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="relative">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="relative flex-1 sm:flex-initial">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <input 
               type="text" 
               placeholder="Search history..." 
-              className="bg-white border border-slate-200 rounded-lg py-2.5 pl-10 pr-4 text-xs font-bold w-64 focus:ring-2 focus:ring-slate-500 transition-all outline-none"
+              className="bg-white border border-slate-200 rounded-lg py-2.5 pl-10 pr-4 text-xs font-bold w-full sm:w-64 focus:ring-2 focus:ring-slate-500 transition-all outline-none"
             />
           </div>
-          <button className="p-2.5 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50">
+          <button className="p-2.5 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 shrink-0">
             <Filter size={18} />
           </button>
         </div>
@@ -68,26 +68,26 @@ const History = () => {
           <table className="w-full text-left">
             <thead>
               <tr className={theme.bg900}>
-                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-white">Student Name</th>
-                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-white">Level</th>
-                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-white">Service Type</th>
-                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-white">Date</th>
-                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-white">Status</th>
-                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-white text-right">Details</th>
+                <th className="px-4 sm:px-6 lg:px-8 py-3.5 sm:py-4 text-[10px] font-black uppercase tracking-widest text-white whitespace-nowrap">Student Name</th>
+                <th className="px-4 sm:px-6 lg:px-8 py-3.5 sm:py-4 text-[10px] font-black uppercase tracking-widest text-white whitespace-nowrap">Level</th>
+                <th className="px-4 sm:px-6 lg:px-8 py-3.5 sm:py-4 text-[10px] font-black uppercase tracking-widest text-white whitespace-nowrap">Service Type</th>
+                <th className="px-4 sm:px-6 lg:px-8 py-3.5 sm:py-4 text-[10px] font-black uppercase tracking-widest text-white whitespace-nowrap">Date</th>
+                <th className="px-4 sm:px-6 lg:px-8 py-3.5 sm:py-4 text-[10px] font-black uppercase tracking-widest text-white whitespace-nowrap">Status</th>
+                <th className="px-4 sm:px-6 lg:px-8 py-3.5 sm:py-4 text-[10px] font-black uppercase tracking-widest text-white text-right whitespace-nowrap">Details</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
               {historyItems.length > 0 ? historyItems.map((item) => (
                 <tr key={item.id} className="group hover:bg-slate-50/50 transition-colors">
-                  <td className="px-8 py-6 font-bold text-sm text-slate-900">{item.student}</td>
-                  <td className="px-8 py-6">
+                  <td className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 font-bold text-sm text-slate-900 whitespace-nowrap">{item.student}</td>
+                  <td className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 whitespace-nowrap">
                     <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
                       item.level === 'College' ? 'bg-indigo-50 text-indigo-600 border-indigo-100' : 'bg-orange-50 text-orange-600 border-orange-100'
                     }`}>
                       {item.level}
                     </span>
                   </td>
-                  <td className="px-8 py-6">
+                  <td className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 whitespace-nowrap">
                     <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${
                       item.type === 'Counseling' ? 'bg-blue-50 text-blue-600 border-blue-100' : 
                       item.type === 'Assessment' ? `${theme.bg50} ${theme.text600} ${theme.border200}` :
@@ -96,13 +96,13 @@ const History = () => {
                       {item.type}
                     </span>
                   </td>
-                  <td className="px-8 py-6">
+                  <td className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 whitespace-nowrap">
                     <div className="flex items-center gap-2 text-slate-500">
                       <CalendarIcon size={14} />
                       <span className="text-sm font-bold">{item.date}</span>
                     </div>
                   </td>
-                  <td className="px-8 py-6">
+                  <td className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       {item.status === 'Completed' ? (
                         <CheckCircle2 size={16} className={theme.text600} />
@@ -114,13 +114,13 @@ const History = () => {
                       </span>
                     </div>
                   </td>
-                  <td className="px-8 py-6 text-right">
+                  <td className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 text-right whitespace-nowrap">
                     <button className={`${theme.text600} text-[10px] font-black uppercase tracking-widest hover:underline`}>View Receipt</button>
                   </td>
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan={6} className="px-8 py-12 text-center text-slate-500 font-bold">
+                  <td colSpan={6} className="px-4 sm:px-6 lg:px-8 py-12 text-center text-slate-500 font-bold">
                     No history records found.
                   </td>
                 </tr>

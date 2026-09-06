@@ -15,15 +15,17 @@ import ClientProfile from '../../ClientProfile';
 import Counseling from '../Counseling';
 import Loader from '../../../components/loader/Loader';
 import { useAuth } from '../../../auth/AuthContext';
-import { cmsApi } from '../../../lib/api';
+import { appointmentApi, cmsApi } from '../../../lib/api';
 import assessmentImg from '../../../assets/img/assessment-img.png';
 import counselingImg from '../../../assets/img/counseling-img.png';
 import shiftingImg from '../../../assets/img/shifting-img.png';
+
 const OutsideClientDashboard = () => {
-  const { user: authUser } = useAuth();
+  const { user: authUser, accessToken } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
   const [activeService, setActiveService] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [pendingCount, setPendingCount] = useState(0);
   const [cmsFeatures, setCmsFeatures] = useState<any[]>([]);
 
   useEffect(() => {
@@ -41,6 +43,24 @@ const OutsideClientDashboard = () => {
   }, []);
 
   useEffect(() => {
+    const fetchPendingCount = async () => {
+      if (!accessToken) return;
+      try {
+        const res = await appointmentApi.getAppointmentHistory(accessToken);
+        if (res.ok && res.data.history) {
+          const pending = res.data.history.filter((item: any) => 
+            item.status.toLowerCase().includes('pending')
+          ).length;
+          setPendingCount(pending);
+        }
+      } catch (err) {
+        console.error("Failed to fetch pending count", err);
+      }
+    };
+    fetchPendingCount();
+  }, [accessToken]);
+
+  useEffect(() => {
     // Simulate real data fetching
     const timer = setTimeout(() => {
       setIsLoading(false);
@@ -50,7 +70,7 @@ const OutsideClientDashboard = () => {
 
   // Map authUser to the structure expected by the dashboard and Profile component
   const user = {
-    name: authUser ? `${authUser.firstName} ${authUser.lastName}` : "User",
+    name: authUser?.firstName ? `${authUser.firstName} ${authUser.lastName || ''}`.trim() : (authUser?.email?.split('@')[0] || "User"),
     type: "outside",
     educationLevel: "Outside Client",
     email: authUser?.email || "",
@@ -63,7 +83,9 @@ const OutsideClientDashboard = () => {
     street: authUser?.street || "N/A"
   };
 
-
+  const displayName = authUser?.firstName?.trim().split(' ')[0] 
+    || (user.name !== 'User' ? user.name.split(' ')[0] : '') 
+    || (authUser?.email ? authUser.email.split('@')[0] : 'User');
 
   return (
     <div className="min-h-screen bg-[#f8fafc] flex flex-col font-sans text-slate-900">
@@ -92,7 +114,7 @@ const OutsideClientDashboard = () => {
                     <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600">Client Portal</span>
                   </div>
-                  <h3 className="text-4xl font-black tracking-tight">Good day, {user.name.split(', ')[1]}!</h3>
+                  <h3 className="text-4xl font-black tracking-tight">Good day, <span className="text-emerald-600">{displayName}</span>!</h3>
                   <p className="text-slate-500 text-sm font-medium mt-1">Here's what's happening with your portal today.</p>
                 </div>
 
@@ -103,7 +125,7 @@ const OutsideClientDashboard = () => {
                       <Calendar size={24} />
                     </div>
                     <p className="text-slate-500 text-xs font-black uppercase tracking-widest mb-1">Appointments</p>
-                    <p className="text-xl font-black">0 Pending</p>
+                    <p className="text-xl font-black">{pendingCount} Pending</p>
                   </div>
                   <div className="bg-white p-6 rounded-lg border border-slate-100 shadow-sm transition-all hover:shadow-md">
                     <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mb-4">

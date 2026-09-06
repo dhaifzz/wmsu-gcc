@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { 
-  Clock, 
+import {
+  Clock,
   LayoutDashboard,
   MessageCircle,
   ClipboardCheck,
@@ -16,7 +16,7 @@ import StaffOverview from './StaffOverview';
 import CounselingAppointments from '../Appointment/CounselingAppointments';
 import AssessmentAppointments from '../Appointment/AssessmentAppointments';
 import ShiftingAppointments from '../Appointment/ShiftingAppointments';
-import History from '../History'; 
+import History from '../History';
 import BlogPosting from '../blog-posting';
 import { useAuth } from '../../../auth/AuthContext';
 
@@ -43,7 +43,7 @@ const StaffDashboardLayout = () => {
 
   return (
     <div className="min-h-screen bg-[#f1f5f9] flex font-sans text-slate-900">
-      <ManagementSidebar 
+      <ManagementSidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         userName={staff.name}
@@ -53,13 +53,18 @@ const StaffDashboardLayout = () => {
         links={navLinks}
       />
 
-      <main className="flex-1 relative h-screen overflow-y-auto">
-        <ManagementNavbar 
+      <main className="flex-1 relative h-screen overflow-y-auto overflow-x-hidden">
+        <ManagementNavbar
           userName={staff.name}
-          onMenuClick={() => setIsSidebarOpen(true)}
+          userType={staff.role}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          links={navLinks}
+          isSidebarOpen={isSidebarOpen}
+          onMenuClick={() => setIsSidebarOpen(prev => !prev)}
         />
 
-        <div className="p-6 lg:p-10 max-w-7xl mx-auto">
+        <div className="p-4 sm:p-6 lg:p-10 max-w-7xl mx-auto w-full">
           <AnimatePresence mode="wait">
             {activeTab === 'dashboard' && role === 'staff' && (
               <StaffOverview key="staff-dashboard" />

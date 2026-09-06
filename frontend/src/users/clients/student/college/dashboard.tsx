@@ -85,7 +85,7 @@ const CollegeDashboard = () => {
 
   // Map authUser to the structure expected by the dashboard and Profile component
   const user = {
-    name: authUser ? `${authUser.firstName} ${authUser.lastName}` : "User",
+    name: authUser?.firstName ? `${authUser.firstName} ${authUser.lastName || ''}`.trim() : (authUser?.email?.split('@')[0] || "User"),
     type: "college",
     educationLevel: authUser?.educationLevel || "College Student",
     email: authUser?.email || "",
@@ -98,7 +98,9 @@ const CollegeDashboard = () => {
     street: authUser?.street || "N/A"
   };
 
-
+  const displayName = authUser?.firstName?.trim().split(' ')[0] 
+    || (user.name !== 'User' ? user.name.split(' ')[0] : '') 
+    || (authUser?.email ? authUser.email.split('@')[0] : 'User');
 
   return (
     <div className="min-h-screen bg-[#f8fafc] flex flex-col font-sans text-slate-900">
@@ -126,7 +128,7 @@ const CollegeDashboard = () => {
                     <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600">Student Portal</span>
                   </div>
-                  <h3 className="text-4xl font-black tracking-tight">Good day, {user.name.split(' ')[0]}!</h3>
+                  <h3 className="text-4xl font-black tracking-tight">Good day, <span className="text-emerald-600">{displayName}</span>!</h3>
                   <p className="text-slate-500 text-sm font-medium mt-1">Here's what's happening with your portal today.</p>
                 </div>
 

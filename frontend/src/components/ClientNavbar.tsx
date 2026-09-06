@@ -115,9 +115,9 @@ const ClientNavbar = ({ activeTab, setActiveTab }: ClientNavbarProps) => {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 md:gap-6 ml-2">
+      <div className="flex items-center gap-2 md:gap-6 ml-2 relative">
         {/* Actions - Bell moved before the two nav buttons */}
-        <div className="flex items-center relative">
+        <div className="flex items-center">
           <button 
             onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
             className={`w-10 h-10 rounded-full flex items-center justify-center transition-all relative group shadow-sm border ${
@@ -133,97 +133,6 @@ const ClientNavbar = ({ activeTab, setActiveTab }: ClientNavbarProps) => {
               </span>
             )}
           </button>
-
-          <AnimatePresence>
-            {isNotificationsOpen && (
-              <>
-                {/* Backdrop to close on click outside */}
-                <div 
-                  className="fixed inset-0 z-40" 
-                  onClick={() => setIsNotificationsOpen(false)}
-                />
-                
-                <motion.div
-                  initial={{ opacity: 0, y: 15, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 15, scale: 0.95 }}
-                  transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-                  className="absolute right-0 top-full mt-4 w-[calc(100vw-2rem)] sm:w-[380px] max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-[100] origin-top-right"
-                >
-                  <div className="p-5 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center">
-                        <Bell size={16} />
-                      </div>
-                      <h3 className="font-black text-slate-900 tracking-tight">Notifications</h3>
-                    </div>
-                    {unreadCount > 0 && (
-                      <button 
-                        onClick={markAllAsRead}
-                        className="text-[10px] font-black uppercase tracking-widest text-emerald-600 hover:text-emerald-700 transition-colors bg-white px-3 py-1.5 rounded-full border border-emerald-100 shadow-sm"
-                      >
-                        Mark all as read
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="max-h-[420px] overflow-y-auto scrollbar-hide py-2">
-                    {notifications.length > 0 ? (
-                      <div className="divide-y divide-slate-50">
-                        {notifications.map((notif) => (
-                          <button
-                            key={notif.id}
-                            onClick={() => markAsRead(notif.id)}
-                            className={`w-full p-4 text-left hover:bg-slate-50 transition-all flex gap-4 group relative ${!notif.is_read ? 'bg-emerald-50/30' : ''}`}
-                          >
-                            <div className={`w-10 h-10 rounded-xl shrink-0 flex items-center justify-center transition-colors ${
-                              notif.type === 'status_change' ? 'bg-emerald-100 text-emerald-600' :
-                              notif.type === 'exam_reminder' ? 'bg-amber-100 text-amber-600' :
-                              'bg-slate-100 text-slate-600'
-                            }`}>
-                              {notif.type === 'status_change' ? <CheckCircle2 size={18} /> :
-                               notif.type === 'exam_reminder' ? <Clock size={18} /> :
-                               <Inbox size={18} />}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between gap-2 mb-1">
-                                <p className={`font-black text-sm truncate ${!notif.is_read ? 'text-slate-900' : 'text-slate-500'}`}>
-                                  {notif.title}
-                                </p>
-                                <span className="text-[10px] font-bold text-slate-400 shrink-0">
-                                  {formatTimeAgo(notif.created_at)}
-                                </span>
-                              </div>
-                              <p className={`text-xs leading-relaxed line-clamp-2 ${!notif.is_read ? 'font-bold text-slate-700' : 'font-medium text-slate-400'}`}>
-                                {notif.message}
-                              </p>
-                            </div>
-                            {!notif.is_read && (
-                              <div className="absolute left-1 top-1/2 -translate-y-1/2 w-1 h-8 bg-emerald-500 rounded-full" />
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="p-12 text-center">
-                        <div className="w-16 h-16 bg-slate-50 text-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <Inbox size={32} />
-                        </div>
-                        <p className="text-sm font-black text-slate-400 tracking-widest">All caught up!</p>
-                        <p className="text-xs text-slate-300 font-medium mt-1">No new notifications to show.</p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="p-4 border-t border-slate-50 bg-slate-50/30">
-                    <button className="w-full py-3 rounded-xl bg-white border border-slate-100 text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-white hover:text-slate-600 hover:border-slate-200 transition-all shadow-sm">
-                      View All Activity
-                    </button>
-                  </div>
-                </motion.div>
-              </>
-            )}
-          </AnimatePresence>
         </div>
 
         <nav className="flex items-center gap-1 md:gap-2 bg-emerald-950/30 p-1 md:p-1.5 rounded-full border border-emerald-800/30 shrink-0">
@@ -267,6 +176,97 @@ const ClientNavbar = ({ activeTab, setActiveTab }: ClientNavbarProps) => {
             {activeTab === 'profile' && <span className="hidden md:block w-1.5 h-1.5 rounded-full bg-emerald-500 ml-2 animate-pulse"></span>}
           </button>
         </nav>
+
+        <AnimatePresence>
+          {isNotificationsOpen && (
+            <>
+              {/* Backdrop to close on click outside */}
+              <div 
+                className="fixed inset-0 z-40 bg-black/20 lg:bg-transparent" 
+                onClick={() => setIsNotificationsOpen(false)}
+              />
+              
+              <motion.div
+                initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 15, scale: 0.95 }}
+                transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+                className="absolute right-0 top-full mt-3 w-[calc(100vw-2.5rem)] sm:w-[320px] md:w-[330px] max-w-[calc(100vw-2.5rem)] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-[100] origin-top-right flex flex-col max-h-[calc(100vh-7rem)] sm:max-h-[380px] md:max-h-[400px]"
+              >
+                <div className="px-4 py-3.5 sm:px-5 sm:py-3.5 border-b border-slate-50 flex items-center justify-between bg-slate-50/50 shrink-0">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center">
+                      <Bell size={16} />
+                    </div>
+                    <h3 className="font-black text-sm text-slate-900 tracking-tight leading-none">Notifications</h3>
+                  </div>
+                  {unreadCount > 0 && (
+                    <button 
+                      onClick={markAllAsRead}
+                      className="text-[9px] font-black uppercase tracking-widest text-emerald-600 hover:text-emerald-700 transition-colors bg-white px-3 py-1.5 rounded-lg border border-emerald-100 shadow-xs active:scale-95"
+                    >
+                      Mark all as read
+                    </button>
+                  )}
+                </div>
+
+                <div className="overflow-y-auto custom-scrollbar py-2 px-2 flex-1 min-h-0 overscroll-contain pr-1">
+                  {notifications.length > 0 ? (
+                    <div className="space-y-1">
+                      {notifications.map((notif) => (
+                        <button
+                          key={notif.id}
+                          onClick={() => markAsRead(notif.id)}
+                          className={`w-full p-2.5 sm:p-3 text-left hover:bg-slate-50 transition-all flex gap-3 rounded-2xl group relative ${!notif.is_read ? 'bg-emerald-50/30' : ''}`}
+                        >
+                          <div className={`w-9 h-9 rounded-xl shrink-0 flex items-center justify-center transition-colors ${
+                            notif.type === 'status_change' ? 'bg-emerald-100 text-emerald-600' :
+                            notif.type === 'exam_reminder' ? 'bg-amber-100 text-amber-600' :
+                            'bg-slate-100 text-slate-600'
+                          }`}>
+                            {notif.type === 'status_change' ? <CheckCircle2 size={16} /> :
+                             notif.type === 'exam_reminder' ? <Clock size={16} /> :
+                             <Inbox size={16} />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-2 mb-0.5">
+                              <p className={`font-black text-xs truncate ${!notif.is_read ? 'text-slate-900' : 'text-slate-500'}`}>
+                                {notif.title}
+                              </p>
+                              <span className="text-[9px] font-bold text-slate-400 shrink-0">
+                                {formatTimeAgo(notif.created_at)}
+                              </span>
+                            </div>
+                            <p className={`text-[11px] leading-relaxed line-clamp-2 break-words ${!notif.is_read ? 'font-bold text-slate-700' : 'font-medium text-slate-400'}`}>
+                              {notif.message}
+                            </p>
+                          </div>
+                          {!notif.is_read && (
+                            <div className="absolute left-1 top-1/2 -translate-y-1/2 w-1 h-6 bg-emerald-500 rounded-full" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="py-8 sm:py-10 text-center">
+                      <div className="w-12 h-12 bg-slate-50 text-slate-200 rounded-2xl flex items-center justify-center mx-auto mb-2.5">
+                        <Inbox size={24} />
+                      </div>
+                      <p className="text-xs font-black text-slate-400 tracking-wider">All caught up!</p>
+                      <p className="text-[10px] text-slate-300 font-medium mt-0.5">No new notifications to show.</p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="p-2.5 sm:p-3 border-t border-slate-50 bg-slate-50/30 shrink-0">
+                  <button className="w-full py-2.5 rounded-xl bg-white border border-slate-100 text-slate-400 text-[10px] font-black uppercase tracking-[0.15em] hover:bg-white hover:text-slate-600 hover:border-slate-200 transition-all shadow-xs">
+                    View All Activity
+                  </button>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
       </div>
     </header>
   );

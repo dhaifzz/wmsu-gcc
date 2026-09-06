@@ -90,19 +90,19 @@ const CounselingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director
             <MessageCircle className="text-blue-500" size={28} />
             {role === 'director' ? 'Counseling Approvals' : 'Counseling Appointments'}
           </h3>
-          <p className="text-slate-500 text-sm font-medium mt-1">
+          <p className="text-slate-500 text-xs sm:text-sm font-medium mt-1">
             {role === 'director' 
               ? 'Review and provide final approval for staff-evaluated counseling requests.' 
               : 'Manage and review student, faculty, and outside client counseling requests.'}
           </p>
         </div>
-        <div className="flex flex-col sm:flex-row items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
           {role === 'director' && appointments.length > 0 && (
-            <div className="flex items-center gap-2 mr-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button 
                 onClick={() => handleBatchAction('approve')}
                 disabled={isProcessingBatch || appointments.length === 0}
-                className={`px-4 py-2.5 ${theme.bg50} ${theme.hoverBg600} ${theme.text600} hover:text-white rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border ${theme.border200} ${theme.hoverBorder600} flex items-center gap-2 shadow-sm disabled:opacity-50`}
+                className={`flex-1 sm:flex-initial justify-center px-4 py-2.5 ${theme.bg50} ${theme.hoverBg600} ${theme.text600} hover:text-white rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border ${theme.border200} ${theme.hoverBorder600} flex items-center gap-2 shadow-sm disabled:opacity-50`}
               >
                 <CheckCircle2 size={14} />
                 Accept All
@@ -110,26 +110,28 @@ const CounselingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director
               <button 
                 onClick={() => handleBatchAction('decline')}
                 disabled={isProcessingBatch || appointments.length === 0}
-                className="px-4 py-2.5 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border border-rose-200 hover:border-rose-600 flex items-center gap-2 shadow-sm disabled:opacity-50"
+                className="flex-1 sm:flex-initial justify-center px-4 py-2.5 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border border-rose-200 hover:border-rose-600 flex items-center gap-2 shadow-sm disabled:opacity-50"
               >
                 <X size={14} />
                 Decline All
               </button>
             </div>
           )}
-          <div className="relative w-full sm:w-auto">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-            <input
-              type="text"
-              placeholder="Search appointments..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-white border border-slate-200 rounded-lg py-2.5 pl-10 pr-4 text-xs font-bold w-64 focus:ring-2 focus:ring-blue-500 transition-all outline-none"
-            />
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="relative flex-1 sm:w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+              <input
+                type="text"
+                placeholder="Search appointments..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="bg-white border border-slate-200 rounded-lg py-2.5 pl-10 pr-4 text-xs font-bold w-full focus:ring-2 focus:ring-blue-500 transition-all outline-none"
+              />
+            </div>
+            <button className="p-2.5 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 shrink-0" title="Filter">
+              <Filter size={18} />
+            </button>
           </div>
-          <button className="p-2.5 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50" title="Filter">
-            <Filter size={18} />
-          </button>
         </div>
       </div>
 
@@ -138,38 +140,38 @@ const CounselingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director
           <table className="w-full text-left">
             <thead>
               <tr className={theme.bg900}>
-                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-white">Requestor Info</th>
+                <th className="px-4 sm:px-6 lg:px-8 py-3.5 sm:py-4 text-[10px] font-black uppercase tracking-widest text-white">Requestor Info</th>
                 {role === 'director' ? (
-                  <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-white">Evaluated By</th>
+                  <th className="px-4 sm:px-6 lg:px-8 py-3.5 sm:py-4 text-[10px] font-black uppercase tracking-widest text-white">Evaluated By</th>
                 ) : (
-                  <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-white">Level / Dept</th>
+                  <th className="px-4 sm:px-6 lg:px-8 py-3.5 sm:py-4 text-[10px] font-black uppercase tracking-widest text-white">Level / Dept</th>
                 )}
-                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-white">Schedule</th>
-                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-white">Status</th>
-                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-white text-right">Actions</th>
+                <th className="px-4 sm:px-6 lg:px-8 py-3.5 sm:py-4 text-[10px] font-black uppercase tracking-widest text-white">Schedule</th>
+                <th className="px-4 sm:px-6 lg:px-8 py-3.5 sm:py-4 text-[10px] font-black uppercase tracking-widest text-white">Status</th>
+                <th className="px-4 sm:px-6 lg:px-8 py-3.5 sm:py-4 text-[10px] font-black uppercase tracking-widest text-white text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-8 py-8 text-center text-slate-500 font-bold text-sm">
+                  <td colSpan={5} className="px-4 sm:px-8 py-8 text-center text-slate-500 font-bold text-sm">
                     Loading appointments...
                   </td>
                 </tr>
               ) : filteredAppointments.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-8 py-8 text-center text-slate-500 font-bold text-sm">
+                  <td colSpan={5} className="px-4 sm:px-8 py-8 text-center text-slate-500 font-bold text-sm">
                     {appointments.length === 0 ? "No appointments found." : "No appointments match your search."}
                   </td>
                 </tr>
               ) : filteredAppointments.map((app) => (
                 <tr key={app.id} className="group hover:bg-slate-50/50 transition-colors">
-                  <td className="px-8 py-6">
+                  <td className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
                     <p className="font-bold text-sm text-slate-900">{app.student}</p>
                     <p className="text-[10px] text-slate-400 font-black tracking-widest uppercase">{app.studentId}</p>
                   </td>
                   {role === 'director' ? (
-                    <td className="px-8 py-6">
+                    <td className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
                       <div className="flex items-center gap-2">
                          <div className={`w-7 h-7 ${theme.bg50} rounded-lg flex items-center justify-center ${theme.text600} border ${theme.border200}`}>
                            <ClipboardCheck size={12} />
@@ -178,7 +180,7 @@ const CounselingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director
                       </div>
                     </td>
                   ) : (
-                    <td className="px-8 py-6">
+                    <td className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
                       <div className="flex flex-col gap-1">
                         <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border w-fit ${app.level === 'College' ? 'bg-indigo-50 text-indigo-600 border-indigo-100' :
                             app.level === 'High School' ? 'bg-orange-50 text-orange-600 border-orange-100' :
@@ -193,20 +195,20 @@ const CounselingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director
                       </div>
                     </td>
                   )}
-                  <td className="px-8 py-6">
+                  <td className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
                     <div className="flex items-center gap-2 text-slate-700">
                       <CalendarIcon size={14} className="text-slate-400" />
                       <p className="text-sm font-bold lowercase">{app.time}</p>
                     </div>
                     <p className="text-[10px] text-slate-400 font-medium ml-6">{app.date}</p>
                   </td>
-                  <td className="px-8 py-6">
+                  <td className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
                     <div className="flex items-center gap-2">
                       <div className={`w-1.5 h-1.5 rounded-full ${app.status === 'Approved' ? theme.bg600.replace('bg-','bg-') : 'bg-amber-500'}`}></div>
                       <span className="font-bold text-xs text-slate-700">{app.status}</span>
                     </div>
                   </td>
-                  <td className="px-8 py-6">
+                  <td className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
                     <div className="flex items-center justify-end gap-3">
                       <button
                         onClick={() => handleEvaluate(app)}

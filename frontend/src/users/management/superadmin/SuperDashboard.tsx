@@ -120,20 +120,20 @@ const Overview = ({ userName, onNavigate }: OverviewProps) => {
       className="space-y-8"
     >
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-2">
             <span className="w-2 h-2 rounded-full bg-teal-500"></span>
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-teal-600">Admin Control Center</span>
           </div>
-          <h3 className="text-4xl font-black tracking-tight">Welcome back, {userName.split(' ')[0]}!</h3>
-          <p className="text-slate-500 text-sm font-medium mt-1">Manage appointments and oversee system activity.</p>
+          <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight">Welcome back, {userName.split(' ')[0]}!</h3>
+          <p className="text-slate-500 text-xs sm:text-sm font-medium mt-1">Manage appointments and oversee system activity.</p>
         </div>
         <button
           onClick={() => setView('book')}
-          className="flex items-center gap-2 px-8 py-4 bg-teal-600 hover:bg-teal-700 text-white font-black rounded-lg transition-all shadow-lg shadow-teal-200 shrink-0"
+          className="flex items-center justify-center gap-2 px-6 py-3.5 sm:px-8 sm:py-4 bg-teal-600 hover:bg-teal-700 text-white font-black rounded-xl transition-all shadow-lg shadow-teal-200 shrink-0 self-start sm:self-auto text-xs sm:text-sm"
         >
-          <Plus size={20} />
+          <Plus size={18} />
           Book Appointment
         </button>
       </div>
@@ -146,11 +146,11 @@ const Overview = ({ userName, onNavigate }: OverviewProps) => {
 
       {/* Quick module nav */}
       <div>
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex items-center gap-3 mb-4 sm:mb-6">
           <LayoutGrid size={20} className="text-slate-400" />
-          <h4 className="text-xl font-black text-slate-800">All Appointment Modules</h4>
+          <h4 className="text-lg sm:text-xl font-black text-slate-800">All Appointment Modules</h4>
         </div>
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {[
             { id: 'counseling', label: 'Counseling', icon: MessageCircle, color: 'bg-blue-500' },
             { id: 'assessment', label: 'Assessment', icon: ClipboardCheck, color: 'bg-teal-500' },
@@ -159,7 +159,7 @@ const Overview = ({ userName, onNavigate }: OverviewProps) => {
             <button
               key={s.id}
               onClick={() => onNavigate(s.id)}
-              className="p-6 bg-white rounded-lg border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 group cursor-pointer transition-all flex items-center gap-4 text-left"
+              className="p-5 sm:p-6 bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 group cursor-pointer transition-all flex items-center gap-4 text-left"
             >
               <div className={`w-12 h-12 ${s.color} text-white rounded-lg flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform shrink-0`}>
                 <s.icon size={22} />

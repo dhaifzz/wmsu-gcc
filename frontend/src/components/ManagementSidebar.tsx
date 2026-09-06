@@ -14,7 +14,7 @@ import { showAlert } from './modal-notification/sweetalert';
 import { cmsApi } from '../lib/api';
 import { useNavigate } from 'react-router-dom';
 
-interface NavLink {
+export interface NavLink {
   id: string;
   label: string;
   icon: any;
@@ -31,7 +31,7 @@ interface ManagementSidebarProps {
   colorScheme?: 'emerald' | 'teal';
 }
 
-const ManagementSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen, onClose, links, colorScheme = 'emerald' }: ManagementSidebarProps) => {
+const ManagementSidebar = ({ activeTab, setActiveTab, userName, userType, onClose, links, colorScheme = 'emerald' }: ManagementSidebarProps) => {
   const { signOut, user } = useAuth();
   const navigate = useNavigate();
   const [logos, setLogos] = useState({
@@ -95,14 +95,7 @@ const ManagementSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen
   const displayLinks = links || defaultLinks;
 
   return (
-    <>
-      {/* Mobile Overlay */}
-      <div
-        className={`fixed inset-0 ${c.overlay} backdrop-blur-sm z-40 transition-opacity lg:hidden ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-        onClick={onClose}
-      ></div>
-
-      <aside className={`fixed lg:sticky top-0 left-0 w-80 ${c.aside} text-white border-r flex flex-col p-6 h-screen z-50 transition-transform lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+    <aside className={`hidden lg:flex sticky top-0 left-0 w-80 ${c.aside} text-white border-r flex-col p-6 h-screen z-50 shrink-0`}>
         {/* Logos & Brand */}
         <div className="flex items-center gap-4 mb-10 px-2">
           <div className="flex -space-x-3">
@@ -154,7 +147,7 @@ const ManagementSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen
                 containerClassName="mt-0.5"
               />
             </div>
-            <button 
+            <button
               onClick={async (e) => {
                 e.stopPropagation();
                 const result = await showAlert.confirm('Logout', 'Are you sure you want to sign out?', 'Logout', 'Stay');
@@ -171,7 +164,6 @@ const ManagementSidebar = ({ activeTab, setActiveTab, userName, userType, isOpen
           </div>
         </div>
       </aside>
-    </>
   );
 };
 

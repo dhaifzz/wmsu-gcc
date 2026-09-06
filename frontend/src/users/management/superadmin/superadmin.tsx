@@ -66,13 +66,19 @@ const SuperAdminDashboard = () => {
         colorScheme="teal"
       />
 
-      <main className="flex-1 relative h-screen overflow-y-auto">
+      <main className="flex-1 relative h-screen overflow-y-auto overflow-x-hidden">
         <ManagementNavbar
           userName={superAdmin.name}
-          onMenuClick={() => setIsSidebarOpen(true)}
+          userType={superAdmin.role}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          links={navLinks}
+          colorScheme="teal"
+          isSidebarOpen={isSidebarOpen}
+          onMenuClick={() => setIsSidebarOpen(prev => !prev)}
         />
 
-        <div className="p-6 lg:p-10 max-w-7xl mx-auto">
+        <div className="p-4 sm:p-6 lg:p-10 max-w-7xl mx-auto w-full">
           <ThemeProvider scheme="teal">
             <AnimatePresence mode="wait">
               {activeTab === 'overview' && (
