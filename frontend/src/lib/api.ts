@@ -525,12 +525,26 @@ export interface MyStatsResponse {
   responseRate: number;
 }
 
+export interface AuditLogItem {
+  id: string;
+  action: string;
+  details: string;
+  category: string;
+  type: 'user' | 'appointment' | 'system' | 'blog';
+  timestamp: string;
+  dateFormatted: string;
+  relativeTime: string;
+}
+
 export const analyticsApi = {
   getAnalyticsDashboardData: (token: string) =>
     api<AnalyticsDashboardResponse>('/api/analytics', { token }),
 
   getMyStats: (token: string) =>
     api<MyStatsResponse>('/api/analytics/my-stats', { token }),
+
+  getAuditLogs: (token: string) =>
+    api<{ auditLogs: AuditLogItem[] }>('/api/analytics/audit-logs', { token }),
 };
 
 // ------------------------------------------

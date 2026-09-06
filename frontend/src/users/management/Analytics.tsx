@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   TrendingUp, 
   Users, 
@@ -14,11 +14,18 @@ import {
   Database,
   Server,
   ShieldCheck,
-  UserCheck
+  UserCheck,
+  X,
+  Search,
+  Download,
+  RefreshCw,
+  FileText,
+  Calendar,
+  ShieldAlert
 } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../auth/AuthContext';
-import { analyticsApi, type AnalyticsDashboardResponse } from '../../lib/api';
+import { analyticsApi, type AnalyticsDashboardResponse, type AuditLogItem } from '../../lib/api';
 import Loader from '../../components/loader/Loader';
 
 const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }) => {
@@ -27,13 +34,37 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
   const [data, setData] = useState<AnalyticsDashboardResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Audit Logs modal states
+  const [showAuditModal, setShowAuditModal] = useState(false);
+  const [auditLogs, setAuditLogs] = useState<AuditLogItem[]>([]);
+  const [loadingAudit, setLoadingAudit] = useState(false);
+  const [auditSearch, setAuditSearch] = useState('');
+  const [auditCategory, setAuditCategory] = useState<string>('All');
+
+  useEffect(() => {
+    if (showAuditModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showAuditModal]);
+
   useEffect(() => {
     const fetchData = async () => {
       if (!accessToken) return;
       try {
-        const result = await analyticsApi.getAnalyticsDashboardData(accessToken);
+        const [result, auditRes] = await Promise.all([
+          analyticsApi.getAnalyticsDashboardData(accessToken),
+          analyticsApi.getAuditLogs(accessToken)
+        ]);
         if (result.ok) {
           setData(result.data);
+        }
+        if (auditRes.ok && auditRes.data?.auditLogs) {
+          setAuditLogs(auditRes.data.auditLogs);
         }
       } catch (error) {
         console.error('Failed to fetch analytics:', error);
@@ -43,6 +74,60 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
     };
     fetchData();
   }, [accessToken]);
+
+  const fetchAuditLogs = async () => {
+    if (!accessToken) return;
+    setLoadingAudit(true);
+    try {
+      const res = await analyticsApi.getAuditLogs(accessToken);
+      if (res.ok) {
+        setAuditLogs(res.data.auditLogs || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch audit logs:', err);
+    } finally {
+      setLoadingAudit(false);
+    }
+  };
+
+  const handleOpenAuditModal = () => {
+    setShowAuditModal(true);
+    fetchAuditLogs();
+  };
+
+  const filteredAuditLogs = auditLogs.filter(log => {
+    const matchesCategory = auditCategory === 'All' || log.category.toLowerCase() === auditCategory.toLowerCase();
+    const query = auditSearch.toLowerCase();
+    const matchesSearch =
+      !query ||
+      log.action.toLowerCase().includes(query) ||
+      log.details.toLowerCase().includes(query) ||
+      log.category.toLowerCase().includes(query) ||
+      log.dateFormatted.toLowerCase().includes(query);
+    return matchesCategory && matchesSearch;
+  });
+
+  const exportAuditLogsCSV = () => {
+    if (filteredAuditLogs.length === 0) return;
+    const headers = ['ID', 'Action', 'Details', 'Category', 'Type', 'Date', 'Time Ago'];
+    const rows = filteredAuditLogs.map(l => [
+      `"${l.id}"`,
+      `"${l.action.replace(/"/g, '""')}"`,
+      `"${l.details.replace(/"/g, '""')}"`,
+      `"${l.category}"`,
+      `"${l.type}"`,
+      `"${l.dateFormatted}"`,
+      `"${l.relativeTime}"`
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `system_audit_logs_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   if (loading) {
     return <Loader type="dashboard" />;
@@ -84,18 +169,19 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
   });
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="space-y-8"
-    >
+    <>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-8"
+      >
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-black tracking-tight text-slate-900">Center Analytics</h2>
           <p className="text-slate-500 font-medium text-sm mt-1">Real-time performance metrics and distribution data.</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm">Export Data</button>
+          <button onClick={handleOpenAuditModal} className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm">View Logs</button>
           <button className={`px-4 py-2 ${theme.bg600} text-white rounded-lg text-xs font-black uppercase tracking-widest ${theme.hoverBg700} transition-all shadow-lg ${theme.shadow200}`}>Generate Report</button>
         </div>
       </div>
@@ -286,25 +372,40 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
             </div>
 
             <div className={`${theme.bg900} rounded-lg p-8 text-white relative overflow-hidden shadow-xl`}>
-              <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent"></div>
+              <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent pointer-events-none"></div>
               <h3 className="text-xl font-black tracking-tight mb-8 relative z-10 flex items-center gap-3">
                 <Activity className={theme.text400} size={24} />
                 Recent System Activity
               </h3>
-              <div className="space-y-6 relative z-10">
-                {currentData.systemActivity.map((log, idx) => (
-                  <div key={idx} className="flex gap-4">
+              <div className="space-y-5 relative z-10">
+                {(auditLogs.length > 0
+                  ? auditLogs.slice(0, 4).map(l => ({ action: l.action, details: l.details, time: l.relativeTime, type: l.type }))
+                  : currentData.systemActivity.map(s => ({ action: s.action, details: '', time: s.time, type: s.type }))
+                ).map((log, idx) => (
+                  <div key={idx} className="flex items-start gap-3.5 group">
                     <div className="mt-1">
-                      <div className={`w-2 h-2 rounded-full ${log.type === 'system' ? 'bg-amber-400' : log.type === 'user' ? theme.bg600.replace('600', '400') : 'bg-purple-400'}`}></div>
+                      <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${
+                        log.type === 'appointment' ? 'bg-teal-400' :
+                        log.type === 'user' ? 'bg-blue-400' :
+                        log.type === 'blog' ? 'bg-purple-400' :
+                        'bg-amber-400'
+                      }`} />
                     </div>
-                    <div>
-                      <p className="text-sm font-bold text-white leading-tight mb-1">{log.action}</p>
-                      <p className={`text-[10px] font-black uppercase tracking-widest ${theme.text400}`}>{log.time}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-white leading-snug truncate">{log.action}</p>
+                      {log.details ? (
+                        <p className="text-xs text-slate-300/80 font-medium truncate mt-0.5">{log.details}</p>
+                      ) : null}
+                      <p className={`text-[10px] font-black uppercase tracking-widest ${theme.text400} mt-1`}>{log.time}</p>
                     </div>
                   </div>
                 ))}
               </div>
-              <button className={`w-full mt-8 py-3 bg-white/10 border border-white/20 text-white rounded-lg font-black text-xs uppercase tracking-widest hover:bg-white/20 transition-all`}>
+              <button
+                type="button"
+                onClick={handleOpenAuditModal}
+                className="relative z-10 w-full mt-8 py-3 bg-white/10 border border-white/20 text-white rounded-lg font-black text-xs uppercase tracking-widest hover:bg-white/20 active:scale-[0.98] transition-all cursor-pointer"
+              >
                 View All Audit Logs
               </button>
             </div>
@@ -312,6 +413,189 @@ const Analytics = ({ role = 'staff' }: { role?: 'staff' | 'director' | 'admin' }
         </div>
       )}
     </motion.div>
+
+    {/* ── Audit Logs Modal ────────────────────────────────────────── */}
+      <AnimatePresence>
+        {showAuditModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/70 backdrop-blur-xs overflow-hidden"
+            onMouseDown={(e) => e.target === e.currentTarget && setShowAuditModal(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white rounded-2xl shadow-2xl border border-slate-100 w-full max-w-4xl max-h-[90vh] sm:max-h-[85vh] flex flex-col overflow-hidden my-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="px-6 sm:px-8 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className={`w-11 h-11 rounded-xl ${theme.bg600} text-white flex items-center justify-center shadow-md shadow-slate-200/50 shrink-0`}>
+                    <Activity size={22} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="text-xl font-black text-slate-900 tracking-tight">System Audit Logs</h3>
+                      <span className="px-3 py-0.5 rounded-full text-xs font-black bg-teal-50 text-teal-700 border border-teal-100">
+                        {auditLogs.length} Records
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 font-bold mt-0.5">Real-time system events, appointments, and account activities.</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowAuditModal(false)}
+                  className="p-2 hover:bg-slate-200/60 rounded-xl transition-all text-slate-400 hover:text-slate-700 cursor-pointer shrink-0"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Controls Bar */}
+              <div className="px-6 sm:px-8 py-4 border-b border-slate-100 bg-white flex flex-col lg:flex-row gap-3 sm:gap-4 items-stretch lg:items-center justify-between shrink-0">
+                {/* Search Input */}
+                <div className="relative flex-1">
+                  <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search logs by action, user, or date..."
+                    value={auditSearch}
+                    onChange={e => setAuditSearch(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 pl-12 pr-10 text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-teal-500/20 focus:bg-white transition-all"
+                  />
+                  {auditSearch && (
+                    <button
+                      onClick={() => setAuditSearch('')}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+                </div>
+
+                {/* Category Pills & Action Buttons */}
+                <div className="flex flex-wrap items-center gap-2 justify-between lg:justify-end">
+                  <div className="flex flex-wrap gap-1.5 items-center overflow-x-auto py-0.5 custom-scrollbar">
+                    {['All', 'User Activity', 'Appointments', 'Reviews', 'CMS & Blog'].map(cat => (
+                      <button
+                        key={cat}
+                        onClick={() => setAuditCategory(cat)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all border cursor-pointer whitespace-nowrap ${
+                          auditCategory === cat
+                            ? 'bg-teal-600 text-white border-teal-600 shadow-md shadow-teal-100'
+                            : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-teal-300 hover:bg-white'
+                        }`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={fetchAuditLogs}
+                      disabled={loadingAudit}
+                      title="Refresh logs"
+                      className="p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all disabled:opacity-50 cursor-pointer"
+                    >
+                      <RefreshCw size={16} className={loadingAudit ? 'animate-spin' : ''} />
+                    </button>
+                    <button
+                      onClick={exportAuditLogsCSV}
+                      disabled={filteredAuditLogs.length === 0}
+                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black text-teal-700 bg-teal-50 hover:bg-teal-100 border border-teal-200 transition-all disabled:opacity-50 cursor-pointer"
+                    >
+                      <Download size={16} /> Export CSV
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Logs Content List (Scrollable Area) */}
+              <div className="flex-1 overflow-y-auto px-6 sm:px-8 py-6 space-y-3 custom-scrollbar min-h-0">
+                {loadingAudit ? (
+                  <div className="py-20 text-center flex flex-col items-center gap-3 text-slate-400">
+                    <RefreshCw size={32} className="animate-spin text-teal-600" />
+                    <p className="text-sm font-bold">Loading audit logs...</p>
+                  </div>
+                ) : filteredAuditLogs.length === 0 ? (
+                  <div className="py-20 text-center text-slate-400 flex flex-col items-center gap-3 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
+                    <ShieldAlert size={40} className="text-slate-300" />
+                    <div>
+                      <p className="text-base font-black text-slate-700">No matching audit logs found</p>
+                      <p className="text-xs font-bold text-slate-400 mt-1">Try adjusting your search query or selected category filter.</p>
+                    </div>
+                  </div>
+                ) : (
+                  filteredAuditLogs.map(log => (
+                    <div
+                      key={log.id}
+                      className="p-4 sm:p-5 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:border-teal-200 hover:shadow-md transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 group"
+                    >
+                      <div className="flex items-start gap-3.5">
+                        <div
+                          className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 font-black shadow-xs ${
+                            log.type === 'user'
+                              ? 'bg-blue-50 text-blue-600 border border-blue-100'
+                              : log.type === 'appointment'
+                              ? 'bg-teal-50 text-teal-600 border border-teal-100'
+                              : log.type === 'blog'
+                              ? 'bg-purple-50 text-purple-600 border border-purple-100'
+                              : 'bg-amber-50 text-amber-600 border border-amber-100'
+                          }`}
+                        >
+                          {log.type === 'user' ? (
+                            <Users size={18} />
+                          ) : log.type === 'appointment' ? (
+                            <Calendar size={18} />
+                          ) : log.type === 'blog' ? (
+                            <FileText size={18} />
+                          ) : (
+                            <Activity size={18} />
+                          )}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-black text-slate-900 text-sm">{log.action}</span>
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200">
+                              {log.category}
+                            </span>
+                          </div>
+                          <p className="text-xs font-bold text-slate-500 mt-1">{log.details}</p>
+                        </div>
+                      </div>
+                      <div className="text-left sm:text-right shrink-0 w-full sm:w-auto flex sm:flex-col items-center sm:items-end justify-between border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-100">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-teal-700 bg-teal-50 px-2.5 py-1 rounded-lg border border-teal-100 inline-block">
+                          {log.relativeTime}
+                        </span>
+                        <span className="text-[11px] font-bold text-slate-400 mt-0.5">{log.dateFormatted}</span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Modal Footer */}
+              <div className="px-6 sm:px-8 py-4 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between text-xs text-slate-500 font-bold shrink-0">
+                <span className="font-black text-slate-400 uppercase tracking-widest text-[10px]">
+                  Showing {filteredAuditLogs.length} of {auditLogs.length} entries
+                </span>
+                <button
+                  onClick={() => setShowAuditModal(false)}
+                  className="px-6 py-2.5 bg-slate-900 text-white rounded-xl font-black hover:bg-slate-800 transition-all cursor-pointer text-xs"
+                >
+                  Close
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 

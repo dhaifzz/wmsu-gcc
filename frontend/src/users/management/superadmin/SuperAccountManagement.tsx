@@ -302,6 +302,13 @@ const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => 
   const { accessToken } = useAuth();
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
   
   // Form State
   const [email, setEmail] = useState('');
@@ -417,16 +424,16 @@ const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => 
   return (
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/70 backdrop-blur-xs overflow-hidden"
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden my-auto"
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] sm:max-h-[85vh] flex flex-col overflow-hidden my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div className="px-6 sm:px-8 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
           <div>
             <h3 className="text-xl font-black text-slate-900">Create Account</h3>
             <div className="flex items-center gap-2 mt-1">
@@ -439,7 +446,7 @@ const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => 
         </div>
 
         {/* Form Body */}
-        <div className="px-8 py-8 max-h-[70vh] overflow-y-auto custom-scrollbar">
+        <div className="px-6 sm:px-8 py-6 sm:py-8 flex-1 overflow-y-auto custom-scrollbar min-h-0">
           {step === 1 && (
             <div className="space-y-6">
               <div className="space-y-4">
@@ -691,7 +698,7 @@ const CreateAccountModal = ({ onClose, onCreated }: CreateAccountModalProps) => 
         </div>
 
         {/* Footer */}
-        <div className="px-8 py-6 border-t border-slate-100 flex gap-3 bg-slate-50/50">
+        <div className="px-6 sm:px-8 py-5 border-t border-slate-100 flex gap-3 bg-slate-50/50 shrink-0">
           {step > 1 && (
             <button onClick={() => setStep(step - 1)} className="px-6 py-4 bg-white border border-slate-200 text-slate-600 font-black rounded-xl hover:bg-slate-100 transition-all flex items-center gap-2">
               <ArrowLeft size={16} /> Back
