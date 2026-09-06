@@ -1,5 +1,22 @@
 import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence, Reorder } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragOverlay,
+  defaultDropAnimationSideEffects,
+} from '@dnd-kit/core';
+import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  useSortable,
+  rectSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { removeBackground } from "@imgly/background-removal";
 import {
   Home,
@@ -31,6 +48,132 @@ import {
   HelpCircle,
   Scale
 } from 'lucide-react';
+
+// ─── Sortable Team Grid (dnd-kit) ───────────────────────────────────────────
+
+interface TeamMember {
+  _id?: string;
+  id?: string;
+  name: string;
+  degree?: string;
+  dept?: string;
+  profileImage?: string | null;
+  [key: string]: any;
+}
+
+interface SortableTeamCardProps {
+  member: TeamMember;
+  children: (member: TeamMember, isDragging: boolean) => React.ReactNode;
+}
+
+function SortableTeamCard({ member, children }: SortableTeamCardProps) {
+  const id = member._id || member.id || member.name;
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.35 : 1,
+    position: 'relative',
+    zIndex: isDragging ? 0 : undefined,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      {children(member, isDragging)}
+    </div>
+  );
+}
+
+interface SortableTeamGridProps {
+  items: TeamMember[];
+  onReorder: (newItems: TeamMember[]) => void;
+  cols?: string;
+  renderCard: (member: TeamMember, idx: number, isDragging: boolean) => React.ReactNode;
+  renderOverlay: (member: TeamMember) => React.ReactNode;
+}
+
+function SortableTeamGrid({
+  items,
+  onReorder,
+  cols = 'grid-cols-2 lg:grid-cols-4',
+  renderCard,
+  renderOverlay,
+}: SortableTeamGridProps) {
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
+  );
+
+  const ids = items.map((m) => m._id || m.id || m.name);
+  const activeMember = activeId ? items.find((m) => (m._id || m.id || m.name) === activeId) : null;
+
+  function handleDragStart(event: DragStartEvent) {
+    setActiveId(String(event.active.id));
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      const oldIndex = ids.indexOf(String(active.id));
+      const newIndex = ids.indexOf(String(over.id));
+      onReorder(arrayMove(items, oldIndex, newIndex));
+    }
+    setActiveId(null);
+  }
+
+  const dropAnimation = {
+    sideEffects: defaultDropAnimationSideEffects({
+      styles: { active: { opacity: '0.35' } },
+    }),
+  };
+
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
+      <SortableContext items={ids} strategy={rectSortingStrategy}>
+        <div className={`grid md:${cols} gap-4`}>
+          {items.map((member, idx) => (
+            <SortableTeamCard
+              key={member._id || member.id || member.name + '_' + idx}
+              member={member}
+            >
+              {(m, dragging) => renderCard(m, idx, dragging)}
+            </SortableTeamCard>
+          ))}
+        </div>
+      </SortableContext>
+      <DragOverlay dropAnimation={dropAnimation}>
+        {activeMember ? (
+          <div
+            style={{
+              transform: 'scale(1.08) rotate(3deg)',
+              boxShadow: '0 30px 60px -12px rgba(13,148,136,0.45)',
+              borderRadius: '12px',
+              cursor: 'grabbing',
+              pointerEvents: 'none',
+            }}
+          >
+            {renderOverlay(activeMember)}
+          </div>
+        ) : null}
+      </DragOverlay>
+    </DndContext>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 const assessmentIconMap: Record<string, any> = {
   FileText,
@@ -77,6 +220,29 @@ import { cmsApi } from '../../../lib/api';
 import { supabase } from '../../../lib/supabaseClient';
 import Loader from '../../../components/loader/Loader';
 import { useAuth } from '../../../auth/AuthContext';
+
+const ensureTeamMemberIds = (data: any) => {
+  if (!data) return data;
+  const clone = JSON.parse(JSON.stringify(data));
+  const processList = (list: any[]) => {
+    if (!Array.isArray(list)) return [];
+    return list.map((item, idx) => ({
+      ...item,
+      _id: item._id || item.id || `member_${idx}_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`
+    }));
+  };
+
+  if (clone.mainCampus) {
+    clone.mainCampus.director = processList(clone.mainCampus.director || []);
+    clone.mainCampus.counselors = processList(clone.mainCampus.counselors || []);
+    clone.mainCampus.staff = processList(clone.mainCampus.staff || []);
+    clone.mainCampus.coordinators = processList(clone.mainCampus.coordinators || []);
+  }
+  if (clone.esuCampus) {
+    clone.esuCampus = processList(clone.esuCampus || []);
+  }
+  return clone;
+};
 
 const CMS = () => {
   const { accessToken } = useAuth();
@@ -368,7 +534,7 @@ const CMS = () => {
             case 'about': setAboutContent(data); break;
             case 'team': 
               if (data.mainCampus && !data.mainCampus.director) data.mainCampus.director = [];
-              setTeamContent(data); 
+              setTeamContent(ensureTeamMemberIds(data)); 
               break;
             case 'contact': setContactContent(data); break;
             case 'footer': setFooterContent(data); break;
@@ -681,11 +847,7 @@ const CMS = () => {
   }
 
 return (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    className="space-y-8"
-  >
+  <>
     <input
       type="file"
       ref={fileInputRef}
@@ -693,10 +855,15 @@ return (
       accept="image/*"
       onChange={handleImageUpload}
     />
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    className="space-y-8"
+  >
+    <div className="flex items-center justify-between">
       <div>
-        <h2 className="text-3xl font-black text-slate-800 tracking-tight">Content Management</h2>
-        <p className="text-slate-500 font-medium">Manage the public-facing content of the GCC Portal.</p>
+        <h2 className="text-3xl font-black tracking-tight text-slate-900">Content Management</h2>
+        <p className="text-slate-500 font-medium text-sm mt-1">Manage the public-facing content of the GCC Portal.</p>
       </div>
     </div>
 
@@ -1346,7 +1513,7 @@ return (
                   <label className="block text-xs font-black text-slate-500 uppercase tracking-widest">Director</label>
                   <button
                     onClick={() => {
-                      const newItems = [...teamContent.mainCampus.director, { name: "New Director", degree: "PhD/MA", dept: "Director, GCC", profileImage: null }];
+                      const newItems = [...teamContent.mainCampus.director, { _id: 'member_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5), name: "New Director", degree: "PhD/MA", dept: "Director, GCC", profileImage: null }];
                       setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, director: newItems } });
                     }}
                     className="text-[10px] font-black text-teal-600 hover:text-teal-700 flex items-center gap-1 bg-teal-50 px-3 py-1 rounded-full transition-all"
@@ -1354,89 +1521,45 @@ return (
                     + Add Director
                   </button>
                 </div>
-                <Reorder.Group 
-                  axis="y" 
-                  values={teamContent.mainCampus.director || []} 
+                <SortableTeamGrid
+                  items={teamContent.mainCampus.director || []}
                   onReorder={(newOrder) => setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, director: newOrder } })}
-                  className="grid md:grid-cols-2 lg:grid-cols-4 gap-4"
-                >
-                  {(teamContent.mainCampus.director || []).map((member: any, idx: number) => (
-                    <Reorder.Item 
-                      key={member.name + idx} 
-                      value={member}
-                      className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3 relative group cursor-default"
-                    >
+                  cols="grid-cols-2 lg:grid-cols-4"
+                  renderCard={(member, idx) => (
+                    <div className="bg-white p-4 rounded-2xl border-2 border-slate-200 hover:border-teal-400 hover:shadow-xl space-y-3 relative group transition-all cursor-grab active:cursor-grabbing select-none">
                       <div className="flex items-center justify-between">
-                        <div className="text-slate-300 cursor-grab active:cursor-grabbing hover:text-teal-500 transition-colors">
+                        <div className="flex items-center gap-1.5 px-2 py-1 rounded-md text-teal-500">
                           <GripVertical size={16} />
+                          <span className="text-[9px] font-black uppercase tracking-wider text-teal-600 opacity-0 group-hover:opacity-100 transition-opacity">Drag</span>
                         </div>
                         <button
-                          onClick={() => {
-                             const newItems = teamContent.mainCampus.director.filter((_: any, i: number) => i !== idx);
-                            setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, director: newItems } });
-                          }}
-                          className="w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
-                        >
-                          ×
-                        </button>
+                          onPointerDown={(e) => e.stopPropagation()}
+                          onClick={(e) => { e.stopPropagation(); const newItems = teamContent.mainCampus.director.filter((_: any, i: number) => i !== idx); setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, director: newItems } }); }}
+                          className="w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold hover:bg-red-200"
+                        >×</button>
                       </div>
                       <div
+                        onPointerDown={(e) => e.stopPropagation()}
                         onClick={() => triggerUpload('team', ['mainCampus', 'director', idx, 'profileImage'])}
-                        className={`w-full aspect-square bg-white rounded-full border-2 border-dashed flex flex-col items-center justify-center text-slate-300 hover:border-teal-400 hover:text-teal-500 cursor-pointer transition-colors relative overflow-hidden group ${member.profileImage !== savedStates.team?.mainCampus?.director?.[idx]?.profileImage ? 'border-amber-400 ring-2 ring-amber-400/20' : 'border-slate-200'
-                          }`}
+                        className={`w-full aspect-square bg-white rounded-full border-2 border-dashed flex flex-col items-center justify-center text-slate-300 hover:border-teal-400 hover:text-teal-500 cursor-pointer transition-colors relative overflow-hidden group ${member.profileImage !== savedStates.team?.mainCampus?.director?.[idx]?.profileImage ? 'border-amber-400 ring-2 ring-amber-400/20' : 'border-slate-200'}`}
                       >
-                        {member.profileImage ? (
-                          <>
-                            <img src={member.profileImage} className="w-full h-full object-cover" alt="" />
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                              <ImageIcon size={20} className="text-white" />
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <ImageIcon size={24} />
-                            <span className="text-[8px] font-bold mt-1">Photo</span>
-                          </>
-                        )}
+                        {member.profileImage ? (<><img src={member.profileImage} className="w-full h-full object-cover" alt="" /><div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"><ImageIcon size={20} className="text-white" /></div></>) : (<><ImageIcon size={24} /><span className="text-[8px] font-bold mt-1">Photo</span></>)}
                       </div>
                       <div className="space-y-2">
-                        <input
-                          type="text"
-                          value={member.name}
-                          onChange={(e) => {
-                            const newItems = [...teamContent.mainCampus.director];
-                            newItems[idx].name = sanitizeTeamInput(e.target.value);
-                            setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, director: newItems } });
-                          }}
-                          placeholder="Name"
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-black text-slate-800 focus:ring-2 focus:ring-teal-500 outline-none"
-                        />
-                        <input
-                          type="text"
-                          value={member.degree}
-                          onChange={(e) => {
-                            const newItems = [...teamContent.mainCampus.director];
-                            newItems[idx].degree = sanitizeTeamInput(e.target.value);
-                            setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, director: newItems } });
-                          }}
-                          placeholder="Degree"
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[9px] font-bold text-teal-600 focus:ring-2 focus:ring-teal-500 outline-none"
-                        />
-                        <input
-                          type="text"
-                          value={member.dept}
-                          onChange={(e) => {
-                            const newItems = [...teamContent.mainCampus.director];
-                            newItems[idx].dept = sanitizeTeamInput(e.target.value);
-                            setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, director: newItems } });
-                          }}
-                          placeholder="Department"
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[9px] font-medium text-slate-500 focus:ring-2 focus:ring-teal-500 outline-none"
-                        />
+                        <input onPointerDown={(e) => e.stopPropagation()} type="text" value={member.name} onChange={(e) => { const n = [...teamContent.mainCampus.director]; n[idx].name = sanitizeTeamInput(e.target.value); setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, director: n } }); }} placeholder="Name" className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-black text-slate-800 focus:ring-2 focus:ring-teal-500 outline-none cursor-text" />
+                        <input onPointerDown={(e) => e.stopPropagation()} type="text" value={member.degree} onChange={(e) => { const n = [...teamContent.mainCampus.director]; n[idx].degree = sanitizeTeamInput(e.target.value); setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, director: n } }); }} placeholder="Degree" className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[9px] font-bold text-teal-600 focus:ring-2 focus:ring-teal-500 outline-none cursor-text" />
+                        <input onPointerDown={(e) => e.stopPropagation()} type="text" value={member.dept} onChange={(e) => { const n = [...teamContent.mainCampus.director]; n[idx].dept = sanitizeTeamInput(e.target.value); setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, director: n } }); }} placeholder="Department" className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[9px] font-medium text-slate-500 focus:ring-2 focus:ring-teal-500 outline-none cursor-text" />
                       </div>
-                    </Reorder.Item>
-                  ))}
-                </Reorder.Group>
+                    </div>
+                  )}
+                  renderOverlay={(member) => (
+                    <div className="bg-white p-4 rounded-2xl border-2 border-teal-400 shadow-2xl space-y-3">
+                      <div className="flex items-center gap-1.5 px-2 py-1 rounded-md text-teal-500"><GripVertical size={16} /></div>
+                      {member.profileImage ? <img src={member.profileImage} className="w-full aspect-square rounded-full object-cover" alt="" /> : <div className="w-full aspect-square rounded-full bg-teal-50 flex items-center justify-center"><ImageIcon size={24} className="text-teal-300" /></div>}
+                      <p className="text-[10px] font-black text-slate-800 truncate">{member.name}</p>
+                    </div>
+                  )}
+                />
               </div>
 
               {/* Counselors */}
@@ -1445,7 +1568,7 @@ return (
                   <label className="block text-xs font-black text-slate-500 uppercase tracking-widest">Guidance Counselors</label>
                   <button
                     onClick={() => {
-                      const newCounselors = [...teamContent.mainCampus.counselors, { name: "New Counselor", degree: "PhD/MA", dept: "Main Campus - GCC", profileImage: null }];
+                      const newCounselors = [...teamContent.mainCampus.counselors, { _id: 'member_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5), name: "New Counselor", degree: "PhD/MA", dept: "Main Campus - GCC", profileImage: null }];
                       setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, counselors: newCounselors } });
                     }}
                     className="text-[10px] font-black text-teal-600 hover:text-teal-700 flex items-center gap-1 bg-teal-50 px-3 py-1 rounded-full transition-all"
@@ -1453,89 +1576,45 @@ return (
                     + Add Counselor
                   </button>
                 </div>
-                <Reorder.Group 
-                  axis="y" 
-                  values={teamContent.mainCampus.counselors} 
+                <SortableTeamGrid
+                  items={teamContent.mainCampus.counselors || []}
                   onReorder={(newOrder) => setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, counselors: newOrder } })}
-                  className="grid md:grid-cols-2 lg:grid-cols-4 gap-4"
-                >
-                  {teamContent.mainCampus.counselors.map((member: any, idx: number) => (
-                    <Reorder.Item 
-                      key={member.name + idx} 
-                      value={member}
-                      className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3 relative group cursor-default"
-                    >
+                  cols="grid-cols-2 lg:grid-cols-4"
+                  renderCard={(member, idx) => (
+                    <div className="bg-white p-4 rounded-xl border-2 border-slate-200 hover:border-teal-400 hover:shadow-xl space-y-3 relative group transition-all cursor-grab active:cursor-grabbing select-none">
                       <div className="flex items-center justify-between">
-                        <div className="text-slate-300 cursor-grab active:cursor-grabbing hover:text-teal-500 transition-colors">
+                        <div className="flex items-center gap-1.5 px-2 py-1 rounded-md text-teal-500">
                           <GripVertical size={16} />
+                          <span className="text-[9px] font-black uppercase tracking-wider text-teal-600 opacity-0 group-hover:opacity-100 transition-opacity">Drag</span>
                         </div>
                         <button
-                          onClick={() => {
-                            const newCounselors = teamContent.mainCampus.counselors.filter((_: any, i: number) => i !== idx);
-                            setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, counselors: newCounselors } });
-                          }}
-                          className="w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
-                        >
-                          ×
-                        </button>
+                          onPointerDown={(e) => e.stopPropagation()}
+                          onClick={(e) => { e.stopPropagation(); const n = teamContent.mainCampus.counselors.filter((_: any, i: number) => i !== idx); setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, counselors: n } }); }}
+                          className="w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold hover:bg-red-200"
+                        >×</button>
                       </div>
                       <div
+                        onPointerDown={(e) => e.stopPropagation()}
                         onClick={() => triggerUpload('team', ['mainCampus', 'counselors', idx, 'profileImage'])}
-                        className={`w-full aspect-square bg-white rounded-full border-2 border-dashed flex flex-col items-center justify-center text-slate-300 hover:border-teal-400 hover:text-teal-500 cursor-pointer transition-colors relative overflow-hidden group ${member.profileImage !== savedStates.team?.mainCampus?.counselors[idx]?.profileImage ? 'border-amber-400 ring-2 ring-amber-400/20' : 'border-slate-200'
-                          }`}
+                        className={`w-full aspect-square bg-white rounded-full border-2 border-dashed flex flex-col items-center justify-center text-slate-300 hover:border-teal-400 hover:text-teal-500 cursor-pointer transition-colors relative overflow-hidden group ${member.profileImage !== savedStates.team?.mainCampus?.counselors[idx]?.profileImage ? 'border-amber-400 ring-2 ring-amber-400/20' : 'border-slate-200'}`}
                       >
-                        {member.profileImage ? (
-                          <>
-                            <img src={member.profileImage} className="w-full h-full object-cover" alt="" />
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                              <ImageIcon size={20} className="text-white" />
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <ImageIcon size={24} />
-                            <span className="text-[8px] font-bold mt-1">Photo</span>
-                          </>
-                        )}
+                        {member.profileImage ? (<><img src={member.profileImage} className="w-full h-full object-cover" alt="" /><div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"><ImageIcon size={20} className="text-white" /></div></>) : (<><ImageIcon size={24} /><span className="text-[8px] font-bold mt-1">Photo</span></>)}
                       </div>
                       <div className="space-y-2">
-                        <input
-                          type="text"
-                          value={member.name}
-                          onChange={(e) => {
-                            const newItems = [...teamContent.mainCampus.counselors];
-                            newItems[idx].name = sanitizeTeamInput(e.target.value);
-                            setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, counselors: newItems } });
-                          }}
-                          placeholder="Name"
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-black text-slate-800 focus:ring-2 focus:ring-teal-500 outline-none"
-                        />
-                        <input
-                          type="text"
-                          value={member.degree}
-                          onChange={(e) => {
-                            const newItems = [...teamContent.mainCampus.counselors];
-                            newItems[idx].degree = sanitizeTeamInput(e.target.value);
-                            setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, counselors: newItems } });
-                          }}
-                          placeholder="Degree"
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[9px] font-bold text-teal-600 focus:ring-2 focus:ring-teal-500 outline-none"
-                        />
-                        <input
-                          type="text"
-                          value={member.dept}
-                          onChange={(e) => {
-                            const newItems = [...teamContent.mainCampus.counselors];
-                            newItems[idx].dept = sanitizeTeamInput(e.target.value);
-                            setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, counselors: newItems } });
-                          }}
-                          placeholder="Department"
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[9px] font-medium text-slate-500 focus:ring-2 focus:ring-teal-500 outline-none"
-                        />
+                        <input onPointerDown={(e) => e.stopPropagation()} type="text" value={member.name} onChange={(e) => { const n = [...teamContent.mainCampus.counselors]; n[idx].name = sanitizeTeamInput(e.target.value); setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, counselors: n } }); }} placeholder="Name" className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-black text-slate-800 focus:ring-2 focus:ring-teal-500 outline-none cursor-text" />
+                        <input onPointerDown={(e) => e.stopPropagation()} type="text" value={member.degree} onChange={(e) => { const n = [...teamContent.mainCampus.counselors]; n[idx].degree = sanitizeTeamInput(e.target.value); setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, counselors: n } }); }} placeholder="Degree" className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[9px] font-bold text-teal-600 focus:ring-2 focus:ring-teal-500 outline-none cursor-text" />
+                        <input onPointerDown={(e) => e.stopPropagation()} type="text" value={member.dept} onChange={(e) => { const n = [...teamContent.mainCampus.counselors]; n[idx].dept = sanitizeTeamInput(e.target.value); setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, counselors: n } }); }} placeholder="Department" className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[9px] font-medium text-slate-500 focus:ring-2 focus:ring-teal-500 outline-none cursor-text" />
                       </div>
-                    </Reorder.Item>
-                  ))}
-                </Reorder.Group>
+                    </div>
+                  )}
+                  renderOverlay={(member) => (
+                    <div className="bg-white p-4 rounded-xl border-2 border-teal-400 shadow-2xl space-y-3">
+                      <div className="flex items-center gap-1.5 px-2 py-1 text-teal-500"><GripVertical size={16} /></div>
+                      {member.profileImage ? <img src={member.profileImage} className="w-full aspect-square rounded-full object-cover" alt="" /> : <div className="w-full aspect-square rounded-full bg-teal-50 flex items-center justify-center"><ImageIcon size={24} className="text-teal-300" /></div>}
+                      <p className="text-[10px] font-black text-slate-800 truncate">{member.name}</p>
+                    </div>
+                  )}
+                />
               </div>
 
               {/* Guidance Staff */}
@@ -1544,7 +1623,7 @@ return (
                   <label className="block text-xs font-black text-slate-500 uppercase tracking-widest">Guidance Staff</label>
                   <button
                     onClick={() => {
-                      const newItems = [...teamContent.mainCampus.staff, { name: "New Staff", degree: "BS/BA", dept: "Unit/Office", profileImage: null }];
+                      const newItems = [...teamContent.mainCampus.staff, { _id: 'member_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5), name: "New Staff", degree: "BS/BA", dept: "Unit/Office", profileImage: null }];
                       setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, staff: newItems } });
                     }}
                     className="text-[10px] font-black text-teal-600 hover:text-teal-700 flex items-center gap-1 bg-teal-50 px-3 py-1 rounded-full transition-all"
@@ -1552,89 +1631,45 @@ return (
                     + Add Staff
                   </button>
                 </div>
-                <Reorder.Group 
-                  axis="y" 
-                  values={teamContent.mainCampus.staff} 
+                <SortableTeamGrid
+                  items={teamContent.mainCampus.staff || []}
                   onReorder={(newOrder) => setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, staff: newOrder } })}
-                  className="grid md:grid-cols-2 lg:grid-cols-4 gap-4"
-                >
-                  {teamContent.mainCampus.staff.map((member: any, idx: number) => (
-                    <Reorder.Item 
-                      key={member.name + idx} 
-                      value={member}
-                      className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3 relative group cursor-default"
-                    >
+                  cols="grid-cols-2 lg:grid-cols-4"
+                  renderCard={(member, idx) => (
+                    <div className="bg-white p-4 rounded-xl border-2 border-slate-200 hover:border-teal-400 hover:shadow-xl space-y-3 relative group transition-all cursor-grab active:cursor-grabbing select-none">
                       <div className="flex items-center justify-between">
-                        <div className="text-slate-300 cursor-grab active:cursor-grabbing hover:text-teal-500 transition-colors">
+                        <div className="flex items-center gap-1.5 px-2 py-1 rounded-md text-teal-500">
                           <GripVertical size={16} />
+                          <span className="text-[9px] font-black uppercase tracking-wider text-teal-600 opacity-0 group-hover:opacity-100 transition-opacity">Drag</span>
                         </div>
                         <button
-                          onClick={() => {
-                            const newItems = teamContent.mainCampus.staff.filter((_: any, i: number) => i !== idx);
-                            setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, staff: newItems } });
-                          }}
-                          className="w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
-                        >
-                          ×
-                        </button>
+                          onPointerDown={(e) => e.stopPropagation()}
+                          onClick={(e) => { e.stopPropagation(); const n = teamContent.mainCampus.staff.filter((_: any, i: number) => i !== idx); setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, staff: n } }); }}
+                          className="w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold hover:bg-red-200"
+                        >×</button>
                       </div>
                       <div
+                        onPointerDown={(e) => e.stopPropagation()}
                         onClick={() => triggerUpload('team', ['mainCampus', 'staff', idx, 'profileImage'])}
-                        className={`w-full aspect-square bg-white rounded-full border-2 border-dashed flex flex-col items-center justify-center text-slate-300 hover:border-teal-400 hover:text-teal-500 cursor-pointer transition-colors relative overflow-hidden group ${member.profileImage !== savedStates.team?.mainCampus?.staff[idx]?.profileImage ? 'border-amber-400 ring-2 ring-amber-400/20' : 'border-slate-200'
-                          }`}
+                        className={`w-full aspect-square bg-white rounded-full border-2 border-dashed flex flex-col items-center justify-center text-slate-300 hover:border-teal-400 hover:text-teal-500 cursor-pointer transition-colors relative overflow-hidden group ${member.profileImage !== savedStates.team?.mainCampus?.staff[idx]?.profileImage ? 'border-amber-400 ring-2 ring-amber-400/20' : 'border-slate-200'}`}
                       >
-                        {member.profileImage ? (
-                          <>
-                            <img src={member.profileImage} className="w-full h-full object-cover" alt="" />
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                              <ImageIcon size={20} className="text-white" />
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <ImageIcon size={24} />
-                            <span className="text-[8px] font-bold mt-1">Photo</span>
-                          </>
-                        )}
+                        {member.profileImage ? (<><img src={member.profileImage} className="w-full h-full object-cover" alt="" /><div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"><ImageIcon size={20} className="text-white" /></div></>) : (<><ImageIcon size={24} /><span className="text-[8px] font-bold mt-1">Photo</span></>)}
                       </div>
                       <div className="space-y-2">
-                        <input
-                          type="text"
-                          value={member.name}
-                          onChange={(e) => {
-                            const newItems = [...teamContent.mainCampus.staff];
-                            newItems[idx].name = sanitizeTeamInput(e.target.value);
-                            setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, staff: newItems } });
-                          }}
-                          placeholder="Name"
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-black text-slate-800 focus:ring-2 focus:ring-teal-500 outline-none"
-                        />
-                        <input
-                          type="text"
-                          value={member.degree}
-                          onChange={(e) => {
-                            const newItems = [...teamContent.mainCampus.staff];
-                            newItems[idx].degree = sanitizeTeamInput(e.target.value);
-                            setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, staff: newItems } });
-                          }}
-                          placeholder="Degree"
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[9px] font-bold text-teal-600 focus:ring-2 focus:ring-teal-500 outline-none"
-                        />
-                        <input
-                          type="text"
-                          value={member.dept}
-                          onChange={(e) => {
-                            const newItems = [...teamContent.mainCampus.staff];
-                            newItems[idx].dept = sanitizeTeamInput(e.target.value);
-                            setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, staff: newItems } });
-                          }}
-                          placeholder="Department"
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[9px] font-medium text-slate-500 focus:ring-2 focus:ring-teal-500 outline-none"
-                        />
+                        <input onPointerDown={(e) => e.stopPropagation()} type="text" value={member.name} onChange={(e) => { const n = [...teamContent.mainCampus.staff]; n[idx].name = sanitizeTeamInput(e.target.value); setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, staff: n } }); }} placeholder="Name" className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-black text-slate-800 focus:ring-2 focus:ring-teal-500 outline-none cursor-text" />
+                        <input onPointerDown={(e) => e.stopPropagation()} type="text" value={member.degree} onChange={(e) => { const n = [...teamContent.mainCampus.staff]; n[idx].degree = sanitizeTeamInput(e.target.value); setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, staff: n } }); }} placeholder="Degree" className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[9px] font-bold text-teal-600 focus:ring-2 focus:ring-teal-500 outline-none cursor-text" />
+                        <input onPointerDown={(e) => e.stopPropagation()} type="text" value={member.dept} onChange={(e) => { const n = [...teamContent.mainCampus.staff]; n[idx].dept = sanitizeTeamInput(e.target.value); setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, staff: n } }); }} placeholder="Department" className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[9px] font-medium text-slate-500 focus:ring-2 focus:ring-teal-500 outline-none cursor-text" />
                       </div>
-                    </Reorder.Item>
-                  ))}
-                </Reorder.Group>
+                    </div>
+                  )}
+                  renderOverlay={(member) => (
+                    <div className="bg-white p-4 rounded-xl border-2 border-teal-400 shadow-2xl space-y-3">
+                      <div className="flex items-center gap-1.5 px-2 py-1 text-teal-500"><GripVertical size={16} /></div>
+                      {member.profileImage ? <img src={member.profileImage} className="w-full aspect-square rounded-full object-cover" alt="" /> : <div className="w-full aspect-square rounded-full bg-teal-50 flex items-center justify-center"><ImageIcon size={24} className="text-teal-300" /></div>}
+                      <p className="text-[10px] font-black text-slate-800 truncate">{member.name}</p>
+                    </div>
+                  )}
+                />
               </div>
 
               {/* Coordinators */}
@@ -1643,7 +1678,7 @@ return (
                   <label className="block text-xs font-black text-slate-500 uppercase tracking-widest">Guidance Coordinators</label>
                   <button
                     onClick={() => {
-                      const newItems = [...teamContent.mainCampus.coordinators, { name: "New Coordinator", degree: "MA/MS", dept: "College/Dept", profileImage: null }];
+                      const newItems = [...teamContent.mainCampus.coordinators, { _id: 'member_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5), name: "New Coordinator", degree: "MA/MS", dept: "College/Dept", profileImage: null }];
                       setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, coordinators: newItems } });
                     }}
                     className="text-[10px] font-black text-teal-600 hover:text-teal-700 flex items-center gap-1 bg-teal-50 px-3 py-1 rounded-full transition-all"
@@ -1651,89 +1686,45 @@ return (
                     + Add Coordinator
                   </button>
                 </div>
-                <Reorder.Group 
-                  axis="y" 
-                  values={teamContent.mainCampus.coordinators} 
+                <SortableTeamGrid
+                  items={teamContent.mainCampus.coordinators || []}
                   onReorder={(newOrder) => setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, coordinators: newOrder } })}
-                  className="grid md:grid-cols-2 lg:grid-cols-4 gap-4"
-                >
-                  {teamContent.mainCampus.coordinators.map((member: any, idx: number) => (
-                    <Reorder.Item 
-                      key={member.name + idx} 
-                      value={member}
-                      className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3 relative group cursor-default"
-                    >
+                  cols="grid-cols-2 lg:grid-cols-4"
+                  renderCard={(member, idx) => (
+                    <div className="bg-white p-4 rounded-xl border-2 border-slate-200 hover:border-teal-400 hover:shadow-xl space-y-3 relative group transition-all cursor-grab active:cursor-grabbing select-none">
                       <div className="flex items-center justify-between">
-                        <div className="text-slate-300 cursor-grab active:cursor-grabbing hover:text-teal-500 transition-colors">
+                        <div className="flex items-center gap-1.5 px-2 py-1 rounded-md text-teal-500">
                           <GripVertical size={16} />
+                          <span className="text-[9px] font-black uppercase tracking-wider text-teal-600 opacity-0 group-hover:opacity-100 transition-opacity">Drag</span>
                         </div>
                         <button
-                          onClick={() => {
-                            const newItems = teamContent.mainCampus.coordinators.filter((_: any, i: number) => i !== idx);
-                            setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, coordinators: newItems } });
-                          }}
-                          className="w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
-                        >
-                          ×
-                        </button>
+                          onPointerDown={(e) => e.stopPropagation()}
+                          onClick={(e) => { e.stopPropagation(); const n = teamContent.mainCampus.coordinators.filter((_: any, i: number) => i !== idx); setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, coordinators: n } }); }}
+                          className="w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold hover:bg-red-200"
+                        >×</button>
                       </div>
                       <div
+                        onPointerDown={(e) => e.stopPropagation()}
                         onClick={() => triggerUpload('team', ['mainCampus', 'coordinators', idx, 'profileImage'])}
-                        className={`w-full aspect-square bg-white rounded-full border-2 border-dashed flex flex-col items-center justify-center text-slate-300 hover:border-teal-400 hover:text-teal-500 cursor-pointer transition-colors relative overflow-hidden group ${member.profileImage !== savedStates.team?.mainCampus?.coordinators[idx]?.profileImage ? 'border-amber-400 ring-2 ring-amber-400/20' : 'border-slate-200'
-                          }`}
+                        className={`w-full aspect-square bg-white rounded-full border-2 border-dashed flex flex-col items-center justify-center text-slate-300 hover:border-teal-400 hover:text-teal-500 cursor-pointer transition-colors relative overflow-hidden group ${member.profileImage !== savedStates.team?.mainCampus?.coordinators[idx]?.profileImage ? 'border-amber-400 ring-2 ring-amber-400/20' : 'border-slate-200'}`}
                       >
-                        {member.profileImage ? (
-                          <>
-                            <img src={member.profileImage} className="w-full h-full object-cover" alt="" />
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                              <ImageIcon size={20} className="text-white" />
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <ImageIcon size={24} />
-                            <span className="text-[8px] font-bold mt-1">Photo</span>
-                          </>
-                        )}
+                        {member.profileImage ? (<><img src={member.profileImage} className="w-full h-full object-cover" alt="" /><div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"><ImageIcon size={20} className="text-white" /></div></>) : (<><ImageIcon size={24} /><span className="text-[8px] font-bold mt-1">Photo</span></>)}
                       </div>
                       <div className="space-y-2">
-                        <input
-                          type="text"
-                          value={member.name}
-                          onChange={(e) => {
-                            const newItems = [...teamContent.mainCampus.coordinators];
-                            newItems[idx].name = sanitizeTeamInput(e.target.value);
-                            setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, coordinators: newItems } });
-                          }}
-                          placeholder="Name"
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-black text-slate-800 focus:ring-2 focus:ring-teal-500 outline-none"
-                        />
-                        <input
-                          type="text"
-                          value={member.degree}
-                          onChange={(e) => {
-                            const newItems = [...teamContent.mainCampus.coordinators];
-                            newItems[idx].degree = sanitizeTeamInput(e.target.value);
-                            setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, coordinators: newItems } });
-                          }}
-                          placeholder="Degree"
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[9px] font-bold text-teal-600 focus:ring-2 focus:ring-teal-500 outline-none"
-                        />
-                        <input
-                          type="text"
-                          value={member.dept}
-                          onChange={(e) => {
-                            const newItems = [...teamContent.mainCampus.coordinators];
-                            newItems[idx].dept = sanitizeTeamInput(e.target.value);
-                            setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, coordinators: newItems } });
-                          }}
-                          placeholder="Department"
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[9px] font-medium text-slate-500 focus:ring-2 focus:ring-teal-500 outline-none"
-                        />
+                        <input onPointerDown={(e) => e.stopPropagation()} type="text" value={member.name} onChange={(e) => { const n = [...teamContent.mainCampus.coordinators]; n[idx].name = sanitizeTeamInput(e.target.value); setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, coordinators: n } }); }} placeholder="Name" className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-black text-slate-800 focus:ring-2 focus:ring-teal-500 outline-none cursor-text" />
+                        <input onPointerDown={(e) => e.stopPropagation()} type="text" value={member.degree} onChange={(e) => { const n = [...teamContent.mainCampus.coordinators]; n[idx].degree = sanitizeTeamInput(e.target.value); setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, coordinators: n } }); }} placeholder="Degree" className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[9px] font-bold text-teal-600 focus:ring-2 focus:ring-teal-500 outline-none cursor-text" />
+                        <input onPointerDown={(e) => e.stopPropagation()} type="text" value={member.dept} onChange={(e) => { const n = [...teamContent.mainCampus.coordinators]; n[idx].dept = sanitizeTeamInput(e.target.value); setTeamContent({ ...teamContent, mainCampus: { ...teamContent.mainCampus, coordinators: n } }); }} placeholder="Department" className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[9px] font-medium text-slate-500 focus:ring-2 focus:ring-teal-500 outline-none cursor-text" />
                       </div>
-                    </Reorder.Item>
-                  ))}
-                </Reorder.Group>
+                    </div>
+                  )}
+                  renderOverlay={(member) => (
+                    <div className="bg-white p-4 rounded-xl border-2 border-teal-400 shadow-2xl space-y-3">
+                      <div className="flex items-center gap-1.5 px-2 py-1 text-teal-500"><GripVertical size={16} /></div>
+                      {member.profileImage ? <img src={member.profileImage} className="w-full aspect-square rounded-full object-cover" alt="" /> : <div className="w-full aspect-square rounded-full bg-teal-50 flex items-center justify-center"><ImageIcon size={24} className="text-teal-300" /></div>}
+                      <p className="text-[10px] font-black text-slate-800 truncate">{member.name}</p>
+                    </div>
+                  )}
+                />
               </div>
             </div>
 
@@ -1746,7 +1737,7 @@ return (
                 </h4>
                 <button
                   onClick={() => {
-                    const newItems = [...teamContent.esuCampus, { name: "New ESU Coordinator", degree: "MA/MS", dept: "ESU Location", profileImage: null }];
+                    const newItems = [...teamContent.esuCampus, { _id: 'member_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5), name: "New ESU Coordinator", degree: "MA/MS", dept: "ESU Location", profileImage: null }];
                     setTeamContent({ ...teamContent, esuCampus: newItems });
                   }}
                   className="text-[10px] font-black text-teal-600 hover:text-teal-700 flex items-center gap-1 bg-teal-50 px-3 py-1 rounded-full transition-all"
@@ -1754,59 +1745,42 @@ return (
                   + Add ESU Member
                 </button>
               </div>
-              <Reorder.Group 
-                axis="y" 
-                values={teamContent.esuCampus} 
+              <SortableTeamGrid
+                items={teamContent.esuCampus || []}
                 onReorder={(newOrder) => setTeamContent({ ...teamContent, esuCampus: newOrder })}
-                className="grid md:grid-cols-4 gap-4"
-              >
-                  {teamContent.esuCampus.map((member: any, idx: number) => (
-                    <Reorder.Item 
-                      key={member.name + idx} 
-                      value={member}
-                      className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-2 relative group cursor-default"
+                cols="grid-cols-4"
+                renderCard={(member, idx) => (
+                  <div className="bg-white p-4 rounded-xl border-2 border-slate-200 hover:border-teal-400 hover:shadow-xl space-y-2 relative group transition-all cursor-grab active:cursor-grabbing select-none">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-1.5 px-2 py-1 rounded-md text-teal-500">
+                        <GripVertical size={14} />
+                        <span className="text-[9px] font-black uppercase tracking-wider text-teal-600 opacity-0 group-hover:opacity-100 transition-opacity">Drag</span>
+                      </div>
+                      <button
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onClick={(e) => { e.stopPropagation(); const n = teamContent.esuCampus.filter((_: any, i: number) => i !== idx); setTeamContent({ ...teamContent, esuCampus: n }); }}
+                        className="w-5 h-5 bg-red-100 text-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-bold z-10 hover:bg-red-200"
+                      >×</button>
+                    </div>
+                    <div
+                      onPointerDown={(e) => e.stopPropagation()}
+                      onClick={() => triggerUpload('team', ['esuCampus', idx, 'profileImage'])}
+                      className={`w-full aspect-square bg-white rounded-full border-2 border-dashed flex flex-col items-center justify-center text-slate-300 hover:border-teal-400 hover:text-teal-500 cursor-pointer transition-colors relative overflow-hidden group ${member.profileImage !== savedStates.team?.esuCampus[idx]?.profileImage ? 'border-amber-400' : 'border-slate-200'}`}
                     >
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="text-slate-300 cursor-grab active:cursor-grabbing hover:text-teal-500 transition-colors">
-                          <GripVertical size={14} />
-                        </div>
-                        <button
-                          onClick={() => {
-                            const newItems = teamContent.esuCampus.filter((_: any, i: number) => i !== idx);
-                            setTeamContent({ ...teamContent, esuCampus: newItems });
-                          }}
-                          className="w-5 h-5 bg-red-100 text-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-bold z-10"
-                        >
-                          ×
-                        </button>
-                      </div>
-                      <div
-                        onClick={() => triggerUpload('team', ['esuCampus', idx, 'profileImage'])}
-                        className={`w-full aspect-square bg-white rounded-full border-2 border-dashed flex flex-col items-center justify-center text-slate-300 hover:border-teal-400 hover:text-teal-500 cursor-pointer transition-colors relative overflow-hidden group ${member.profileImage !== savedStates.team?.esuCampus[idx]?.profileImage ? 'border-amber-400' : 'border-slate-200'
-                          }`}
-                      >
-                        {member.profileImage ? (
-                          <img src={member.profileImage} className="w-full h-full object-cover" alt="" />
-                        ) : (
-                          <>
-                            <ImageIcon size={20} />
-                            <span className="text-[8px] font-bold mt-1">Photo</span>
-                          </>
-                        )}
-                      </div>
-                      <input type="text" value={member.name} onChange={(e) => {
-                        const newItems = [...teamContent.esuCampus];
-                        newItems[idx].name = sanitizeTeamInput(e.target.value);
-                        setTeamContent({ ...teamContent, esuCampus: newItems });
-                      }} className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-[10px] font-black text-slate-800 outline-none" />
-                      <input type="text" value={member.dept} onChange={(e) => {
-                        const newItems = [...teamContent.esuCampus];
-                        newItems[idx].dept = sanitizeTeamInput(e.target.value);
-                        setTeamContent({ ...teamContent, esuCampus: newItems });
-                      }} className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-[9px] font-bold text-emerald-600 outline-none" />
-                    </Reorder.Item>
-                  ))}
-                </Reorder.Group>
+                      {member.profileImage ? <img src={member.profileImage} className="w-full h-full object-cover" alt="" /> : (<><ImageIcon size={20} /><span className="text-[8px] font-bold mt-1">Photo</span></>)}
+                    </div>
+                    <input onPointerDown={(e) => e.stopPropagation()} type="text" value={member.name} onChange={(e) => { const n = [...teamContent.esuCampus]; n[idx].name = sanitizeTeamInput(e.target.value); setTeamContent({ ...teamContent, esuCampus: n }); }} className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-[10px] font-black text-slate-800 outline-none cursor-text" />
+                    <input onPointerDown={(e) => e.stopPropagation()} type="text" value={member.dept} onChange={(e) => { const n = [...teamContent.esuCampus]; n[idx].dept = sanitizeTeamInput(e.target.value); setTeamContent({ ...teamContent, esuCampus: n }); }} className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-[9px] font-bold text-emerald-600 outline-none cursor-text" />
+                  </div>
+                )}
+                renderOverlay={(member) => (
+                  <div className="bg-white p-4 rounded-xl border-2 border-teal-400 shadow-2xl space-y-2">
+                    <div className="flex items-center gap-1.5 px-2 py-1 text-teal-500"><GripVertical size={14} /></div>
+                    {member.profileImage ? <img src={member.profileImage} className="w-full aspect-square rounded-full object-cover" alt="" /> : <div className="w-full aspect-square rounded-full bg-teal-50 flex items-center justify-center"><ImageIcon size={20} className="text-teal-300" /></div>}
+                    <p className="text-[10px] font-black text-slate-800 truncate">{member.name}</p>
+                  </div>
+                )}
+              />
             </div>
           </div>
         </motion.div>
@@ -3322,6 +3296,7 @@ return (
 
     </AnimatePresence>
   </motion.div>
+  </>
 );
 };
 

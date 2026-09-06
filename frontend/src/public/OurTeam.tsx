@@ -93,7 +93,11 @@ const OurTeam = () => {
   }, []);
 
   const DirectorCard = ({ member }: { member: any }) => (
-    <div className="max-w-4xl w-full mx-auto bg-white p-6 md:p-12 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col md:flex-row items-center gap-6 md:gap-10 overflow-hidden relative group">
+    <motion.div 
+      whileHover={{ y: -6, scale: 1.01 }}
+      transition={{ type: "spring", stiffness: 350, damping: 25 }}
+      className="max-w-4xl w-full mx-auto bg-white p-6 md:p-12 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col md:flex-row items-center gap-6 md:gap-10 overflow-hidden relative group"
+    >
       <div className="w-40 h-40 md:w-64 md:h-64 rounded-full overflow-hidden border-4 md:border-8 border-white shadow-xl shrink-0 relative z-10 bg-slate-100">
         {member.profileImage ? (
           <img src={member.profileImage} alt={member.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
@@ -125,11 +129,15 @@ const OurTeam = () => {
             </div>
           </div>
         </div>
-    </div>
+    </motion.div>
   );
 
   const MemberCard = ({ member, showDegree = true }: { member: any; showDegree?: boolean }) => (
-    <div className="bg-white p-4 md:p-5 rounded-[1.5rem] md:rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 hover:shadow-2xl transition-all group overflow-hidden flex flex-col items-center text-center w-full">
+    <motion.div 
+      whileHover={{ y: -8, scale: 1.02 }}
+      transition={{ type: "spring", stiffness: 350, damping: 22 }}
+      className="bg-white p-4 md:p-5 rounded-[1.5rem] md:rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 hover:shadow-2xl transition-all group overflow-hidden flex flex-col items-center text-center w-full"
+    >
       <div className="w-full aspect-square mb-4 md:mb-6 rounded-full overflow-hidden bg-slate-100 relative border-4 border-white shadow-inner">
         {member.profileImage ? (
           <img src={member.profileImage} alt={member.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
@@ -155,7 +163,7 @@ const OurTeam = () => {
         <Building2 size={10} className="shrink-0" />
         <MarqueeText text={member.dept} className="text-[8px] md:text-[10px] font-bold" />
       </div>
-    </div>
+    </motion.div>
   );
 
   return (
