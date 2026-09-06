@@ -304,68 +304,107 @@ export default function Register() {
     }
   }, [step]);
 
-  const handleNextStep1 = () => {
-    if (!email.trim()) { showToast.error('Email is required.'); return; }
+  const isEmailDomainInvalid = useMemo(() => {
+    if (!email.includes('@')) return false;
+    const domain = email.split('@')[1]?.toLowerCase() || '';
+    if (!domain) return false;
+    if (isWMSU) return domain !== 'wmsu.edu.ph';
+    return !['wmsu.edu.ph', 'gmail.com'].includes(domain);
+  }, [email, isWMSU]);
+
+  const passwordRules = useMemo(() => {
+    return {
+      minLength: password.length >= 8,
+      hasUpper: /[A-Z]/.test(password),
+      hasNumber: /[0-9]/.test(password),
+    };
+  }, [password]);
+
+  const validateStep1 = (): boolean => {
+    if (!email.trim()) { showToast.error('Email is required.'); return false; }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) { showToast.error('Please enter a valid email address.'); return; }
+    if (!emailRegex.test(email.trim())) { showToast.error('Please enter a valid email address.'); return false; }
     
     const domain = email.split('@')[1]?.toLowerCase();
     
     if (isWMSU && domain !== 'wmsu.edu.ph') {
-      showToast.error('Please use your valid school email address.');
-      return;
+      showToast.error('Please use your valid school email address (@wmsu.edu.ph).');
+      return false;
     }
     
     if (!isWMSU && !['wmsu.edu.ph', 'gmail.com'].includes(domain)) {
       showToast.error('Only @wmsu.edu.ph or @gmail.com emails are allowed.');
-      return;
+      return false;
     }
 
-    if (password.length < 8) { showToast.error('Password must be at least 8 characters.'); return; }
-    if (!/[A-Z]/.test(password)) { showToast.error('Password must contain at least one uppercase letter.'); return; }
-    if (!/[0-9]/.test(password)) { showToast.error('Password must contain at least one number.'); return; }
-    if (password !== confirmPassword) { showToast.error('Passwords do not match.'); return; }
+    if (!password) { showToast.error('Password is required.'); return false; }
+    if (password.length < 8) { showToast.error('Password must be at least 8 characters.'); return false; }
+    if (!/[A-Z]/.test(password)) { showToast.error('Password must contain at least one uppercase letter.'); return false; }
+    if (!/[0-9]/.test(password)) { showToast.error('Password must contain at least one number.'); return false; }
+    if (!confirmPassword) { showToast.error('Please re-enter your password.'); return false; }
+    if (password !== confirmPassword) { showToast.error('Passwords do not match.'); return false; }
     
-    closeDropdowns();
-    setStep(2);
+    return true;
   };
 
-  const handleNextStep2 = () => {
-    if (!firstName.trim()) { showToast.error('First name is required.'); return; }
-    if (!lastName.trim()) { showToast.error('Last name is required.'); return; }
-    if (!contactNumber.trim()) { showToast.error('Contact number is required.'); return; }
+  const handleNextStep1 = (): boolean => {
+    if (!validateStep1()) return false;
+    closeDropdowns();
+    setStep(2);
+    return true;
+  };
+
+  const validateStep2 = (): boolean => {
+    if (!firstName.trim()) { showToast.error('First name is required.'); return false; }
+    if (!lastName.trim()) { showToast.error('Last name is required.'); return false; }
+    if (!contactNumber.trim()) { showToast.error('Contact number is required.'); return false; }
     
     const { normalized, error } = validateAndNormalizePhone(contactNumber);
     if (error) {
       showToast.error(error);
-      return;
+      return false;
     }
     
     // Update to normalized format
     setContactNumber(normalized);
-    if (!city.trim()) { showToast.error('City is required.'); return; }
-    if (!barangay.trim()) { showToast.error('Barangay is required.'); return; }
+    if (!city.trim()) { showToast.error('City is required.'); return false; }
+    if (!barangay.trim()) { showToast.error('Barangay is required.'); return false; }
     
-    closeDropdowns();
-    setStep(3);
+    return true;
   };
 
-  const handleNextStep3 = () => {
-    if (!sex) { showToast.error('Please select your sex.'); return; }
-    if (!birthdate) { showToast.error('Birthdate is required.'); return; }
-    if (!occupation) { showToast.error('Please select your occupation.'); return; }
-    if (isWMSU && isFaculty && !employeeId.trim()) { showToast.error('Employee ID is required.'); return; }
-    if (isWMSU && isFaculty && !/^\d{6}$/.test(employeeId.trim())) { showToast.error('Employee ID must be exactly 6 digits.'); return; }
+  const handleNextStep2 = (): boolean => {
+    if (!validateStep2()) return false;
+    closeDropdowns();
+    setStep(3);
+    return true;
+  };
+
+  const validateStep3 = (): boolean => {
+    if (!sex) { showToast.error('Please select your sex.'); return false; }
+    if (!birthdate) { showToast.error('Birthdate is required.'); return false; }
+    if (!occupation) { showToast.error('Please select your occupation.'); return false; }
+    if (isWMSU && isFaculty && !employeeId.trim()) { showToast.error('Employee ID is required.'); return false; }
+    if (isWMSU && isFaculty && !/^\d{6}$/.test(employeeId.trim())) { showToast.error('Employee ID must be exactly 6 digits.'); return false; }
     
+    return true;
+  };
+
+  const handleNextStep3 = (): boolean => {
+    if (!validateStep3()) return false;
     closeDropdowns();
     setStep(4);
+    return true;
   };
 
   const validateStep4 = (): boolean => {
+    if (!educationLevel) { showToast.error('Please select an education level.'); return false; }
     if (educationLevel === 'College' && !selectedCollege) { showToast.error('Please select a college.'); return false; }
     if (educationLevel === 'College' && !course.trim()) { showToast.error('Course is required.'); return false; }
+    if (educationLevel === 'College' && isWMSU && !schoolId.trim()) { showToast.error('School ID is required.'); return false; }
     if (educationLevel === 'College' && isWMSU && !/^\d{9}$/.test(schoolId.trim())) { showToast.error('School ID must be exactly 9 digits.'); return false; }
     if (educationLevel === 'High School' && !gradeLevel) { showToast.error('Grade level is required.'); return false; }
+    if (educationLevel === 'High School' && isWMSU && !lrn.trim()) { showToast.error('LRN is required.'); return false; }
     if (educationLevel === 'High School' && isWMSU && !/^\d{12}$/.test(lrn.trim())) { showToast.error('LRN must be exactly 12 digits.'); return false; }
     if (educationLevel === 'High School' && ['11', '12'].includes(gradeLevel) && !track) { showToast.error('Please select a track.'); return false; }
     if (!isWMSU && !school.trim()) { showToast.error('School name is required.'); return false; }
@@ -375,8 +414,30 @@ export default function Register() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // If on step 4, validate education fields first
-    if (step === 4 && !validateStep4()) return;
+    if (step === 1) {
+      handleNextStep1();
+      return;
+    }
+
+    if (step === 2) {
+      handleNextStep2();
+      return;
+    }
+
+    if (step === 3) {
+      if (shouldShowEducationStep) {
+        handleNextStep3();
+        return;
+      }
+      if (!validateStep3()) return;
+    }
+
+    if (step === 4 && shouldShowEducationStep && !validateStep4()) return;
+
+    if (!validateStep1()) { setStep(1); return; }
+    if (!validateStep2()) { setStep(2); return; }
+    if (!validateStep3()) { setStep(3); return; }
+    if (shouldShowEducationStep && !validateStep4()) { setStep(4); return; }
 
     setLoading(true);
     try {
@@ -581,63 +642,88 @@ export default function Register() {
                             onChange={(e) => setEmail(e.target.value)}
                             required
                             className={`w-full rounded-lg bg-gray-100 py-4 pl-12 pr-4 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 transition-all ${
-                              email.includes('@') && isWMSU && email.split('@')[1]?.toLowerCase() !== 'wmsu.edu.ph' && email.split('@')[1]?.toLowerCase() !== ''
+                              isEmailDomainInvalid
                                 ? 'focus:ring-rose-500 ring-2 ring-rose-500/50 bg-rose-50/50'
                                 : 'focus:ring-emerald-600'
                             }`}
                           />
                         </div>
-                        {email.includes('@') && isWMSU && email.split('@')[1]?.toLowerCase() !== 'wmsu.edu.ph' && email.split('@')[1]?.toLowerCase() !== '' && (
+
+                        {isEmailDomainInvalid && (
                           <p className="text-xs font-bold text-rose-500 ml-2 animate-in fade-in duration-200">
-                            Please use your valid school email address.
+                            {isWMSU ? 'Please use your valid school email address (@wmsu.edu.ph).' : 'Only @wmsu.edu.ph or @gmail.com emails are allowed.'}
                           </p>
                         )}
                       </div>
 
                       {/* Password Input */}
-                      <div className="relative flex items-center">
-                        <div className="absolute left-4 text-gray-700">
-                          <Lock className="h-5 w-5" />
+                      <div className="relative flex flex-col gap-1">
+                        <div className="relative flex items-center">
+                          <div className="absolute left-4 text-gray-700">
+                            <Lock className="h-5 w-5" />
+                          </div>
+                          <input
+                            type={showPassword ? 'text' : 'password'}
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-20 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-4 text-emerald-800 hover:text-emerald-600 focus:outline-none"
+                            aria-label={showPassword ? "Hide password" : "Show password"}
+                          >
+                            {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                          </button>
                         </div>
-                        <input
-                          type={showPassword ? 'text' : 'password'}
-                          placeholder="Password"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          required
-                          className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-20 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-4 text-emerald-800 hover:text-emerald-600 focus:outline-none"
-                          aria-label={showPassword ? "Hide password" : "Show password"}
-                        >
-                          {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                        </button>
+                        {password.length > 0 && (
+                          <div className="flex flex-wrap gap-2 text-[11px] font-bold ml-2 mt-1">
+                            <span className={passwordRules.minLength ? 'text-emerald-600' : 'text-rose-500'}>
+                              {passwordRules.minLength ? '✓' : '✕'} 8+ chars
+                            </span>
+                            <span className={passwordRules.hasUpper ? 'text-emerald-600' : 'text-rose-500'}>
+                              {passwordRules.hasUpper ? '✓' : '✕'} 1 uppercase
+                            </span>
+                            <span className={passwordRules.hasNumber ? 'text-emerald-600' : 'text-rose-500'}>
+                              {passwordRules.hasNumber ? '✓' : '✕'} 1 number
+                            </span>
+                          </div>
+                        )}
                       </div>
 
                       {/* Confirm Password Input */}
-                      <div className="relative flex items-center">
-                        <div className="absolute left-4 text-gray-700">
-                          <Lock className="h-5 w-5" />
+                      <div className="relative flex flex-col gap-1">
+                        <div className="relative flex items-center">
+                          <div className="absolute left-4 text-gray-700">
+                            <Lock className="h-5 w-5" />
+                          </div>
+                          <input
+                            type={showConfirmPassword ? 'text' : 'password'}
+                            placeholder="Re-enter Password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            required
+                            className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-20 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            className="absolute right-4 text-emerald-800 hover:text-emerald-600 focus:outline-none"
+                            aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                          >
+                            {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                          </button>
                         </div>
-                        <input
-                          type={showConfirmPassword ? 'text' : 'password'}
-                          placeholder="Re-enter Password"
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          required
-                          className="w-full rounded-lg bg-gray-100 py-4 pl-12 pr-20 text-sm font-semibold text-gray-700 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          className="absolute right-4 text-emerald-800 hover:text-emerald-600 focus:outline-none"
-                          aria-label={showConfirmPassword ? "Hide password" : "Show password"}
-                        >
-                          {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                        </button>
+                        {confirmPassword.length > 0 && (
+                          <p className={`text-xs font-bold ml-2 animate-in fade-in duration-200 ${
+                            password === confirmPassword ? 'text-emerald-600' : 'text-rose-600'
+                          }`}>
+                            {password === confirmPassword ? '✓ Passwords match' : '✕ Passwords do not match'}
+                          </p>
+                        )}
                       </div>
                     </div>
                   )}

@@ -193,6 +193,9 @@ export const authApi = {
   register: (payload: RegisterPayload) =>
     api<RegisterResponse>('/api/auth/register', { method: 'POST', body: payload as unknown as Record<string, unknown> }),
 
+  checkEmail: (email: string) =>
+    api<{ exists: boolean; message?: string }>('/api/auth/check-email', { method: 'POST', body: { email } }),
+
   getProfile: (token: string) =>
     api<{ user: UserProfile; redirectPath: string }>('/api/auth/profile', { token }),
 

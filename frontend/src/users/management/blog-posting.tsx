@@ -29,7 +29,7 @@ function formatDate(dateString: string) {
 }
 
 const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
-  const { user, accessToken } = useAuth();
+  const { accessToken } = useAuth();
   const canApprove = role === 'director' || role === 'admin';
   const { isDirectorOnline } = useDirectorPresence(role);
 
@@ -263,10 +263,10 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
           <div className="p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-11 h-11 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white font-black text-lg shadow-md">
-                {user?.firstName?.charAt(0)?.toUpperCase() || '?'}
+                G
               </div>
               <div>
-                <p className="font-black text-slate-900 text-sm">{user?.firstName} {user?.lastName}</p>
+                <p className="font-black text-slate-900 text-sm">GCC</p>
                 <p className="text-[10px] text-slate-400 font-bold">
                   {canApprove ? '🟢 Publishes immediately' : '🟡 Submitted for director approval'}
                 </p>
@@ -414,8 +414,9 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
       {activeView === 'my-posts' && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
           {loading ? (
-            <div className="flex justify-center py-20">
-              <div className="w-8 h-8 border-3 border-emerald-200 border-t-emerald-600 rounded-full animate-spin" />
+            <div className="bg-white rounded-2xl p-12 text-center border border-slate-100 flex flex-col items-center justify-center gap-3">
+              <Loader2 size={36} className="animate-spin text-emerald-600" />
+              <p className="text-sm font-bold text-slate-500">Loading your posts...</p>
             </div>
           ) : myPosts.length === 0 ? (
             <div className="bg-white rounded-2xl p-12 text-center border border-slate-100">
@@ -476,8 +477,9 @@ const BlogPosting = ({ role = 'staff' }: BlogPostingProps) => {
       {activeView === 'approval' && canApprove && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
           {loading ? (
-            <div className="flex justify-center py-20">
-              <div className="w-8 h-8 border-3 border-emerald-200 border-t-emerald-600 rounded-full animate-spin" />
+            <div className="bg-white rounded-2xl p-12 text-center border border-slate-100 flex flex-col items-center justify-center gap-3">
+              <Loader2 size={36} className="animate-spin text-emerald-600" />
+              <p className="text-sm font-bold text-slate-500">Loading approval queue...</p>
             </div>
           ) : pendingPosts.length === 0 ? (
             <div className="bg-white rounded-2xl p-12 text-center border border-slate-100">
