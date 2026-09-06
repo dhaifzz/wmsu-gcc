@@ -459,7 +459,7 @@ const ShiftingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director' 
               {loading ? (
                 <tr><td colSpan={6} className="px-4 sm:px-8 py-8 text-center text-slate-500 font-bold text-sm">Loading applications...</td></tr>
               ) : appointments.length === 0 ? (
-                <tr><td colSpan={6} className="px-4 sm:px-8 py-8 text-center text-slate-500 font-bold text-sm">No applications found.</td></tr>
+                <tr><td colSpan={6} className="px-4 sm:px-8 py-8 text-center text-slate-500 font-bold text-sm">{role === 'director' ? "No applications awaiting director approval." : "No applications found."}</td></tr>
               ) : appointments.map((app) => (
                 <tr key={app.id} className="group hover:bg-slate-50/50 transition-colors">
                   <td className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6">

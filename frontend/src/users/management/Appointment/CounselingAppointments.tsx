@@ -161,7 +161,9 @@ const CounselingAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director
               ) : filteredAppointments.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-4 sm:px-8 py-8 text-center text-slate-500 font-bold text-sm">
-                    {appointments.length === 0 ? "No appointments found." : "No appointments match your search."}
+                    {appointments.length === 0 
+                      ? (role === 'director' ? "No appointments awaiting director approval." : "No appointments found.") 
+                      : "No appointments match your search."}
                   </td>
                 </tr>
               ) : filteredAppointments.map((app) => (

@@ -58,7 +58,7 @@ const Overview = ({ userName, onNavigate }: OverviewProps) => {
 
   // ── Resolve API endpoint for approve/decline by type ──────────────────────
   const evaluateAppointment = async (id: string, type: string, action: 'approve' | 'decline') => {
-    if (!token) return false;
+    if (!token) return { ok: false, error: 'Authentication required' };
     const payload = { action };
     const lowerType = type.toLowerCase();
     let res;
@@ -69,7 +69,7 @@ const Overview = ({ userName, onNavigate }: OverviewProps) => {
     } else {
       res = await appointmentApi.directorEvaluateCounselingAppointment(id, payload, token);
     }
-    return res.ok;
+    return res;
   };
 
   const handleApprove = async (item: PendingItem) => {
@@ -82,15 +82,15 @@ const Overview = ({ userName, onNavigate }: OverviewProps) => {
     if (result.isConfirmed) {
       setProcessingId(item.id);
       try {
-        const ok = await evaluateAppointment(item.id, item.type, 'approve');
-        if (ok) {
+        const res = await evaluateAppointment(item.id, item.type, 'approve');
+        if (res.ok) {
           setQueue(q => q.filter(a => a.id !== item.id));
           toast.success('Appointment approved!');
         } else {
-          toast.error('Failed to approve appointment.');
+          toast.error(res.error || (res.data as any)?.error || 'Failed to approve appointment.');
         }
-      } catch {
-        toast.error('Failed to approve appointment.');
+      } catch (err: any) {
+        toast.error(err?.message || 'Failed to approve appointment.');
       } finally {
         setProcessingId(null);
       }
@@ -107,15 +107,15 @@ const Overview = ({ userName, onNavigate }: OverviewProps) => {
     if (result.isConfirmed) {
       setProcessingId(item.id);
       try {
-        const ok = await evaluateAppointment(item.id, item.type, 'decline');
-        if (ok) {
+        const res = await evaluateAppointment(item.id, item.type, 'decline');
+        if (res.ok) {
           setQueue(q => q.filter(a => a.id !== item.id));
           toast.error('Appointment declined.');
         } else {
-          toast.error('Failed to decline appointment.');
+          toast.error(res.error || (res.data as any)?.error || 'Failed to decline appointment.');
         }
-      } catch {
-        toast.error('Failed to decline appointment.');
+      } catch (err: any) {
+        toast.error(err?.message || 'Failed to decline appointment.');
       } finally {
         setProcessingId(null);
       }

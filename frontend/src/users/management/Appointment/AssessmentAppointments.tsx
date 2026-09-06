@@ -121,7 +121,7 @@ const AssessmentAppointments = ({ role = 'staff' }: { role?: 'staff' | 'director
               ) : appointments.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-4 sm:px-8 py-8 text-center text-slate-500 font-bold text-sm">
-                    No appointments found.
+                    {role === 'director' ? "No appointments awaiting director approval." : "No appointments found."}
                   </td>
                 </tr>
               ) : appointments.map((app) => (
